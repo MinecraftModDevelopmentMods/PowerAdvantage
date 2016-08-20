@@ -69,11 +69,12 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-    public void writeToNBT(final NBTTagCompound tagRoot) {
+    public NBTTagCompound writeToNBT(final NBTTagCompound tagRoot) {
 		super.writeToNBT(tagRoot);
         NBTTagCompound tankTag = new NBTTagCompound();
         this.getTank().writeToNBT(tankTag);
         tagRoot.setTag("Tank", tankTag);
+		return tagRoot;
 	}
 	/**
 	 * Handles data saving and loading
@@ -178,7 +179,7 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 		if(getTank().getFluidAmount() > 0 && getTank().getFluid().getFluid().equals(fluid.getFluid())){
 			return getTank().drain(fluid.amount,forReal);
 		} else {
-			return new FluidStack(getTank().getFluid().getFluid(),0);
+			return new FluidStack(fluid.getFluid(),0);
 		}
 	}
 	/**
