@@ -22,7 +22,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.Random;
 
 public class FluidDischargeBlock extends BlockSimpleFluidMachine {
-	
+
 	public FluidDischargeBlock() {
 		super(Material.PISTON, 3f);
 		super.setCreativeTab(ItemGroups.tab_powerAdvantage);
@@ -32,37 +32,38 @@ public class FluidDischargeBlock extends BlockSimpleFluidMachine {
 	public PoweredEntity createNewTileEntity(World w, int m) {
 		return new FluidDischargeTileEntity();
 	}
-	
+
 
 	/**
 	 * Override of default block behavior
 	 */
-    @Override
-    public Item getItemDropped(final IBlockState state, final Random prng, final int i3) {
-        return Item.getItemFromBlock(this);
-    }
-    /**
-     * Destroys the TileEntity associated with this block when this block 
-     * breaks.
-     */
-    @Override
-    public void breakBlock(final World world, final BlockPos coord, final IBlockState bs) {
-        final TileEntity tileEntity = world.getTileEntity(coord);
-        if (tileEntity instanceof TileEntitySimplePowerMachine) {
-            InventoryHelper.dropInventoryItems(world, coord, (IInventory)tileEntity);
-            world.updateComparatorOutputLevel(coord, this);
-        }
-        super.breakBlock(world, coord, bs);
-    }
-    
-    /**
-     * (Client-only) Override of default block behavior
-     */
-    @SideOnly(Side.CLIENT)
-    @Override
-    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
-        return new ItemStack(this);
-    }
+	@Override
+	public Item getItemDropped(final IBlockState state, final Random prng, final int i3) {
+		return Item.getItemFromBlock(this);
+	}
+
+	/**
+	 * Destroys the TileEntity associated with this block when this block
+	 * breaks.
+	 */
+	@Override
+	public void breakBlock(final World world, final BlockPos coord, final IBlockState bs) {
+		final TileEntity tileEntity = world.getTileEntity(coord);
+		if (tileEntity instanceof TileEntitySimplePowerMachine) {
+			InventoryHelper.dropInventoryItems(world, coord, (IInventory) tileEntity);
+			world.updateComparatorOutputLevel(coord, this);
+		}
+		super.breakBlock(world, coord, bs);
+	}
+
+	/**
+	 * (Client-only) Override of default block behavior
+	 */
+	@SideOnly(Side.CLIENT)
+	@Override
+	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
+		return new ItemStack(this);
+	}
 
 	@Override
 	public boolean hasComparatorInputOverride(IBlockState state) {
@@ -72,8 +73,8 @@ public class FluidDischargeBlock extends BlockSimpleFluidMachine {
 	@Override
 	public int getComparatorInputOverride(IBlockState state, World world, BlockPos coord) {
 		TileEntity te = world.getTileEntity(coord);
-		if(te != null && te instanceof FluidDischargeTileEntity){
-			return ((FluidDischargeTileEntity)te).getRedstoneOutput();
+		if (te != null && te instanceof FluidDischargeTileEntity) {
+			return ((FluidDischargeTileEntity) te).getRedstoneOutput();
 		}
 		return 0;
 	}

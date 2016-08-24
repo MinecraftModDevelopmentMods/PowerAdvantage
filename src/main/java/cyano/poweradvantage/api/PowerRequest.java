@@ -18,12 +18,18 @@ package cyano.poweradvantage.api;
  * @author DrCyano
  *
  */
-public class PowerRequest implements Comparable<PowerRequest>, Cloneable{
-	/** amount of energy requested */
+public class PowerRequest implements Comparable<PowerRequest>, Cloneable {
+	/**
+	 * amount of energy requested
+	 */
 	public final float amount;
-	/** priority level of the request */
+	/**
+	 * priority level of the request
+	 */
 	public final byte priority;
-	/** the TileEntity that filed this request */
+	/**
+	 * the TileEntity that filed this request
+	 */
 	public final IPowerMachine entity;
 
 	/**
@@ -54,59 +60,66 @@ public class PowerRequest implements Comparable<PowerRequest>, Cloneable{
 	/**
 	 * Default PowerRequest object for machines that don't need power of the available type.
 	 */
-	public static final PowerRequest REQUEST_NOTHING = new PowerRequest(LAST_PRIORITY,0,null);
+	public static final PowerRequest REQUEST_NOTHING = new PowerRequest(LAST_PRIORITY, 0, null);
+
 	/**
 	 * Standard constructor for making a power request
-	 * @param priority Priority level (determines order of power reception). If demand exceeds 
-	 * supply, lower priority machines receive no energy.
-	 * @param requestSize How much to ask for of the given energy type.
+	 *
+	 * @param priority      Priority level (determines order of power reception). If demand exceeds
+	 *                      supply, lower priority machines receive no energy.
+	 * @param requestSize   How much to ask for of the given energy type.
 	 * @param requestSource The TileEntity that created this PowerRequest
 	 */
-	public PowerRequest(byte priority, float requestSize, IPowerMachine requestSource){
+	public PowerRequest(byte priority, float requestSize, IPowerMachine requestSource) {
 		this.priority = priority;
 		this.amount = requestSize;
 		this.entity = requestSource;
 	}
-	
+
 	/**
 	 * Standard constructor for making a power request
-	 * @param priority Priority level (determines order of power reception). If demand exceeds 
-	 * supply, lower priority machines receive no energy.
-	 * @param requestSize How much to ask for of the given energy type.
+	 *
+	 * @param priority      Priority level (determines order of power reception). If demand exceeds
+	 *                      supply, lower priority machines receive no energy.
+	 * @param requestSize   How much to ask for of the given energy type.
 	 * @param requestSource The TileEntity that created this PowerRequest
 	 */
-	public PowerRequest(int priority, float requestSize, IPowerMachine requestSource){
-		this.priority = (byte)priority;
+	public PowerRequest(int priority, float requestSize, IPowerMachine requestSource) {
+		this.priority = (byte) priority;
 		this.amount = requestSize;
 		this.entity = requestSource;
 	}
+
 	/**
 	 * Copies this this object.
+	 *
 	 * @return A copy of this object
 	 */
 	@Override
-	public PowerRequest clone(){
-		return new PowerRequest(priority,amount,entity);
+	public PowerRequest clone() {
+		return new PowerRequest(priority, amount, entity);
 	}
 
 	/**
-	 * Compares the PowerRequests such that the higher priority comes before lower priority and 
+	 * Compares the PowerRequests such that the higher priority comes before lower priority and
 	 * within the same priority level, machines wanting more power come before those wanting less.
 	 */
 	@Override
 	public int compareTo(PowerRequest o) {
-		if(this.priority == o.priority){
+		if (this.priority == o.priority) {
 			return Float.compare(o.amount, this.amount);
 		} else {
 			return Byte.compare(o.priority, this.priority);
 		}
 	}
+
 	/**
 	 * toString implementation
+	 *
 	 * @return returns a brief description of the request
 	 */
 	@Override
-	public String toString(){
-		return "PowerRequest: "+amount+" units at priority="+((int)priority)+" from entity "+((entity == null)?("null"):(entity.getClass().getSimpleName()));
+	public String toString() {
+		return "PowerRequest: " + amount + " units at priority=" + ((int) priority) + " from entity " + ((entity == null) ? ("null") : (entity.getClass().getSimpleName()));
 	}
 }

@@ -4,14 +4,14 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-public class ReversibleHashMap<K,V> implements ReversibleMap<K,V>{
-	
-	private final java.util.HashMap<K,V> forward;
-	private final java.util.HashMap<V,K> reverse;
-	
-	public ReversibleHashMap(){
-		forward = new java.util.HashMap<K,V>();
-		reverse = new java.util.HashMap<V,K>();
+public class ReversibleHashMap<K,V> implements ReversibleMap<K,V> {
+
+	private final java.util.HashMap<K, V> forward;
+	private final java.util.HashMap<V, K> reverse;
+
+	public ReversibleHashMap() {
+		forward = new java.util.HashMap<K, V>();
+		reverse = new java.util.HashMap<V, K>();
 	}
 
 	@Override
@@ -45,13 +45,13 @@ public class ReversibleHashMap<K,V> implements ReversibleMap<K,V>{
 	public V put(K key, V value) {
 		V prev = forward.get(key);
 		forward.put(key, value);
-		reverse.put(value,key);
+		reverse.put(value, key);
 		return prev;
 	}
 
 	@Override
 	public V remove(Object key) {
-		if(this.containsKey(key)){
+		if (this.containsKey(key)) {
 			V prev = forward.get(key);
 			forward.remove(key);
 			reverse.remove(prev);
@@ -63,7 +63,7 @@ public class ReversibleHashMap<K,V> implements ReversibleMap<K,V>{
 
 	@Override
 	public K removeValue(V value) {
-		if(reverse.containsKey(value)){
+		if (reverse.containsKey(value)) {
 			K prev = reverse.get(value);
 			reverse.remove(value);
 			forward.remove(prev);
@@ -74,8 +74,8 @@ public class ReversibleHashMap<K,V> implements ReversibleMap<K,V>{
 	}
 
 	@Override
-	public void putAll(Map<? extends K, ? extends V> m){
-		for(Map.Entry<? extends K,? extends V> pair : m.entrySet()){
+	public void putAll(Map<? extends K, ? extends V> m) {
+		for (Map.Entry<? extends K, ? extends V> pair : m.entrySet()) {
 			this.put(pair.getKey(), pair.getValue());
 		}
 	}
@@ -97,7 +97,7 @@ public class ReversibleHashMap<K,V> implements ReversibleMap<K,V>{
 	}
 
 	@Override
-	public Set<Map.Entry<K,V>> entrySet() {
+	public Set<Map.Entry<K, V>> entrySet() {
 		return forward.entrySet();
 	}
 

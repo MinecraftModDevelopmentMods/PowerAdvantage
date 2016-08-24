@@ -13,17 +13,20 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 public interface ITileEntityGUI {
 	/**
-	 * Gets an instance of net.minecraft.inventory.Container for the 
+	 * Gets an instance of net.minecraft.inventory.Container for the
 	 * server-side portion of a GUI interaction.
-	 * @param e The TileEntity that is presenting this GUI
+	 *
+	 * @param e      The TileEntity that is presenting this GUI
 	 * @param player The player that is going to use the GUI
 	 * @return An instance of net.minecraft.inventory.Container
 	 */
 	public abstract net.minecraft.inventory.Container getContainer(TileEntity e, EntityPlayer player);
+
 	/**
-	 * Gets an instance of net.minecraft.client.gui.inventory.GuiContainer for 
+	 * Gets an instance of net.minecraft.client.gui.inventory.GuiContainer for
 	 * the client-side portion of a GUI interaction.
-	 * @param e The TileEntity that is presenting this GUI
+	 *
+	 * @param e      The TileEntity that is presenting this GUI
 	 * @param player The player that is going to use the GUI
 	 * @return An instance of net.minecraft.client.gui.inventory.GuiContainer
 	 */

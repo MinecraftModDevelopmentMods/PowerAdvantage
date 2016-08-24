@@ -82,13 +82,13 @@ public class DistillationRecipeRegistry {
 	 */
 	public static void addDistillationRecipe(String inputFluidName, int inputFluidVolume, 
 			String outputFluidName, int outputFluidVolume){
-		if(FluidRegistry.isFluidRegistered(inputFluidName) == false){
+		if(!FluidRegistry.isFluidRegistered(inputFluidName)){
 			FMLLog.warning("%s: Fluid named %s was used in distillation recipe %sx%s -> %sx%s, but there is no fluid registered under the name %s", 
 					PowerAdvantage.MODID,inputFluidName,
 					inputFluidVolume,inputFluidName,outputFluidVolume,outputFluidName,
 					inputFluidName);
 		}
-		if(FluidRegistry.isFluidRegistered(outputFluidName) == false){
+		if(!FluidRegistry.isFluidRegistered(outputFluidName)){
 			FMLLog.warning("%s: Fluid named %s was used in distillation recipe %sx%s -> %sx%s, but there is no fluid registered under the name %s", 
 					PowerAdvantage.MODID,outputFluidName,
 					inputFluidVolume,inputFluidName,outputFluidVolume,outputFluidName,

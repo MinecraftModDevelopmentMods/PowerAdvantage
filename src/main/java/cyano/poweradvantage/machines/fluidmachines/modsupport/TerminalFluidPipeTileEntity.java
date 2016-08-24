@@ -16,11 +16,11 @@ import net.minecraftforge.fluids.IFluidHandler;
 
 import java.util.List;
 
-public class TerminalFluidPipeTileEntity extends PoweredEntity{
+public class TerminalFluidPipeTileEntity extends PoweredEntity {
 
 	private final EnumFacing[] faces = EnumFacing.values();
-	private final IFluidHandler[] neighbors = new IFluidHandler[6]; 
-	
+	private final IFluidHandler[] neighbors = new IFluidHandler[6];
+
 	public TerminalFluidPipeTileEntity() {
 		// constructor
 	}
@@ -28,12 +28,12 @@ public class TerminalFluidPipeTileEntity extends PoweredEntity{
 
 	@Override
 	public void tickUpdate(boolean isServerWorld) {
-		if(isServerWorld){
+		if (isServerWorld) {
 			World w = getWorld();
-			for(int i = 0; i < 6; i++){
+			for (int i = 0; i < 6; i++) {
 				TileEntity te = w.getTileEntity(getPos().offset(faces[i]));
-				if(te instanceof IFluidHandler){
-					neighbors[i] = (IFluidHandler)te;
+				if (te instanceof IFluidHandler) {
+					neighbors[i] = (IFluidHandler) te;
 				} else {
 					neighbors[i] = null;
 				}
@@ -42,30 +42,29 @@ public class TerminalFluidPipeTileEntity extends PoweredEntity{
 	}
 
 
-
 	@Override
-	public boolean isPowerSink(ConduitType powerType){
-		return true;
-	}
-	
-	@Override
-	public boolean isPowerSource(ConduitType powerType){
+	public boolean isPowerSink(ConduitType powerType) {
 		return true;
 	}
 
+	@Override
+	public boolean isPowerSource(ConduitType powerType) {
+		return true;
+	}
+
 
 	@Override
-	public boolean canAcceptConnection(PowerConnectorContext connection){
+	public boolean canAcceptConnection(PowerConnectorContext connection) {
 		ConduitType type = connection.powerType;
-		return ConduitType.areSameType(type,Fluids.fluidConduit_general) || (Fluids.conduitTypeToFluid(type) != null);
+		return ConduitType.areSameType(type, Fluids.fluidConduit_general) || (Fluids.conduitTypeToFluid(type) != null);
 	}
 
 	private final ConduitType[] typeArray = {Fluids.fluidConduit_general};
+
 	@Override
 	public ConduitType[] getTypes() {
 		return typeArray;
 	}
-
 
 
 	@Override
@@ -77,11 +76,11 @@ public class TerminalFluidPipeTileEntity extends PoweredEntity{
 	@Override
 	public float getEnergy(ConduitType type) {
 		int sum = 0;
-		for(int i = 0; i < 6; i++){
-			if(neighbors[i] == null) continue;
+		for (int i = 0; i < 6; i++) {
+			if (neighbors[i] == null) continue;
 			IFluidHandler f = neighbors[i];
 			FluidStack drain = neighbors[i].drain(faces[i].getOpposite(), Integer.MAX_VALUE, false);
-			if(f != null && drain != null) sum += drain.amount;
+			if (f != null && drain != null) sum += drain.amount;
 		}
 		return sum;
 	}
@@ -89,38 +88,39 @@ public class TerminalFluidPipeTileEntity extends PoweredEntity{
 
 	@Override
 	public void powerUpdate() {
-		for(int i = 0; i < 6; i++){
-			if(neighbors[i] == null) continue;
+		for (int i = 0; i < 6; i++) {
+			if (neighbors[i] == null) continue;
 			IFluidHandler n = neighbors[i];
 			EnumFacing face = faces[i].getOpposite();
 			FluidStack available = n.drain(face, Integer.MAX_VALUE, false);
-			if(available != null && available.getFluid() != null && available.amount > 0){
-				int delta = transmitFluidToConsumers(available,PowerRequest.LOW_PRIORITY);
+			if (available != null && available.getFluid() != null && available.amount > 0) {
+				int delta = transmitFluidToConsumers(available, PowerRequest.LOW_PRIORITY);
 				n.drain(face, delta, true);
 			}
 		}
 	}
-	
+
 	/**
-	 * This class distributes fluids to connected fluid consumers using the standard power network 
+	 * This class distributes fluids to connected fluid consumers using the standard power network
 	 * registry.
-	 * @param available The available fluid to distribute
+	 *
+	 * @param available       The available fluid to distribute
 	 * @param minumimPriority The lowest priority of power request that will be filled.
 	 * @return How much fluid was sent out
 	 */
-	protected int transmitFluidToConsumers(FluidStack available, byte minumimPriority){
+	protected int transmitFluidToConsumers(FluidStack available, byte minumimPriority) {
 		ConduitType type = Fluids.fluidToConduitType(available.getFluid());
 		List<PowerRequest> requests = ConduitRegistry.getInstance()
-				.getRequestsForPower(getWorld(), getPos(), Fluids.fluidConduit_general,type);
+				.getRequestsForPower(getWorld(), getPos(), Fluids.fluidConduit_general, type);
 		int bucket = available.amount;
-		for(PowerRequest req : requests){
-			if(req.entity == this) continue;
-			if(req.priority < minumimPriority)break; // relies on list being sorted properly
-			if(req.amount <= 0)continue;
-			if(req.amount < bucket){
-				bucket -= req.entity.addEnergy(req.amount,type);
+		for (PowerRequest req : requests) {
+			if (req.entity == this) continue;
+			if (req.priority < minumimPriority) break; // relies on list being sorted properly
+			if (req.amount <= 0) continue;
+			if (req.amount < bucket) {
+				bucket -= req.entity.addEnergy(req.amount, type);
 			} else {
-				req.entity.addEnergy(bucket,type);
+				req.entity.addEnergy(bucket, type);
 				bucket = 0;
 				break;
 			}
@@ -134,29 +134,30 @@ public class TerminalFluidPipeTileEntity extends PoweredEntity{
 	public void setEnergy(float energy, ConduitType type) {
 		// do nothing
 	}
-	
+
 	/**
-	 * Adds energy to this conductor, up to the maximum allowed energy. The 
-	 * amount of energy that was actually added (or subtracted) to the energy 
-	 * buffer is returned. 
-	 * @param energy The amount of energy to add (can be negative to subtract 
-	 * energy).
-	 * @param type The type of energy to be added to the buffer
+	 * Adds energy to this conductor, up to the maximum allowed energy. The
+	 * amount of energy that was actually added (or subtracted) to the energy
+	 * buffer is returned.
+	 *
+	 * @param energy The amount of energy to add (can be negative to subtract
+	 *               energy).
+	 * @param type   The type of energy to be added to the buffer
 	 * @return The actual change to the internal energy buffer.
 	 */
 	@Override
-	public float addEnergy(float energy, ConduitType type){
+	public float addEnergy(float energy, ConduitType type) {
 		Fluid f = Fluids.conduitTypeToFluid(type);
-		if(f == null) return 0;
+		if (f == null) return 0;
 		int delta = 0, original = (int) energy;
-		for(int i = 0; i < 6; i++){
+		for (int i = 0; i < 6; i++) {
 			IFluidHandler n = neighbors[i];
 			EnumFacing face = faces[i].getOpposite();
-			if(n != null){
-				FluidStack fs = new FluidStack(f,original - delta);
+			if (n != null) {
+				FluidStack fs = new FluidStack(f, original - delta);
 				delta += n.fill(face, fs, true);
 			}
-			if(delta >= original) break;
+			if (delta >= original) break;
 		}
 		return delta;
 	}
@@ -165,17 +166,17 @@ public class TerminalFluidPipeTileEntity extends PoweredEntity{
 	@Override
 	public PowerRequest getPowerRequest(ConduitType type) {
 		Fluid f = Fluids.conduitTypeToFluid(type);
-		if(f == null) return PowerRequest.REQUEST_NOTHING;
-		FluidStack offer = new FluidStack(f,Integer.MAX_VALUE);
+		if (f == null) return PowerRequest.REQUEST_NOTHING;
+		FluidStack offer = new FluidStack(f, Integer.MAX_VALUE);
 		int demand = 0;
-		for(int i = 0; i < 6; i++){
+		for (int i = 0; i < 6; i++) {
 			IFluidHandler n = neighbors[i];
 			EnumFacing face = faces[i].getOpposite();
-			if(n != null){
+			if (n != null) {
 				demand += n.fill(face, offer, false);
 			}
 		}
-		return new FluidRequest(PowerRequest.LOW_PRIORITY-1,demand,this);
+		return new FluidRequest(PowerRequest.LOW_PRIORITY - 1, demand, this);
 	}
-	
+
 }

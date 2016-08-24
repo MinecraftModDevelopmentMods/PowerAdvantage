@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Random;
 
 public class TileEntityConveyor extends TileEntity implements ITickable, ISidedInventory {
-
-	
 	
 	public static String unlocalizedName = TileEntityConveyorFilter.class.getName();
 	
@@ -448,9 +446,4 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 		return slotAccessCache;
 	}
 	//////////  //////////
-
-	
-	
-	
-
 }

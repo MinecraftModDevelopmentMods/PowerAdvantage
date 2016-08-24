@@ -13,10 +13,12 @@ public class ExternalPowerRequest extends PowerRequest {
 
 	public final TileEntity externalPowerAcceptor;
 	public final BlockPos pos;
+
 	/**
 	 * Constructs a new request for an external machine block.
+	 *
 	 * @param requestSize Amount of energy requested
-	 * @param source The source TileEntity (which does not extend PoweredEntity)
+	 * @param source      The source TileEntity (which does not extend PoweredEntity)
 	 */
 	public ExternalPowerRequest(float requestSize, TileEntity source) {
 		super(0, requestSize, null);

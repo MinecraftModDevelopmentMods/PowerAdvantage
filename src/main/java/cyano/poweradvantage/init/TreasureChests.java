@@ -14,25 +14,26 @@ import java.util.Arrays;
 public abstract class TreasureChests {
 
 	private static boolean initDone = false;
-	public static void init(Path configFolder){
-		if(initDone)return;
 
-		Path chestFolder = configFolder.resolve(Paths.get("additional-loot-tables",PowerAdvantage.MODID,"chests"));
+	public static void init(Path configFolder) {
+		if (initDone) return;
+
+		Path chestFolder = configFolder.resolve(Paths.get("additional-loot-tables", PowerAdvantage.MODID, "chests"));
 		writeLootFile(chestFolder.resolve("abandoned_mineshaft.json"), LOOT_POOL);
 		writeLootFile(chestFolder.resolve("simple_dungeon.json"), LOOT_POOL);
 		writeLootFile(chestFolder.resolve("village_blacksmith.json"), LOOT_POOL);
 		writeLootFile(chestFolder.resolve("stronghold_corridor.json"), LOOT_POOL);
 		writeLootFile(chestFolder.resolve("stronghold_crossing.json"), LOOT_POOL);
-		
+
 		initDone = true;
 	}
 
-	private static void writeLootFile(Path file, String content){
+	private static void writeLootFile(Path file, String content) {
 		try {
 			Files.createDirectories(file.getParent());
 			Files.write(file, Arrays.asList(content), Charset.forName("UTF-8"));
 		} catch (IOException e) {
-			FMLLog.log(Level.ERROR,e,"Error writing additional-loot-table files");
+			FMLLog.log(Level.ERROR, e, "Error writing additional-loot-table files");
 		}
 	}
 

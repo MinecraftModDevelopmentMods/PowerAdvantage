@@ -15,7 +15,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.IFluidHandler;
 
-public class TerminalFluidPipeBlock extends FluidPipeBlock implements ITileEntityProvider{
+public class TerminalFluidPipeBlock extends FluidPipeBlock implements ITileEntityProvider {
 
 	@Override
 	public TileEntity createNewTileEntity(World worldIn, int meta) {
@@ -24,56 +24,55 @@ public class TerminalFluidPipeBlock extends FluidPipeBlock implements ITileEntit
 
 
 	@Override
-	public boolean isPowerSink(ConduitType powerType){
+	public boolean isPowerSink(ConduitType powerType) {
 		return true;
 	}
 
 	@Override
-	public boolean isPowerSource(ConduitType powerType){
+	public boolean isPowerSource(ConduitType powerType) {
 		return true;
 	}
-	
+
 	/**
 	 * Called when a neighboring block changes.
 	 */
-	public void onNeighborBlockChange(World w, BlockPos pos, IBlockState state, Block neighborBlock){
-		pipeCheck(w,pos);
+	public void onNeighborBlockChange(World w, BlockPos pos, IBlockState state, Block neighborBlock) {
+		pipeCheck(w, pos);
 	}
-	
+
 	/**
 	 * Called by ItemBlocks after a block is set in the world, to allow post-place logic
 	 */
-	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack){
+	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
 		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
-		pipeCheck(worldIn,pos);
+		pipeCheck(worldIn, pos);
 	}
 
 	private void pipeCheck(World w, BlockPos pos) {
-		if(!w.isRemote){
-			if(numberOfAdjacentFluidHandlers(w,pos) == 0){
+		if (!w.isRemote) {
+			if (numberOfAdjacentFluidHandlers(w, pos) == 0) {
 				w.setBlockState(pos, Blocks.fluid_pipe.getDefaultState());
 			}
 		}
 	}
-	
+
 	/**
-	 * This method determines whether to connect to a neighboring block. 
-	 * Override this method to change block connection behavior. 
-	 * @param w World instance
-	 * @param thisBlock The block that is checking its neighbor
-	 * @param bs Block state of this block
-	 * @param face The face on the first block through which the connection would happen
+	 * This method determines whether to connect to a neighboring block.
+	 * Override this method to change block connection behavior.
+	 *
+	 * @param w          World instance
+	 * @param thisBlock  The block that is checking its neighbor
+	 * @param bs         Block state of this block
+	 * @param face       The face on the first block through which the connection would happen
 	 * @param otherBlock Coordinate of neighboring block
-	 * @return Default implementation: true if the neighboring block implements 
-	 * ITypedConductor and has the same energy type as this block. Overriding 
-	 * the canConnectTo(ConductorType) method will change the results of this 
+	 * @return Default implementation: true if the neighboring block implements
+	 * ITypedConductor and has the same energy type as this block. Overriding
+	 * the canConnectTo(ConductorType) method will change the results of this
 	 * method.
 	 */
 	@Override
-	protected boolean canConnectTo(IBlockAccess w, BlockPos thisBlock, IBlockState bs, EnumFacing face, BlockPos otherBlock){
+	protected boolean canConnectTo(IBlockAccess w, BlockPos thisBlock, IBlockState bs, EnumFacing face, BlockPos otherBlock) {
 		return super.canConnectTo(w, thisBlock, bs, face, otherBlock) || w.getTileEntity(otherBlock) instanceof IFluidHandler;
 	}
-	
-	
-	
+
 }

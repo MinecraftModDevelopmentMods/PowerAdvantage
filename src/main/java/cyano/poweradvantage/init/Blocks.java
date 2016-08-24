@@ -39,10 +39,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class Blocks {
-	private static final Map<String,Block> allBlocks = new HashMap<>();
+	private static final Map<String, Block> allBlocks = new HashMap<>();
 
-	public static GUIBlock fluid_drain; 
-	public static GUIBlock fluid_discharge; 
+	public static GUIBlock fluid_drain;
+	public static GUIBlock fluid_discharge;
 	public static GUIBlock storage_tank;
 	public static GUIBlock metal_storage_tank;
 	public static GUIBlock still;
@@ -59,70 +59,69 @@ public abstract class Blocks {
 	public static GUIBlock item_filter_smelt;
 	public static GUIBlock item_filter_overflow;
 	public static Block steel_frame;
-	
+
 
 	public static GUIBlock infinite_steam;
 	public static GUIBlock infinite_electricity;
 	public static GUIBlock infinite_quantum;
-	
+
 
 	public static BlockFluidBase crude_oil_block;
 	public static BlockFluidBase refined_oil_block;
-	
-	
 
-	
+
 	private static boolean initDone = false;
-	public static void init(){
-		if(initDone) return;
+
+	public static void init() {
+		if (initDone) return;
 		ItemGroups.init();
 		Fluids.init();
 		cyano.poweradvantage.init.Materials.init();
-		
-		
-		fluid_drain = (GUIBlock)addBlock(new FluidDrainBlock(),"fluid_drain");
-		fluid_discharge = (GUIBlock)addBlock(new FluidDischargeBlock(),"fluid_discharge");
-		storage_tank = (GUIBlock)addBlock(new StorageTankBlock(),"fluid_storage_tank");
-		metal_storage_tank = (GUIBlock)addBlock(new MetalTankBlock(),"fluid_metal_tank");
-		still = (GUIBlock)addBlock(new StillBlock(),"still");
-		fluid_pipe = addBlock(new FluidPipeBlock(),"fluid_pipe");
-		fluid_pipe_terminal = addBlock(new TerminalFluidPipeBlock(),"fluid_pipe_terminal");
+
+
+		fluid_drain = (GUIBlock) addBlock(new FluidDrainBlock(), "fluid_drain");
+		fluid_discharge = (GUIBlock) addBlock(new FluidDischargeBlock(), "fluid_discharge");
+		storage_tank = (GUIBlock) addBlock(new StorageTankBlock(), "fluid_storage_tank");
+		metal_storage_tank = (GUIBlock) addBlock(new MetalTankBlock(), "fluid_metal_tank");
+		still = (GUIBlock) addBlock(new StillBlock(), "still");
+		fluid_pipe = addBlock(new FluidPipeBlock(), "fluid_pipe");
+		fluid_pipe_terminal = addBlock(new TerminalFluidPipeBlock(), "fluid_pipe_terminal");
 		fluid_pipe_terminal.setUnlocalizedName("fluid_pipe");
 		fluid_pipe_terminal.setCreativeTab(null);
-		fluid_switch = addBlock(new BlockPowerSwitch(Fluids.fluidConduit_general),"fluid_switch");
+		fluid_switch = addBlock(new BlockPowerSwitch(Fluids.fluidConduit_general), "fluid_switch");
 		OreDictionary.registerOre("pipe", fluid_pipe);
 		steel_frame = addBlock(new BlockFrame(net.minecraft.block.material.Material.PISTON)
 				.setResistance(cyano.basemetals.init.Materials.steel.getBlastResistance())
-				.setHardness(0.75f),"steel_frame");
+				.setHardness(0.75f), "steel_frame");
 		OreDictionary.registerOre("frameSteel", steel_frame);
-		
+
 		final float defaultMachineHardness = 0.75f;
 		final Material defaultMachineMaterial = Material.PISTON;
-		item_conveyor = (GUIBlock)addBlock(new BlockConveyor(defaultMachineMaterial,defaultMachineHardness),"item_conveyor");
-		item_filter_block = (GUIBlock)addBlock(new BlockConveyorFilter(defaultMachineMaterial,defaultMachineHardness,TileEntityBlockFilter.class),"item_filter_block");
-		item_filter_food = (GUIBlock)addBlock(new BlockConveyorFilter(defaultMachineMaterial,defaultMachineHardness,TileEntityFoodFilter.class),"item_filter_food");
-		item_filter_fuel = (GUIBlock)addBlock(new BlockConveyorFilter(defaultMachineMaterial,defaultMachineHardness,TileEntityFuelFilter.class),"item_filter_fuel");
-		item_filter_inventory = (GUIBlock)addBlock(new BlockConveyorFilter(defaultMachineMaterial,defaultMachineHardness,TileEntityInventoryFilter.class),"item_filter_inventory");
-		item_filter_ore = (GUIBlock)addBlock(new BlockConveyorFilter(defaultMachineMaterial,defaultMachineHardness,TileEntityOreFilter.class),"item_filter_ore");
-		item_filter_plant = (GUIBlock)addBlock(new BlockConveyorFilter(defaultMachineMaterial,defaultMachineHardness,TileEntityPlantFilter.class),"item_filter_plant");
-		item_filter_smelt = (GUIBlock)addBlock(new BlockConveyorFilter(defaultMachineMaterial,defaultMachineHardness,TileEntitySmeltableFilter.class),"item_filter_smelt");
-		item_filter_overflow = (GUIBlock)addBlock(new BlockConveyorFilter(defaultMachineMaterial,defaultMachineHardness,TileEntityOverflowFilter.class),"item_filter_overflow");
-		
+		item_conveyor = (GUIBlock) addBlock(new BlockConveyor(defaultMachineMaterial, defaultMachineHardness), "item_conveyor");
+		item_filter_block = (GUIBlock) addBlock(new BlockConveyorFilter(defaultMachineMaterial, defaultMachineHardness, TileEntityBlockFilter.class), "item_filter_block");
+		item_filter_food = (GUIBlock) addBlock(new BlockConveyorFilter(defaultMachineMaterial, defaultMachineHardness, TileEntityFoodFilter.class), "item_filter_food");
+		item_filter_fuel = (GUIBlock) addBlock(new BlockConveyorFilter(defaultMachineMaterial, defaultMachineHardness, TileEntityFuelFilter.class), "item_filter_fuel");
+		item_filter_inventory = (GUIBlock) addBlock(new BlockConveyorFilter(defaultMachineMaterial, defaultMachineHardness, TileEntityInventoryFilter.class), "item_filter_inventory");
+		item_filter_ore = (GUIBlock) addBlock(new BlockConveyorFilter(defaultMachineMaterial, defaultMachineHardness, TileEntityOreFilter.class), "item_filter_ore");
+		item_filter_plant = (GUIBlock) addBlock(new BlockConveyorFilter(defaultMachineMaterial, defaultMachineHardness, TileEntityPlantFilter.class), "item_filter_plant");
+		item_filter_smelt = (GUIBlock) addBlock(new BlockConveyorFilter(defaultMachineMaterial, defaultMachineHardness, TileEntitySmeltableFilter.class), "item_filter_smelt");
+		item_filter_overflow = (GUIBlock) addBlock(new BlockConveyorFilter(defaultMachineMaterial, defaultMachineHardness, TileEntityOverflowFilter.class), "item_filter_overflow");
 
-		infinite_steam = (GUIBlock)addBlock(new InfiniteEnergyBlock(new ConduitType("steam")),"infinite_steam");
-		infinite_electricity = (GUIBlock)addBlock(new InfiniteEnergyBlock(new ConduitType("electricity")),"infinite_electricity");
-		infinite_quantum = (GUIBlock)addBlock(new InfiniteEnergyBlock(new ConduitType("quantum")),"infinite_quantum");
 
-		
-		refined_oil_block = (BlockFluidBase)addBlock(new InteractiveFluidBlock(Fluids.refined_oil,true,(World w, EntityLivingBase e)->{
-			e.addPotionEffect(new PotionEffect(Potion.REGISTRY.getObject(new ResourceLocation("nausea")),200));
-		}),"refined_oil");
-		
-		crude_oil_block = (BlockFluidBase)addBlock(new InteractiveFluidBlock(Fluids.crude_oil,true,(World w, EntityLivingBase e)->{
-			e.addPotionEffect(new PotionEffect(Potion.REGISTRY.getObject(new ResourceLocation("slowness")),200,2));
-		}),"crude_oil");
-		
-		
+		infinite_steam = (GUIBlock) addBlock(new InfiniteEnergyBlock(new ConduitType("steam")), "infinite_steam");
+		infinite_electricity = (GUIBlock) addBlock(new InfiniteEnergyBlock(new ConduitType("electricity")), "infinite_electricity");
+		infinite_quantum = (GUIBlock) addBlock(new InfiniteEnergyBlock(new ConduitType("quantum")), "infinite_quantum");
+
+
+		refined_oil_block = (BlockFluidBase) addBlock(new InteractiveFluidBlock(Fluids.refined_oil, true, (World w, EntityLivingBase e) -> {
+			e.addPotionEffect(new PotionEffect(Potion.REGISTRY.getObject(new ResourceLocation("nausea")), 200));
+		}), "refined_oil");
+
+		crude_oil_block = (BlockFluidBase) addBlock(new InteractiveFluidBlock(Fluids.crude_oil, true, (World w, EntityLivingBase e) -> {
+			e.addPotionEffect(new PotionEffect(Potion.REGISTRY.getObject(new ResourceLocation("slowness")), 200, 2));
+		}), "crude_oil");
+
+
 		initDone = true;
 	}
 
@@ -130,29 +129,25 @@ public abstract class Blocks {
 	 * Adds fluid block models to the game and applies them to the fluid blocks
 	 */
 	@SideOnly(Side.CLIENT)
-	public static void bakeModels(){
+	public static void bakeModels() {
 		String modID = PowerAdvantage.MODID;
-		for(Map.Entry<String,Block> e : allBlocks.entrySet()){
+		for (Map.Entry<String, Block> e : allBlocks.entrySet()) {
 			Block b = e.getValue();
 			String name = e.getKey();
-			if(b instanceof BlockFluidBase){
-				BlockFluidBase block = (BlockFluidBase)b;
+			if (b instanceof BlockFluidBase) {
+				BlockFluidBase block = (BlockFluidBase) b;
 				Fluid fluid = block.getFluid();
 				Item item = Item.getItemFromBlock(block);
 				final ModelResourceLocation fluidModelLocation = new ModelResourceLocation(
 						modID.toLowerCase() + ":" + name, "fluid");
 				ModelBakery.registerItemVariants(item);
-				ModelLoader.setCustomMeshDefinition(item, new ItemMeshDefinition()
-				{
-					public ModelResourceLocation getModelLocation(ItemStack stack)
-					{
+				ModelLoader.setCustomMeshDefinition(item, new ItemMeshDefinition() {
+					public ModelResourceLocation getModelLocation(ItemStack stack) {
 						return fluidModelLocation;
 					}
 				});
-				ModelLoader.setCustomStateMapper(block, new StateMapperBase()
-				{
-					protected ModelResourceLocation getModelResourceLocation(IBlockState state)
-					{
+				ModelLoader.setCustomStateMapper(block, new StateMapperBase() {
+					protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
 						return fluidModelLocation;
 					}
 				});
@@ -160,28 +155,26 @@ public abstract class Blocks {
 		}
 	}
 
-	private static Block addBlock(Block block, String name ){
-		block.setUnlocalizedName(PowerAdvantage.MODID+"."+name);
+	private static Block addBlock(Block block, String name) {
+		block.setUnlocalizedName(PowerAdvantage.MODID + "." + name);
 		GameRegistry.registerBlock(block, name);
-		if((block instanceof BlockFluidBase) == false)block.setCreativeTab(ItemGroups.tab_powerAdvantage);
+		if ((block instanceof BlockFluidBase) == false) block.setCreativeTab(ItemGroups.tab_powerAdvantage);
 		allBlocks.put(name, block);
 		return block;
 	}
-	
-	public static Map<String,Block> getModBlockRegistry(){
+
+	public static Map<String, Block> getModBlockRegistry() {
 		return Collections.unmodifiableMap(allBlocks);
 	}
-	
+
 	@SideOnly(Side.CLIENT)
-	public static void registerItemRenders(FMLInitializationEvent event){
-		for(Map.Entry<String, Block> e : allBlocks.entrySet()){
+	public static void registerItemRenders(FMLInitializationEvent event) {
+		for (Map.Entry<String, Block> e : allBlocks.entrySet()) {
 			String name = e.getKey();
 			Block block = e.getValue();
 			Minecraft.getMinecraft().getRenderItem().getItemModelMesher()
-			.register(net.minecraft.item.Item.getItemFromBlock(block), 0, 
-				new ModelResourceLocation(PowerAdvantage.MODID+":"+name, "inventory"));
+					.register(net.minecraft.item.Item.getItemFromBlock(block), 0,
+							new ModelResourceLocation(PowerAdvantage.MODID + ":" + name, "inventory"));
 		}
 	}
-
-	
 }

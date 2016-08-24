@@ -10,17 +10,19 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class RotationTool extends net.minecraft.item.Item{
+public class RotationTool extends net.minecraft.item.Item {
 
-	public RotationTool(){
+	public RotationTool() {
 		super();
 		super.setMaxStackSize(1);
 	}
-	
+
 	@Override
-	public EnumActionResult onItemUse(final ItemStack item, final EntityPlayer player, final World w,
-									  final BlockPos coord, final EnumHand hand, final EnumFacing facing,
-									  final float partialX, final float partialY, final float partialZ) {
+	public EnumActionResult onItemUse(
+			final ItemStack item, final EntityPlayer player, final World w,
+			final BlockPos coord, final EnumHand hand, final EnumFacing facing,
+			final float partialX, final float partialY, final float partialZ
+	) {
 		IBlockState bs = w.getBlockState(coord);
 		/*  // comment this line to turn the wrench into a hacker tool
 		try { // hacker info
@@ -36,8 +38,8 @@ public class RotationTool extends net.minecraft.item.Item{
 		}
 		//*/
 
-		if(bs.getBlock().rotateBlock(w,coord, facing)) return EnumActionResult.SUCCESS;
-		if(bs.withRotation(Rotation.COUNTERCLOCKWISE_90) != bs) {
+		if (bs.getBlock().rotateBlock(w, coord, facing)) return EnumActionResult.SUCCESS;
+		if (bs.withRotation(Rotation.COUNTERCLOCKWISE_90) != bs) {
 			w.setBlockState(coord, bs.withRotation(Rotation.COUNTERCLOCKWISE_90));
 			return EnumActionResult.SUCCESS;
 		}

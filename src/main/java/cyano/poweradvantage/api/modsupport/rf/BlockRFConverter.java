@@ -13,6 +13,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class BlockRFConverter extends BlockSimplePowerMachine {
 
 	private final Class tileEntityClass;
+
 	public BlockRFConverter(Material blockMaterial, float hardness, ConduitType energyType, Class<? extends TileEntityRFConverter> tileEntityClass) {
 		super(blockMaterial, hardness, energyType);
 		this.tileEntityClass = tileEntityClass;
@@ -22,14 +23,14 @@ public class BlockRFConverter extends BlockSimplePowerMachine {
 	@Override
 	public TileEntityRFConverter createNewTileEntity(World world, int metaDataValue) {
 		try {
-			return (TileEntityRFConverter)tileEntityClass.newInstance();
+			return (TileEntityRFConverter) tileEntityClass.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			return null;
 		}
 	}
-	
+
 	@Override
-	public boolean isNormalCube(IBlockState bs){
+	public boolean isNormalCube(IBlockState bs) {
 		return false;
 	}
 
@@ -38,7 +39,7 @@ public class BlockRFConverter extends BlockSimplePowerMachine {
 	public boolean isOpaqueCube(IBlockState bs) {
 		return false;
 	}
-	
+
 	@SideOnly(Side.CLIENT)
 	@Override
 	public BlockRenderLayer getBlockLayer() {

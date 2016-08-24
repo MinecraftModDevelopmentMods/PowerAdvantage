@@ -12,45 +12,54 @@ package cyano.poweradvantage.api;
 public interface IPowerMachine extends ITypedConduit {
 	/**
 	 * Gets the amount of energy that can be stored in this machine.
+	 *
 	 * @param energyType The type of energy being polled
 	 * @return Size of the energy buffer
 	 */
 	public abstract float getEnergyCapacity(ConduitType energyType);
+
 	/**
 	 * Gets the amount of energy stored in this machine
+	 *
 	 * @param energyType The type of energy being polled
 	 * @return The amount of energy in the energy buffer
 	 */
 	public abstract float getEnergy(ConduitType energyType);
+
 	/**
 	 * Sets the amount of energy in the buffer
-	 * @param energy The amount of energy to be added to the buffer
+	 *
+	 * @param energy     The amount of energy to be added to the buffer
 	 * @param energyType The type of energy to be added to the buffer
 	 */
-	public abstract void setEnergy(float energy, ConduitType energyType); 
+	public abstract void setEnergy(float energy, ConduitType energyType);
+
 	/**
-	 * Adds energy to this conductor, up to the maximum allowed energy. The 
-	 * amount of energy that was actually added (or subtracted) to the energy 
-	 * buffer is returned. 
-	 * @param energy The amount of energy to add (can be negative to subtract 
-	 * energy).
+	 * Adds energy to this conductor, up to the maximum allowed energy. The
+	 * amount of energy that was actually added (or subtracted) to the energy
+	 * buffer is returned.
+	 *
+	 * @param energy     The amount of energy to add (can be negative to subtract
+	 *                   energy).
 	 * @param energyType The type of energy to be added to the buffer
 	 * @return The actual change to the internal energy buffer.
 	 */
 	public float addEnergy(float energy, ConduitType energyType);
-	
+
 	/**
-	 * Subtracts energy from the energy buffer and returns the actual change to 
+	 * Subtracts energy from the energy buffer and returns the actual change to
 	 * the energy buffer (a negative number).
-	 * @param energy The amount of energy to subtract (a positive number).
+	 *
+	 * @param energy     The amount of energy to subtract (a positive number).
 	 * @param energyType The type of energy to be subtracted to the buffer
 	 * @return The actual change to the internal energy buffer
 	 */
 	public float subtractEnergy(float energy, ConduitType energyType);
-	
+
 	/**
-	 * Specify how much energy this power sink wants from a power generator. If this tile entity is 
+	 * Specify how much energy this power sink wants from a power generator. If this tile entity is
 	 * not a sink, then simply return PowerRequest.REQUEST_NOTHING
+	 *
 	 * @param energyType The type of energy available upon request
 	 * @return A PowerRequest instance indicated how much power you'd like to get
 	 */

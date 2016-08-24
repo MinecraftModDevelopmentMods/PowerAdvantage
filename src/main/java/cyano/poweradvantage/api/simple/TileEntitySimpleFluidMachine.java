@@ -17,10 +17,12 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
 import java.util.List;
 
@@ -67,8 +69,18 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
 		this.tank = new FluidTank(fluidTankCapacity);
 		this.unlocalizedName = unlocalizedName;
 	}
-    
-    /**
+
+	@Override
+	public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+		return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY || super.hasCapability(capability, facing);
+	}
+
+	@Override
+	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+		return (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)? (T) tank : super.getCapability(capability,facing);
+	}
+
+	/**
      * Gets the unlocalized String passed to the constructor
      * @return A String used in name localization by client GUI 
      */
@@ -740,6 +752,5 @@ private final ConduitType[] types = {Fluids.fluidConduit_general};
 	public FluidTank getTank(){
 		return tank;
 	}
-	
-	
+
 }

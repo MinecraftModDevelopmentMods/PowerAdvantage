@@ -17,22 +17,23 @@ import net.minecraft.world.ILockableContainer;
  *
  */
 public class InventoryWrapper implements ISidedInventory {
-	
+
 	private final IInventory inventory;
 	private final int[] slots;
 	private static final int[] NO_SLOTS = new int[0];
 	private static final InventoryWrapper NULL_INVENTORY = new InventoryWrapper();
-	
+
 	/**
 	 * Constructs an ISidedInventory wrapper for the given IInventory instance
-	 * @param inv An net.minecraft.inventory.IInventory that you want to treat as a 
-	 * net.minecraft.inventory.ISidedInventory
+	 *
+	 * @param inv An net.minecraft.inventory.IInventory that you want to treat as a
+	 *            net.minecraft.inventory.ISidedInventory
 	 */
-	protected InventoryWrapper(IInventory inv){
+	protected InventoryWrapper(IInventory inv) {
 		this.inventory = inv;
 		slots = new int[inventory.getSizeInventory()];
 		net.minecraft.tileentity.TileEntityChest g;
-		for(int i = 0; i < slots.length; i++){
+		for (int i = 0; i < slots.length; i++) {
 			slots[i] = i;
 		}
 	}
@@ -40,7 +41,7 @@ public class InventoryWrapper implements ISidedInventory {
 	/**
 	 * Creates an ISidedInventory instance that has no inventory
 	 */
-	protected InventoryWrapper(){
+	protected InventoryWrapper() {
 		slots = NO_SLOTS;
 		inventory = new IInventory() {
 			@Override
@@ -134,27 +135,31 @@ public class InventoryWrapper implements ISidedInventory {
 			}
 		};
 	}
+
 	/**
 	 * Gets whether this is a locked container
+	 *
 	 * @return true if the wrapped inventory is an instance of ILockableContainer and is locked
 	 */
-	public boolean isLocked(){
-		if(inventory instanceof ILockableContainer){
-			return ((ILockableContainer)inventory).isLocked();
+	public boolean isLocked() {
+		if (inventory instanceof ILockableContainer) {
+			return ((ILockableContainer) inventory).isLocked();
 		}
 		return false;
 	}
+
 	/**
-	 * Constructs an ISidedInventory wrapper for the given IInventory instance. If the provided 
-	 * instance is already an ISidedInventory, then that instance is simply returned instead of 
+	 * Constructs an ISidedInventory wrapper for the given IInventory instance. If the provided
+	 * instance is already an ISidedInventory, then that instance is simply returned instead of
 	 * making a wrapper.
-	 * @param inv An net.minecraft.inventory.IInventory that you want to treat as a 
-	 * net.minecraft.inventory.ISidedInventory
+	 *
+	 * @param inv An net.minecraft.inventory.IInventory that you want to treat as a
+	 *            net.minecraft.inventory.ISidedInventory
 	 * @return An instance of ISidedInventory that forwards all methods to the given IInventory
 	 */
-	public static ISidedInventory wrap(IInventory inv){
-		if(inv == null) return NULL_INVENTORY;
-		if(inv instanceof ISidedInventory) return (ISidedInventory)inv;
+	public static ISidedInventory wrap(IInventory inv) {
+		if (inv == null) return NULL_INVENTORY;
+		if (inv instanceof ISidedInventory) return (ISidedInventory) inv;
 		return new InventoryWrapper(inv);
 	}
 
@@ -250,22 +255,20 @@ public class InventoryWrapper implements ISidedInventory {
 
 	@Override
 	public boolean canExtractItem(int arg0, ItemStack arg1, EnumFacing arg2) {
-		if(isLocked())return false;
+		if (isLocked()) return false;
 		return true;
 	}
 
 	@Override
 	public boolean canInsertItem(int arg0, ItemStack arg1, EnumFacing arg2) {
-		if(isLocked())return false;
+		if (isLocked()) return false;
 		return true;
 	}
 
-	
+
 	@Override
 	public int[] getSlotsForFace(EnumFacing arg0) {
-		if(isLocked())return NO_SLOTS;
+		if (isLocked()) return NO_SLOTS;
 		return slots;
 	}
-	
-
 }

@@ -23,15 +23,19 @@ import net.minecraft.world.World;
  *
  */
 public class BlockPowerSwitch extends Block implements ITypedConduit {
-	/** Blockstate peroperty. If true, conduct power, if false, don't */
+	/**
+	 * Blockstate peroperty. If true, conduct power, if false, don't
+	 */
 	public static final PropertyBool ACTIVE = PropertyBool.create("active");
 	private final ConduitType[] powerType;
+
 	/**
 	 * Constructor for making a power switch
-	 * @param powerType Type of power to switch
+	 *
+	 * @param powerType     Type of power to switch
 	 * @param blockMaterial The block material (usually piston material)
 	 * @param blockHardness The hardness of the block (0.75 is a good value)
-	 * @param mapColor Color on a map
+	 * @param mapColor      Color on a map
 	 */
 	public BlockPowerSwitch(ConduitType powerType, Material blockMaterial, float blockHardness, MapColor mapColor) {
 		super(blockMaterial, mapColor);
@@ -40,36 +44,39 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 		this.setHardness(blockHardness);
 		this.setDefaultState(getDefaultState().withProperty(ACTIVE, false));
 	}
+
 	/**
 	 * Constructor for making a power switch
+	 *
 	 * @param powerType Type of power to switch
 	 */
-	public BlockPowerSwitch(ConduitType powerType){
-		this(powerType,Material.PISTON,0.75f,MapColor.IRON);
+	public BlockPowerSwitch(ConduitType powerType) {
+		this(powerType, Material.PISTON, 0.75f, MapColor.IRON);
 	}
-	
+
 	/**
 	 * Creates a blockstate
 	 */
 	@Override
 	protected BlockStateContainer createBlockState() {
-		return new BlockStateContainer(this, new IProperty[] { ACTIVE });
+		return new BlockStateContainer(this, new IProperty[]{ACTIVE});
 	}
+
 	/**
 	 * Converts metadata into blockstate
 	 */
 	@Override
 	public IBlockState getStateFromMeta(final int metaValue) {
 		return this.getDefaultState()
-				.withProperty(ACTIVE, metaValue  > 0);
+				.withProperty(ACTIVE, metaValue > 0);
 	}
-	
+
 	/**
 	 * Converts blockstate into metadata
 	 */
 	@Override
 	public int getMetaFromState(final IBlockState bs) {
-		if((Boolean)(bs.getValue(ACTIVE))){
+		if ((Boolean) (bs.getValue(ACTIVE))) {
 			return 1;
 		} else {
 			return 0;
@@ -84,17 +91,19 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	 */
 	@Override
 	public boolean canAcceptConnection(PowerConnectorContext connection) {
-		return (Boolean)connection.thisBlock.getValue(ACTIVE) && ConduitType.areSameType(powerType[0],connection.powerType);
+		return (Boolean) connection.thisBlock.getValue(ACTIVE) && ConduitType.areSameType(powerType[0], connection.powerType);
 	}
 
 	@Override
 	public ConduitType[] getTypes() {
 		return powerType;
 	}
+
 	@Override
 	public boolean isPowerSink(ConduitType powerType) {
 		return false;
 	}
+
 	@Override
 	public boolean isPowerSource(ConduitType powerType) {
 		return false;
@@ -104,16 +113,15 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	 * Used to determine ambient occlusion and culling when rebuilding chunks for render
 	 */
 	@Override
-	public boolean isOpaqueCube(IBlockState bs)
-	{
+	public boolean isOpaqueCube(IBlockState bs) {
 		return true;
 	}
-@Override
-	public boolean isFullCube(IBlockState bs)
-	{
+
+	@Override
+	public boolean isFullCube(IBlockState bs) {
 		return true;
 	}
-	
+
 	/**
 	 * Override of default block behavior
 	 */
@@ -121,30 +129,32 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	public void onBlockAdded(final World world, final BlockPos coord, final IBlockState state) {
 		ConduitRegistry.getInstance().conduitBlockPlacedEvent(world, world.provider.getDimension(), coord, getTypes());
 	}
+
 	/**
 	 * This method is called when the block is removed from the world by an entity.
 	 */
 	@Override
-	public void onBlockDestroyedByPlayer(World w, BlockPos coord, IBlockState state){
+	public void onBlockDestroyedByPlayer(World w, BlockPos coord, IBlockState state) {
 		super.onBlockDestroyedByPlayer(w, coord, state);
 		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.provider.getDimension(), coord, getTypes());
 	}
+
 	/**
 	 * This method is called when the block is destroyed by an explosion.
 	 */
 	@Override
-	public void onBlockDestroyedByExplosion(World w, BlockPos coord, Explosion boom){
+	public void onBlockDestroyedByExplosion(World w, BlockPos coord, Explosion boom) {
 		super.onBlockDestroyedByExplosion(w, coord, boom);
 		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.provider.getDimension(), coord, getTypes());
 	}
-	
+
 	/**
 	 * Called when a neighboring block changes.
 	 */
 	@Override
 	public void onNeighborChange(IBlockAccess w, BlockPos pos, BlockPos neighbor) {
 		if (w instanceof World) {
-			World world = (World)w;
+			World world = (World) w;
 			IBlockState state = world.getBlockState(pos);
 			// redstone power given or taken
 			boolean activated = !world.isBlockPowered(pos);
@@ -158,8 +168,8 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	}
 
 	@Override
-	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block block){
-		onNeighborChange(world,pos,pos);
+	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block block) {
+		onNeighborChange(world, pos, pos);
 	}
 
 }

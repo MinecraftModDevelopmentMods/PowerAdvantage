@@ -10,24 +10,23 @@ public class InfiniteEnergyTileEntity extends TileEntitySimplePowerMachine {
 	private final ItemStack[] inventory = new ItemStack[0];
 	private final int[] dataArray = new int[0];
 	private final ConduitType[] type = new ConduitType[1];
-	
+
 	public InfiniteEnergyTileEntity(ConduitType energyType) {
 		super(energyType, 1000f, InfiniteEnergyTileEntity.class.getName());
 		this.type[0] = energyType;
 	}
-	
 
 	public InfiniteEnergyTileEntity() {
 		super(new ConduitType("power"), 1000f, InfiniteEnergyTileEntity.class.getName());
 		this.type[0] = new ConduitType("power");
 	}
-	
-	public void setPowerType(ConduitType type){
+
+	public void setPowerType(ConduitType type) {
 		this.type[0] = type;
 	}
-	
+
 	@Override
-	public ConduitType[] getTypes(){
+	public ConduitType[] getTypes() {
 		return type;
 	}
 
@@ -68,26 +67,25 @@ public class InfiniteEnergyTileEntity extends TileEntitySimplePowerMachine {
 	@Override
 	public void prepareDataFieldsForSync() {
 		// do nothing
-		
+
 	}
 
 	@Override
 	public void onDataFieldUpdate() {
 		// do nothing
-		
+
 	}
 
 	@Override
 	public void tickUpdate(boolean isServerWorld) {
 		// do nothing
 	}
-	
+
 	@Override
-	public void powerUpdate(){
+	public void powerUpdate() {
 		super.powerUpdate();
 		this.setEnergy(this.getEnergyCapacity(this.getTypes()[0]), this.getTypes()[0]);
 	}
-
 
 	@Override
 	public NBTTagCompound writeToNBT(final NBTTagCompound tagRoot) {

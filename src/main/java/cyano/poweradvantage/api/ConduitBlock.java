@@ -23,38 +23,41 @@ import net.minecraft.world.World;
  * @author DrCyano
  *
  */
-public abstract class ConduitBlock extends net.minecraft.block.Block implements  ITypedConduit{
+public abstract class ConduitBlock extends net.minecraft.block.Block implements  ITypedConduit {
 	/**
 	 * Block constructor
+	 *
 	 * @param mat Block material, typically Material.iron
 	 */
 	protected ConduitBlock(Material mat) {
 		super(mat);
 	}
+
 	/**
 	 * This method is called whenever the block is placed into the world
 	 */
 	@Override
-	public void onBlockAdded(World w, BlockPos coord, IBlockState state){
+	public void onBlockAdded(World w, BlockPos coord, IBlockState state) {
 		super.onBlockAdded(w, coord, state);
 		ConduitRegistry.getInstance().conduitBlockPlacedEvent(w, w.provider.getDimension(), coord, getTypes());
 	}
-	
+
 	/**
 	 * This method is called when the block is removed from the world by an entity.
 	 */
 	@Override
-	public void onBlockDestroyedByPlayer(World w, BlockPos coord, IBlockState state){
+	public void onBlockDestroyedByPlayer(World w, BlockPos coord, IBlockState state) {
 		super.onBlockDestroyedByPlayer(w, coord, state);
 		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.provider.getDimension(), coord, getTypes());
 	}
+
 	/**
 	 * This method is called when the block is destroyed by an explosion.
 	 */
 	@Override
-	public void onBlockDestroyedByExplosion(World w, BlockPos coord, Explosion boom){
+	public void onBlockDestroyedByExplosion(World w, BlockPos coord, Explosion boom) {
 		super.onBlockDestroyedByExplosion(w, coord, boom);
 		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.provider.getDimension(), coord, getTypes());
 	}
-	
+
 }
