@@ -19,39 +19,39 @@ public abstract class TileEntityTRConverter extends TileEntityConverter implemen
 	private double euBuffer = 0;
 	private final ConduitType powerAdvantageType;
 
-	public TileEntityTRConverter(ConduitType powerAdvantageType, String unlocalizedName){
-		super(powerAdvantageType,1024F,unlocalizedName);
+	public TileEntityTRConverter(ConduitType powerAdvantageType, String unlocalizedName) {
+		super(powerAdvantageType, 1024F, unlocalizedName);
 		this.powerAdvantageType = powerAdvantageType;
 	}
 
 	@Override
 	public void tickUpdate(boolean isServerWorld) {
-		if(isServerWorld){
+		if (isServerWorld) {
 			World w = getWorld();
-			int sub = ((int)(w.getTotalWorldTime() & 0x0FFFFFFF) % 11);
+			int sub = ((int) (w.getTotalWorldTime() & 0x0FFFFFFF) % 11);
 			EnumFacing[] sides = EnumFacing.values();
 
 			double delta = euBuffer - halfBuffer;
-			if(delta < 0){
-				if(sub < sides.length){
+			if (delta < 0) {
+				if (sub < sides.length) {
 					EnumFacing dir = sides[sub];
 					TileEntity te = w.getTileEntity(getPos().offset(dir));
-					if(te instanceof reborncore.api.power.IEnergyInterfaceTile){
-						reborncore.api.power.IEnergyInterfaceTile trMachine = (reborncore.api.power.IEnergyInterfaceTile)te;
-						if(trMachine.canProvideEnergy(dir.getOpposite()) && trMachine.getEnergy() > 0){
-							double amount = min(this.getMaxInput(), trMachine.getMaxOutput(), trMachine.getEnergy(),-1*delta);
+					if (te instanceof reborncore.api.power.IEnergyInterfaceTile) {
+						reborncore.api.power.IEnergyInterfaceTile trMachine = (reborncore.api.power.IEnergyInterfaceTile) te;
+						if (trMachine.canProvideEnergy(dir.getOpposite()) && trMachine.getEnergy() > 0) {
+							double amount = min(this.getMaxInput(), trMachine.getMaxOutput(), trMachine.getEnergy(), -1 * delta);
 							this.addEnergy(trMachine.useEnergy(amount));
 						}
 					}
 				}
-			} else if (delta > 0){
-				if(sub < sides.length){
+			} else if (delta > 0) {
+				if (sub < sides.length) {
 					EnumFacing dir = sides[sub];
 					TileEntity te = w.getTileEntity(getPos().offset(dir));
-					if(te instanceof reborncore.api.power.IEnergyInterfaceTile){
-						reborncore.api.power.IEnergyInterfaceTile trMachine = (reborncore.api.power.IEnergyInterfaceTile)te;
-						if(trMachine.canAcceptEnergy(dir.getOpposite()) && trMachine.getEnergy() < trMachine.getMaxPower()){
-							double amount = min(trMachine.getMaxInput(), this.getMaxOutput(), trMachine.getMaxPower() - trMachine.getEnergy(),delta);
+					if (te instanceof reborncore.api.power.IEnergyInterfaceTile) {
+						reborncore.api.power.IEnergyInterfaceTile trMachine = (reborncore.api.power.IEnergyInterfaceTile) te;
+						if (trMachine.canAcceptEnergy(dir.getOpposite()) && trMachine.getEnergy() < trMachine.getMaxPower()) {
+							double amount = min(trMachine.getMaxInput(), this.getMaxOutput(), trMachine.getMaxPower() - trMachine.getEnergy(), delta);
 							trMachine.addEnergy(this.useEnergy(amount));
 						}
 					}
@@ -98,27 +98,28 @@ public abstract class TileEntityTRConverter extends TileEntityConverter implemen
 	 */
 	@Override
 	public boolean canConvertEnergy(ConduitType type) {
-		return  ConduitType.areSameType(powerAdvantageType,type);
+		return ConduitType.areSameType(powerAdvantageType, type);
 	}
 
 	@Override
 	public float addEnergyToOther(float amount, ConduitType type) {
-		if(canConvertEnergy(type)){
-			int delta = (int)Math.min(this.getOtherEnergyCapacity() - getOtherEnergy(),
-					this.convertEnergyToOther( amount,type));
+		if (canConvertEnergy(type)) {
+			int delta = (int) Math.min(this.getOtherEnergyCapacity() - getOtherEnergy(),
+					this.convertEnergyToOther(amount, type));
 			euBuffer += delta;
-			return convertOtherToEnergy(delta,type);
+			return convertOtherToEnergy(delta, type);
 		} else {
 			return 0;
 		}
 	}
+
 	@Override
 	public float subtractEnergyFromOther(float amount, ConduitType type) {
-		if(canConvertEnergy(type)){
-			int delta = -1 * (int)Math.min(getOtherEnergy(),
-					this.convertEnergyToOther( amount,type));
+		if (canConvertEnergy(type)) {
+			int delta = -1 * (int) Math.min(getOtherEnergy(),
+					this.convertEnergyToOther(amount, type));
 			euBuffer += delta;
-			return convertOtherToEnergy(delta,type);
+			return convertOtherToEnergy(delta, type);
 		} else {
 			return 0;
 		}
@@ -133,7 +134,7 @@ public abstract class TileEntityTRConverter extends TileEntityConverter implemen
 	 */
 	@Override
 	public float convertOtherToEnergy(double amountOfOther, ConduitType type) {
-		return (float)(amountOfOther / PowerAdvantage.trConversionTable.get(powerAdvantageType));
+		return (float) (amountOfOther / PowerAdvantage.trConversionTable.get(powerAdvantageType));
 	}
 
 	/**
@@ -148,17 +149,18 @@ public abstract class TileEntityTRConverter extends TileEntityConverter implemen
 		return amountOfEnergy * PowerAdvantage.trConversionTable.get(powerAdvantageType);
 	}
 
-	private static double min(double... vals){
+	private static double min(double... vals) {
 		double n = Double.POSITIVE_INFINITY;
-		for (int i = 0; i < vals.length; i++){
-			if(vals[i] < n) n = vals[i];
+		for (int i = 0; i < vals.length; i++) {
+			if (vals[i] < n) n = vals[i];
 		}
 		return n;
 	}
-	private static double max(double... vals){
+
+	private static double max(double... vals) {
 		double n = Double.NEGATIVE_INFINITY;
-		for (int i = 0; i < vals.length; i++){
-			if(vals[i] > n) n = vals[i];
+		for (int i = 0; i < vals.length; i++) {
+			if (vals[i] > n) n = vals[i];
 		}
 		return n;
 	}
@@ -185,13 +187,13 @@ public abstract class TileEntityTRConverter extends TileEntityConverter implemen
 
 	@Override
 	public double addEnergy(double v) {
-		return addEnergy(v,false);
+		return addEnergy(v, false);
 	}
 
 	@Override
 	public double addEnergy(double v, boolean b) {
-		double delta = Math.min(euBufferMax - euBuffer,v);
-		if(!b) euBuffer += delta;
+		double delta = Math.min(euBufferMax - euBuffer, v);
+		if (!b) euBuffer += delta;
 		return delta;
 	}
 
@@ -207,8 +209,8 @@ public abstract class TileEntityTRConverter extends TileEntityConverter implemen
 
 	@Override
 	public double useEnergy(double v, boolean b) {
-		double delta = Math.min(euBuffer,v);
-		if(!b) euBuffer -= delta;
+		double delta = Math.min(euBuffer, v);
+		if (!b) euBuffer -= delta;
 		return delta;
 	}
 

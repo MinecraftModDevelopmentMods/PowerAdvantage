@@ -29,35 +29,32 @@ public class MetalTankBlock extends BlockSimpleFluidMachine {
 	@Override
 	public int getComparatorInputOverride(IBlockState bs, World world, BlockPos coord) {
 		TileEntity te = world.getTileEntity(coord);
-		if(te != null && te instanceof MetalTankTileEntity){
-			return ((MetalTankTileEntity)te).getRedstoneOutput();
+		if (te != null && te instanceof MetalTankTileEntity) {
+			return ((MetalTankTileEntity) te).getRedstoneOutput();
 		}
 		return 0;
 	}
-	
+
 	/**
 	 * Determines whether this block/entity should receive energy
+	 *
 	 * @param powerType Type of power
 	 * @return true if this block/entity should receive energy
 	 */
 	@Override
-	public boolean isPowerSink(ConduitType powerType){
+	public boolean isPowerSink(ConduitType powerType) {
 		return true;
 	}
+
 	/**
 	 * Determines whether this block/entity can provide energy
+	 *
 	 * @param powerType Type of power
 	 * @return true if this block/entity can provide energy
 	 */
 	@Override
-	public boolean isPowerSource(ConduitType powerType){
+	public boolean isPowerSource(ConduitType powerType) {
 		return true;
 	}
-
-	
-
-
-	
-	
 
 }

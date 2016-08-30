@@ -39,13 +39,11 @@ public class BlockFrame extends Block {
 	public boolean canSilkHarvest(World world, BlockPos pos, IBlockState state, EntityPlayer player) {
 		return true;
 	}
-	
 
 
 	@Override
 	public boolean isOpaqueCube(IBlockState bs) {
 		return false;
 	}
-
 
 }

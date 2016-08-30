@@ -336,7 +336,7 @@ public class PowerAdvantage
 			try{
 				Number d;
 				if(val.contains(".")){
-					d = new Double(Double.parseDouble(val));
+					d = Double.parseDouble(val);
 				} else {
 					d = Long.parseLong(val);
 				}
@@ -358,7 +358,7 @@ public class PowerAdvantage
 			try{
 				Number d;
 				if(val.contains(".")){
-					d = new Double(Double.parseDouble(val));
+					d = Double.parseDouble(val);
 				} else {
 					d = Long.parseLong(val);
 				}
@@ -518,7 +518,7 @@ public class PowerAdvantage
 		Map<String,Set<Block>> modBlocks = sortBlocksByModID();
 		
 		// hacking
-		//printHackingInfo(); // XXX: hacker stuff
+		// printHackingInfo(); // XXX: hacker stuff
 		if(event.getSide() == Side.CLIENT){
 			clientPostInit(event);
 		}
@@ -693,15 +693,11 @@ public class PowerAdvantage
 	}
 
 	public static String superDump(Object o) throws IllegalAccessException {
-		Class c = o.getClass();
-		StringBuilder sb = new StringBuilder();
-		sb.append(c.getCanonicalName()).append(" ")
-				.append(String.valueOf(o))
-				.append(" {");
-		sb.append("\n\t").append( superDump(o, c));
-
-		sb.append("}");
-		return sb.toString();
+		return o.getClass().getCanonicalName() + " " +
+				String.valueOf(o) +
+				" {" +
+				"\n\t" + superDump(o, o.getClass()) +
+				"}";
 	}
 	public static String superDump(Object o, Class c) throws IllegalAccessException {
 		StringBuilder sb = new StringBuilder();

@@ -39,62 +39,65 @@ public class StorageTankBlock extends BlockSimpleFluidMachine {
 	@Override
 	public int getComparatorInputOverride(IBlockState bs, World world, BlockPos coord) {
 		TileEntity te = world.getTileEntity(coord);
-		if(te != null && te instanceof StorageTankTileEntity){
-			return ((StorageTankTileEntity)te).getRedstoneOutput();
+		if (te != null && te instanceof StorageTankTileEntity) {
+			return ((StorageTankTileEntity) te).getRedstoneOutput();
 		}
 		return 0;
 	}
-	
+
 	/**
 	 * Determines whether this block/entity should receive energy
+	 *
 	 * @param powerType Type of power
 	 * @return true if this block/entity should receive energy
 	 */
 	@Override
-	public boolean isPowerSink(ConduitType powerType){
+	public boolean isPowerSink(ConduitType powerType) {
 		return true;
 	}
+
 	/**
 	 * Determines whether this block/entity can provide energy
+	 *
 	 * @param powerType Type of power
 	 * @return true if this block/entity can provide energy
 	 */
 	@Override
-	public boolean isPowerSource(ConduitType powerType){
+	public boolean isPowerSource(ConduitType powerType) {
 		return true;
 	}
 
 	public void onBlockPlacedBy(final World world, final BlockPos coord, final IBlockState bs, final EntityLivingBase player, final ItemStack item) {
 		super.onBlockPlacedBy(world, coord, bs, player, item);
-		if( item.hasTagCompound() && item.getTagCompound().hasKey("FluidID") && item.getTagCompound().hasKey("Volume")){
-			StorageTankTileEntity st = (StorageTankTileEntity)world.getTileEntity(coord);
-			FluidStack fs = new FluidStack(FluidRegistry.getFluid(item.getTagCompound().getString("FluidID")),item.getTagCompound().getInteger("Volume"));
+		if (item.hasTagCompound() && item.getTagCompound().hasKey("FluidID") && item.getTagCompound().hasKey("Volume")) {
+			StorageTankTileEntity st = (StorageTankTileEntity) world.getTileEntity(coord);
+			FluidStack fs = new FluidStack(FluidRegistry.getFluid(item.getTagCompound().getString("FluidID")), item.getTagCompound().getInteger("Volume"));
 			st.getTank().setFluid(fs);
 		}
-    }
-	
-
-    @Override
-	public void harvestBlock(World w, EntityPlayer player, BlockPos pos, IBlockState bs, TileEntity te, ItemStack stack){
-		doItemDrop(w,pos,te);
 	}
 
-    private void doItemDrop(final World world, final BlockPos coord, TileEntity te ) {
-        if (!world.isRemote && !world.restoringBlockSnapshots) {
-			if(te instanceof StorageTankTileEntity){
-        		ItemStack item = createItem((StorageTankTileEntity)te);
-        		spawnAsEntity(world, coord, item);
-        	} else {
-        		ItemStack item = new ItemStack(this,1);
-        		spawnAsEntity(world, coord, item);
-        	}
-        }
-    }
 
-    
-    public ItemStack createItem(StorageTankTileEntity te){
-		ItemStack item = new ItemStack(this,1);
-		if(te.getTank().getFluidAmount() > 0){
+	@Override
+	public void harvestBlock(World w, EntityPlayer player, BlockPos pos, IBlockState bs, TileEntity te, ItemStack stack) {
+		doItemDrop(w, pos, te);
+	}
+
+	private void doItemDrop(final World world, final BlockPos coord, TileEntity te) {
+		if (!world.isRemote && !world.restoringBlockSnapshots) {
+			if (te instanceof StorageTankTileEntity) {
+				ItemStack item = createItem((StorageTankTileEntity) te);
+				spawnAsEntity(world, coord, item);
+			} else {
+				ItemStack item = new ItemStack(this, 1);
+				spawnAsEntity(world, coord, item);
+			}
+		}
+	}
+
+
+	public ItemStack createItem(StorageTankTileEntity te) {
+		ItemStack item = new ItemStack(this, 1);
+		if (te.getTank().getFluidAmount() > 0) {
 			NBTTagCompound dataTag = new NBTTagCompound();
 			dataTag.setString("FluidID", te.getTank().getFluid().getFluid().getName());
 			dataTag.setInteger("Volume", te.getTank().getFluidAmount());
@@ -105,44 +108,40 @@ public class StorageTankBlock extends BlockSimpleFluidMachine {
 	}
 
 
-	
-	public void displayInformation(ItemStack stack){
+	public void displayInformation(ItemStack stack) {
 		String message;
 		NBTTagCompound dataTag;
-		if(!stack.hasTagCompound()){
+		if (!stack.hasTagCompound()) {
 			dataTag = new NBTTagCompound();
 		} else {
 			dataTag = stack.getTagCompound();
 		}
-		if(dataTag.hasKey("Volume") && dataTag.hasKey("FluidID")){
-			float buckets = (float)dataTag.getInteger("Volume") / (float)FluidContainerRegistry.BUCKET_VOLUME;
+		if (dataTag.hasKey("Volume") && dataTag.hasKey("FluidID")) {
+			float buckets = (float) dataTag.getInteger("Volume") / (float) FluidContainerRegistry.BUCKET_VOLUME;
 			message = (I18n.translateToLocal("tooltip.poweradvantage.buckets_of")
 					.replace("%x", String.valueOf(buckets))
-					.replace("%y",FluidRegistry.getFluid(dataTag.getString("FluidID")).getName()));
+					.replace("%y", FluidRegistry.getFluid(dataTag.getString("FluidID")).getName()));
 		} else {
 			message = (I18n.translateToLocal("tooltip.poweradvantage.empty"));
 		}
-		
+
 		NBTTagCompound displayTag;
-		if(dataTag.hasKey("display")){
+		if (dataTag.hasKey("display")) {
 			displayTag = dataTag.getCompoundTag("display");
 		} else {
 			displayTag = new NBTTagCompound();
 			dataTag.setTag("display", displayTag);
 		}
 		NBTTagList loreTag;
-		if(dataTag.hasKey("Lore")){
-			loreTag = displayTag.getTagList("Lore",8);
+		if (dataTag.hasKey("Lore")) {
+			loreTag = displayTag.getTagList("Lore", 8);
 		} else {
 			loreTag = new NBTTagList();
 			displayTag.setTag("Lore", loreTag);
 		}
 		loreTag.appendTag(new NBTTagString(message));
-		if(!stack.hasTagCompound()){
+		if (!stack.hasTagCompound()) {
 			stack.setTagCompound(new NBTTagCompound());
 		}
 	}
-	
-
-
 }

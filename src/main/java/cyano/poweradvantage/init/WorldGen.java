@@ -3,16 +3,17 @@ package cyano.poweradvantage.init;
 public abstract class WorldGen {
 
 	private static boolean initDone = false;
-	public static void init(){
-		if(initDone)return;
+
+	public static void init() {
+		if (initDone) return;
 		Items.init();
 		Blocks.init();
-		
-		
+
+
 		initDone = true;
 	}
-	
-	
+
+
 	public static final String ORESPAWN_FILE_CONTENTS = "{\n"
 			+ "	\"dimensions\":[\n"
 			+ "		{\n"

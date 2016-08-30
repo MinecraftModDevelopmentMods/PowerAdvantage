@@ -285,7 +285,7 @@ guiContainer.drawTexturedModalRect(x+79, y+35, 0, 0, arrowLength, 17); // x, y, 
 	 * This class is a simple data structure used for passing all knowable parameters to the constructor of a custom
 	 * inventory slot
 	 */
-	public static class SlotContext{
+	public static class SlotContext {
 		public final InventoryPlayer playerInventory;
 		public final IInventory machineInventory;
 		public final int slotIndex;
@@ -294,23 +294,25 @@ guiContainer.drawTexturedModalRect(x+79, y+35, 0, 0, arrowLength, 17); // x, y, 
 
 		/**
 		 * Creates a slot context object for use in making custom inventory slots
-		 * @param playerInventory player's inventory
+		 *
+		 * @param playerInventory  player's inventory
 		 * @param machineInventory inventory (of the machine) that the player is interacting with
-		 * @param slotIndex index of slot in inventory of the machine
-		 * @param screenPositionX coordinate position on screen
-		 * @param screenPositionY coordinate position on screen
+		 * @param slotIndex        index of slot in inventory of the machine
+		 * @param screenPositionX  coordinate position on screen
+		 * @param screenPositionY  coordinate position on screen
 		 */
 		public SlotContext(
-				 final InventoryPlayer playerInventory,
-				 final IInventory machineInventory,
-				 final int slotIndex,
-				 final int screenPositionX,
-				 final int screenPositionY){
-			this. playerInventory=playerInventory;
-			this. machineInventory=machineInventory;
-			this. slotIndex=slotIndex;
-			this. screenPositionX=screenPositionX;
-			this. screenPositionY=screenPositionY;
+				final InventoryPlayer playerInventory,
+				final IInventory machineInventory,
+				final int slotIndex,
+				final int screenPositionX,
+				final int screenPositionY
+		) {
+			this.playerInventory = playerInventory;
+			this.machineInventory = machineInventory;
+			this.slotIndex = slotIndex;
+			this.screenPositionX = screenPositionX;
+			this.screenPositionY = screenPositionY;
 		}
 
 	}

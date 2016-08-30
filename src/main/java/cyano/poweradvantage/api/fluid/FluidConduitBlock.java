@@ -21,10 +21,11 @@ import net.minecraft.block.material.Material;
  * @author DrCyano
  *
  */
-public abstract class FluidConduitBlock extends ConduitBlock{
+public abstract class FluidConduitBlock extends ConduitBlock {
 
 	/**
 	 * Block constructor
+	 *
 	 * @param mat Block material, typically Material.iron
 	 */
 	protected FluidConduitBlock(Material mat) {
@@ -45,14 +46,15 @@ public abstract class FluidConduitBlock extends ConduitBlock{
 
 
 	private final ConduitType[] typeArray = {Fluids.fluidConduit_general};
+
 	/**
 	 * Fluid conduits return <code>Fluids.fluidConduit_general</code> as their type.
+	 *
 	 * @return returns <code>Fluids.fluidConduit_general</code>
 	 */
 	@Override
 	public ConduitType[] getTypes() {
 		return typeArray;
 	}
-
 
 }

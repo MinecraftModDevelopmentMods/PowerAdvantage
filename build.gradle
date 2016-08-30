@@ -31,14 +31,20 @@ minecraft {
     mappings = "snapshot_20160820"
 }
 
+repositories {
+    maven {
+        name "Dankhax"
+        url "http://maven.epoxide.xyz"
+    }
+}
 dependencies {
 	compile files(
 			'libs/CodeChickenCore-1.8-1.0.5.36-dev.jar',
 			'libs/NotEnoughItems-1.8-1.0.5.104-dev.jar',
-			'libs/BaseMetals_1.9.4-API-2.3.1.5.jar',
 			'libs/RF-API.jar',
 			'libs/RebornCore-1.9-API.jar'
     )
+    compile "net.darkhax.tesla:Tesla:1.10.2-1.2.1.44"
 }
 
 processResources {

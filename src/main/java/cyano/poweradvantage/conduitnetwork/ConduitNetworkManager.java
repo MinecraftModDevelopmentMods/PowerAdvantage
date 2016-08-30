@@ -19,168 +19,188 @@ import java.util.concurrent.locks.ReadWriteLock;
  *
  */
 public class ConduitNetworkManager {
-	
-	private final Map<BlockPos4D,List<BlockPos4D>> networkCache; // Note that calling Map.values() will return duplicate references (store result in a Set<> to remove duplicates)
+
+	private final Map<BlockPos4D, List<BlockPos4D>> networkCache; // Note that calling Map.values() will return duplicate references (store result in a Set<> to remove duplicates)
 	private final ReadWriteLock lock = new java.util.concurrent.locks.ReentrantReadWriteLock();
 	private final ConduitType type;
+
 	/**
 	 * Constructs a new network cache manager for a given energy type
+	 *
 	 * @param type The energy type in question
 	 */
-	public ConduitNetworkManager(ConduitType type){
+	public ConduitNetworkManager(ConduitType type) {
 		this.type = type;
 		this.networkCache = new HashMap<>();
 	}
-	
-	
+
+
 	/**
 	 * Removes a network from the cache by its object reference
+	 *
 	 * @param net A cached network you with to remove from the cache
 	 */
-	protected void removeNetwork(List<BlockPos4D> net){
+	protected void removeNetwork(List<BlockPos4D> net) {
 		lock.writeLock().lock();
-		try{
-			for(BlockPos4D n : net){
+		try {
+			for (BlockPos4D n : net) {
 				networkCache.remove(n);
 			}
 			net.clear();
-		}finally{
+		} finally {
 			lock.writeLock().unlock();
 		}
 	}
+
 	/**
-	 * Adds a block to the same network as a previous block, creating a new network for the first 
+	 * Adds a block to the same network as a previous block, creating a new network for the first
 	 * block if necessary
-	 * @param netBlock A block that should already be part of a network (if not, that's okay, a new 
-	 * one will be made for it)
+	 *
+	 * @param netBlock A block that should already be part of a network (if not, that's okay, a new
+	 *                 one will be made for it)
 	 * @param newBlock A block you want to add to the same network as <code>netBlock</code>
 	 */
-	protected void addBlockToNetwork(BlockPos4D netBlock, BlockPos4D newBlock){
+	protected void addBlockToNetwork(BlockPos4D netBlock, BlockPos4D newBlock) {
 		lock.writeLock().lock();
-		try{
+		try {
 			List<BlockPos4D> net = networkCache.get(netBlock);
-			if(net == null){
+			if (net == null) {
 				net = createNewNetwork(netBlock);
 			}
 			net.add(newBlock);
 			networkCache.put(newBlock, net);
-		}finally{
+		} finally {
 			lock.writeLock().unlock();
 		}
-	} 
+	}
+
 	/**
 	 * Creates a new network for a block
+	 *
 	 * @param netBlock Block that needs a new network
 	 * @return The new cached network for that block
 	 */
-	protected List<BlockPos4D> createNewNetwork(BlockPos4D netBlock){
+	protected List<BlockPos4D> createNewNetwork(BlockPos4D netBlock) {
 		lock.writeLock().lock();
-		try{
+		try {
 			List<BlockPos4D> net = new ArrayList<>();
 			net.add(netBlock);
 			networkCache.put(netBlock, net);
 			return net;
-		}finally{
+		} finally {
 			lock.writeLock().unlock();
 		}
-	} 
+	}
+
 	/**
-	 * finds the cached network for a block and deletes it (and removes references for all the 
+	 * finds the cached network for a block and deletes it (and removes references for all the
 	 * blocks on that network).
+	 *
 	 * @param coord The block coordinate to invalidate
 	 */
-	public void invalidate(BlockPos4D coord){
+	public void invalidate(BlockPos4D coord) {
 		lock.writeLock().lock();
-		try{
+		try {
 			List<BlockPos4D> net = networkCache.get(coord);
-			if(net == null) return;
+			if (net == null) return;
 			removeNetwork(net);
-		}finally{
+		} finally {
 			lock.writeLock().unlock();
 		}
 	}
+
 	/**
-	 * Invalidates the cached network at a block location and then rescans the world to make a new 
+	 * Invalidates the cached network at a block location and then rescans the world to make a new
 	 * cached network
+	 *
 	 * @param coord The block position that needs revalidating
-	 * @param w The world instance for the same dimension as the coord
-	 * @param type The energy type that is triggering the revalidation (should be the same type as 
-	 * this manager)
+	 * @param w     The world instance for the same dimension as the coord
+	 * @param type  The energy type that is triggering the revalidation (should be the same type as
+	 *              this manager)
 	 */
-	public void revalidate(BlockPos4D coord, World w, ConduitType type){
+	public void revalidate(BlockPos4D coord, World w, ConduitType type) {
 		lock.writeLock().lock();
-		try{
+		try {
 			invalidate(coord);
-			recursiveScan(w,coord,w.getBlockState(coord.pos),type);
-		}finally{
+			recursiveScan(w, coord, w.getBlockState(coord.pos), type);
+		} finally {
 			lock.writeLock().unlock();
 		}
 	}
+
 	/**
 	 * Checks if to blocks are in the same cached network
+	 *
 	 * @param a A block position
 	 * @param b Another block position
 	 * @return True if both are connected in a cached network, false otherwise
 	 */
-	public boolean areInSameNetwork(BlockPos4D a, BlockPos4D b){
+	public boolean areInSameNetwork(BlockPos4D a, BlockPos4D b) {
 		lock.readLock().lock();
-		try{
-			return networkCache.containsKey(a) 
+		try {
+			return networkCache.containsKey(a)
 					&& networkCache.containsKey(b)
 					&& networkCache.get(a) == networkCache.get(b);
-		}finally{
+		} finally {
 			lock.readLock().unlock();
 		}
 	}
+
 	/**
 	 * scans the world to make a new cached network
-	 * @param w The world instance for the same dimension as the coord
+	 *
+	 * @param w     The world instance for the same dimension as the coord
 	 * @param coord The block position to start scanning from
-	 * @param src The block from which we are scanning
-	 * @param type The type of energy that will flow throught the scanned network
+	 * @param src   The block from which we are scanning
+	 * @param type  The type of energy that will flow throught the scanned network
 	 */
-	protected void recursiveScan(World w, BlockPos4D coord, IBlockState src, ConduitType type){
-		for(int i = 0; i < EnumFacing.values().length; i++){
+	protected void recursiveScan(World w, BlockPos4D coord, IBlockState src, ConduitType type) {
+		for (int i = 0; i < EnumFacing.values().length; i++) {
 			EnumFacing face = EnumFacing.values()[i];
 			BlockPos4D n = coord.offset(face);
-			if(areInSameNetwork(coord,n)) {continue;}
+			if (areInSameNetwork(coord, n)) {
+				continue;
+			}
 			IBlockState blockstate = w.getBlockState(n.pos);
 			Block block = blockstate.getBlock();
-			PowerConnectorContext connection = new PowerConnectorContext(type,w,src, coord.pos, face, blockstate, n.pos, face.getOpposite());
-			if(PowerHelper.areConnectable(connection)){
+			PowerConnectorContext connection = new PowerConnectorContext(type, w, src, coord.pos, face, blockstate, n.pos, face.getOpposite());
+			if (PowerHelper.areConnectable(connection)) {
 				addBlockToNetwork(coord, n);
-				recursiveScan(w,n,blockstate,type);
+				recursiveScan(w, n, blockstate, type);
 			}
 		}
 	}
+
 	/**
 	 * Checks if a given block is part of a cached network
+	 *
 	 * @param coord The block position to check
 	 * @return true if this block is in a cached network, false otherwise
 	 */
-	public boolean isValidatedNetwork(BlockPos4D coord){
+	public boolean isValidatedNetwork(BlockPos4D coord) {
 		lock.readLock().lock();
-		try{
+		try {
 			return networkCache.get(coord) != null;
-		}finally{
+		} finally {
 			lock.readLock().unlock();
 		}
 	}
-	
+
 	/**
-	 * Gets all of the blocks in a cached network as a read-only list 
+	 * Gets all of the blocks in a cached network as a read-only list
+	 *
 	 * @param coord One block in the network
 	 * @return All blocks in the same network as the given coord
 	 */
-	public List<BlockPos4D> getNetwork(BlockPos4D coord){
+	public List<BlockPos4D> getNetwork(BlockPos4D coord) {
 		lock.readLock().lock();
-		try{
-			if(networkCache.containsKey(coord)){
+		try {
+			if (networkCache.containsKey(coord)) {
 				return Collections.unmodifiableList(networkCache.get(coord));
 			} else {
 				return Collections.EMPTY_LIST;
 			}
-		}finally{
+		} finally {
 			lock.readLock().unlock();
 		}
 	}

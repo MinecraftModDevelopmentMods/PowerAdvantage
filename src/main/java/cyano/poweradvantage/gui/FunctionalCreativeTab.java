@@ -13,31 +13,35 @@ import java.util.List;
  *
  */
 public class FunctionalCreativeTab  extends CreativeTabs {
-	
+
 	private final java.util.function.Supplier<Item> itemSupplier;
 	private final java.util.Comparator<ItemStack> itemSortingAlgorithm;
 	private final boolean searchEnabled;
+
 	/**
 	 * Constructor
-	 * @param unlocalizedName Name for translation
-	 * @param itemSupplier Function that provides the item used for the icon
+	 *
+	 * @param unlocalizedName      Name for translation
+	 * @param itemSupplier         Function that provides the item used for the icon
 	 * @param itemSortingAlgorithm Algorithm for sorting the items (Comparable interface implementation)
-	 * @param searchBar If true, there will be a search bar above th item gallery
+	 * @param searchBar            If true, there will be a search bar above th item gallery
 	 */
-	public FunctionalCreativeTab( String unlocalizedName,
+	public FunctionalCreativeTab(
+			String unlocalizedName,
 			final java.util.function.Supplier<Item> itemSupplier,
-			final java.util.function.BiFunction<ItemStack,ItemStack,Integer> itemSortingAlgorithm,
-			boolean searchBar) {
+			final java.util.function.BiFunction<ItemStack, ItemStack, Integer> itemSortingAlgorithm,
+			boolean searchBar
+	) {
 		super(unlocalizedName);
 		this.itemSupplier = itemSupplier;
-		this.itemSortingAlgorithm = new java.util.Comparator<ItemStack>(){
+		this.itemSortingAlgorithm = new java.util.Comparator<ItemStack>() {
 			@Override
 			public int compare(ItemStack o1, ItemStack o2) {
 				return itemSortingAlgorithm.apply(o1, o2);
 			}
 		};
 		this.searchEnabled = searchBar;
-		if(this.searchEnabled)setBackgroundImageName("item_search.png");
+		if (this.searchEnabled) setBackgroundImageName("item_search.png");
 	}
 
 
@@ -50,21 +54,21 @@ public class FunctionalCreativeTab  extends CreativeTabs {
 	public boolean hasSearchBar() {
 		return this.searchEnabled;
 	}
-	
+
 
 	/**
 	 * only shows items which have tabToDisplayOn == this
-	 * @param itemList  All the items in the tab so you can sort them
+	 *
+	 * @param itemList All the items in the tab so you can sort them
 	 */
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void displayAllRelevantItems(List<ItemStack> itemList)
-	{
+	public void displayAllRelevantItems(List<ItemStack> itemList) {
 		super.displayAllRelevantItems(itemList);
 		itemList.sort(itemSortingAlgorithm);
 	}
 
-	
+
 	/**
 	 * Gets the item used in the tab icon
 	 */

@@ -710,6 +710,4 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 		}
 		return slotAccessCache;
 	}
-
-	
 }

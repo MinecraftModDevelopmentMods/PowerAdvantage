@@ -272,5 +272,5 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
 		}
 		super.breakBlock(world, pos, state);
 	}
-	
+
 }

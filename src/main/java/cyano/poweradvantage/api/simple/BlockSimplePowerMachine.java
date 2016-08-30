@@ -293,5 +293,4 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
 	@Override
 	public abstract boolean isPowerSource(ConduitType powerType) ;
 
-    
 }

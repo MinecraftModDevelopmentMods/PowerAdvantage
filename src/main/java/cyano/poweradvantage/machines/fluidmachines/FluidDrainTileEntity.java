@@ -19,117 +19,113 @@ import net.minecraftforge.fluids.*;
 public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 
 	public FluidDrainTileEntity() {
-		super( FluidContainerRegistry.BUCKET_VOLUME, FluidDrainTileEntity.class.getName());
+		super(FluidContainerRegistry.BUCKET_VOLUME, FluidDrainTileEntity.class.getName());
 	}
 
-	
-	
-	
-	
+
 	///// Logic and implementation /////
-	
-	
+
+
 	@Override
-	public void powerUpdate(){
+	public void powerUpdate() {
 		// send fluid into pipes
-		
+
 		FluidTank tank = getTank();
-		if(tank.getFluidAmount() > 0) tryPushFluid(this.pos.down(), EnumFacing.UP);
+		if (tank.getFluidAmount() > 0) tryPushFluid(this.pos.down(), EnumFacing.UP);
 //		if(tank.getFluidAmount() > 0) tryPushFluid(this.pos.north(), EnumFacing.SOUTH);
 //		if(tank.getFluidAmount() > 0) tryPushFluid(this.pos.east(), EnumFacing.WEST);
 //		if(tank.getFluidAmount() > 0) tryPushFluid(this.pos.south(), EnumFacing.NORTH);
 //		if(tank.getFluidAmount() > 0) tryPushFluid(this.pos.west(), EnumFacing.EAST);
-		fluidScan:{
+		fluidScan:
+		{
 			// pull fluid from above
-			final EnumFacing[] cardinals = {EnumFacing.UP,EnumFacing.NORTH,EnumFacing.EAST,EnumFacing.SOUTH,EnumFacing.WEST,EnumFacing.DOWN};
-			for(int k = 0; k < cardinals.length; k++){
+			final EnumFacing[] cardinals = {EnumFacing.UP, EnumFacing.NORTH, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.DOWN};
+			for (int k = 0; k < cardinals.length; k++) {
 				BlockPos space = this.pos.offset(cardinals[k]);
 				// from fluid container
-				if(getWorld().getBlockState(space).getBlock() instanceof ITileEntityProvider && getWorld().getTileEntity(space) instanceof IFluidHandler){
+				if (getWorld().getBlockState(space).getBlock() instanceof ITileEntityProvider && getWorld().getTileEntity(space) instanceof IFluidHandler) {
 					IFluidHandler other = (IFluidHandler) getWorld().getTileEntity(space);
 					FluidTankInfo[] tanks = other.getTankInfo(cardinals[k].getOpposite());
-					for(int i = 0; i < tanks.length; i++){
+					for (int i = 0; i < tanks.length; i++) {
 						FluidTankInfo t = tanks[i];
-						if((t.fluid == null) || (tank.getFluidAmount() > 0 && tank.getFluid().getFluid() != t.fluid.getFluid())){
+						if ((t.fluid == null) || (tank.getFluidAmount() > 0 && tank.getFluid().getFluid() != t.fluid.getFluid())) {
 							continue;
 						}
-						if(other.canDrain(cardinals[k].getOpposite(), t.fluid.getFluid())){
+						if (other.canDrain(cardinals[k].getOpposite(), t.fluid.getFluid())) {
 							FluidStack fluid = other.drain(cardinals[k].getOpposite(), tank.getCapacity() - tank.getFluidAmount(), true);
-							tank.fill(fluid,true);
+							tank.fill(fluid, true);
 							break fluidScan;
 						}
 					}
-				} 
+				}
 			}
 			// from fluid source block
 			BlockPos space = this.pos.up();
-			if(tank.getFluidAmount() <= 0){
+			if (tank.getFluidAmount() <= 0) {
 				IBlockState bs = getWorld().getBlockState(space);
 				Block block = bs.getBlock();
-				if(block instanceof BlockLiquid || block instanceof IFluidBlock){
+				if (block instanceof BlockLiquid || block instanceof IFluidBlock) {
 					Fluid fluid = null;
-					if(block == Blocks.WATER || block == Blocks.FLOWING_WATER){
+					if (block == Blocks.WATER || block == Blocks.FLOWING_WATER) {
 						// Minecraft fluid
 						fluid = FluidRegistry.WATER;
-					} else if(block == Blocks.LAVA || block == Blocks.FLOWING_LAVA){
+					} else if (block == Blocks.LAVA || block == Blocks.FLOWING_LAVA) {
 						// Minecraft fluid
 						fluid = FluidRegistry.LAVA;
-					} else if(block instanceof IFluidBlock){
-						fluid = ((IFluidBlock)block).getFluid();
-					}else {
+					} else if (block instanceof IFluidBlock) {
+						fluid = ((IFluidBlock) block).getFluid();
+					} else {
 						// Minecraft fluid?
 						fluid = FluidRegistry.lookupFluidForBlock(block);
 					}
 
-					if(fluid != null){
-						BlockPos srcPos = scanFluidSpaceForSourceBlock(getWorld(),space,fluid,32);
-						if(srcPos != null) {
+					if (fluid != null) {
+						BlockPos srcPos = scanFluidSpaceForSourceBlock(getWorld(), space, fluid, 32);
+						if (srcPos != null) {
 							// found source block
 							tank.fill(new FluidStack(fluid, FluidContainerRegistry.BUCKET_VOLUME), true);
 							getWorld().setBlockToAir(srcPos);
 							break fluidScan;
 						}
 					}
-	
+
 				}
 			}
 		}
 		super.powerUpdate();
 	}
 
-	
-	private void tryPushFluid(BlockPos coord, EnumFacing otherFace){
-		if(this.getTank().getFluidAmount() <= 0) return; // no fluid to push
+
+	private void tryPushFluid(BlockPos coord, EnumFacing otherFace) {
+		if (this.getTank().getFluidAmount() <= 0) return; // no fluid to push
 		TileEntity e = getWorld().getTileEntity(coord);
-		if(e instanceof IFluidHandler){
-			IFluidHandler fh = (IFluidHandler)e;
-			if(fh.canFill(otherFace, getTank().getFluid().getFluid())){
+		if (e instanceof IFluidHandler) {
+			IFluidHandler fh = (IFluidHandler) e;
+			if (fh.canFill(otherFace, getTank().getFluid().getFluid())) {
 				getTank().drain(fh.fill(otherFace, getTank().getFluid(), true), true);
 				this.sync();
 			}
 		}
 	}
-	
-	
-	
-	
-	public FluidStack getFluid(){
-		if(getTank().getFluidAmount() <= 0) return null;
+
+
+	public FluidStack getFluid() {
+		if (getTank().getFluidAmount() <= 0) return null;
 		return getTank().getFluid();
 	}
-	
-	public int getFluidCapacity(){
+
+	public int getFluidCapacity() {
 		return getTank().getCapacity();
 	}
-	
+
 	///// Synchronization /////
-	@Override public void readFromNBT(NBTTagCompound root)
-	{
+	@Override
+	public void readFromNBT(NBTTagCompound root) {
 		super.readFromNBT(root);
 	}
-	
-	@Override public NBTTagCompound writeToNBT(NBTTagCompound root)
-	{
+
+	@Override
+	public NBTTagCompound writeToNBT(NBTTagCompound root) {
 		return super.writeToNBT(root);
 	}
 
@@ -147,22 +143,20 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 
 
 	///// Boiler Plate /////
-	
+
 	private String customName = null;
-	
+
 
 	@Override
 	protected ItemStack[] getInventory() {
 		return new ItemStack[0];
 	}
-	
-	
+
+
 	@Override
 	public void tickUpdate(boolean isServerWorld) {
 		// do nothing
 	}
-
-
 
 
 	public int getRedstoneOutput() {
@@ -217,25 +211,25 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 	}
 
 
-	public static BlockPos scanFluidSpaceForSourceBlock(World w, BlockPos initial, Fluid fluid, int range){
-		final EnumFacing[] dirs = {EnumFacing.UP,EnumFacing.NORTH,EnumFacing.WEST,EnumFacing.SOUTH,EnumFacing.EAST};
+	public static BlockPos scanFluidSpaceForSourceBlock(World w, BlockPos initial, Fluid fluid, int range) {
+		final EnumFacing[] dirs = {EnumFacing.UP, EnumFacing.NORTH, EnumFacing.WEST, EnumFacing.SOUTH, EnumFacing.EAST};
 		BlockPos pos = initial;
 		final BlockPos[] next = new BlockPos[5];
 		final Block[] neighborBlocks = new Block[5];
 		Block currentBlock = w.getBlockState(pos).getBlock();
-		while (range > 0){
-			if(isFluidSourceBlock(currentBlock,fluid,w,pos)) return pos;
+		while (range > 0) {
+			if (isFluidSourceBlock(currentBlock, fluid, w, pos)) return pos;
 			int count = 0;
-			for(int i = 0; i < 5; i++){
+			for (int i = 0; i < 5; i++) {
 				BlockPos p = pos.offset(dirs[i]);
 				Block bb = w.getBlockState(p).getBlock();
-				if(isFluidBlock(bb,fluid)){
+				if (isFluidBlock(bb, fluid)) {
 					next[count] = p;
 					neighborBlocks[count] = bb;
 					count++;
 				}
 			}
-			if(count == 0) break; // dead end
+			if (count == 0) break; // dead end
 
 			int r = (count < 2 ? 0 : w.rand.nextInt(count));
 			pos = next[r];
@@ -246,34 +240,34 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 		return null;
 	}
 
-	public static boolean isFluidBlock(Block block, Fluid f){
-		if(f == FluidRegistry.WATER){
+	public static boolean isFluidBlock(Block block, Fluid f) {
+		if (f == FluidRegistry.WATER) {
 			return block.equals(Blocks.FLOWING_WATER) || block.equals(Blocks.WATER);
-		} else if(f == FluidRegistry.LAVA){
+		} else if (f == FluidRegistry.LAVA) {
 			return block.equals(Blocks.FLOWING_LAVA) || block.equals(Blocks.LAVA);
-		} else if(block instanceof IFluidBlock){
-			IFluidBlock fb = (IFluidBlock)block;
-			return areEqual(fb.getFluid(),f);
+		} else if (block instanceof IFluidBlock) {
+			IFluidBlock fb = (IFluidBlock) block;
+			return areEqual(fb.getFluid(), f);
 		} else {
 			return false;
 		}
 	}
 
-	public static boolean isFluidSourceBlock(Block block, Fluid f, World w, BlockPos p){
-		if(f == FluidRegistry.WATER){
+	public static boolean isFluidSourceBlock(Block block, Fluid f, World w, BlockPos p) {
+		if (f == FluidRegistry.WATER) {
 			return block.equals(Blocks.WATER) && w.getBlockState(p).getValue(BlockLiquid.LEVEL) == 0;
-		} else if(f == FluidRegistry.LAVA){
+		} else if (f == FluidRegistry.LAVA) {
 			return block.equals(Blocks.LAVA) && w.getBlockState(p).getValue(BlockLiquid.LEVEL) == 0;
-		} else if(block instanceof IFluidBlock){
-			IFluidBlock fb = (IFluidBlock)block;
-			return fb.canDrain(w,p);
+		} else if (block instanceof IFluidBlock) {
+			IFluidBlock fb = (IFluidBlock) block;
+			return fb.canDrain(w, p);
 		} else {
 			return false;
 		}
 	}
 
 	private static boolean areEqual(Object o1, Object o2) {
-		if( o1 != null){
+		if (o1 != null) {
 			return o1.equals(o2);
 		} else {
 			return o2 == null;

@@ -19,8 +19,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.Random;
 
 public class FluidDrainBlock extends BlockSimpleFluidMachine {
-	
-	
+
+
 	public FluidDrainBlock() {
 		super(Material.PISTON, 3f);
 		super.setCreativeTab(ItemGroups.tab_powerAdvantage);
@@ -30,27 +30,27 @@ public class FluidDrainBlock extends BlockSimpleFluidMachine {
 	public PoweredEntity createNewTileEntity(World w, int m) {
 		return new FluidDrainTileEntity();
 	}
-	
+
 
 	/**
 	 * Override of default block behavior
 	 */
-    @Override
-    public Item getItemDropped(final IBlockState state, final Random prng, final int i3) {
-        return Item.getItemFromBlock(this);
-    }
-    
-    
-    /**
-     * (Client-only) Override of default block behavior
-     */
-    @SideOnly(Side.CLIENT)
-    @Override
+	@Override
+	public Item getItemDropped(final IBlockState state, final Random prng, final int i3) {
+		return Item.getItemFromBlock(this);
+	}
+
+
+	/**
+	 * (Client-only) Override of default block behavior
+	 */
+	@SideOnly(Side.CLIENT)
+	@Override
 	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
 		return new ItemStack(this);
 	}
 
-    @Override
+	@Override
 	public boolean hasComparatorInputOverride(IBlockState state) {
 		return true;
 	}
@@ -58,8 +58,8 @@ public class FluidDrainBlock extends BlockSimpleFluidMachine {
 	@Override
 	public int getComparatorInputOverride(IBlockState state, World world, BlockPos coord) {
 		TileEntity te = world.getTileEntity(coord);
-		if(te != null && te instanceof FluidDrainTileEntity){
-			return ((FluidDrainTileEntity)te).getRedstoneOutput();
+		if (te != null && te instanceof FluidDrainTileEntity) {
+			return ((FluidDrainTileEntity) te).getRedstoneOutput();
 		}
 		return 0;
 	}
