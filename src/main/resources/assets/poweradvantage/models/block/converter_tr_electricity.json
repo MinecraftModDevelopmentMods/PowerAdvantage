@@ -1,6 +1,0 @@
-{
-  "parent": "block/cube_all",
-  "textures": {
-    "all": "poweradvantage:blocks/techreborn_converter"
-  }
-}

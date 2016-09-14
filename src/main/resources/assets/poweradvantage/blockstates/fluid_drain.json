@@ -1,8 +1,0 @@
-{
-    "variants": {
-        "facing=east": { "model": "poweradvantage:fluid_drain", "y": 90 },
-        "facing=north": { "model": "poweradvantage:fluid_drain" },
-        "facing=south": { "model": "poweradvantage:fluid_drain", "y": 180 },
-        "facing=west": { "model": "poweradvantage:fluid_drain", "y": 270 }
-    }
-}
