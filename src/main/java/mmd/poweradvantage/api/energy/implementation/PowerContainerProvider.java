@@ -1,6 +1,6 @@
 package mmd.poweradvantage.api.energy.implementation;
 
-import dank.modularity.core.common.capability.EnergyCapabilities;
+import mmd.poweradvantage.mod.capability.PowerCapabilities;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
@@ -19,14 +19,14 @@ public class PowerContainerProvider implements INBTSerializable<NBTTagCompound>,
     @Override
     public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
 
-        return capability == EnergyCapabilities.CAPABILITY_CONSUMER || capability == EnergyCapabilities.CAPABILITY_PRODUCER || capability == EnergyCapabilities.CAPABILITY_HOLDER;
+        return capability == PowerCapabilities.CAPABILITY_CONSUMER || capability == PowerCapabilities.CAPABILITY_PRODUCER || capability == PowerCapabilities.CAPABILITY_HOLDER;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
 
-        if (capability == EnergyCapabilities.CAPABILITY_CONSUMER || capability == EnergyCapabilities.CAPABILITY_PRODUCER || capability == EnergyCapabilities.CAPABILITY_HOLDER)
+        if (capability == PowerCapabilities.CAPABILITY_CONSUMER || capability == PowerCapabilities.CAPABILITY_PRODUCER || capability == PowerCapabilities.CAPABILITY_HOLDER)
             return (T) this.container;
 
         return null;
