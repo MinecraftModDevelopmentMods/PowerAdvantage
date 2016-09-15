@@ -1,10 +1,11 @@
 package mmd.poweradvantage.mod;
 
-import mmd.poweradvantage.api.energy.IPowerConsumer;
-import mmd.poweradvantage.api.energy.IPowerHolder;
-import mmd.poweradvantage.api.energy.IPowerProducer;
-import mmd.poweradvantage.api.energy.implementation.PowerContainer;
-import mmd.poweradvantage.mod.capability.PowerCapabilities;
+import mmd.advantagecore.IProxy;
+import mmd.advantagecore.energy.IAdvantageConsumer;
+import mmd.advantagecore.energy.IAdvantageHolder;
+import mmd.advantagecore.energy.IAdvantageProducer;
+import mmd.advantagecore.energy.implementation.AdvantageContainer;
+import mmd.advantagecore.capability.AdvantageCapabilities;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -29,9 +30,9 @@ public class PowerAdvantage {
     public void onConstruct(FMLConstructionEvent e) {
         PROXY.onConstruct(e);
 
-        CapabilityManager.INSTANCE.register(IPowerConsumer.class, new PowerCapabilities.CapabilityEnergyConsumer<>(), PowerContainer.class);
-        CapabilityManager.INSTANCE.register(IPowerProducer.class, new PowerCapabilities.CapabilityEnergyProducer<>(), PowerContainer.class);
-        CapabilityManager.INSTANCE.register(IPowerHolder.class, new PowerCapabilities.CapabilityEnergyHolder<>(), PowerContainer.class);
+        CapabilityManager.INSTANCE.register(IAdvantageConsumer.class, new AdvantageCapabilities.CapabilityAdvantageConsumer<>(), AdvantageContainer.class);
+        CapabilityManager.INSTANCE.register(IAdvantageProducer.class, new AdvantageCapabilities.CapabilityAdvantageProducer<>(), AdvantageContainer.class);
+        CapabilityManager.INSTANCE.register(IAdvantageHolder.class, new AdvantageCapabilities.CapabilityAdvantageHolder<>(), AdvantageContainer.class);
     }
 
     @EventHandler

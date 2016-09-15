@@ -1,6 +1,6 @@
 package mmd.poweradvantage.mod.proxy;
 
-import mmd.poweradvantage.mod.IProxy;
+import mmd.advantagecore.IProxy;
 import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
