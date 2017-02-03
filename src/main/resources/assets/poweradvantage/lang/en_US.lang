@@ -1,0 +1,21 @@
+itemGroup.poweradvantage.name=Power Advantage
+
+item.poweradvantage.denseplate.name=Dense Plate
+item.poweradvantage.casing.name=Casing
+item.poweradvantage.plate.name=Plate
+item.poweradvantage.smalldust.name=Small %s Dust
+
+material.poweradvantage.iron.name=Iron
+material.poweradvantage.gold.name=Gold
+material.poweradvantage.copper.name=Copper
+material.poweradvantage.tin.name=Tin
+material.poweradvantage.silver.name=Silver
+material.poweradvantage.lead.name=Lead
+material.poweradvantage.electrum.name=Electrum
+
+item.poweradvantage.battery.name=Small Battery
+item.poweradvantage.battery_medium.name=Medium Battery
+item.poweradvantage.battery_large.name=Large Battery
+
+item.poweradvantage.wrench.name=Wrench
+item.poweradvantage.screwdriver.name=Screwdriver
