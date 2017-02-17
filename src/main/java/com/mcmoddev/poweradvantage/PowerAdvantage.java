@@ -1,5 +1,6 @@
 package com.mcmoddev.poweradvantage;
 
+import com.mcmoddev.poweradvantage.init.ModBlocks;
 import com.mcmoddev.poweradvantage.init.ModItems;
 import com.mcmoddev.poweradvantage.proxy.CommonProxy;
 import net.minecraftforge.fml.common.Mod;
@@ -19,6 +20,7 @@ public class PowerAdvantage {
 
     @Instance
     public static PowerAdvantage INSTANCE;
+
     @SidedProxy(clientSide = "com.mcmoddev.poweradvantage.proxy.ClientProxy")
     public static CommonProxy PROXY;
 
@@ -29,8 +31,10 @@ public class PowerAdvantage {
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent e) {
+        ModBlocks.register();
         ModItems.register();
         PROXY.preInit();
+        PowerAdvantageFluidTab.TAB.getTabIconItem();
     }
 
     @EventHandler

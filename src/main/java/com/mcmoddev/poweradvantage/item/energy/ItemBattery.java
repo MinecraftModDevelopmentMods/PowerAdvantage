@@ -34,13 +34,13 @@ public class ItemBattery extends Item {
 
     @Override
     public boolean showDurabilityBar(ItemStack stack) {
-        return getStorage(stack).getEnergyStored() > 0;
+        return getStorage(stack).getEnergyStored() > -1;
     }
 
     @Override
     public double getDurabilityForDisplay(ItemStack stack) {
         IEnergyStorage storage = getStorage(stack);
-        return (double) storage.getEnergyStored() / (double) storage.getMaxEnergyStored();
+        return (double)storage.getMaxEnergyStored()/(double)storage.getEnergyStored();
     }
 
     @Nullable

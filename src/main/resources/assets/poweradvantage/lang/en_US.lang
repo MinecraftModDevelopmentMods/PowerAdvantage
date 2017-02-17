@@ -3,7 +3,9 @@ itemGroup.poweradvantage.name=Power Advantage
 item.poweradvantage.denseplate.name=Dense Plate
 item.poweradvantage.casing.name=Casing
 item.poweradvantage.plate.name=Plate
-item.poweradvantage.smalldust.name=Small %s Dust
+item.poweradvantage.smalldust.name=Tiny %s Dust
+item.poweradvantage.cell.name=%s Cell
+item.poweradvantage.cell.empty.name=Empty
 
 material.poweradvantage.iron.name=Iron
 material.poweradvantage.gold.name=Gold

@@ -1,6 +1,6 @@
 package com.mcmoddev.poweradvantage.item.resource;
 
-import com.mcmoddev.poweradvantage.Material;
+import com.mcmoddev.poweradvantage.misc.Material;
 import com.mcmoddev.poweradvantage.PowerAdvantageTab;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.creativetab.CreativeTabs;

@@ -5,22 +5,58 @@ buildscript {
             name = "forge"
             url = "http://files.minecraftforge.net/maven"
         }
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/groups/public"
+        }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: "maven-publish"
 
-version = "2.0.0"
-group= "mmd.poweradvantage"
-archivesBaseName = "poweradvantage"
+def v = "3.0.0"
+if(System.getenv().BUILD_NUMBER) {
+    version = v+"-build"+System.getenv().BUILD_NUMBER
+} else {
+    version = v
+}
+group= "com.mcmoddev"
+archivesBaseName = "PowerAdvantage"
 
 sourceCompatibility = targetCompatibility = "1.8"
 compileJava {
     sourceCompatibility = targetCompatibility = "1.8"
 }
 
+class Secrets {
+    def data = null
+
+    def getProperty(String key) {
+        return data ? data[key] : ""
+    }
+}
+
+import groovy.json.JsonSlurper
+
+def secretFile
+if (System.getenv().SECRET_FILE) {
+    secretFile = file System.getenv().SECRET_FILE
+} else {
+    secretFile = file "secret.json"
+}
+
+project.ext.secret = new Secrets()
+if (secretFile.exists()) {
+    secretFile.withReader {
+        project.ext.secret.data = new JsonSlurper().parse it
+    }
+}
 minecraft {
     version = "1.10.2-12.18.3.2221"
     runDir = "run"
@@ -30,6 +66,44 @@ minecraft {
 
 dependencies {
 
+}
+
+
+task deobfJar(type: Jar) {
+    classifier = "deobf"
+    from sourceSets.main.output
+}
+
+artifacts {
+//  archives apiJar
+    archives deobfJar
+    archives sourceJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId project.group
+            artifactId project.archivesBaseName
+            version project.version
+            from components.java
+            artifact sourceJar {
+                classifier "sources"
+            }
+            artifact deobfJar {
+                classifier "deobf"
+            }
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                username secret.username
+                password secret.password
+            }
+            url secret.url
+        }
+    }
 }
 
 processResources

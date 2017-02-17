@@ -1,6 +1,5 @@
-package com.mcmoddev.poweradvantage;
+package com.mcmoddev.poweradvantage.misc;
 
-import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.util.text.translation.I18n;
 
 import java.awt.*;
