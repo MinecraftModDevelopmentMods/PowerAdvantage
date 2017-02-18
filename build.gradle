@@ -20,9 +20,9 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: "maven-publish"
 
-def v = "3.0.0"
+def v = "1.10.2-3.0.0"
 if(System.getenv().BUILD_NUMBER) {
-    version = v+"-build"+System.getenv().BUILD_NUMBER
+    version = v+"."+System.getenv().BUILD_NUMBER
 } else {
     version = v
 }
