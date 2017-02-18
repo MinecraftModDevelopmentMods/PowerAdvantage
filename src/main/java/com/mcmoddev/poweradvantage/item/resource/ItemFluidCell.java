@@ -42,6 +42,25 @@ public class ItemFluidCell extends Item {
         GameRegistry.register(this);
     }
 
+    public static FluidHandler getFluidHandler(ItemStack stack) {
+        return new FluidHandler(stack, CAPACITY);
+    }
+
+    public static ItemStack getCellWithFluid(Fluid fluid, int stackSize) {
+        Validate.notNull(fluid);
+        ItemStack stack = new ItemStack(ModItems.FLUID_CELL, stackSize);
+        getFluidHandler(stack).fill(new FluidStack(fluid, CAPACITY), true);
+        return stack;
+    }
+
+    public static ItemStack getEmptyCell(int amount) {
+        return new ItemStack(ModItems.FLUID_CELL, amount);
+    }
+
+    public static ItemStack getCellWithFluid(Fluid fluid) {
+        return getCellWithFluid(fluid, 1);
+    }
+
     @Override
     public ActionResult<ItemStack> onItemRightClick(ItemStack stack, World worldIn, EntityPlayer playerIn, EnumHand hand) {
         if (!worldIn.isRemote) {
@@ -96,26 +115,6 @@ public class ItemFluidCell extends Item {
     @Override
     public ICapabilityProvider initCapabilities(ItemStack stack, NBTTagCompound nbt) {
         return getFluidHandler(stack);
-    }
-
-    public static FluidHandler getFluidHandler(ItemStack stack) {
-        return new FluidHandler(stack, CAPACITY);
-    }
-
-    public static ItemStack getCellWithFluid(Fluid fluid, int stackSize) {
-        Validate.notNull(fluid);
-        ItemStack stack = new ItemStack(ModItems.FLUID_CELL);
-        getFluidHandler(stack).fill(new FluidStack(fluid, CAPACITY), true);
-        stack.stackSize = stackSize;
-        return stack;
-    }
-
-    public static ItemStack getEmptyCell(int amount) {
-        return new ItemStack(ModItems.FLUID_CELL, amount);
-    }
-
-    public static ItemStack getCellWithFluid(Fluid fluid) {
-        return getCellWithFluid(fluid, 1);
     }
 
     public static class FluidHandler extends FluidHandlerItemStack {

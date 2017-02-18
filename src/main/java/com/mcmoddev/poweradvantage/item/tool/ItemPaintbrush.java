@@ -4,11 +4,9 @@ import com.mcmoddev.poweradvantage.PowerAdvantageTab;
 import com.mcmoddev.poweradvantage.init.ModItems;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumActionResult;
@@ -31,18 +29,6 @@ public class ItemPaintbrush extends Item implements IItemColor {
         GameRegistry.register(this);
     }
 
-    @Override
-    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        return EnumActionResult.SUCCESS;
-    }
-
-    @Override
-    public int getColorFromItemstack(ItemStack stack, int tintIndex) {
-        if (stack.hasTagCompound() && tintIndex == 1)
-            return EnumDyeColor.byMetadata(stack.getTagCompound().getInteger("color")).getMapColor().colorValue;
-        return 0xFFFFFF;
-    }
-
     public static ItemStack getItemWithDye(EnumDyeColor color) {
         ItemStack stack = new ItemStack(ModItems.PAINTBRUSH);
         NBTTagCompound tag = new NBTTagCompound();
@@ -51,6 +37,22 @@ public class ItemPaintbrush extends Item implements IItemColor {
         return stack;
     }
 
+    @Override
+    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        return EnumActionResult.SUCCESS;
+    }
+
+    @Override
+    public String getItemStackDisplayName(ItemStack stack) {
+        return super.getItemStackDisplayName(stack);
+    }
+
+    @Override
+    public int getColorFromItemstack(ItemStack stack, int tintIndex) {
+        if (stack.hasTagCompound() && tintIndex == 1)
+            return EnumDyeColor.byMetadata(stack.getTagCompound().getInteger("color")).getMapColor().colorValue;
+        return 0xFFFFFF;
+    }
 
     @Override
     @SideOnly(Side.CLIENT)

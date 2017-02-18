@@ -13,10 +13,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 
-public class ItemPlate extends Item implements IItemColor {
-    public ItemPlate() {
-        setUnlocalizedName("poweradvantage.plate");
-        setRegistryName("plate");
+public class ItemCrushed extends Item implements IItemColor {
+    public ItemCrushed() {
+        setUnlocalizedName("poweradvantage.crushed");
+        setRegistryName("crushed");
         setCreativeTab(PowerAdvantageResourceTab.TAB);
         setHasSubtypes(true);
         GameRegistry.register(this);
@@ -24,21 +24,21 @@ public class ItemPlate extends Item implements IItemColor {
 
     @Override
     public String getItemStackDisplayName(ItemStack stack) {
-        return Material.getMaterial(stack.getMetadata()).translateServer() + " " + super.getItemStackDisplayName(stack);
+        return String.format(super.getItemStackDisplayName(stack), Material.getMaterial(stack.getMetadata()).translateServer());
     }
 
     @Override
     public int getColorFromItemstack(ItemStack stack, int tintIndex) {
-        if (tintIndex == 0)
+        if (tintIndex == 1)
             return Material.getMaterial(stack.getMetadata()).getRGB();
-        return 0;
+        return 0xFFFFFF;
     }
 
     @Override
     @SideOnly(Side.CLIENT)
     public void getSubItems(Item itemIn, CreativeTabs tab, List<ItemStack> subItems) {
         for (Material material : Material.values())
-            if (material.canBe(MaterialType.PLATE))
+            if (material.canBe(MaterialType.CRUSHED))
                 subItems.add(new ItemStack(itemIn, 1, material.ordinal()));
     }
 }

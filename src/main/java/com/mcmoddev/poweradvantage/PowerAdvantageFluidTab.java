@@ -18,6 +18,12 @@ public class PowerAdvantageFluidTab extends CreativeTabs {
 
     public PowerAdvantageFluidTab() {
         super("poweradvantage.fluid.name");
+        setBackgroundImageName("item_search.png");
+    }
+
+    @Override
+    public boolean hasSearchBar() {
+        return true;
     }
 
     @Override
@@ -26,7 +32,7 @@ public class PowerAdvantageFluidTab extends CreativeTabs {
     }
 
     @Override
-    @SideOnly(Side.CLIENT   )
+    @SideOnly(Side.CLIENT)
     public ItemStack getIconItemStack() {
         return ItemFluidCell.getCellWithFluid(FluidRegistry.LAVA);
     }
@@ -34,7 +40,7 @@ public class PowerAdvantageFluidTab extends CreativeTabs {
     @Override
     public void displayAllRelevantItems(List<ItemStack> p_78018_1_) {
         p_78018_1_.add(ItemFluidCell.getEmptyCell(1));
-        for(Fluid fluid : FluidRegistry.getRegisteredFluids().values())
+        for (Fluid fluid : FluidRegistry.getRegisteredFluids().values())
             p_78018_1_.add(ItemFluidCell.getCellWithFluid(fluid));
     }
 }

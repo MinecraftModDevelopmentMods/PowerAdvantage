@@ -3,7 +3,6 @@ package com.mcmoddev.poweradvantage;
 import com.mcmoddev.poweradvantage.init.ModItems;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 
 public class PowerAdvantageTab extends CreativeTabs {
 
