@@ -1,0 +1,23 @@
+{
+  "forge_marker": 1,
+  "variants": {
+    "poweradvantage.oil": {
+      "model": "forge:fluid",
+      "custom": {
+        "fluid": "fluidoil"
+      }
+    },
+    "poweradvantage.fuel": {
+      "model": "forge:fluid",
+      "custom": {
+        "fluid": "fluidfuel"
+      }
+    },
+    "poweradvantage.steam": {
+      "model": "forge:fluid",
+      "custom": {
+        "fluid": "fluidsteam"
+      }
+    }
+  }
+}
