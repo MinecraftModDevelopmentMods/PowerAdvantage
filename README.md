@@ -1,1 +1,1 @@
-# PowerAdvantage 2.x
+# PowerAdvantage 3 [![Build Status](https://ci.mcmoddev.com/job/Power Advantage 3/badge/icon)](https://ci.mcmoddev.com/job/Power Advantage 3)

@@ -64,8 +64,16 @@ minecraft {
     mappings = "stable_29"
 }
 
-dependencies {
 
+repositories {
+    mavenCentral()
+    maven {
+        url "http://maven.mcmoddev.com/"
+    }
+}
+
+dependencies {
+    compile "com.mcmoddev:MMDLib:1.0.0.5:deobf"
 }
 
 
