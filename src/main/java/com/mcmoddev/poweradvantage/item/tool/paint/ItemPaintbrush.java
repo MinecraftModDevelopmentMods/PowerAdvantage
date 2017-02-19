@@ -1,10 +1,16 @@
 package com.mcmoddev.poweradvantage.item.tool.paint;
 
 import com.mcmoddev.poweradvantage.PowerAdvantageTab;
+import com.mcmoddev.poweradvantage.api.IPaintable;
+import com.mcmoddev.poweradvantage.api.IPaintableItem;
 import com.mcmoddev.poweradvantage.init.ModItems;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockColored;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -20,7 +26,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 
-public class ItemPaintbrush extends Item implements IItemColor {
+public class ItemPaintbrush extends Item implements IItemColor,IPaintableItem {
     public ItemPaintbrush() {
         setUnlocalizedName("poweradvantage.paintbrush");
         setRegistryName("paintbrush");
@@ -29,17 +35,30 @@ public class ItemPaintbrush extends Item implements IItemColor {
         GameRegistry.register(this);
     }
 
+    @Override
+    public EnumDyeColor getColor(ItemStack stack) {
+        return EnumDyeColor.byMetadata(stack.getMetadata());
+    }
+
     public static ItemStack getItemWithDye(EnumDyeColor color) {
-        ItemStack stack = new ItemStack(ModItems.PAINTBRUSH);
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setInteger("color", color.getMetadata());
-        stack.setTagCompound(tag);
-        return stack;
+        return new ItemStack(ModItems.PAINTBRUSH, 1, color.getMetadata());
     }
 
     @Override
     public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        return EnumActionResult.SUCCESS;
+        IBlockState state = worldIn.getBlockState(pos);
+        if (state.getBlock() instanceof BlockColored) {
+            if (state.getValue(BlockColored.COLOR) != getColor(stack)) {
+                worldIn.setBlockState(pos, state.withProperty(BlockColored.COLOR, getColor(stack)));
+                return EnumActionResult.SUCCESS;
+            }
+        } else if(state.getBlock() instanceof IPaintable) {
+            if (((IPaintable) state.getBlock()).getColor(worldIn, pos) != getColor(stack)) {
+                ((IPaintable) state.getBlock()).setColor(getColor(stack), worldIn, pos);
+                return EnumActionResult.SUCCESS;
+            }
+        }
+        return EnumActionResult.FAIL;
     }
 
     @Override
@@ -49,8 +68,8 @@ public class ItemPaintbrush extends Item implements IItemColor {
 
     @Override
     public int getColorFromItemstack(ItemStack stack, int tintIndex) {
-        if (stack.hasTagCompound() && tintIndex == 1)
-            return EnumDyeColor.byMetadata(stack.getTagCompound().getInteger("color")).getMapColor().colorValue;
+        if (tintIndex == 1)
+            return getColor(stack).getMapColor().colorValue;
         return 0xFFFFFF;
     }
 
