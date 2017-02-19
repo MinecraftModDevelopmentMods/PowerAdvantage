@@ -25,7 +25,7 @@ public class PowerAdvantage {
     @Instance
     public static PowerAdvantage INSTANCE;
 
-    @SidedProxy(clientSide = "com.mcmoddev.poweradvantage.proxy.ClientProxy")
+    @SidedProxy(clientSide = "com.mcmoddev.poweradvantage.proxy.ClientProxy", serverSide = "com.mcmoddev.poweradvantage.proxy.ServerProxy")
     public static CommonProxy PROXY;
 
     static {

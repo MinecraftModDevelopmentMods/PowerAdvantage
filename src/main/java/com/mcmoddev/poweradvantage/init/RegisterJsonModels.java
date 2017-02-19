@@ -37,12 +37,40 @@ public class RegisterJsonModels {
         MMDLibRegistry.registerItemColour(ModItems.CRUSHED, ModItems.CRUSHED);
         MMDLibRegistry.registerItemColour(ModItems.PAINTBRUSH, ModItems.PAINTBRUSH);
         MMDLibRegistry.registerItemColour(ModItems.PAINTCAN, ModItems.PAINTCAN);
+        MMDLibRegistry.registerItemColour(ModItems.CRYSTAL, ModItems.CRYSTAL);
+
+        MMDLibRegistry.registerItemColour(ModItems.SAPPHIRE_AXE, ModItems.SAPPHIRE_AXE);
+        MMDLibRegistry.registerItemColour(ModItems.RUBY_AXE, ModItems.RUBY_AXE);
+
+        MMDLibRegistry.registerItemColour(ModItems.SAPPHIRE_PICKAXE, ModItems.SAPPHIRE_PICKAXE);
+        MMDLibRegistry.registerItemColour(ModItems.RUBY_PICKAXE, ModItems.RUBY_PICKAXE);
+
+        MMDLibRegistry.registerItemColour(ModItems.SAPPHIRE_SWORD, ModItems.SAPPHIRE_SWORD);
+        MMDLibRegistry.registerItemColour(ModItems.RUBY_SWORD, ModItems.RUBY_SWORD);
+
+        MMDLibRegistry.registerItemColour(ModItems.SAPPHIRE_HOE, ModItems.SAPPHIRE_HOE);
+        MMDLibRegistry.registerItemColour(ModItems.RUBY_HOE, ModItems.RUBY_HOE);
+
+        MMDLibRegistry.registerItemColour(ModItems.SAPPHIRE_SHOVEL, ModItems.SAPPHIRE_SHOVEL);
+        MMDLibRegistry.registerItemColour(ModItems.RUBY_SHOVEL, ModItems.RUBY_SHOVEL);
     }
 
     private static void items() {
         register(ModItems.SCREWDRIVER, "tool/screwdriver");
         register(ModItems.MANUAL, "tool/manual");
         register(ModItems.WRENCH, "tool/wrench");
+
+        register(ModItems.SAPPHIRE_AXE, "tool/gem/axe");
+        register(ModItems.RUBY_AXE, "tool/gem/axe");
+        register(ModItems.SAPPHIRE_PICKAXE, "tool/gem/pickaxe");
+        register(ModItems.RUBY_PICKAXE, "tool/gem/pickaxe");
+        register(ModItems.SAPPHIRE_HOE, "tool/gem/hoe");
+        register(ModItems.RUBY_HOE, "tool/gem/hoe");
+        register(ModItems.SAPPHIRE_SWORD, "tool/gem/sword");
+        register(ModItems.RUBY_SWORD, "tool/gem/sword");
+        register(ModItems.SAPPHIRE_SHOVEL, "tool/gem/shovel");
+        register(ModItems.RUBY_SHOVEL, "tool/gem/shovel");
+
         for (Crystal material : Crystal.values())
             register(ModItems.CRYSTAL, material.ordinal(), "resource/crystal");
         for (Material material : Material.values())

@@ -1,4 +1,4 @@
-package com.mcmoddev.poweradvantage.item.tool;
+package com.mcmoddev.poweradvantage.item.tool.paint;
 
 import com.mcmoddev.poweradvantage.PowerAdvantageTab;
 import com.mcmoddev.poweradvantage.init.ModItems;

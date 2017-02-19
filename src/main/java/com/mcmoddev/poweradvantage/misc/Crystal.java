@@ -6,8 +6,8 @@ import net.minecraft.util.text.translation.I18n;
 import java.awt.*;
 
 public enum Crystal {
-    RUBY("Ruby", new Color(0xAB2F38).getRGB()),
-    SAPPHIRE("Sapphire", new Color(0x4B56AB).getRGB())
+    RUBY("Ruby", new Color(0xE73D48).getRGB()),
+    SAPPHIRE("Sapphire", new Color(0x5C75DB).getRGB())
     ;
 
     private String oreDict;
