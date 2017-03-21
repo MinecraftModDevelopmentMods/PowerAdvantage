@@ -1,7 +1,0 @@
-{
-  "parent": "item/generated",
-  "textures": {
-    "layer0": "poweradvantage:items/paint_can",
-    "layer1": "poweradvantage:items/paint_can_overlay"
-  }
-}

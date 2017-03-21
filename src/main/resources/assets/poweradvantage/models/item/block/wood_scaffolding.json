@@ -1,6 +1,0 @@
-{
-  "parent": "poweradvantage:block/scaffolding",
-  "textures": {
-    "texture": "poweradvantage:blocks/structure/scaffold_wood"
-  }
-}

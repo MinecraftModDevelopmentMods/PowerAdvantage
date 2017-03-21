@@ -1,0 +1,7 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "poweradvantage3:items/paint_brush",
+    "layer1": "poweradvantage3:items/paint_brush_overlay"
+  }
+}

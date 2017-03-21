@@ -1,0 +1,39 @@
+itemGroup.poweradvantage.name=Power Advantage
+itemGroup.poweradvantage.fluid.name=Fluid Cells
+itemGroup.poweradvantage.resource.name=Resources
+
+item.poweradvantage.denseplate.name=Dense Plate
+item.poweradvantage.casing.name=Casing
+item.poweradvantage.plate.name=Plate
+item.poweradvantage.crushed.name=Crushed %s Dust
+item.poweradvantage.purified.name=Purified %s Dust
+item.poweradvantage.smalldust.name=Tiny %s Dust
+item.poweradvantage.cell.name=%s Cell
+item.poweradvantage.cell.empty.name=Empty
+
+material.poweradvantage.iron.name=Iron
+material.poweradvantage.gold.name=Gold
+material.poweradvantage.copper.name=Copper
+material.poweradvantage.tin.name=Tin
+material.poweradvantage.silver.name=Silver
+material.poweradvantage.lead.name=Lead
+material.poweradvantage.electrum.name=Electrum
+material.poweradvantage.signalum.name=Signalum
+material.poweradvantage.bronze.name=Bronze
+material.poweradvantage.iridium.name=Iridium
+
+fluid.fluidoil=Oil
+fluid.fluidfuel=Fuel
+fluid.fluidsteam=Steam
+
+tile.poweradvantage.scaffolding.name=Scaffolding
+
+item.poweradvantage.battery.name=Small Battery
+item.poweradvantage.battery_medium.name=Medium Battery
+item.poweradvantage.battery_large.name=Large Battery
+item.poweradvantage.manual.name=Power Advantage Manual
+item.poweradvantage.paintbrush.name=Paintbrush
+item.poweradvantage.paintcan.name=Paintcan
+
+item.poweradvantage.wrench.name=Wrench
+item.poweradvantage.screwdriver.name=Screwdriver

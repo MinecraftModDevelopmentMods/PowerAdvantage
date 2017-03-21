@@ -27,7 +27,7 @@ if(System.getenv().BUILD_NUMBER) {
     version = v
 }
 group= "com.mcmoddev"
-archivesBaseName = "PowerAdvantage"
+archivesBaseName = "PowerAdvantage3"
 
 sourceCompatibility = targetCompatibility = "1.8"
 compileJava {
@@ -68,12 +68,22 @@ minecraft {
 repositories {
     mavenCentral()
     maven {
+        url "http://dvs1.progwml6.com/files/maven"
+    }
+    maven {
         url "http://maven.mcmoddev.com/"
+    }
+
+    maven {
+        url "http://maven.amadornes.com/"
     }
 }
 
 dependencies {
+    deobfCompile "mezz.jei:jei_1.10.2:3.13.6.387:api"
+    runtime "mezz.jei:jei_1.10.2:3.13.6.387"
     compile "com.mcmoddev:MMDLib:1.0.0.5:deobf"
+    compile "MCMultiPart:MCMultiPart-experimental:1.4.0_93:deobf"
 }
 
 
