@@ -54,7 +54,7 @@ public abstract class Items {
 
 	private static Item addItem(String unlocalizedName, Item i) {
 		i.setUnlocalizedName(PowerAdvantage.MODID + "." + unlocalizedName);
-		GameRegistry.registerItem(i, unlocalizedName);
+		GameRegistry.register(i);
 		i.setCreativeTab(ItemGroups.tab_powerAdvantage);
 		allItems.put(unlocalizedName, i);
 		return i;

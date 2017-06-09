@@ -3,6 +3,7 @@ package cyano.poweradvantage.api.modsupport.rf;
 import cyano.poweradvantage.PowerAdvantage;
 import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.modsupport.TileEntityConverter;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
@@ -141,5 +142,15 @@ public class TileEntityRFConverter extends TileEntityConverter implements cofh.a
 	@Override
 	public double convertEnergyToOther(float amountOfEnergy, ConduitType type) {
 		return amountOfEnergy * PowerAdvantage.rfConversionTable.get(type);
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return false;
+	}
+
+	@Override
+	public boolean isUsableByPlayer(EntityPlayer player) {
+		return true;
 	}
 }

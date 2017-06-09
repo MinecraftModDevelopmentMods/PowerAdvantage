@@ -5,8 +5,8 @@ import cyano.poweradvantage.api.fluid.FluidRequest;
 import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 public class StorageTankTileEntity  extends TileEntitySimpleFluidMachine {
 
@@ -114,5 +114,15 @@ public class StorageTankTileEntity  extends TileEntitySimpleFluidMachine {
 	@Override
 	public boolean isFluidSink() {
 		return true;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return false;
+	}
+
+	@Override
+	public IFluidTankProperties[] getTankProperties() {
+		return null;
 	}
 }

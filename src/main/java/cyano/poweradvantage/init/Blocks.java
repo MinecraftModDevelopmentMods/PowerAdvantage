@@ -136,7 +136,7 @@ public abstract class Blocks {
 			String name = e.getKey();
 			if (b instanceof BlockFluidBase) {
 				BlockFluidBase block = (BlockFluidBase) b;
-				Fluid fluid = block.getFluid();
+				block.getFluid();
 				Item item = Item.getItemFromBlock(block);
 				final ModelResourceLocation fluidModelLocation = new ModelResourceLocation(
 						modID.toLowerCase() + ":" + name, "fluid");
@@ -156,8 +156,8 @@ public abstract class Blocks {
 	}
 
 	private static Block addBlock(Block block, String name) {
-		block.setUnlocalizedName(PowerAdvantage.MODID + "." + name);
-		GameRegistry.registerBlock(block, name);
+		block.setUnlocalizedName(PowerAdvantage.MODID + "." + name);;
+		GameRegistry.register(block);
 		if ((block instanceof BlockFluidBase) == false) block.setCreativeTab(ItemGroups.tab_powerAdvantage);
 		allBlocks.put(name, block);
 		return block;

@@ -13,7 +13,14 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fluids.*;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fluids.FluidTankInfo;
+import net.minecraftforge.fluids.IFluidBlock;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 
 public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
@@ -45,14 +52,14 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 				// from fluid container
 				if (getWorld().getBlockState(space).getBlock() instanceof ITileEntityProvider && getWorld().getTileEntity(space) instanceof IFluidHandler) {
 					IFluidHandler other = (IFluidHandler) getWorld().getTileEntity(space);
-					FluidTankInfo[] tanks = other.getTankInfo(cardinals[k].getOpposite());
+					FluidTankInfo[] tanks = other.get(cardinals[k].getOpposite());
 					for (int i = 0; i < tanks.length; i++) {
 						FluidTankInfo t = tanks[i];
 						if ((t.fluid == null) || (tank.getFluidAmount() > 0 && tank.getFluid().getFluid() != t.fluid.getFluid())) {
 							continue;
 						}
 						if (other.canDrain(cardinals[k].getOpposite(), t.fluid.getFluid())) {
-							FluidStack fluid = other.drain(cardinals[k].getOpposite(), tank.getCapacity() - tank.getFluidAmount(), true);
+							FluidStack fluid = other.drain(tank.getCapacity() - tank.getFluidAmount(), true);
 							tank.fill(fluid, true);
 							break fluidScan;
 						}
@@ -101,8 +108,8 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 		TileEntity e = getWorld().getTileEntity(coord);
 		if (e instanceof IFluidHandler) {
 			IFluidHandler fh = (IFluidHandler) e;
-			if (fh.canFill(otherFace, getTank().getFluid().getFluid())) {
-				getTank().drain(fh.fill(otherFace, getTank().getFluid(), true), true);
+			if (fh.canFill(getTank().getFluid().getFluid())) {
+				getTank().drain(fh.fill(getTank().getFluid(), true), true);
 				this.sync();
 			}
 		}
@@ -141,11 +148,7 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 		return true;
 	}
 
-
 	///// Boiler Plate /////
-
-	private String customName = null;
-
 
 	@Override
 	protected ItemStack[] getInventory() {
@@ -272,5 +275,17 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 		} else {
 			return o2 == null;
 		}
+	}
+
+
+	@Override
+	public boolean isEmpty() {
+		return false;
+	}
+
+
+	@Override
+	public IFluidTankProperties[] getTankProperties() {
+		return null;
 	}
 }

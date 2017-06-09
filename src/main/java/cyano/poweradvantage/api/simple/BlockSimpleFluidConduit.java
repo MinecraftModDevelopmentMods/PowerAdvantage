@@ -194,11 +194,8 @@ public abstract class BlockSimpleFluidConduit extends FluidConduitBlock {
 	 * Calculates the collision boxes for this block.
 	 */
 	@Override
-	public void addCollisionBoxToList(
-			final IBlockState bs, final World world, final BlockPos coord,
-			final AxisAlignedBB box, final List<AxisAlignedBB> collisionBoxList,
-			final Entity entity
-	) {
+	public void addCollisionBoxToList(IBlockState bs, World world, BlockPos coord, AxisAlignedBB box,
+			List<AxisAlignedBB> collisionBoxList, Entity entity, boolean p_185477_7_) {
 		IBlockState oldBS = bs;
 		final boolean connectNorth = this.canConnectTo(world, coord, oldBS, EnumFacing.NORTH, coord.north());
 		final boolean connectSouth = this.canConnectTo(world, coord, oldBS, EnumFacing.SOUTH, coord.south());
@@ -259,7 +256,7 @@ public abstract class BlockSimpleFluidConduit extends FluidConduitBlock {
 	 * method.
 	 */
 	protected boolean canConnectTo(IBlockAccess w, BlockPos thisBlock, IBlockState bs, EnumFacing face, BlockPos otherBlock) {
-		IBlockState other = w.getBlockState(otherBlock);
+		w.getBlockState(otherBlock);
 		ConduitType[] types = getTypes();
 		for (int i = 0; i < types.length; i++) {
 			if (PowerHelper.areConnectable(new PowerConnectorContext(types[i], w, bs, thisBlock, face))) return true;
@@ -283,15 +280,6 @@ public abstract class BlockSimpleFluidConduit extends FluidConduitBlock {
 	public boolean isFullCube(IBlockState bs) {
 		return false;
 	}
-
-	/**
-	 * Override of default block behavior
-	 */
-	@Override
-	public boolean isPassable(final IBlockAccess world, final BlockPos coord) {
-		return false;
-	}
-
 
 	/**
 	 * Metadata not used.

@@ -88,14 +88,14 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 					if(!e.isAirBorne){
 						if(canInsertItemInto(e.getEntityItem(),this,myDir)){
 							ItemStack newItem = e.getEntityItem().copy();
-							newItem.stackSize = 1;
-							e.getEntityItem().stackSize--;
+							newItem.setCount(1);
+							e.getEntityItem().shrink(1);
 							if(getInventory()[0] == null){
 								getInventory()[0] = newItem;
 							} else {
-								getInventory()[0].stackSize++;
+								getInventory()[0].grow(1);
 							}
-							if(e.getEntityItem().stackSize <= 0){
+							if(e.getEntityItem().getCount() <= 0){
 								e.setDead();
 							}
 							this.markDirty();
@@ -158,10 +158,10 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 						if(dest.canInsertItem(destValidSlots[j], item, destFace)){
 							ItemStack otherItem = dest.getStackInSlot(destValidSlots[j]);
 							if( ItemStack.areItemsEqual(item, otherItem)
-									&& otherItem.stackSize < dest.getInventoryStackLimit()
-									&& otherItem.stackSize < otherItem.getItem().getItemStackLimit(otherItem)){
+									&& otherItem.getCount() < dest.getInventoryStackLimit()
+									&& otherItem.getCount() < otherItem.getItem().getItemStackLimit(otherItem)){
 								src.decrStackSize(srcValidSlots[i], 1);
-								otherItem.stackSize++;
+								otherItem.grow(1);
 								return true;
 							}
 						}
@@ -284,7 +284,7 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 		if (this.getInventory()[slot] == null) {
 			return null;
 		}
-		if (this.getInventory()[slot].stackSize <= decrement) {
+		if (this.getInventory()[slot].getCount() <= decrement) {
 			final ItemStack itemstack = this.getInventory()[slot];
 			this.getInventory()[slot] = null;
 			return itemstack;
@@ -333,8 +333,8 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 	}
 
 	@Override
-	public boolean isUseableByPlayer(final EntityPlayer p_isUseableByPlayer_1_) {
-		return this.worldObj.getTileEntity(this.pos) 
+	public boolean isUsableByPlayer(final EntityPlayer p_isUseableByPlayer_1_) {
+		return this.world.getTileEntity(this.pos) 
 				== this && p_isUseableByPlayer_1_.getDistanceSq(
 						(double)this.pos.getX() + 0.5, 
 						(double)this.pos.getY() + 0.5, 
@@ -356,8 +356,8 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 		final boolean flag = item != null && item.isItemEqual(this.getInventory()[slot]) 
 				&& ItemStack.areItemStackTagsEqual(item, this.getInventory()[slot]);
 		this.getInventory()[slot] = item;
-		if (item != null && item.stackSize > this.getInventoryStackLimit()) {
-			item.stackSize = this.getInventoryStackLimit();
+		if (item != null && item.getCount() > this.getInventoryStackLimit()) {
+			item.setCount(this.getInventoryStackLimit());
 		}
 		if (slot == 0 && !flag) {
 			this.markDirty();
@@ -446,4 +446,9 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 		return slotAccessCache;
 	}
 	//////////  //////////
+
+	@Override
+	public boolean isEmpty() {
+		return false;
+	}
 }

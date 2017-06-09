@@ -1,5 +1,7 @@
 package cyano.poweradvantage.machines.fluidmachines.modsupport;
 
+import java.util.List;
+
 import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.PowerConnectorContext;
 import cyano.poweradvantage.api.PowerRequest;
@@ -12,9 +14,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidHandler;
-
-import java.util.List;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 public class TerminalFluidPipeTileEntity extends PoweredEntity {
 
@@ -79,23 +79,22 @@ public class TerminalFluidPipeTileEntity extends PoweredEntity {
 		for (int i = 0; i < 6; i++) {
 			if (neighbors[i] == null) continue;
 			IFluidHandler f = neighbors[i];
-			FluidStack drain = neighbors[i].drain(faces[i].getOpposite(), Integer.MAX_VALUE, false);
+			FluidStack drain = neighbors[i].drain(Integer.MAX_VALUE, false);
 			if (f != null && drain != null) sum += drain.amount;
 		}
 		return sum;
 	}
-
 
 	@Override
 	public void powerUpdate() {
 		for (int i = 0; i < 6; i++) {
 			if (neighbors[i] == null) continue;
 			IFluidHandler n = neighbors[i];
-			EnumFacing face = faces[i].getOpposite();
-			FluidStack available = n.drain(face, Integer.MAX_VALUE, false);
+			faces[i].getOpposite();
+			FluidStack available = n.drain(Integer.MAX_VALUE, false);
 			if (available != null && available.getFluid() != null && available.amount > 0) {
 				int delta = transmitFluidToConsumers(available, PowerRequest.LOW_PRIORITY);
-				n.drain(face, delta, true);
+				n.drain( delta, true);
 			}
 		}
 	}
@@ -152,10 +151,10 @@ public class TerminalFluidPipeTileEntity extends PoweredEntity {
 		int delta = 0, original = (int) energy;
 		for (int i = 0; i < 6; i++) {
 			IFluidHandler n = neighbors[i];
-			EnumFacing face = faces[i].getOpposite();
+			faces[i].getOpposite();
 			if (n != null) {
 				FluidStack fs = new FluidStack(f, original - delta);
-				delta += n.fill(face, fs, true);
+				delta += n.fill( fs, true);
 			}
 			if (delta >= original) break;
 		}
@@ -171,9 +170,9 @@ public class TerminalFluidPipeTileEntity extends PoweredEntity {
 		int demand = 0;
 		for (int i = 0; i < 6; i++) {
 			IFluidHandler n = neighbors[i];
-			EnumFacing face = faces[i].getOpposite();
+			faces[i].getOpposite();
 			if (n != null) {
-				demand += n.fill(face, offer, false);
+				demand += n.fill( offer, false);
 			}
 		}
 		return new FluidRequest(PowerRequest.LOW_PRIORITY - 1, demand, this);

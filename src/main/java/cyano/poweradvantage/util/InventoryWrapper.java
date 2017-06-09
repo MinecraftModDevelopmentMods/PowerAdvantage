@@ -32,7 +32,6 @@ public class InventoryWrapper implements ISidedInventory {
 	protected InventoryWrapper(IInventory inv) {
 		this.inventory = inv;
 		slots = new int[inventory.getSizeInventory()];
-		net.minecraft.tileentity.TileEntityChest g;
 		for (int i = 0; i < slots.length; i++) {
 			slots[i] = i;
 		}
@@ -79,8 +78,9 @@ public class InventoryWrapper implements ISidedInventory {
 
 			}
 
+			
 			@Override
-			public boolean isUseableByPlayer(EntityPlayer entityPlayer) {
+			public boolean isUsableByPlayer(EntityPlayer entityPlayer) {
 				return false;
 			}
 
@@ -132,6 +132,11 @@ public class InventoryWrapper implements ISidedInventory {
 			@Override
 			public TextComponentBase getDisplayName() {
 				return new TextComponentString("Inventory");
+			}
+
+			@Override
+			public boolean isEmpty() {
+				return false;
 			}
 		};
 	}
@@ -229,8 +234,8 @@ public class InventoryWrapper implements ISidedInventory {
 	}
 
 	@Override
-	public boolean isUseableByPlayer(EntityPlayer arg0) {
-		return inventory.isUseableByPlayer(arg0);
+	public boolean isUsableByPlayer(EntityPlayer arg0) {
+		return inventory.isUsableByPlayer(arg0);
 	}
 
 	@Override
@@ -270,5 +275,10 @@ public class InventoryWrapper implements ISidedInventory {
 	public int[] getSlotsForFace(EnumFacing arg0) {
 		if (isLocked()) return NO_SLOTS;
 		return slots;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return false;
 	}
 }

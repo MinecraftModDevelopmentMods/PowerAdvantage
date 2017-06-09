@@ -101,7 +101,7 @@ public class FuelRegistry implements IFuelHandler{
 	 */
 	public List<Function<ItemStack,Short>> getFuelAlgorithmsForItem(Item item){
 		List<Function<ItemStack,Short>> list = burnMap.get(item);
-		if(list == null) return Collections.EMPTY_LIST;
+		if(list == null) return Collections.emptyList();
 		return list;
 	}
 
@@ -115,7 +115,7 @@ public class FuelRegistry implements IFuelHandler{
 	 */
 	public List<Function<ItemStack,ItemStack>> getPostBurnAlgorithmsForItem(Item item){
 		List<Function<ItemStack,ItemStack>> list = postBurnMap.get(item);
-		if(list == null) return Collections.EMPTY_LIST;
+		if(list == null) return Collections.emptyList();
 		return list;
 	}
 	/**
@@ -154,8 +154,8 @@ public class FuelRegistry implements IFuelHandler{
 		if(fuelItem == null) return null;
 		List<Function<ItemStack, ItemStack>> list = FuelRegistry.getInstance().getPostBurnAlgorithmsForItem(fuelItem.getItem());
 		if(list.isEmpty()){
-			fuelItem.stackSize--;
-			if(fuelItem.stackSize == 0){
+			fuelItem.shrink(1);
+			if(fuelItem.getCount() == 0){
 				fuelItem = fuelItem.getItem().getContainerItem(fuelItem);
 			}
 		} else {

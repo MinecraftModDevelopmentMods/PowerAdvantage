@@ -1,7 +1,7 @@
 package cyano.poweradvantage.init;
 
-import cyano.basemetals.init.FunctionalCreativeTab;
 import cyano.poweradvantage.PowerAdvantage;
+import cyano.poweradvantage.gui.FunctionalCreativeTab;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -18,6 +18,7 @@ public class ItemGroups {
 	public static void init() {
 		if (initDone) return;
 
+		
 		tab_powerAdvantage = FunctionalCreativeTab.create(PowerAdvantage.MODID)
 				.setIcon(Items.sprocket)
 				.setItemSortingAlgorithm(ItemGroups::itemSort)
@@ -25,6 +26,8 @@ public class ItemGroups {
 		initDone = true;
 	}
 
+	//TODO Don't  think we need
+	/*
 	private static int itemSort(ItemStack A, ItemStack B) {
 		String catA = catagorize(A);
 		String catB = catagorize(B);
@@ -49,4 +52,5 @@ public class ItemGroups {
 
 		return sb.toString();
 	}
+	*/
 }

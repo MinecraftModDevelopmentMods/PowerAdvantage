@@ -105,7 +105,7 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 	protected final void sync() {
 		this.markDirty();
 		//this.getWorld().markBlockForUpdate(getPos());
-		Packet packet = this.getUpdatePacket();
+		Packet<?> packet = this.getUpdatePacket();
 		if (packet == null) return;
 		List<EntityPlayerMP> players = this.getWorld().getPlayers(EntityPlayerMP.class, (EntityPlayerMP p) -> p.getPosition().distanceSq(getPos()) < 256);
 		for (EntityPlayerMP player : players) {

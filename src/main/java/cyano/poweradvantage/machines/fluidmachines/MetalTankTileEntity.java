@@ -6,7 +6,11 @@ import cyano.poweradvantage.api.fluid.FluidRequest;
 import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.ForgeModContainer;
-import net.minecraftforge.fluids.*;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.UniversalBucket;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
 
@@ -50,7 +54,7 @@ public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
 		if (item == null) return null;
 		if (item.getItem() instanceof UniversalBucket) {
 			UniversalBucket bucket = (UniversalBucket) item.getItem();
-			FluidStack drain = bucket.drain(item, bucket.getCapacity(item), false);
+			FluidStack drain = bucket.drain(item, bucket.getCapacity(), false);
 			if (drain != null && drain.amount > 0) {
 				return drain;
 			} else {
@@ -165,6 +169,18 @@ public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
 	@Override
 	public boolean isPowerSource(ConduitType powerType) {
 		return true;
+	}
+
+
+	@Override
+	public boolean isEmpty() {
+		return false;
+	}
+
+
+	@Override
+	public IFluidTankProperties[] getTankProperties() {
+		return null;
 	}
 
 }

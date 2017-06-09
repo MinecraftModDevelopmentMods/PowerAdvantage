@@ -46,12 +46,6 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
 	private String customName = null;
     
     private final String unlocalizedName;
-	/**
-	 * Precomputed value for improved performance
-	 */
-	private boolean isEmpty = true;
-	
-
 	private int[] dataFields = new int[2];
 	private static final int DATAFIELD_FLUID_ID = 0; // index in the dataFields array
 	private static final int DATAFIELD_FLUID_VOLUME = 1; // index in the dataFields array
@@ -190,10 +184,6 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
     @Override
     public abstract void tickUpdate(boolean isServerWorld);
     
-    
-    /** implementation detail for the powerUpdate() method. Do not touch! */
-    private static final EnumFacing[] faces = {EnumFacing.UP,EnumFacing.SOUTH,EnumFacing.EAST,EnumFacing.NORTH,EnumFacing.WEST,EnumFacing.DOWN};
-	
     
     private int oldLevel = -1;
     /**
@@ -465,13 +455,13 @@ private final ConduitType[] types = {Fluids.fluidConduit_general};
 		if (this.getInventory()[slot] == null) {
             return null;
         }
-        if (this.getInventory()[slot].stackSize <= decrement) {
+        if (this.getInventory()[slot].getCount() <= decrement) {
             final ItemStack itemstack = this.getInventory()[slot];
             this.getInventory()[slot] = null;
             return itemstack;
         }
         final ItemStack itemstack = this.getInventory()[slot].splitStack(decrement);
-        if (this.getInventory()[slot].stackSize == 0) {
+        if (this.getInventory()[slot].getCount() == 0) {
             this.getInventory()[slot] = null;
         }
         return itemstack;
@@ -589,8 +579,8 @@ private final ConduitType[] types = {Fluids.fluidConduit_general};
 	 * boilerplate inventory code
 	 */
 	@Override
-    public boolean isUseableByPlayer(final EntityPlayer p_isUseableByPlayer_1_) {
-        return this.worldObj.getTileEntity(this.pos) == this && p_isUseableByPlayer_1_.getDistanceSq((double)this.pos.getX() + 0.5, (double)this.pos.getY() + 0.5, (double)this.pos.getZ() + 0.5) <= 64.0;
+    public boolean isUsableByPlayer(final EntityPlayer p_isUseableByPlayer_1_) {
+        return this.world.getTileEntity(this.pos) == this && p_isUseableByPlayer_1_.getDistanceSq((double)this.pos.getX() + 0.5, (double)this.pos.getY() + 0.5, (double)this.pos.getZ() + 0.5) <= 64.0;
     }
 
 	/**
@@ -602,8 +592,8 @@ private final ConduitType[] types = {Fluids.fluidConduit_general};
 		final boolean flag = item != null && item.isItemEqual(this.getInventory()[slot]) 
 				&& ItemStack.areItemStackTagsEqual(item, this.getInventory()[slot]);
 		this.getInventory()[slot] = item;
-		if (item != null && item.stackSize > this.getInventoryStackLimit()) {
-			item.stackSize = this.getInventoryStackLimit();
+		if (item != null && item.getCount() > this.getInventoryStackLimit()) {
+			item.setCount(this.getInventoryStackLimit());
 		}
 		if (slot == 0 && !flag) {
 			this.markDirty();

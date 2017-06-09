@@ -156,7 +156,9 @@ public abstract class TileEntityTRConverter extends TileEntityConverter implemen
 		}
 		return n;
 	}
-
+	
+	//Don't think we need thi
+	/*
 	private static double max(double... vals) {
 		double n = Double.NEGATIVE_INFINITY;
 		for (int i = 0; i < vals.length; i++) {
@@ -164,6 +166,7 @@ public abstract class TileEntityTRConverter extends TileEntityConverter implemen
 		}
 		return n;
 	}
+	*/
 
 	@Override
 	public double getEnergy() {

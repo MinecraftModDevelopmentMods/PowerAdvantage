@@ -34,8 +34,8 @@ public class TileEntityOverflowFilter extends TileEntityConveyorFilter {
 					if ((targetSlot == null) ||
 							(ItemStack.areItemsEqual(item, targetSlot)
 									&& !targetSlot.getItem().isDamageable()
-									&& targetSlot.stackSize < targetSlot.getMaxStackSize()
-									&& targetSlot.stackSize < dt.getInventoryStackLimit())) {
+									&& targetSlot.getCount() < targetSlot.getMaxStackSize()
+									&& targetSlot.getCount() < dt.getInventoryStackLimit())) {
 						return true;
 					}
 				}

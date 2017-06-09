@@ -198,7 +198,7 @@ public class ConduitNetworkManager {
 			if (networkCache.containsKey(coord)) {
 				return Collections.unmodifiableList(networkCache.get(coord));
 			} else {
-				return Collections.EMPTY_LIST;
+				return Collections.emptyList();
 			}
 		} finally {
 			lock.readLock().unlock();

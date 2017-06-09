@@ -12,7 +12,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockRFConverter extends BlockSimplePowerMachine {
 
-	private final Class tileEntityClass;
+	private final Class<? extends TileEntityRFConverter> tileEntityClass;
 
 	public BlockRFConverter(Material blockMaterial, float hardness, ConduitType energyType, Class<? extends TileEntityRFConverter> tileEntityClass) {
 		super(blockMaterial, hardness, energyType);

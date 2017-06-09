@@ -1,5 +1,21 @@
 package cyano.poweradvantage;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
 import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.init.WorldGen;
 import cyano.poweradvantage.registry.FuelRegistry;
@@ -7,9 +23,7 @@ import cyano.poweradvantage.registry.MachineGUIRegistry;
 import cyano.poweradvantage.registry.still.recipe.DistillationRecipeRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Mod;
@@ -23,18 +37,6 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
-import org.apache.logging.log4j.Level;
-
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
 
 // NOTE: other mods dependant on this one need to add the following to their @Mod annotation:
 // dependencies = "required-after:poweradvantage" 
@@ -426,7 +428,7 @@ public class PowerAdvantage
 		FMLLog.info("%s: starting main inititalization", MODID);
 		try {
 			FMLLog.info("%s: testing whether we have to support redstone flux", MODID);
-			Class rfClass = Class.forName("cofh.api.energy.IEnergyReceiver", false, getClass().getClassLoader());
+			Class<?> rfClass = Class.forName("cofh.api.energy.IEnergyReceiver", false, getClass().getClassLoader());
 			detectedRF = rfClass != null;
 			FMLLog.info("%s: RF class detected: %s", MODID, rfClass);
 		} catch (ClassNotFoundException e) {
@@ -435,7 +437,7 @@ public class PowerAdvantage
 		}
 		try {
 			FMLLog.info("%s: testing whether we have to support Tech Reborn", MODID);
-			Class trClass = Class.forName("reborncore.api.power.IEnergyInterfaceTile", false, getClass().getClassLoader());
+			Class<?> trClass = Class.forName("reborncore.api.power.IEnergyInterfaceTile", false, getClass().getClassLoader());
 			detectedTechReborn = trClass != null;
 			FMLLog.info("%s: Tech Reborn class detected: %s", MODID, trClass);
 		} catch (ClassNotFoundException e) {
@@ -514,8 +516,7 @@ public class PowerAdvantage
 		// Clear caches
 		DistillationRecipeRegistry.clearRecipeCache();
 		
-		// Handle inter-mod action
-		Map<String,Set<Block>> modBlocks = sortBlocksByModID();
+		sortBlocksByModID();
 		
 		// hacking
 		// printHackingInfo(); // XXX: hacker stuff
@@ -556,6 +557,8 @@ public class PowerAdvantage
 		return Collections.unmodifiableMap(modMap);
 	}
 
+	//TODO Don't think we need
+	/*
 	private void printHackingInfo() {
 		try {
 			// Object dump all blocks and class dump all tile entities
@@ -569,10 +572,10 @@ public class PowerAdvantage
 			try {
 				Field f = TileEntity.class.getDeclaredField("field_145853_j");
 				f.setAccessible(true);
-				Map m = (Map) f.get(null);
+				Map<?, ?> m = (Map<?, ?>) f.get(null);
 				// do TileEntity class dump
 				for (Object o : m.keySet()) {
-					FMLLog.info("TileEntity: %s", superDump(null, (Class) o));
+					FMLLog.info("TileEntity: %s", superDump(null, (Class<?>) o));
 				}
 			} catch (Exception ex) {
 				FMLLog.severe("%s: Exception\n%s", MODID, ex);
@@ -585,13 +588,13 @@ public class PowerAdvantage
 	private static String objectDump(Object o){
 		if(o == null) return "null";
 		StringBuilder sb = new StringBuilder("\n");
-		Class c = o.getClass();
+		Class<?> c = o.getClass();
 		sb.append(c.getName()).append(" extends ").append(c.getSuperclass()).append("\n\t");
 		
 		Class[] interfaces = c.getInterfaces();
 		if(interfaces != null && interfaces.length > 0){
 			sb.append("\t").append("Interfaces").append("\n\t");
-			for(Class i : interfaces){
+			for(Class<?> i : interfaces){
 				sb.append(i.getName()).append("\n\t");
 			}
 		}
@@ -645,6 +648,8 @@ public class PowerAdvantage
 		}
 		return sb.toString();
 	}
+	*/
+
 
 	private static String dumpField(Field f, Object inst) throws IllegalAccessException {
 		StringBuilder sb = new StringBuilder();
@@ -678,7 +683,7 @@ public class PowerAdvantage
 		sb.append(m.getReturnType().getCanonicalName()).append(" ");
 		sb.append(m.getName()).append("(");
 		boolean b = false;
-		for(Class p : m.getParameterTypes()){
+		for(Class<?> p : m.getParameterTypes()){
 			if(b) sb.append(", ");
 			if(p.isArray()){
 				sb.append(p.getComponentType().getSimpleName()).append("[]");
@@ -699,12 +704,12 @@ public class PowerAdvantage
 				"\n\t" + superDump(o, o.getClass()) +
 				"}";
 	}
-	public static String superDump(Object o, Class c) throws IllegalAccessException {
+	public static String superDump(Object o, Class<?> c) throws IllegalAccessException {
 		StringBuilder sb = new StringBuilder();
 		sb.append("class ").append(c.getCanonicalName());
 		if(c.getInterfaces().length > 0) sb.append(" implements ");
 		boolean b = false;
-		for(Class i : c.getInterfaces()){
+		for(Class<?> i : c.getInterfaces()){
 			if(b) sb.append(", ");
 			sb.append(i.getSimpleName());
 			b = true;
@@ -716,7 +721,7 @@ public class PowerAdvantage
 		for(Method m : c.getDeclaredMethods()){
 			sb.append("\t").append(dumpMethod(m)).append("\n");
 		}
-		for(Class i : c.getInterfaces()){
+		for(Class<?> i : c.getInterfaces()){
 			for(Method m : i.getDeclaredMethods()){
 				sb.append("\t@Implementation(").append(i.getCanonicalName()).append(") ")
 						.append(dumpMethod(m)).append("\n");

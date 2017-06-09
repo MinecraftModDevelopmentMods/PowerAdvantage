@@ -11,7 +11,12 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fluids.*;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fluids.FluidTankInfo;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 public class StillTileEntity extends TileEntitySimpleFluidMachine {
 
@@ -214,7 +219,7 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 	 * @param fluid The fluid being added/removed
 	 */
 	@Override
-	public boolean canFill(EnumFacing face, Fluid fluid) {
+	public boolean canFill(Fluid fluid) {
 		if (inputTank.getFluid() == null) return canDistill(new FluidStack(fluid, inputTank.getCapacity()));
 		return inputTank.getFluidAmount() <= inputTank.getCapacity() && fluid.equals(inputTank.getFluid().getFluid());
 	}
@@ -406,5 +411,15 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 	@Override
 	public boolean isFluidSink() {
 		return true;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return false;
+	}
+
+	@Override
+	public IFluidTankProperties[] getTankProperties() {
+		return null;
 	}
 }

@@ -3,10 +3,9 @@ package cyano.poweradvantage.gui;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
 /**
  * Uses java 8 function API to lazily pass an item icon
  * @author DrCyano
@@ -63,7 +62,7 @@ public class FunctionalCreativeTab  extends CreativeTabs {
 	 */
 	@Override
 	@SideOnly(Side.CLIENT)
-	public void displayAllRelevantItems(List<ItemStack> itemList) {
+	public void displayAllRelevantItems(NonNullList<ItemStack> itemList) {
 		super.displayAllRelevantItems(itemList);
 		itemList.sort(itemSortingAlgorithm);
 	}
@@ -74,7 +73,7 @@ public class FunctionalCreativeTab  extends CreativeTabs {
 	 */
 	@SideOnly(Side.CLIENT)
 	@Override
-	public Item getTabIconItem() {
-		return itemSupplier.get();
+	public ItemStack getTabIconItem() {
+		return new ItemStack(itemSupplier.get());
 	}
 }

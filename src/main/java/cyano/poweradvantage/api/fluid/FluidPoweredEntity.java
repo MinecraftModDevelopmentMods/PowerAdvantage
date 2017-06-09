@@ -8,6 +8,7 @@ import cyano.poweradvantage.init.Fluids;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.*;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import java.util.List;
 
@@ -175,7 +176,7 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param forReal if true, then the fluid in the tank will change
 	 */
 	@Override
-	public int fill(EnumFacing face, FluidStack fluid, boolean forReal) {
+	public int fill(FluidStack fluid, boolean forReal) {
 		if (getTank().getFluidAmount() <= 0 || getTank().getFluid().getFluid().equals(fluid.getFluid())) {
 			return getTank().fill(fluid, forReal);
 		} else {
@@ -191,7 +192,7 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param forReal if true, then the fluid in the tank will change
 	 */
 	@Override
-	public FluidStack drain(EnumFacing face, FluidStack fluid, boolean forReal) {
+	public FluidStack drain(FluidStack fluid, boolean forReal) {
 		if (getTank().getFluidAmount() > 0 && getTank().getFluid().getFluid().equals(fluid.getFluid())) {
 			return getTank().drain(fluid.amount, forReal);
 		} else {
@@ -207,7 +208,7 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param forReal if true, then the fluid in the tank will change
 	 */
 	@Override
-	public FluidStack drain(EnumFacing face, int amount, boolean forReal) {
+	public FluidStack drain(int amount, boolean forReal) {
 		if (getTank().getFluidAmount() > 0) {
 			return getTank().drain(amount, forReal);
 		} else {
@@ -221,8 +222,9 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param face  Face of the block being polled
 	 * @param fluid The fluid being added/removed
 	 */
+	
 	@Override
-	public boolean canFill(EnumFacing face, Fluid fluid) {
+	public boolean canFill(Fluid fluid) {
 		if (getTank().getFluid() == null) return true;
 		return getTank().getFluidAmount() <= getTank().getCapacity() && fluid.equals(getTank().getFluid().getFluid());
 	}
@@ -234,7 +236,7 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param fluid The fluid being added/removed
 	 */
 	@Override
-	public boolean canDrain(EnumFacing face, Fluid fluid) {
+	public boolean canDrain(Fluid fluid) {
 		if (getTank().getFluid() == null) return false;
 		return getTank().getFluidAmount() > 0 && fluid.equals(getTank().getFluid().getFluid());
 	}
@@ -245,6 +247,7 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param face Face of the block being polled
 	 * @return array of FluidTankInfo describing all of the FluidTanks
 	 */
+	
 	@Override
 	public FluidTankInfo[] getTankInfo(EnumFacing face) {
 		FluidTankInfo[] arr = new FluidTankInfo[1];

@@ -206,9 +206,6 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	public abstract void tickUpdate(boolean isServerWorld);
 	
 	
-	/** implementation detail for the powerUpdate() method. Do not touch! */
-	private static final EnumFacing[] faces = {EnumFacing.UP,EnumFacing.SOUTH,EnumFacing.EAST,EnumFacing.NORTH,EnumFacing.WEST,EnumFacing.DOWN};
-	
 	/**
 	 * This method is called when the power transmission is computed (not every 
 	 * tick). You do not need to override this method, but if you do, be sure to 
@@ -477,13 +474,13 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 		if (this.getInventory()[slot] == null) {
 			return null;
 		}
-		if (this.getInventory()[slot].stackSize <= decrement) {
+		if (this.getInventory()[slot].getCount() <= decrement) {
 			final ItemStack itemstack = this.getInventory()[slot];
 			this.getInventory()[slot] = null;
 			return itemstack;
 		}
 		final ItemStack itemstack = this.getInventory()[slot].splitStack(decrement);
-		if (this.getInventory()[slot].stackSize == 0) {
+		if (this.getInventory()[slot].getCount() == 0) {
 			this.getInventory()[slot] = null;
 		}
 		return itemstack;
@@ -601,8 +598,8 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * boilerplate inventory code
 	 */
 	@Override
-	public boolean isUseableByPlayer(final EntityPlayer p_isUseableByPlayer_1_) {
-		return this.worldObj.getTileEntity(this.pos) == this && p_isUseableByPlayer_1_.getDistanceSq((double)this.pos.getX() + 0.5, (double)this.pos.getY() + 0.5, (double)this.pos.getZ() + 0.5) <= 64.0;
+	public boolean isUsableByPlayer(final EntityPlayer p_isUseableByPlayer_1_) {
+		return this.world.getTileEntity(this.pos) == this && p_isUseableByPlayer_1_.getDistanceSq((double)this.pos.getX() + 0.5, (double)this.pos.getY() + 0.5, (double)this.pos.getZ() + 0.5) <= 64.0;
 	}
 
 	/**
@@ -614,8 +611,8 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 		final boolean flag = item != null && item.isItemEqual(this.getInventory()[slot]) 
 				&& ItemStack.areItemStackTagsEqual(item, this.getInventory()[slot]);
 		this.getInventory()[slot] = item;
-		if (item != null && item.stackSize > this.getInventoryStackLimit()) {
-			item.stackSize = this.getInventoryStackLimit();
+		if (item != null && item.getCount() > this.getInventoryStackLimit()) {
+			item.setCount(this.getInventoryStackLimit());
 		}
 		if (slot == 0 && !flag) {
 			this.markDirty();

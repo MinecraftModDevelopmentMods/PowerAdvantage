@@ -10,6 +10,7 @@ import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Mirror;
@@ -50,7 +51,6 @@ public class BlockConveyorFilter extends GUIBlock {
 
 	@Override
 	public TileEntity createNewTileEntity(World w, int m) {
-		net.minecraft.block.BlockPistonBase k;
 		try {
 			return tileEntityClass.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -73,12 +73,9 @@ public class BlockConveyorFilter extends GUIBlock {
 	}
 
 	@Override
-	public IBlockState onBlockPlaced(
-			final World w, final BlockPos coord, final EnumFacing face,
-			final float partialX, final float partialY, final float partialZ,
-			final int i, final EntityLivingBase placer
-	) {
-		return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing());
+	public void onBlockPlacedBy(World w, BlockPos coord, IBlockState state, EntityLivingBase placer,
+			ItemStack stack) {
+		return;
 	}
 
 	@Override

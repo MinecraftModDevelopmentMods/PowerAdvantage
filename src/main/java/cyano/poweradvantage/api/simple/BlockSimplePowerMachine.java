@@ -133,6 +133,8 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
 	/**
 	 * Creates the blockstate of this block when it is placed in the world
 	 */
+    
+    
     @Override
     public IBlockState onBlockPlaced(final World p_onBlockPlaced_1_, final BlockPos p_onBlockPlaced_2_, final EnumFacing p_onBlockPlaced_3_, final float p_onBlockPlaced_4_, final float p_onBlockPlaced_5_, final float p_onBlockPlaced_6_, final int p_onBlockPlaced_7_, final EntityLivingBase p_onBlockPlaced_8_) {
         return this.getDefaultState().withProperty( FACING, p_onBlockPlaced_8_.getHorizontalFacing().getOpposite());

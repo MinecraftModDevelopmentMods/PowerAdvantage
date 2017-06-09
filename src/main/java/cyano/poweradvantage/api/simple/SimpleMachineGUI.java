@@ -161,7 +161,7 @@ guiContainer.drawTexturedModalRect(x+79, y+35, 0, 0, arrowLength, 17); // x, y, 
 		
 		@Override
 		public boolean canInteractWith(EntityPlayer entityplayer) {
-			return entity.isUseableByPlayer(entityplayer);
+			return entity.isUsableByPlayer(entityplayer);
 		}
 		
 		protected void bindPlayerInventory(InventoryPlayer inventoryPlayer, int yOffset) {
@@ -196,16 +196,16 @@ guiContainer.drawTexturedModalRect(x+79, y+35, 0, 0, arrowLength, 17); // x, y, 
 					return null;
 				}
 
-				if (stackInSlot.stackSize == 0) {
+				if (stackInSlot.getCount() == 0) {
 					slotObject.putStack(null);
 				} else {
 					slotObject.onSlotChanged();
 				}
 
-				if (stackInSlot.stackSize == stack.stackSize) {
+				if (stackInSlot.getCount() == stack.getCount()) {
 					return null;
 				}
-				slotObject.onPickupFromSlot(player, stackInSlot);
+				slotObject.onSlotChanged();
 			}
 			return stack;
 		}

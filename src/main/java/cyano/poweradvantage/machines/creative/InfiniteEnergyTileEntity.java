@@ -101,4 +101,9 @@ public class InfiniteEnergyTileEntity extends TileEntitySimplePowerMachine {
 			this.type[0] = new ConduitType(tagRoot.getString("InfType"));
 		}
 	}
+
+	@Override
+	public boolean isEmpty() {
+		return false;
+	}
 }

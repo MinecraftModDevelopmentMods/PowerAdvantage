@@ -11,6 +11,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Mirror;
@@ -72,11 +73,8 @@ public class BlockConveyor extends GUIBlock {
 	}
 
 	@Override
-	public IBlockState onBlockPlaced(
-			final World w, final BlockPos coord, final EnumFacing face,
-			final float partialX, final float partialY, final float partialZ,
-			final int i, final EntityLivingBase placer
-	) {
+	public void onBlockPlacedBy(World w, BlockPos coord, IBlockState state, EntityLivingBase placer,
+			ItemStack stack) {
 		return this.getDefaultState().withProperty(FACING, face.getOpposite());
 	}
 
