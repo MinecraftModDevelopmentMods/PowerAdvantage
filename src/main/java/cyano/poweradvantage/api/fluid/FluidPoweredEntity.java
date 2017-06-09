@@ -113,7 +113,7 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	public float addEnergy(float amount, ConduitType type) {
 		if (Fluids.isFluidType(type)) {
 			if (this.canFill(null, Fluids.conduitTypeToFluid(type))) {
-				return this.fill(null, new FluidStack(Fluids.conduitTypeToFluid(type), (int) amount), true);
+				return this.fill(new FluidStack(Fluids.conduitTypeToFluid(type), (int) amount), true);
 			} else {
 				return 0;
 			}
@@ -149,7 +149,7 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	public float subtractEnergy(float amount, ConduitType type) {
 		if (Fluids.isFluidType(type)) {
 			if (this.canDrain(null, Fluids.conduitTypeToFluid(type))) {
-				return this.drain(null, new FluidStack(Fluids.conduitTypeToFluid(type), (int) amount), true).amount;
+				return this.drain(new FluidStack(Fluids.conduitTypeToFluid(type), (int) amount), true).amount;
 			} else {
 				return 0;
 			}
@@ -222,7 +222,6 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param face  Face of the block being polled
 	 * @param fluid The fluid being added/removed
 	 */
-	
 	@Override
 	public boolean canFill(Fluid fluid) {
 		if (getTank().getFluid() == null) return true;
@@ -247,7 +246,6 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param face Face of the block being polled
 	 * @return array of FluidTankInfo describing all of the FluidTanks
 	 */
-	
 	@Override
 	public FluidTankInfo[] getTankInfo(EnumFacing face) {
 		FluidTankInfo[] arr = new FluidTankInfo[1];

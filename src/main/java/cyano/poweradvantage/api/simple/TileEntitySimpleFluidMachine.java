@@ -46,7 +46,7 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
 	private String customName = null;
     
     private final String unlocalizedName;
-	private int[] dataFields = new int[2];
+	private int[] dataFields = new int[2];	 
 	private static final int DATAFIELD_FLUID_ID = 0; // index in the dataFields array
 	private static final int DATAFIELD_FLUID_VOLUME = 1; // index in the dataFields array
     
@@ -259,7 +259,7 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
 	            final NBTTagCompound nbttagcompound1 = nbttaglist.getCompoundTagAt(i);
 	            final byte n = nbttagcompound1.getByte("Slot");
 	            if (n >= 0 && n < inventory.length) {
-	                inventory[n] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
+	                inventory[n] = new ItemStack(nbttagcompound1);
 	            }
 	        }
         }

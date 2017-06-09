@@ -1,6 +1,5 @@
 package cyano.poweradvantage.init;
 
-import cyano.basemetals.util.VillagerTradeHelper;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraftforge.fml.common.FMLLog;
 import org.apache.logging.log4j.Level;

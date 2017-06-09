@@ -23,6 +23,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.UniversalBucket;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 
 /**
  * <p>
@@ -135,9 +136,9 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
 		if(tileEntity instanceof IFluidHandler && item != null) {
 			/// NEW WAY - IFluidContainerItem and the UniversalBucket FTW!
 			IFluidHandler target = (IFluidHandler) tileEntity;
-			if (item.getItem() instanceof IFluidContainerItem){
+			if (item.getItem() instanceof IFluidHandler){
 				// fill from bucket
-				IFluidContainerItem container = (IFluidContainerItem) item.getItem();
+				IFluidHandlerItem container = (IFluidHandlerItem) item.getItem();
 				if (container.getFluid(item) != null && container.getFluid(item).amount > 0) {
 					if (target.fill(
 							container.drain(item,container.getFluid(item).amount,false),
@@ -192,7 +193,7 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
 						}
 					}
 				}
-			} else if (item != null && FluidContainerRegistry.isContainer(item) && tileEntity instanceof IFluidHandler) {
+			} else if (item != null && FluidRegistry(item) && tileEntity instanceof IFluidHandler) {
 				/// OLD WAY - deprecated (but still might be used by other mods)
 				boolean bucketed = handleBucketInteraction(item, player, (IFluidHandler) tileEntity, w);
 				if (bucketed) {

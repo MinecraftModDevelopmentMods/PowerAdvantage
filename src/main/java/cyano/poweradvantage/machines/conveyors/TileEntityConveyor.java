@@ -218,7 +218,7 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 				final NBTTagCompound nbttagcompound1 = nbttaglist.getCompoundTagAt(i);
 				final byte n = nbttagcompound1.getByte("Slot");
 				if (n >= 0 && n < inventory.length) {
-					inventory[n] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
+					inventory[n] = new ItemStack(nbttagcompound1);
 				}
 			}
 		}

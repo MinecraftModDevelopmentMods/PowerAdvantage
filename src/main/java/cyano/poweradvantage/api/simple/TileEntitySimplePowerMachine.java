@@ -294,7 +294,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 				final NBTTagCompound nbttagcompound1 = nbttaglist.getCompoundTagAt(i);
 				final byte n = nbttagcompound1.getByte("Slot");
 				if (n >= 0 && n < inventory.length) {
-					inventory[n] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
+					inventory[n] = new ItemStack(nbttagcompound1);
 				}
 			}
 		}
