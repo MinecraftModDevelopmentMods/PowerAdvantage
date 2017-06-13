@@ -232,7 +232,7 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
 				} else {
 					bucket.stackSize--;
 					if(newBucket != null)
-						world.spawnEntityInWorld(new EntityItem(world,player.posX,player.posY,player.posZ, newBucket));
+						world.spawnEntity(new EntityItem(world,player.posX,player.posY,player.posZ, newBucket));
 				}
 				return true;
 			} else {
@@ -249,7 +249,7 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
 					player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, newBucket);
 				} else {
 					bucket.stackSize--;
-					world.spawnEntityInWorld(new EntityItem(world,player.posX,player.posY,player.posZ, newBucket));
+					world.spawnEntity(new EntityItem(world,player.posX,player.posY,player.posZ, newBucket));
 				}
 				return true;
 			} else {

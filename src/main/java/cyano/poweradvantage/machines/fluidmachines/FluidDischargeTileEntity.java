@@ -33,8 +33,8 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
 		// push fluid to below
 		BlockPos space = this.pos.down();
 		// to fluid container
-		if (tank.getFluidAmount() > 0 && worldObj.getTileEntity(space) instanceof IFluidHandler) {
-			IFluidHandler other = (IFluidHandler) worldObj.getTileEntity(space);
+		if (tank.getFluidAmount() > 0 && world.getTileEntity(space) instanceof IFluidHandler) {
+			IFluidHandler other = (IFluidHandler) world.getTileEntity(space);
 			FluidTankInfo[] tanks = other.getTankInfo(EnumFacing.DOWN);
 			for (int i = 0; i < tanks.length; i++) {
 				FluidTankInfo t = tanks[i];
@@ -53,18 +53,18 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
 				Fluid fluid = fstack.getFluid();
 				Block fluidBlock = fluid.getBlock();
 				BlockPos coord = space;
-				if (worldObj.isAirBlock(coord)) {
-					worldObj.setBlockState(coord, fluidBlock.getDefaultState());
-					worldObj.notifyBlockOfStateChange(coord, fluidBlock);
+				if (world.isAirBlock(coord)) {
+					world.setBlockState(coord, fluidBlock.getDefaultState());
+					world.notifyBlockOfStateChange(coord, fluidBlock);
 					this.drain(EnumFacing.DOWN, FluidContainerRegistry.BUCKET_VOLUME, true);
-				} else if (worldObj.getBlockState(coord).getBlock() == fluidBlock) {
+				} else if (world.getBlockState(coord).getBlock() == fluidBlock) {
 					// follow the flow
 					coord = scanFluidSpaceForNonsourceBlock(getWorld(), coord, fluid, 32);
 
 					if (coord != null) {
 						// not a source block
-						worldObj.setBlockState(coord, fluidBlock.getDefaultState());
-						worldObj.notifyBlockOfStateChange(coord, fluidBlock);
+						world.setBlockState(coord, fluidBlock.getDefaultState());
+						world.notifyBlockOfStateChange(coord, fluidBlock);
 						this.drain(EnumFacing.DOWN, FluidContainerRegistry.BUCKET_VOLUME, true);
 					}
 				}
@@ -85,15 +85,15 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
 
 
 	private boolean canPlace(BlockPos coord, Fluid fluid) {
-		if (worldObj.isAirBlock(coord)) return true;
-		IBlockState bs = worldObj.getBlockState(coord);
+		if (world.isAirBlock(coord)) return true;
+		IBlockState bs = world.getBlockState(coord);
 		Block b = bs.getBlock();
 		if (fluid == FluidRegistry.WATER && b == Blocks.FLOWING_WATER) {
 			return true;
 		} else if (fluid == FluidRegistry.LAVA && b == Blocks.FLOWING_LAVA) {
 			return true;
 		} else if (b instanceof IFluidBlock && ((IFluidBlock) b).getFluid().equals(fluid)) {
-			return ((IFluidBlock) b).getFilledPercentage(worldObj, coord) < 1.0f;
+			return ((IFluidBlock) b).getFilledPercentage(world, coord) < 1.0f;
 		}
 		return false;
 	}

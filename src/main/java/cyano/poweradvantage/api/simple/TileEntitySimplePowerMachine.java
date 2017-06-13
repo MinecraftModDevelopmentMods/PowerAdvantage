@@ -601,8 +601,8 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * boilerplate inventory code
 	 */
 	@Override
-	public boolean isUseableByPlayer(final EntityPlayer p_isUseableByPlayer_1_) {
-		return this.worldObj.getTileEntity(this.pos) == this && p_isUseableByPlayer_1_.getDistanceSq((double)this.pos.getX() + 0.5, (double)this.pos.getY() + 0.5, (double)this.pos.getZ() + 0.5) <= 64.0;
+	public boolean isUsableByPlayer(final EntityPlayer p_isUseableByPlayer_1_) {
+		return this.world.getTileEntity(this.pos) == this && p_isUseableByPlayer_1_.getDistanceSq((double)this.pos.getX() + 0.5, (double)this.pos.getY() + 0.5, (double)this.pos.getZ() + 0.5) <= 64.0;
 	}
 
 	/**

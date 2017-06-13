@@ -50,7 +50,6 @@ public class BlockConveyorFilter extends GUIBlock {
 
 	@Override
 	public TileEntity createNewTileEntity(World w, int m) {
-		net.minecraft.block.BlockPistonBase k;
 		try {
 			return tileEntityClass.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -72,8 +71,10 @@ public class BlockConveyorFilter extends GUIBlock {
 		return false;
 	}
 
+	
+	
 	@Override
-	public IBlockState onBlockPlaced(
+	public IBlockState getStateForPlacement(
 			final World w, final BlockPos coord, final EnumFacing face,
 			final float partialX, final float partialY, final float partialZ,
 			final int i, final EntityLivingBase placer

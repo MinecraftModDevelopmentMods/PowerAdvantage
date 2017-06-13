@@ -93,7 +93,7 @@ public abstract class TileEntityConveyorFilter extends TileEntityConveyor {
 			ie.motionX = 0;
 			ie.motionZ = 0;
 			ie.motionY = 0;
-			w.spawnEntityInWorld(ie);
+			w.spawnEntity(ie);
 			getInventory()[0] = null;
 			transferCooldown = transferInvterval;
 			this.markDirty();

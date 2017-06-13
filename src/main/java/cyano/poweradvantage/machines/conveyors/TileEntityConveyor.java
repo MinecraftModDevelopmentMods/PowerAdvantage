@@ -333,8 +333,8 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 	}
 
 	@Override
-	public boolean isUseableByPlayer(final EntityPlayer p_isUseableByPlayer_1_) {
-		return this.worldObj.getTileEntity(this.pos) 
+	public boolean isUsableByPlayer(final EntityPlayer p_isUseableByPlayer_1_) {
+		return this.world.getTileEntity(this.pos) 
 				== this && p_isUseableByPlayer_1_.getDistanceSq(
 						(double)this.pos.getX() + 0.5, 
 						(double)this.pos.getY() + 0.5, 
@@ -446,4 +446,5 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 		return slotAccessCache;
 	}
 	//////////  //////////
+
 }

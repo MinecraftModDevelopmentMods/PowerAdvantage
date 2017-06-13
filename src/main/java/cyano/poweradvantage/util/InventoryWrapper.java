@@ -80,7 +80,7 @@ public class InventoryWrapper implements ISidedInventory {
 			}
 
 			@Override
-			public boolean isUseableByPlayer(EntityPlayer entityPlayer) {
+			public boolean isUsableByPlayer(EntityPlayer entityPlayer) {
 				return false;
 			}
 
@@ -229,8 +229,8 @@ public class InventoryWrapper implements ISidedInventory {
 	}
 
 	@Override
-	public boolean isUseableByPlayer(EntityPlayer arg0) {
-		return inventory.isUseableByPlayer(arg0);
+	public boolean isUsableByPlayer(EntityPlayer arg0) {
+		return inventory.isUsableByPlayer(arg0);
 	}
 
 	@Override

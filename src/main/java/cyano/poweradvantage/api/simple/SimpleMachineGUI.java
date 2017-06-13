@@ -161,7 +161,7 @@ guiContainer.drawTexturedModalRect(x+79, y+35, 0, 0, arrowLength, 17); // x, y, 
 		
 		@Override
 		public boolean canInteractWith(EntityPlayer entityplayer) {
-			return entity.isUseableByPlayer(entityplayer);
+			return entity.isUsableByPlayer(entityplayer);
 		}
 		
 		protected void bindPlayerInventory(InventoryPlayer inventoryPlayer, int yOffset) {
