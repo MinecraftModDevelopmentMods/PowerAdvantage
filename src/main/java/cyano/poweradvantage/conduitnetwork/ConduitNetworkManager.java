@@ -1,16 +1,19 @@
 package cyano.poweradvantage.conduitnetwork;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+
 import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.PowerConnectorContext;
 import cyano.poweradvantage.math.BlockPos4D;
 import cyano.poweradvantage.util.PowerHelper;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-
-import java.util.*;
-import java.util.concurrent.locks.ReadWriteLock;
 
 /**
  * This class manages a global (trans-dimensional) cache of power networks of a single power type.
@@ -22,15 +25,12 @@ public class ConduitNetworkManager {
 
 	private final Map<BlockPos4D, List<BlockPos4D>> networkCache; // Note that calling Map.values() will return duplicate references (store result in a Set<> to remove duplicates)
 	private final ReadWriteLock lock = new java.util.concurrent.locks.ReentrantReadWriteLock();
-	private final ConduitType type;
-
 	/**
 	 * Constructs a new network cache manager for a given energy type
 	 *
 	 * @param type The energy type in question
 	 */
 	public ConduitNetworkManager(ConduitType type) {
-		this.type = type;
 		this.networkCache = new HashMap<>();
 	}
 
@@ -162,7 +162,7 @@ public class ConduitNetworkManager {
 				continue;
 			}
 			IBlockState blockstate = w.getBlockState(n.pos);
-			Block block = blockstate.getBlock();
+			blockstate.getBlock();
 			PowerConnectorContext connection = new PowerConnectorContext(type, w, src, coord.pos, face, blockstate, n.pos, face.getOpposite());
 			if (PowerHelper.areConnectable(connection)) {
 				addBlockToNetwork(coord, n);

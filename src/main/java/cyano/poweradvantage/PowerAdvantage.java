@@ -547,6 +547,7 @@ public class PowerAdvantage
 		return instance;
 	}
 
+	@SuppressWarnings("deprecation")
 	private Map<String, Set<Block>> sortBlocksByModID() {
 		Map<String, Set<Block>> modMap = new HashMap<>();
 		GameData.getBlockRegistry().forEach((Block b)->{
