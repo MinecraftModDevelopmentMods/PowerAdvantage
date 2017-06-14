@@ -25,12 +25,14 @@ public class ItemGroups {
 		initDone = true;
 	}
 
+	@SuppressWarnings("unused")
 	private static int itemSort(ItemStack A, ItemStack B) {
 		String catA = catagorize(A);
 		String catB = catagorize(B);
 		return catA.compareToIgnoreCase(catB);
 	}
 
+	@SuppressWarnings("deprecation")
 	private static String catagorize(ItemStack i) {
 		StringBuilder sb = new StringBuilder();
 		Item item = i.getItem();

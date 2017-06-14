@@ -15,6 +15,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.IFluidHandler;
 
+@SuppressWarnings("deprecation")
 public class TerminalFluidPipeBlock extends FluidPipeBlock implements ITileEntityProvider {
 
 	@Override

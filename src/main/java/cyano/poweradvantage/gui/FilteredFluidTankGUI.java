@@ -7,13 +7,8 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class FilteredFluidTankGUI extends SimpleMachineGUI {
 
-
-	private static final Map<ResourceLocation, ResourceLocation> realTextureLocationCache = new HashMap<>();
 
 	public FilteredFluidTankGUI(ResourceLocation image) {
 		super(image,

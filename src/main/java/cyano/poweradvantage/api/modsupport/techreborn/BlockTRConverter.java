@@ -15,12 +15,10 @@ import org.apache.logging.log4j.Level;
  */
 public class BlockTRConverter extends BlockSimplePowerMachine {
 
-	private final ConduitType powerAdvantageType;
 	private final Class<? extends PoweredEntity> tileEntity;
 
 	public BlockTRConverter(Material blockMaterial, float hardness, ConduitType energyType, Class<? extends PoweredEntity> tileEntity) {
 		super(blockMaterial, hardness, energyType);
-		powerAdvantageType = energyType;
 		this.tileEntity = tileEntity;
 	}
 

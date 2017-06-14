@@ -115,6 +115,7 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
      * @return true if the interaction resulted in opening the GUI, false 
      * otherwise
      */
+	@SuppressWarnings("deprecation")
     @Override
     public boolean onBlockActivated(World w, BlockPos coord, IBlockState bs,
 									EntityPlayer player, EnumHand hand, ItemStack heldItem, EnumFacing facing,

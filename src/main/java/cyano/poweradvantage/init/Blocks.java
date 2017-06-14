@@ -136,7 +136,7 @@ public abstract class Blocks {
 			String name = e.getKey();
 			if (b instanceof BlockFluidBase) {
 				BlockFluidBase block = (BlockFluidBase) b;
-				Fluid fluid = block.getFluid();
+				block.getFluid();
 				Item item = Item.getItemFromBlock(block);
 				final ModelResourceLocation fluidModelLocation = new ModelResourceLocation(
 						modID.toLowerCase() + ":" + name, "fluid");
@@ -155,6 +155,7 @@ public abstract class Blocks {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private static Block addBlock(Block block, String name) {
 		block.setUnlocalizedName(PowerAdvantage.MODID + "." + name);
 		GameRegistry.registerBlock(block, name);

@@ -259,7 +259,7 @@ public abstract class BlockSimpleFluidConduit extends FluidConduitBlock {
 	 * method.
 	 */
 	protected boolean canConnectTo(IBlockAccess w, BlockPos thisBlock, IBlockState bs, EnumFacing face, BlockPos otherBlock) {
-		IBlockState other = w.getBlockState(otherBlock);
+		w.getBlockState(otherBlock);
 		ConduitType[] types = getTypes();
 		for (int i = 0; i < types.length; i++) {
 			if (PowerHelper.areConnectable(new PowerConnectorContext(types[i], w, bs, thisBlock, face))) return true;

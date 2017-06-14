@@ -36,7 +36,7 @@ public class BlockConveyorFilter extends GUIBlock {
 	/**
 	 * Blockstate property
 	 */
-	public static final PropertyDirection FACING = PropertyDirection.create("facing", (Predicate) EnumFacing.Plane.HORIZONTAL);
+	public static final PropertyDirection FACING = PropertyDirection.create("facing", (Predicate<EnumFacing>) EnumFacing.Plane.HORIZONTAL);
 
 	@Override
 	public IBlockState withRotation(IBlockState state, Rotation rot) {

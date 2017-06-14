@@ -13,6 +13,7 @@ import net.minecraftforge.fluids.FluidStack;
  * @author DrCyano
  *
  */
+@SuppressWarnings("deprecation")
 public class DistillationRecipe {
 
 

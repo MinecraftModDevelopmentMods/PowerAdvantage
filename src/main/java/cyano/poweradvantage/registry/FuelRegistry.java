@@ -101,7 +101,7 @@ public class FuelRegistry implements IFuelHandler{
 	 */
 	public List<Function<ItemStack,Short>> getFuelAlgorithmsForItem(Item item){
 		List<Function<ItemStack,Short>> list = burnMap.get(item);
-		if(list == null) return Collections.EMPTY_LIST;
+		if(list == null) return Collections.emptyList();
 		return list;
 	}
 
@@ -115,7 +115,7 @@ public class FuelRegistry implements IFuelHandler{
 	 */
 	public List<Function<ItemStack,ItemStack>> getPostBurnAlgorithmsForItem(Item item){
 		List<Function<ItemStack,ItemStack>> list = postBurnMap.get(item);
-		if(list == null) return Collections.EMPTY_LIST;
+		if(list == null) return Collections.emptyList();
 		return list;
 	}
 	/**

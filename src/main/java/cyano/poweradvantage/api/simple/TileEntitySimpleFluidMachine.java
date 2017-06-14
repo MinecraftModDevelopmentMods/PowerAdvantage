@@ -37,6 +37,7 @@ import java.util.List;
  * @author DrCyano
  *
  */
+@SuppressWarnings("deprecation")
 public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity implements ISidedInventory{
 	/**
 	 * This FluidTank holds the fluids for this machine
@@ -71,7 +72,7 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
 
 	@Override
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-		return (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)? (T) tank : super.getCapability(capability,facing);
+		return (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)? (T)tank : super.getCapability(capability,facing);
 	}
 
 	/**

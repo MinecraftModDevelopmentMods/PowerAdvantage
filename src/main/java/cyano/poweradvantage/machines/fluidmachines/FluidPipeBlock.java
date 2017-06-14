@@ -14,6 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.IFluidHandler;
 
+@SuppressWarnings("deprecation")
 public class FluidPipeBlock extends BlockSimpleFluidConduit {
 
 	public FluidPipeBlock() {

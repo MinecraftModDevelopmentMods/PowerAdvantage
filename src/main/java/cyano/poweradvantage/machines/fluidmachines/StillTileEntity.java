@@ -13,6 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
 
+@SuppressWarnings("deprecation")
 public class StillTileEntity extends TileEntitySimpleFluidMachine {
 
 

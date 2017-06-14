@@ -16,6 +16,7 @@ import net.minecraftforge.fluids.IFluidHandler;
 
 import java.util.List;
 
+@SuppressWarnings("deprecation")
 public class TerminalFluidPipeTileEntity extends PoweredEntity {
 
 	private final EnumFacing[] faces = EnumFacing.values();

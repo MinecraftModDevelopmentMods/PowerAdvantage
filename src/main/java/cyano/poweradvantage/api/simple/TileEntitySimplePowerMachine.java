@@ -206,9 +206,6 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	public abstract void tickUpdate(boolean isServerWorld);
 	
 	
-	/** implementation detail for the powerUpdate() method. Do not touch! */
-	private static final EnumFacing[] faces = {EnumFacing.UP,EnumFacing.SOUTH,EnumFacing.EAST,EnumFacing.NORTH,EnumFacing.WEST,EnumFacing.DOWN};
-	
 	/**
 	 * This method is called when the power transmission is computed (not every 
 	 * tick). You do not need to override this method, but if you do, be sure to 

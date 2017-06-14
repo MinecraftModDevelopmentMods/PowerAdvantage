@@ -15,7 +15,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
 
-
+@SuppressWarnings("deprecation")
 public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 
 	public FluidDrainTileEntity() {
@@ -143,9 +143,6 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 
 
 	///// Boiler Plate /////
-
-	private String customName = null;
-
 
 	@Override
 	protected ItemStack[] getInventory() {

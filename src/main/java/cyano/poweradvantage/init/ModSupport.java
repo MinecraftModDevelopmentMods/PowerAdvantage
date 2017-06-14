@@ -74,6 +74,7 @@ public abstract class ModSupport {
 		initDone = true;
 	}
 
+	@SuppressWarnings("deprecation")
 	private static Block addBlock(Block block, String name) {
 		block.setUnlocalizedName(PowerAdvantage.MODID + "." + name);
 		GameRegistry.registerBlock(block, name);

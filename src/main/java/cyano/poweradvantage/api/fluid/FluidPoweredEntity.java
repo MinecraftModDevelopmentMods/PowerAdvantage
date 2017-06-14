@@ -27,6 +27,7 @@ import java.util.List;
  * @author DrCyano
  *
  */
+@SuppressWarnings("deprecation")
 public abstract class FluidPoweredEntity extends PoweredEntity implements IFluidHandler {
 
 

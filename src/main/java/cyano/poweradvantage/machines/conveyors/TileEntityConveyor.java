@@ -77,7 +77,6 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 			myDir = dir.getOpposite();
 			theirDir = dir;
 			BlockPos upstreamBlock = getPos().offset(myDir);
-			boolean pickedUpItem = false;
 			if(w.isAirBlock(upstreamBlock)){
 				// grab items sitting on the ground behind the conveyor
 				List<EntityItem> list = w.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(
@@ -99,7 +98,6 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 								e.setDead();
 							}
 							this.markDirty();
-							pickedUpItem = true;
 						}
 					}
 				}
@@ -110,7 +108,6 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 						ISidedInventory them = InventoryWrapper.wrap(TileEntityHopper.getInventoryAtPosition(getWorld(),upstreamBlock.getX(), upstreamBlock.getY(), upstreamBlock.getZ()));
 						if(transferItem(them,theirDir,this,myDir)){
 							this.markDirty();
-							pickedUpItem = true;
 						}
 					}
 				}
