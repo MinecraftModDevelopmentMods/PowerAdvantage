@@ -1,5 +1,9 @@
 package cyano.poweradvantage.init;
 
+import com.mcmoddev.basemetals.data.MaterialNames;
+import com.mcmoddev.lib.data.Names;
+import com.mcmoddev.lib.init.Materials;
+
 import cyano.poweradvantage.registry.FuelRegistry;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.ForgeModContainer;
@@ -18,8 +22,8 @@ public abstract class Fuels {
 	public static void init() {
 		if (initDone) return;
 
-		FuelRegistry.getInstance().registerFuel(com.mcmoddev.basemetals.init.Items.carbon_powder, (short) 1600);
-		ItemStack bucket = new ItemStack(ForgeModContainer.getInstance().universalBucket);
+		FuelRegistry.getInstance().registerFuel(Materials.getMaterialByName(MaterialNames.COAL).getItem(Names.POWDER), (short) 1600);
+		new ItemStack(ForgeModContainer.getInstance().universalBucket);
 
 
 		FuelRegistry.getInstance().registerFuel(ForgeModContainer.getInstance().universalBucket, (ItemStack ub) -> {

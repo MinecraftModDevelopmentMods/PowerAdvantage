@@ -1,6 +1,10 @@
 package cyano.poweradvantage.init;
 
 import com.mcmoddev.basemetals.BaseMetals;
+import com.mcmoddev.basemetals.data.MaterialNames;
+import com.mcmoddev.basemetals.util.Config.Options;
+import com.mcmoddev.lib.data.Names;
+import com.mcmoddev.lib.init.Materials;
 import com.mcmoddev.lib.registry.CrusherRecipeRegistry;
 import cyano.poweradvantage.PowerAdvantage;
 import cyano.poweradvantage.RecipeMode;
@@ -70,6 +74,7 @@ public abstract class Recipes {
 			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(Blocks.metal_storage_tank, 1), "xxx", "xpx", "xxx", 'x', "ingotIron", 'p', "pipe"));
 		} else if (PowerAdvantage.recipeMode == RecipeMode.TECH_PROGRESSION) {
 			// make things a little more complicated with tech-progression mode
+			//TODO We need a setStrongHammers(boolean b) method in MMDLib Config File to fix this
 			BaseMetals.strongHammers = false;
 			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(Items.sprocket, 4), " x ", "x/x", " x ", 'x', "ingotSteel", '/', "rod"));
 			if (OreDictionary.getOres("rod").isEmpty())
@@ -77,15 +82,15 @@ public abstract class Recipes {
 			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(Blocks.fluid_pipe, 6), "xxx", "   ", "xxx", 'x', "ingotIron"));
 		} else if (PowerAdvantage.recipeMode == RecipeMode.APOCALYPTIC) {
 			// apocalyptic means some things are not craftable, but some stuff can be recycled
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_conveyor, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_block, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_food, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_fuel, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_inventory, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_ore, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_plant, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_smelt, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_overflow, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_conveyor, new ItemStack(Materials.getMaterialByName(MaterialNames.STEEL).getBlock(Names.PLATE), 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_block, new ItemStack(Materials.getMaterialByName(MaterialNames.STEEL).getBlock(Names.PLATE), 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_food, new ItemStack(Materials.getMaterialByName(MaterialNames.STEEL).getBlock(Names.PLATE), 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_fuel, new ItemStack(Materials.getMaterialByName(MaterialNames.STEEL).getBlock(Names.PLATE), 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_inventory, new ItemStack(Materials.getMaterialByName(MaterialNames.STEEL).getBlock(Names.PLATE), 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_ore, new ItemStack(Materials.getMaterialByName(MaterialNames.STEEL).getBlock(Names.PLATE), 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_plant, new ItemStack(Materials.getMaterialByName(MaterialNames.STEEL).getBlock(Names.PLATE), 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_smelt, new ItemStack(Materials.getMaterialByName(MaterialNames.STEEL).getBlock(Names.PLATE), 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_overflow, new ItemStack(Materials.getMaterialByName(MaterialNames.STEEL).getBlock(Names.PLATE), 1));
 
 			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.storage_tank, new ItemStack(Blocks.fluid_pipe, 1));
 			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.fluid_discharge, new ItemStack(Blocks.fluid_pipe, 2));

@@ -4,6 +4,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.mcmoddev.basemetals.data.MaterialNames;
+import com.mcmoddev.lib.data.Names;
+import com.mcmoddev.lib.init.Materials;
+
 import cyano.poweradvantage.PowerAdvantage;
 import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.GUIBlock;
@@ -104,7 +108,7 @@ public abstract class Blocks {
 		fluid_switch = addBlock(new BlockPowerSwitch(Fluids.fluidConduit_general), "fluid_switch");
 		OreDictionary.registerOre("pipe", fluid_pipe);
 		steel_frame = addBlock(new BlockFrame(net.minecraft.block.material.Material.PISTON)
-				.setResistance(com.mcmoddev.basemetals.init.Materials.steel.getBlastResistance())
+				.setResistance(Materials.getMaterialByName(MaterialNames.STEEL).getBlock(Names.BLOCK).getExplosionResistance(null))
 				.setHardness(0.75f), "steel_frame");
 		OreDictionary.registerOre("frameSteel", steel_frame);
 

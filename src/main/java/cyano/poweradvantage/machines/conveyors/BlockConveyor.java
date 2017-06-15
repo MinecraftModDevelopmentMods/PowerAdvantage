@@ -75,6 +75,7 @@ public class BlockConveyor extends GUIBlock {
 	@Override
 	public void onBlockPlacedBy(World w, BlockPos coord, IBlockState state, EntityLivingBase placer,
 			ItemStack stack) {
+		//TODO No longer an EnumFacing param
 		return this.getDefaultState().withProperty(FACING, face.getOpposite());
 	}
 

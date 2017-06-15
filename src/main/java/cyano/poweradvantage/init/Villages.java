@@ -4,6 +4,8 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraftforge.fml.common.FMLLog;
 import org.apache.logging.log4j.Level;
 
+import com.mcmoddev.basemetals.util.VillagerTradeHelper;
+
 public abstract class Villages {
 	// TODO: add machinist villager
 

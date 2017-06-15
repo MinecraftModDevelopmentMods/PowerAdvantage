@@ -1,29 +1,27 @@
 package cyano.poweradvantage.init;
 
-import cyano.poweradvantage.PowerAdvantage;
-import cyano.poweradvantage.gui.FunctionalCreativeTab;
-import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.common.registry.GameData;
+import com.mcmoddev.lib.init.MMDCreativeTab;
 
-public class ItemGroups {
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.ItemStack;
+
+public class ItemGroups extends com.mcmoddev.lib.init.ItemGroups {
 
 	public static CreativeTabs tab_powerAdvantage;
 
 	private static boolean initDone = false;
+	
+	private static final int itemsTabId = addTab("items", true);
+	public static final MMDCreativeTab itemsTab = getTab(itemsTabId);
+
 
 	public static void init() {
 		if (initDone) return;
 
-		
-		tab_powerAdvantage = FunctionalCreativeTab.create(PowerAdvantage.MODID)
-				.setIcon(Items.sprocket)
-				.setItemSortingAlgorithm(ItemGroups::itemSort)
-				.setSearchable(true);
-		initDone = true;
+	}
+	
+	public static void setupIcons() {
+		itemsTab.setTabIconItem(new ItemStack(Items.sprocket));
 	}
 
 	//TODO Don't  think we need

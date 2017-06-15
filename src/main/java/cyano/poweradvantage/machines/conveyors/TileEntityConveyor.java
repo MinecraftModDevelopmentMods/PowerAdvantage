@@ -85,16 +85,16 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 				if(!list.isEmpty()){
 					EntityItem e = list.get(0);
 					if(!e.isAirBorne){
-						if(canInsertItemInto(e.getEntityItem(),this,myDir)){
-							ItemStack newItem = e.getEntityItem().copy();
+						if(canInsertItemInto(e.getItem(),this,myDir)){
+							ItemStack newItem = e.getItem().copy();
 							newItem.setCount(1);
-							e.getEntityItem().shrink(1);
+							e.getItem().shrink(1);
 							if(getInventory()[0] == null){
 								getInventory()[0] = newItem;
 							} else {
 								getInventory()[0].grow(1);
 							}
-							if(e.getEntityItem().getCount() <= 0){
+							if(e.getItem().getCount() <= 0){
 								e.setDead();
 							}
 							this.markDirty();
