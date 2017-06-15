@@ -33,18 +33,31 @@ minecraft {
 
 repositories {
     maven {
+        name "MMD"
+        url "https://maven.mcmoddev.com/"
+    }
+    maven {
         name "Dankhax"
-        url "http://maven.epoxide.xyz"
+        url "http://maven.epoxide.org"
+    }
+    maven { // Mantle, TCon, JEI
+        name "DVS1 Maven FS"
+        url "http://dvs1.progwml6.com/files/maven"
+    }
+    maven { // CCL, CCC, NEI
+        name "Chickenbones Repo"
+        url "http://chickenbones.net/maven/"
     }
 }
 dependencies {
 	compile files(
-			'libs/CodeChickenCore-1.8-1.0.5.36-dev.jar',
-			'libs/NotEnoughItems-1.8-1.0.5.104-dev.jar',
 			'libs/RF-API.jar',
 			'libs/RebornCore-1.9-API.jar'
     )
-    compile "net.darkhax.tesla:Tesla:1.10.2-1.2.1.44"
+    compile "net.darkhax.tesla:Tesla:1.10.2-1.2.1.50"
+    deobfCompile "cyano:BaseMetals:1.10.2-2.4.0"
+    compile "codechicken:CodeChickenCore:1.8-1.0.5.36:dev"
+    compile "codechicken:NotEnoughItems:1.8-1.0.5.104:dev"
 }
 
 processResources {
