@@ -104,7 +104,7 @@ public abstract class Blocks {
 		fluid_switch = addBlock(new BlockPowerSwitch(Fluids.fluidConduit_general), "fluid_switch");
 		OreDictionary.registerOre("pipe", fluid_pipe);
 		steel_frame = addBlock(new BlockFrame(net.minecraft.block.material.Material.PISTON)
-				.setResistance(cyano.basemetals.init.Materials.steel.getBlastResistance())
+				.setResistance(com.mcmoddev.basemetals.init.Materials.steel.getBlastResistance())
 				.setHardness(0.75f), "steel_frame");
 		OreDictionary.registerOre("frameSteel", steel_frame);
 

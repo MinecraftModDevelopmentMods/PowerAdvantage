@@ -18,7 +18,7 @@ public abstract class Fuels {
 	public static void init() {
 		if (initDone) return;
 
-		FuelRegistry.getInstance().registerFuel(cyano.basemetals.init.Items.carbon_powder, (short) 1600);
+		FuelRegistry.getInstance().registerFuel(com.mcmoddev.basemetals.init.Items.carbon_powder, (short) 1600);
 		ItemStack bucket = new ItemStack(ForgeModContainer.getInstance().universalBucket);
 
 

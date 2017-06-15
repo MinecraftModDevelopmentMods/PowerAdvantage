@@ -21,30 +21,51 @@ apply plugin: "com.matthewprenger.cursegradle"
 
 def mod_file = getModFile()
 version = getVersion("VERSION", mod_file)
-group= "cyano.poweradvantage"
-archivesBaseName = "PowerAdvantage_1.11.2"
+group= "com.mcmoddev.poweradvantage"
+archivesBaseName = "PowerAdvantage-1.11.2"
 sourceCompatibility = targetCompatibility = "1.8"
 
 minecraft {
     version = "1.11.2-13.20.0.2228"
     runDir = "run"
-    mappings = "snapshot_20170531"
+    mappings = "stable_32"
 }
 
 repositories {
     maven {
+        name "MMD"
+        url "https://maven.mcmoddev.com/"
+    }
+    maven {
         name "Dankhax"
-        url "http://maven.epoxide.xyz"
+        url "http://maven.epoxide.org"
+    }
+    maven { // Mantle, TCon, JEI
+        name "DVS1 Maven FS"
+        url "http://dvs1.progwml6.com/files/maven"
+    }
+    maven { // CCL, CCC, NEI
+        name "Chickenbones Repo"
+        url "http://chickenbones.net/maven/"
+    }
+    maven { // CoFH
+    	name "Covers Maven"
+    	url "http://maven.covers1624.net"
+    }
+    maven {
+	    name "SpongePowered"
+        url 'https://repo.spongepowered.org/maven/'
     }
 }
 dependencies {
 	compile files(
-			'libs/CodeChickenCore-1.8-1.0.5.36-dev.jar',
-			'libs/NotEnoughItems-1.8-1.0.5.104-dev.jar',
 			'libs/RF-API.jar',
 			'libs/RebornCore-1.9-API.jar'
     )
-    compile "net.darkhax.tesla:Tesla:1.10.2-1.2.1.44"
+    compile "net.darkhax.tesla:Tesla:1.11-1.3.0.52"
+    deobfCompile "com.mcmoddev:BaseMetals:1.11.2-2.5.0-beta+"
+    compile "codechicken:CodeChickenCore:1.8-1.0.5.36:dev"
+    compile "codechicken:NotEnoughItems:1.8-1.0.5.104:dev"
 }
 
 processResources {

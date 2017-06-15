@@ -1,7 +1,7 @@
 package cyano.poweradvantage.init;
 
-import cyano.basemetals.BaseMetals;
-import cyano.basemetals.registry.CrusherRecipeRegistry;
+import com.mcmoddev.basemetals.BaseMetals;
+import com.mcmoddev.lib.registry.CrusherRecipeRegistry;
 import cyano.poweradvantage.PowerAdvantage;
 import cyano.poweradvantage.RecipeMode;
 import cyano.poweradvantage.registry.still.recipe.DistillationRecipeRegistry;
@@ -77,15 +77,15 @@ public abstract class Recipes {
 			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(Blocks.fluid_pipe, 6), "xxx", "   ", "xxx", 'x', "ingotIron"));
 		} else if (PowerAdvantage.recipeMode == RecipeMode.APOCALYPTIC) {
 			// apocalyptic means some things are not craftable, but some stuff can be recycled
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_conveyor, new ItemStack(cyano.basemetals.init.Blocks.steel_plate, 1));
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_block, new ItemStack(cyano.basemetals.init.Blocks.steel_plate, 1));
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_food, new ItemStack(cyano.basemetals.init.Blocks.steel_plate, 1));
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_fuel, new ItemStack(cyano.basemetals.init.Blocks.steel_plate, 1));
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_inventory, new ItemStack(cyano.basemetals.init.Blocks.steel_plate, 1));
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_ore, new ItemStack(cyano.basemetals.init.Blocks.steel_plate, 1));
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_plant, new ItemStack(cyano.basemetals.init.Blocks.steel_plate, 1));
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_smelt, new ItemStack(cyano.basemetals.init.Blocks.steel_plate, 1));
-			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_overflow, new ItemStack(cyano.basemetals.init.Blocks.steel_plate, 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_conveyor, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_block, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_food, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_fuel, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_inventory, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_ore, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_plant, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_smelt, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
+			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.item_filter_overflow, new ItemStack(com.mcmoddev.basemetals.init.Blocks.steel_plate, 1));
 
 			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.storage_tank, new ItemStack(Blocks.fluid_pipe, 1));
 			CrusherRecipeRegistry.addNewCrusherRecipe(Blocks.fluid_discharge, new ItemStack(Blocks.fluid_pipe, 2));
