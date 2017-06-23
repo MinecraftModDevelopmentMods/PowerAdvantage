@@ -14,6 +14,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.translation.I18n;
@@ -62,7 +63,8 @@ public class ItemFluidCell extends Item {
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(ItemStack stack, World worldIn, EntityPlayer playerIn, EnumHand hand) {
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand hand) {
+    	ItemStack stack = playerIn.getHeldItem(hand);
         if (!worldIn.isRemote) {
             RayTraceResult result = rayTrace(worldIn, playerIn, true);
             if (result.typeOfHit == RayTraceResult.Type.BLOCK) {
@@ -95,14 +97,14 @@ public class ItemFluidCell extends Item {
 
     public boolean tryAddCellToInventory(EntityPlayer player, ItemStack stack, Fluid fluid) {
         if (player.inventory.addItemStackToInventory(ItemFluidCell.getCellWithFluid(fluid))) {
-            --stack.stackSize;
+            stack.setCount(stack.getCount() - 1);
             return true;
         }
         return false;
     }
 
     @Override
-    public void getSubItems(Item itemIn, CreativeTabs tab, List<ItemStack> subItems) {
+    public void getSubItems(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> subItems) {
         subItems.add(getEmptyCell(1));
     }
 

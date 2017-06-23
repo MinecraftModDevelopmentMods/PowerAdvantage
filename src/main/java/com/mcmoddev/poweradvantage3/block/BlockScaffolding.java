@@ -40,14 +40,14 @@ public class BlockScaffolding extends Block {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void getSubBlocks(Item itemIn, CreativeTabs tab, List<ItemStack> list) {
+    public void getSubBlocks(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> list) {
         for (Type type : Type.values())
             list.add(new ItemStack(itemIn, 1, type.ordinal()));
     }
 
     @Override
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn) {
-        super.neighborChanged(state, worldIn, pos, blockIn);
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
+        super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
     }
 
     @Override
@@ -153,9 +153,10 @@ public class BlockScaffolding extends Block {
         }
 
         @Override
-        public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
             IBlockState iblockstate = worldIn.getBlockState(pos);
             Block block = iblockstate.getBlock();
+            ItemStack stack = playerIn.getHeldItem(hand);
             if (!playerIn.isSneaking() && block == this.block) {
                 if (hitY > 0.7) {
                     int heightLeft = 255 - pos.getY();
@@ -188,8 +189,8 @@ public class BlockScaffolding extends Block {
                     }
                 }
             }
-            return super.onItemUse(stack, playerIn, worldIn, pos, hand, facing, hitX, hitY, hitZ);
+            return super.onItemUse(playerIn, worldIn, pos, hand, facing, hitX, hitY, hitZ);
         }
-    }
+    } 
 
 }

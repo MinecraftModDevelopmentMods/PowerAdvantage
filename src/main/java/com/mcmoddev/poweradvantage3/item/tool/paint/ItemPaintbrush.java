@@ -15,6 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -42,8 +43,9 @@ public class ItemPaintbrush extends Item implements IItemColor, IPaintableItem {
     }
 
     @Override
-    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+    public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         IBlockState state = worldIn.getBlockState(pos);
+        ItemStack stack = playerIn.getHeldItem(hand);
         if (state.getBlock() instanceof BlockColored) {
             if (state.getValue(BlockColored.COLOR) != getColor(stack)) {
                 worldIn.setBlockState(pos, state.withProperty(BlockColored.COLOR, getColor(stack)));
@@ -72,7 +74,7 @@ public class ItemPaintbrush extends Item implements IItemColor, IPaintableItem {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void getSubItems(Item itemIn, CreativeTabs tab, List<ItemStack> subItems) {
+    public void getSubItems(Item itemIn, CreativeTabs tab, NonNullList<ItemStack> subItems) {
         for (EnumDyeColor color : EnumDyeColor.values())
             subItems.add(getItemWithDye(color));
     }
