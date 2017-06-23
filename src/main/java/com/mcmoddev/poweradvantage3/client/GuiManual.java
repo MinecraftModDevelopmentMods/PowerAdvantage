@@ -40,7 +40,7 @@ public class GuiManual extends GuiContainer {
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
         super.drawGuiContainerForegroundLayer(mouseX, mouseY);
         String title = "Bedrock Infinite";
-        fontRendererObj.drawString(title, (float) (218 - fontRendererObj.getStringWidth(title) / 2), (float) 18, 0x3B3E4E, false);
+        fontRenderer.drawString(title, (float) (218 - fontRenderer.getStringWidth(title) / 2), (float) 18, 0x3B3E4E, false);
 
         ItemStack stack = new ItemStack(Blocks.BEDROCK);
 

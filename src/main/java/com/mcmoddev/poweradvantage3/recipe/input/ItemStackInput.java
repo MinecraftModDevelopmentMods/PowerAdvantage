@@ -32,6 +32,6 @@ public class ItemStackInput extends MachineInput<ItemStackInput> {
 
     @Override
     public void load(NBTTagCompound nbt) {
-        stack = ItemStack.loadItemStackFromNBT(nbt);
+        stack = new ItemStack(nbt);
     }
 }

@@ -3,6 +3,7 @@ package com.mcmoddev.poweradvantage3;
 import com.mcmoddev.poweradvantage3.init.ModItems;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 
 public class PowerAdvantageTab extends CreativeTabs {
 
@@ -13,7 +14,7 @@ public class PowerAdvantageTab extends CreativeTabs {
     }
 
     @Override
-    public Item getTabIconItem() {
-        return ModItems.WRENCH;
+    public ItemStack getTabIconItem() {
+        return new ItemStack(ModItems.WRENCH);
     }
 }

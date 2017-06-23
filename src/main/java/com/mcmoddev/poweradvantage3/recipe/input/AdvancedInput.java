@@ -35,7 +35,7 @@ public class AdvancedInput extends MachineInput<AdvancedInput> {
 
     @Override
     public void load(NBTTagCompound nbt) {
-        stack = ItemStack.loadItemStackFromNBT(nbt.getCompoundTag("stack"));
+        stack = new ItemStack(nbt.getCompoundTag("stack"));
         fluid = FluidStack.loadFluidStackFromNBT(nbt.getCompoundTag("fluid"));
     }
 }

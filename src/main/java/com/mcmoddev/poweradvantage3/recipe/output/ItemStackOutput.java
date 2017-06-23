@@ -21,6 +21,6 @@ public class ItemStackOutput extends MachineOutput<ItemStackOutput> {
 
     @Override
     public void load(NBTTagCompound tag) {
-        stack = ItemStack.loadItemStackFromNBT(tag);
+        stack = new ItemStack(tag);
     }
 }
