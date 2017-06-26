@@ -18,10 +18,15 @@ public class ItemGroups {
 	public static void init() {
 		if (initDone) return;
 
-		tab_powerAdvantage = FunctionalCreativeTab.create(PowerAdvantage.MODID)
-				.setIcon(Items.sprocket)
-				.setItemSortingAlgorithm(ItemGroups::itemSort)
-				.setSearchable(true);
+//		tab_powerAdvantage = FunctionalCreativeTab.create(PowerAdvantage.MODID)
+//				.setIcon(Items.sprocket)
+//				.setItemSortingAlgorithm(ItemGroups::itemSort)
+//				.setSearchable(true);
+
+		tab_powerAdvantage = new FunctionalCreativeTab(PowerAdvantage.MODID, false,
+				()->cyano.poweradvantage.init.Items.sprocket,
+				ItemGroups::itemSort);
+
 		initDone = true;
 	}
 

@@ -198,8 +198,8 @@ allprojects {
 
 dependencies {
     compile files(
-        'lib/basemetals-1.6.0-dev.jar'
-        'lib/PowerAdvantage-API-1.4.0.jar'
+        'lib/basemetals-2.4.0-dev.jar'
+        'lib/PowerAdvantage-API-2.4.0.jar'
     )
 
 }
@@ -223,7 +223,7 @@ public class PowerAdvantage
 	/** The display name for this mod */
 	public static final String NAME = "Power Advantage";
 	/** The version of this mod, in the format major.minor.update */
-	public static final String VERSION = "2.3.0";
+	public static final String VERSION = "2.4.0";
 	
 
 
