@@ -224,10 +224,10 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
 		/// OLD WAY - deprecated (but still might be used by other mods)
 		if(FluidContainerRegistry.isEmpty (bucket)){
 			// pull from tank
-			FluidStack practice = target.drain(blockFace, Fluid.BUCKET_VOLUME, false);
+			FluidStack practice = target.drain(Fluid.BUCKET_VOLUME, false);
 			if(practice != null && practice.amount ==  Fluid.BUCKET_VOLUME
 					&& FluidContainerRegistry.fillFluidContainer(practice, bucket) != null){
-				FluidStack drain = target.drain(blockFace, Fluid.BUCKET_VOLUME, true);
+				FluidStack drain = target.drain(Fluid.BUCKET_VOLUME, true);
 				ItemStack newBucket = FluidContainerRegistry.fillFluidContainer(drain, bucket);
 				if(bucket.getCount() == 1){
 					player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, newBucket);
