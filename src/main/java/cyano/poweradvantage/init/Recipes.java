@@ -1,11 +1,10 @@
 package cyano.poweradvantage.init;
 
-import com.mcmoddev.basemetals.BaseMetals;
 import com.mcmoddev.basemetals.data.MaterialNames;
-import com.mcmoddev.basemetals.util.Config.Options;
 import com.mcmoddev.lib.data.Names;
 import com.mcmoddev.lib.init.Materials;
 import com.mcmoddev.lib.registry.CrusherRecipeRegistry;
+import com.mcmoddev.lib.util.ConfigBase.Options;
 import cyano.poweradvantage.PowerAdvantage;
 import cyano.poweradvantage.RecipeMode;
 import cyano.poweradvantage.registry.still.recipe.DistillationRecipeRegistry;
@@ -15,7 +14,6 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
-
 public abstract class Recipes {
 
 	/*
@@ -23,7 +21,6 @@ public abstract class Recipes {
 	 * Apocalyptic - must find key parts as treasure in chests
 	 * Tech-progression - making the first key part is very complicated, but once made, key parts can be duplicated fairly easily
 	 */
-
 
 	private static boolean initDone = false;
 
@@ -74,8 +71,9 @@ public abstract class Recipes {
 			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(Blocks.metal_storage_tank, 1), "xxx", "xpx", "xxx", 'x', "ingotIron", 'p', "pipe"));
 		} else if (PowerAdvantage.recipeMode == RecipeMode.TECH_PROGRESSION) {
 			// make things a little more complicated with tech-progression mode
-			//TODO We need a setStrongHammers(boolean b) method in MMDLib Config File to fix this
-			BaseMetals.strongHammers = false;
+			//TODO We need a setStrongHammers(boolean b) method in MMDLib Config File to fix this.
+			//TODO Fixed acording to Jas. ProxyNeko.
+			Options.strongHammers();
 			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(Items.sprocket, 4), " x ", "x/x", " x ", 'x', "ingotSteel", '/', "rod"));
 			if (OreDictionary.getOres("rod").isEmpty())
 				GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(Items.sprocket, 4), " x ", "x/x", " x ", 'x', "ingotSteel", '/', "nuggetBronze"));

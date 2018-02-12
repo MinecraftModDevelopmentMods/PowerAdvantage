@@ -26,7 +26,7 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
 
 
 	public FluidDischargeTileEntity() {
-		super(FluidContainerRegistry.BUCKET_VOLUME, FluidDischargeTileEntity.class.getName());
+		super(Fluid.BUCKET_VOLUME, FluidDischargeTileEntity.class.getName());
 	}
 
 
@@ -55,7 +55,7 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
 			}
 		} else
 			// place fluid block
-			if (tank.getFluidAmount() >= FluidContainerRegistry.BUCKET_VOLUME) {
+			if (tank.getFluidAmount() >= Fluid.BUCKET_VOLUME) {
 				FluidStack fstack = tank.getFluid();
 				Fluid fluid = fstack.getFluid();
 				Block fluidBlock = fluid.getBlock();
@@ -63,7 +63,7 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
 				if (world.isAirBlock(coord)) {
 					world.setBlockState(coord, fluidBlock.getDefaultState());
 					world.notify();
-					this.drain(EnumFacing.DOWN, FluidContainerRegistry.BUCKET_VOLUME, true);
+					this.drain(EnumFacing.DOWN, Fluid.BUCKET_VOLUME, true);
 				} else if (world.getBlockState(coord).getBlock() == fluidBlock) {
 					// follow the flow
 					coord = scanFluidSpaceForNonsourceBlock(getWorld(), coord, fluid, 32);
@@ -72,7 +72,7 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
 						// not a source block
 						world.setBlockState(coord, fluidBlock.getDefaultState());
 						world.notify();
-						this.drain(EnumFacing.DOWN, FluidContainerRegistry.BUCKET_VOLUME, true);
+						this.drain(EnumFacing.DOWN, Fluid.BUCKET_VOLUME, true);
 					}
 				}
 

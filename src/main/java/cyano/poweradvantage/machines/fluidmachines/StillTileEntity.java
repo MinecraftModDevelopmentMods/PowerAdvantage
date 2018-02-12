@@ -22,7 +22,7 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 
 
 	private final ItemStack[] inventory = new ItemStack[1];
-	private final FluidTank inputTank = new FluidTank(FluidContainerRegistry.BUCKET_VOLUME);
+	private final FluidTank inputTank = new FluidTank(Fluid.BUCKET_VOLUME);
 	private int[] dataFields = new int[6];
 	private static final int DATAFIELD_FLUID_ID1 = 0; // index in the dataFields array
 	private static final int DATAFIELD_FLUID_VOLUME1 = 1; // index in the dataFields array
@@ -40,7 +40,7 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 
 
 	public StillTileEntity() {
-		super(FluidContainerRegistry.BUCKET_VOLUME, StillTileEntity.class.getName());
+		super(Fluid.BUCKET_VOLUME, StillTileEntity.class.getName());
 	}
 
 	@Override

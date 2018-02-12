@@ -26,7 +26,7 @@ import net.minecraftforge.fluids.capability.IFluidTankProperties;
 public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 
 	public FluidDrainTileEntity() {
-		super(FluidContainerRegistry.BUCKET_VOLUME, FluidDrainTileEntity.class.getName());
+		super(Fluid.BUCKET_VOLUME, FluidDrainTileEntity.class.getName());
 	}
 
 
@@ -90,7 +90,7 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 						BlockPos srcPos = scanFluidSpaceForSourceBlock(getWorld(), space, fluid, 32);
 						if (srcPos != null) {
 							// found source block
-							tank.fill(new FluidStack(fluid, FluidContainerRegistry.BUCKET_VOLUME), true);
+							tank.fill(new FluidStack(fluid, Fluid.BUCKET_VOLUME), true);
 							getWorld().setBlockToAir(srcPos);
 							break fluidScan;
 						}
