@@ -10,6 +10,7 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.UniversalBucket;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
@@ -102,8 +103,9 @@ public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
 		if (this.getInventory() == null) return false;
 		if (slot >= this.getInventory().length) return false;
 		if (item.getItem() == ForgeModContainer.getInstance().universalBucket) return true;
-		return FluidContainerRegistry.isFilledContainer(item)
-				&& FluidContainerRegistry.getFluidForFilledItem(item) != null;
+		return item.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
+		// Old
+		// return FluidContainerRegistry.isFilledContainer(item) && FluidContainerRegistry.getFluidForFilledItem(item) != null;
 	}
 
 	private Fluid lastFluid = null;
