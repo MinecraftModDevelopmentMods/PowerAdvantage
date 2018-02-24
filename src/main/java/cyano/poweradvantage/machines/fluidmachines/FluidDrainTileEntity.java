@@ -105,7 +105,6 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 		super.powerUpdate();
 	}
 
-
 	private void tryPushFluid(BlockPos coord, EnumFacing otherFace) {
 		if (this.getTank().getFluidAmount() <= 0) return; // no fluid to push
 		TileEntity e = getWorld().getTileEntity(coord);

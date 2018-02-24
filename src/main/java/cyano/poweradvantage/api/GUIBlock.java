@@ -28,7 +28,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
  * @author DrCyano
  *
  */
-public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
+public abstract class GUIBlock extends BlockContainer {
 
 	/**
 	 * Constructor for GUI block
