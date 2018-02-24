@@ -3,11 +3,31 @@ package cyano.poweradvantage.init;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import com.mcmoddev.basemetals.data.MaterialNames;
 import com.mcmoddev.lib.data.Names;
 import com.mcmoddev.lib.init.Materials;
-
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.renderer.block.model.ModelBakery;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.block.statemap.StateMapperBase;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.fluids.BlockFluidBase;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.oredict.OreDictionary;
 import cyano.poweradvantage.PowerAdvantage;
 import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.GUIBlock;
@@ -32,28 +52,6 @@ import cyano.poweradvantage.machines.fluidmachines.MetalTankBlock;
 import cyano.poweradvantage.machines.fluidmachines.StillBlock;
 import cyano.poweradvantage.machines.fluidmachines.StorageTankBlock;
 import cyano.poweradvantage.machines.fluidmachines.modsupport.TerminalFluidPipeBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemMeshDefinition;
-import net.minecraft.client.renderer.block.model.ModelBakery;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.renderer.block.statemap.StateMapperBase;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.fluids.BlockFluidBase;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.oredict.OreDictionary;
 
 public abstract class Blocks {
 	private static final Map<String, Block> allBlocks = new HashMap<>();
@@ -173,7 +171,8 @@ public abstract class Blocks {
 	}
 
 	private static Block addBlock(Block block, String name) {
-		block.setUnlocalizedName(PowerAdvantage.MODID + "." + name);;
+		block.setUnlocalizedName(PowerAdvantage.MODID + "." + name);
+		block.setRegistryName(name);
 		GameRegistry.register(block);
 		if ((block instanceof BlockFluidBase) == false) block.setCreativeTab(ItemGroups.tab_powerAdvantage);
 		allBlocks.put(name, block);

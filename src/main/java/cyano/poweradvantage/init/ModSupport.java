@@ -1,13 +1,7 @@
 package cyano.poweradvantage.init;
 
-import cyano.poweradvantage.PowerAdvantage;
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.api.modsupport.rf.BlockRFConverter;
-import cyano.poweradvantage.api.modsupport.rf.TileEntityRFElectricityConverter;
-import cyano.poweradvantage.api.modsupport.rf.TileEntityRFQuantumConverter;
-import cyano.poweradvantage.api.modsupport.rf.TileEntityRFSteamConverter;
-import cyano.poweradvantage.api.modsupport.techreborn.BlockTRConverter;
-import cyano.poweradvantage.api.modsupport.techreborn.TileEntityTRElectricityConverter;
+import java.util.HashMap;
+import java.util.Map;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
@@ -20,9 +14,14 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.ShapedOreRecipe;
-
-import java.util.HashMap;
-import java.util.Map;
+import cyano.poweradvantage.PowerAdvantage;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.modsupport.rf.BlockRFConverter;
+import cyano.poweradvantage.api.modsupport.rf.TileEntityRFElectricityConverter;
+import cyano.poweradvantage.api.modsupport.rf.TileEntityRFQuantumConverter;
+import cyano.poweradvantage.api.modsupport.rf.TileEntityRFSteamConverter;
+import cyano.poweradvantage.api.modsupport.techreborn.BlockTRConverter;
+import cyano.poweradvantage.api.modsupport.techreborn.TileEntityTRElectricityConverter;
 
 public abstract class ModSupport {
 
@@ -76,6 +75,7 @@ public abstract class ModSupport {
 
 	private static Block addBlock(Block block, String name) {
 		block.setUnlocalizedName(PowerAdvantage.MODID + "." + name);
+		block.setRegistryName(name);
 		GameRegistry.register(block);
 		if ((block instanceof BlockFluidBase) == false) block.setCreativeTab(ItemGroups.tab_powerAdvantage);
 		allBlocks.put(name, block);

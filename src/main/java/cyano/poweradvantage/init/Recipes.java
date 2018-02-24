@@ -1,19 +1,17 @@
 package cyano.poweradvantage.init;
 
-import com.mcmoddev.basemetals.BaseMetals;
 import com.mcmoddev.basemetals.data.MaterialNames;
-import com.mcmoddev.basemetals.util.Config.Options;
 import com.mcmoddev.lib.data.Names;
 import com.mcmoddev.lib.init.Materials;
 import com.mcmoddev.lib.registry.CrusherRecipeRegistry;
-import cyano.poweradvantage.PowerAdvantage;
-import cyano.poweradvantage.RecipeMode;
-import cyano.poweradvantage.registry.still.recipe.DistillationRecipeRegistry;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
+import cyano.poweradvantage.PowerAdvantage;
+import cyano.poweradvantage.RecipeMode;
+import cyano.poweradvantage.registry.still.recipe.DistillationRecipeRegistry;
 
 
 public abstract class Recipes {
@@ -75,7 +73,7 @@ public abstract class Recipes {
 		} else if (PowerAdvantage.recipeMode == RecipeMode.TECH_PROGRESSION) {
 			// make things a little more complicated with tech-progression mode
 			//TODO We need a setStrongHammers(boolean b) method in MMDLib Config File to fix this
-			BaseMetals.strongHammers = false;
+			//BaseMetals.strongHammers = false;
 			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(Items.sprocket, 4), " x ", "x/x", " x ", 'x', "ingotSteel", '/', "rod"));
 			if (OreDictionary.getOres("rod").isEmpty())
 				GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(Items.sprocket, 4), " x ", "x/x", " x ", 'x', "ingotSteel", '/', "nuggetBronze"));

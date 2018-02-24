@@ -1,8 +1,5 @@
 package cyano.poweradvantage.machines.fluidmachines;
 
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.api.PoweredEntity;
-import cyano.poweradvantage.api.simple.BlockSimpleFluidMachine;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -15,8 +12,12 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.PoweredEntity;
+import cyano.poweradvantage.api.simple.BlockSimpleFluidMachine;
 
 @SuppressWarnings("deprecation")
 public class StorageTankBlock extends BlockSimpleFluidMachine {
@@ -117,7 +118,7 @@ public class StorageTankBlock extends BlockSimpleFluidMachine {
 			dataTag = stack.getTagCompound();
 		}
 		if (dataTag.hasKey("Volume") && dataTag.hasKey("FluidID")) {
-			float buckets = (float) dataTag.getInteger("Volume") / (float) FluidContainerRegistry.BUCKET_VOLUME;
+			float buckets = (float) dataTag.getInteger("Volume") / (float) Fluid.BUCKET_VOLUME;
 			message = (I18n.translateToLocal("tooltip.poweradvantage.buckets_of")
 					.replace("%x", String.valueOf(buckets))
 					.replace("%y", FluidRegistry.getFluid(dataTag.getString("FluidID")).getName()));

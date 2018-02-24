@@ -1,9 +1,6 @@
 package cyano.poweradvantage.machines.fluidmachines;
 
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -13,20 +10,19 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
-import net.minecraftforge.fluids.FluidTankInfo;
-import net.minecraftforge.fluids.IFluidBlock;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
 
 
 public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
 
 
 	public FluidDischargeTileEntity() {
-		super(FluidContainerRegistry.BUCKET_VOLUME, FluidDischargeTileEntity.class.getName());
+		super(Fluid.BUCKET_VOLUME, FluidDischargeTileEntity.class.getName());
 	}
 
 
@@ -42,20 +38,21 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
 		// to fluid container
 		if (tank.getFluidAmount() > 0 && world.getTileEntity(space) instanceof IFluidHandler) {
 			IFluidHandler other = (IFluidHandler) world.getTileEntity(space);
-			FluidTankInfo[] tanks = other.getTankInfo(EnumFacing.DOWN);
+			// TODO: facing was removed, this needs to work with caps, not interfaces in tile entities
+			IFluidTankProperties[] tanks = other.getTankProperties(); // EnumFacing.DOWN);
 			for (int i = 0; i < tanks.length; i++) {
-				FluidTankInfo t = tanks[i];
-				if (t.fluid != null && tank.getFluid().getFluid() != t.fluid.getFluid()) {
+				IFluidTankProperties t = tanks[i];
+				if (t.getContents() != null && tank.getFluid().getFluid() != t.getContents().getFluid()) {
 					continue;
 				}
-				if (other.canFill(EnumFacing.UP, tank.getFluid().getFluid())) {
-					int amount = other.fill(EnumFacing.UP, tank.getFluid(), true);
+				if (other.fill(tank.getFluid(), false) > 0) {
+					int amount = other.fill(tank.getFluid(), true);
 					tank.drain(amount, true);
 				}
 			}
 		} else
 			// place fluid block
-			if (tank.getFluidAmount() >= FluidContainerRegistry.BUCKET_VOLUME) {
+			if (tank.getFluidAmount() >= Fluid.BUCKET_VOLUME) {
 				FluidStack fstack = tank.getFluid();
 				Fluid fluid = fstack.getFluid();
 				Block fluidBlock = fluid.getBlock();
@@ -63,7 +60,8 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
 				if (world.isAirBlock(coord)) {
 					world.setBlockState(coord, fluidBlock.getDefaultState());
 					world.notify();
-					this.drain(EnumFacing.DOWN, FluidContainerRegistry.BUCKET_VOLUME, true);
+					// TODO: facing was removed, this needs to work with caps, not interfaces in tile entities
+					this.drain(/*EnumFacing.DOWN, */Fluid.BUCKET_VOLUME, true);
 				} else if (world.getBlockState(coord).getBlock() == fluidBlock) {
 					// follow the flow
 					coord = scanFluidSpaceForNonsourceBlock(getWorld(), coord, fluid, 32);
@@ -72,11 +70,10 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
 						// not a source block
 						world.setBlockState(coord, fluidBlock.getDefaultState());
 						world.notify();
-						this.drain(EnumFacing.DOWN, FluidContainerRegistry.BUCKET_VOLUME, true);
+						// TODO: facing was removed, this needs to work with caps, not interfaces in tile entities
+						this.drain(/*EnumFacing.DOWN, */Fluid.BUCKET_VOLUME, true);
 					}
 				}
-
-
 			}
 		if (this.getTank().getFluidAmount() != oldLevel) {
 			oldLevel = this.getTank().getFluidAmount();
