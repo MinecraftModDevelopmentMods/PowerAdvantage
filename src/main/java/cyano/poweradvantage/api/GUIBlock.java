@@ -1,7 +1,6 @@
 package cyano.poweradvantage.api;
 
-import static net.minecraft.init.Items.BUCKET;
-
+import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
@@ -35,7 +34,7 @@ import net.minecraftforge.fluids.capability.IFluidHandlerItem;
  * @author DrCyano
  *
  */
-public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
+public abstract class GUIBlock extends BlockContainer {
 
 	/**
 	 * Constructor for GUI block
@@ -147,7 +146,7 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
 						return true;
 					}
 				}
-			}else if (item.getItem() == BUCKET) {
+			} else if (item.getItem() == Items.BUCKET) {
 				// make universal bucket
 				for(FluidTankInfo tank : target.getTankInfo(facing)){
 					if(tank.fluid != null){
