@@ -1,10 +1,5 @@
 package cyano.poweradvantage.machines.fluidmachines;
 
-import cyano.poweradvantage.api.fluid.FluidRequest;
-import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
-import cyano.poweradvantage.registry.FuelRegistry;
-import cyano.poweradvantage.registry.still.recipe.DistillationRecipe;
-import cyano.poweradvantage.registry.still.recipe.DistillationRecipeRegistry;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -13,13 +8,17 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import cyano.poweradvantage.api.fluid.FluidRequest;
+import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
+import cyano.poweradvantage.registry.FuelRegistry;
+import cyano.poweradvantage.registry.still.recipe.DistillationRecipe;
+import cyano.poweradvantage.registry.still.recipe.DistillationRecipeRegistry;
+import cyano.poweradvantage.util.FluidHelper;
 
 public class StillTileEntity extends TileEntitySimpleFluidMachine {
-
-
 	private final ItemStack[] inventory = new ItemStack[1];
 	private final FluidTank inputTank = new FluidTank(Fluid.BUCKET_VOLUME);
-	private String[] dataFields = new String[6];
+	private int[] dataFields = new int[6];
 	private static final int DATAFIELD_FLUID_ID1 = 0; // index in the dataFields array
 	private static final int DATAFIELD_FLUID_VOLUME1 = 1; // index in the dataFields array
 	private static final int DATAFIELD_FLUID_ID2 = 2; // index in the dataFields array
@@ -211,7 +210,6 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 	/**
 	 * Implementation of IFluidHandler
 	 *
-	 * @param face  Face of the block being polled
 	 * @param fluid The fluid being added/removed
 	 */
 	@Override
@@ -223,18 +221,18 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 
 	private final FluidTankInfo[] tankInfoArray = new FluidTankInfo[2];
 
-	/**
-	 * Implementation of IFluidHandler
-	 *
-	 * @param face Face of the block being polled
-	 * @return array of FluidTankInfo describing all of the FluidTanks
-	 */
-	@Override
-	public FluidTankInfo[] getTankInfo(EnumFacing face) {
-		tankInfoArray[0] = inputTank.getInfo();
-		tankInfoArray[1] = getTank().getInfo();
-		return tankInfoArray;
-	}
+//	/**
+//	 * Implementation of IFluidHandler
+//	 *
+//	 * @param face Face of the block being polled
+//	 * @return array of FluidTankInfo describing all of the FluidTanks
+//	 */
+//	@Override
+//	public FluidTankInfo[] getTankInfo(EnumFacing face) {
+//		tankInfoArray[0] = inputTank.getInfo();
+//		tankInfoArray[1] = getTank().getInfo();
+//		return tankInfoArray;
+//	}
 
 	/**
 	 * Handles data saving and loading
@@ -331,13 +329,13 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 		if (fluidVolume1 <= 0) {
 			inputTank.setFluid(new FluidStack(FluidRegistry.WATER, 0));
 		} else {
-			FluidStack fs = new FluidStack(FluidRegistry.getFluid(fluidID1), fluidVolume1);
+			FluidStack fs = new FluidStack(FluidHelper.getFluidById(fluidID1), fluidVolume1);
 			inputTank.setFluid(fs);
 		}
 		if (fluidVolume2 <= 0) {
 			getTank().setFluid(new FluidStack(FluidRegistry.WATER, 0));
 		} else {
-			FluidStack fs = new FluidStack(FluidRegistry.getFluid(fluidID2), fluidVolume2);
+			FluidStack fs = new FluidStack(FluidHelper.getFluidById(fluidID2), fluidVolume2);
 			getTank().setFluid(fs);
 		}
 		this.burnTime = (short) dataFields[DATAFIELD_BURNTIME];
@@ -365,17 +363,17 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 	 */
 	public void prepareDataFieldsForSync() {
 		if (inputTank.getFluid() == null || inputTank.getFluidAmount() <= 0) {
-			dataFields[DATAFIELD_FLUID_ID1] = FluidRegistry.getFluidName(FluidRegistry.WATER);
+			dataFields[DATAFIELD_FLUID_ID1] = FluidHelper.getFluidId(FluidRegistry.WATER);
 			dataFields[DATAFIELD_FLUID_VOLUME1] = 0;
 		} else {
-			dataFields[DATAFIELD_FLUID_ID1] = FluidRegistry.getFluidID(inputTank.getFluid().getFluid());
+			dataFields[DATAFIELD_FLUID_ID1] = FluidHelper.getFluidId(inputTank.getFluid().getFluid());
 			dataFields[DATAFIELD_FLUID_VOLUME1] = inputTank.getFluidAmount();
 		}
 		if (getTank().getFluid() == null || getTank().getFluidAmount() <= 0) {
-			dataFields[DATAFIELD_FLUID_ID2] = FluidRegistry.getFluidID(FluidRegistry.WATER);
+			dataFields[DATAFIELD_FLUID_ID2] = FluidHelper.getFluidId(FluidRegistry.WATER);
 			dataFields[DATAFIELD_FLUID_VOLUME2] = 0;
 		} else {
-			dataFields[DATAFIELD_FLUID_ID2] = FluidRegistry.getFluidID(getTank().getFluid().getFluid());
+			dataFields[DATAFIELD_FLUID_ID2] = FluidHelper.getFluidId(getTank().getFluid().getFluid());
 			dataFields[DATAFIELD_FLUID_VOLUME2] = getTank().getFluidAmount();
 		}
 		dataFields[DATAFIELD_BURNTIME] = this.burnTime;

@@ -13,6 +13,9 @@ import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
+import cyano.poweradvantage.PowerAdvantage;
+import cyano.poweradvantage.RecipeMode;
+import cyano.poweradvantage.registry.still.recipe.DistillationRecipeRegistry;
 
 public abstract class Recipes {
 

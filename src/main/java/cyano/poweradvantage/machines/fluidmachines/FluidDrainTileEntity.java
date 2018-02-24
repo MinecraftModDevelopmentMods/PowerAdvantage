@@ -1,7 +1,5 @@
 package cyano.poweradvantage.machines.fluidmachines;
 
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.ITileEntityProvider;
@@ -17,10 +15,11 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
-import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidBlock;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
 
 
 public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
@@ -52,13 +51,17 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 				// from fluid container
 				if (getWorld().getBlockState(space).getBlock() instanceof ITileEntityProvider && getWorld().getTileEntity(space) instanceof IFluidHandler) {
 					IFluidHandler other = (IFluidHandler) getWorld().getTileEntity(space);
-					FluidTankInfo[] tanks = other.getTankProperties(cardinals[k].getOpposite());
+					// TODO: facing was removed from this test... add it back!
+					IFluidTankProperties[] tanks = other.getTankProperties(); // cardinals[k].getOpposite());
 					for (int i = 0; i < tanks.length; i++) {
-						FluidTankInfo t = tanks[i];
-						if ((t.fluid == null) || (tank.getFluidAmount() > 0 && tank.getFluid().getFluid() != t.fluid.getFluid())) {
+						IFluidTankProperties t = tanks[i];
+						if ((t.getContents() == null) || (tank.getFluidAmount() > 0 && tank.getFluid().getFluid() != t.getContents().getFluid())) {
 							continue;
 						}
-						if (other.canDrain(cardinals[k].getOpposite(), t.fluid.getFluid())) {
+						// TODO: facing was removed from this test... add it back!
+						FluidStack drained = other.drain(t.getContents(), false);
+						if ((drained != null) && (drained.amount > 0)) {
+						// if (other.canDrain(cardinals[k].getOpposite(), t.fluid.getFluid())) {
 							FluidStack fluid = other.drain(tank.getCapacity() - tank.getFluidAmount(), true);
 							tank.fill(fluid, true);
 							break fluidScan;
@@ -107,7 +110,7 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 		TileEntity e = getWorld().getTileEntity(coord);
 		if (e instanceof IFluidHandler) {
 			IFluidHandler fh = (IFluidHandler) e;
-			if (fh.canFill(getTank().getFluid().getFluid())) {
+			if (fh.fill(getTank().getFluid(), false) > 0) {
 				getTank().drain(fh.fill(getTank().getFluid(), true), true);
 				this.sync();
 			}

@@ -1,7 +1,5 @@
 package cyano.poweradvantage.machines.conveyors;
 
-import cyano.poweradvantage.api.GUIBlock;
-import cyano.poweradvantage.init.ItemGroups;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -19,6 +17,8 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLLog;
+import cyano.poweradvantage.api.GUIBlock;
+import cyano.poweradvantage.init.ItemGroups;
 
 public class BlockConveyor extends GUIBlock {
 
@@ -73,10 +73,12 @@ public class BlockConveyor extends GUIBlock {
 	}
 
 	@Override
-	public void onBlockPlacedBy(World w, BlockPos coord, IBlockState state, EntityLivingBase placer,
-			ItemStack stack) {
+	public void onBlockPlacedBy(World w, BlockPos coord, IBlockState state, EntityLivingBase placer, ItemStack stack) {
 		//TODO No longer an EnumFacing param
-		return; //this.getDefaultState().withProperty(FACING, face.getOpposite());
+		w.setBlockState(coord, this.getDefaultState().withProperty(FACING,
+			EnumFacing.getFacingFromVector((float)(placer.posX - coord.getX()), 0f, (float)(placer.posZ - coord.getZ())).getOpposite()),
+			2);
+		super.onBlockPlacedBy(w, coord, state, placer, stack);
 	}
 
 	@Override

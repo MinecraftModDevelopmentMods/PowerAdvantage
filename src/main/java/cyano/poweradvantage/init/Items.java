@@ -1,7 +1,8 @@
 package cyano.poweradvantage.init;
 
-import cyano.poweradvantage.PowerAdvantage;
-import cyano.poweradvantage.items.RotationTool;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
@@ -10,10 +11,8 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import cyano.poweradvantage.PowerAdvantage;
+import cyano.poweradvantage.items.RotationTool;
 
 public abstract class Items {
 
@@ -54,6 +53,7 @@ public abstract class Items {
 
 	private static Item addItem(String unlocalizedName, Item i) {
 		i.setUnlocalizedName(PowerAdvantage.MODID + "." + unlocalizedName);
+		i.setRegistryName(unlocalizedName);
 		GameRegistry.register(i);
 		i.setCreativeTab(ItemGroups.tab_powerAdvantage);
 		allItems.put(unlocalizedName, i);

@@ -1,12 +1,12 @@
 package cyano.poweradvantage.machines.fluidmachines;
 
-import cyano.poweradvantage.api.PowerRequest;
-import cyano.poweradvantage.api.fluid.FluidRequest;
-import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import cyano.poweradvantage.api.PowerRequest;
+import cyano.poweradvantage.api.fluid.FluidRequest;
+import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
 
 public class StorageTankTileEntity  extends TileEntitySimpleFluidMachine {
 

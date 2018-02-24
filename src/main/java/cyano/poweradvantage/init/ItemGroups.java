@@ -1,7 +1,6 @@
 package cyano.poweradvantage.init;
 
 import com.mcmoddev.lib.init.MMDCreativeTab;
-
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 
@@ -11,8 +10,8 @@ public class ItemGroups extends com.mcmoddev.lib.init.ItemGroups {
 
 	private static boolean initDone = false;
 	
-	private static final int itemsTabId = addTab("items", true);
-	public static final MMDCreativeTab itemsTab = getTab(itemsTabId);
+//	private static final MMDCreativeTab itemsTabId = addTab("items", true);
+	public static final MMDCreativeTab itemsTab = addTab("items", true); // getTab(itemsTabId);
 
 
 	public static void init() {

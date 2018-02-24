@@ -1,16 +1,17 @@
 package cyano.poweradvantage.api.fluid;
 
+import java.util.List;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.PowerRequest;
 import cyano.poweradvantage.api.PoweredEntity;
 import cyano.poweradvantage.conduitnetwork.ConduitRegistry;
 import cyano.poweradvantage.init.Fluids;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
-import net.minecraftforge.fluids.*;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-
-import java.util.List;
 
 /**
  * <p>
@@ -29,8 +30,6 @@ import java.util.List;
  *
  */
 public abstract class FluidPoweredEntity extends PoweredEntity implements IFluidHandler {
-
-
 	/**
 	 * For simplicity's sake, this method wraps the <code>getFluidRequest(...)</code> and sends it
 	 * of through the normal power network algorithm.
@@ -167,11 +166,9 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 */
 	public abstract FluidRequest getFluidRequest(Fluid type);
 
-
-	/**
+    /**
 	 * Implementation of IFluidHandler
 	 *
-	 * @param face    Face of the block being polled
 	 * @param fluid   The fluid being added/removed
 	 * @param forReal if true, then the fluid in the tank will change
 	 */
@@ -187,7 +184,6 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	/**
 	 * Implementation of IFluidHandler
 	 *
-	 * @param face    Face of the block being polled
 	 * @param fluid   The fluid being added/removed
 	 * @param forReal if true, then the fluid in the tank will change
 	 */
@@ -203,7 +199,6 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	/**
 	 * Implementation of IFluidHandler
 	 *
-	 * @param face    Face of the block being polled
 	 * @param amount  The amount of fluid being added/removed
 	 * @param forReal if true, then the fluid in the tank will change
 	 */
@@ -219,10 +214,8 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	/**
 	 * Implementation of IFluidHandler
 	 *
-	 * @param face  Face of the block being polled
 	 * @param fluid The fluid being added/removed
 	 */
-
 	public boolean canFill(Fluid fluid) {
 		if (getTank().getFluid() == null) return true;
 		return getTank().getFluidAmount() <= getTank().getCapacity() && fluid.equals(getTank().getFluid().getFluid());
@@ -231,10 +224,8 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	/**
 	 * Implementation of IFluidHandler
 	 *
-	 * @param face  Face of the block being polled
 	 * @param fluid The fluid being added/removed
 	 */
-
 	public boolean canDrain(Fluid fluid) {
 		if (getTank().getFluid() == null) return false;
 		return getTank().getFluidAmount() > 0 && fluid.equals(getTank().getFluid().getFluid());
@@ -243,15 +234,18 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	/**
 	 * Implementation of IFluidHandler
 	 *
-	 * @param face Face of the block being polled
-	 * @return array of FluidTankInfo describing all of the FluidTanks
+	 * @return array of IFluidTankProperties describing all of the FluidTanks
 	 */
-	@Override
-	public FluidTankInfo[] getTankInfo(EnumFacing face) {
-		FluidTankInfo[] arr = new FluidTankInfo[1];
-		arr[0] = getTank().getInfo();
-		return arr;
-	}
+//	public FluidTankInfo[] getTankInfo(EnumFacing face) {
+//		FluidTankInfo[] arr = new FluidTankInfo[1];
+//		arr[0] = getTank().getInfo();
+//		return arr;
+//	}
+
+    @Override
+    public IFluidTankProperties[] getTankProperties() {
+        return this.getTank().getTankProperties();
+    }
 
 	/**
 	 * checks whether this machine should transmit a given power type to power consumers

@@ -1,11 +1,6 @@
 package cyano.poweradvantage.api.simple;
 
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.api.PowerConnectorContext;
-import cyano.poweradvantage.api.PowerRequest;
-import cyano.poweradvantage.api.fluid.FluidPoweredEntity;
-import cyano.poweradvantage.api.fluid.FluidRequest;
-import cyano.poweradvantage.init.Fluids;
+import java.util.List;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
@@ -23,8 +18,13 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-
-import java.util.List;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.PowerConnectorContext;
+import cyano.poweradvantage.api.PowerRequest;
+import cyano.poweradvantage.api.fluid.FluidPoweredEntity;
+import cyano.poweradvantage.api.fluid.FluidRequest;
+import cyano.poweradvantage.init.Fluids;
+import cyano.poweradvantage.util.FluidHelper;
 
 /**
  * This block implements the cyano.poweradvantage.api.PowerSourceEntity 
@@ -46,7 +46,7 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
 	private String customName = null;
     
     private final String unlocalizedName;
-	private int[] dataFields = new int[2];	 
+	private int[] dataFields = new int[2];
 	private static final int DATAFIELD_FLUID_ID = 0; // index in the dataFields array
 	private static final int DATAFIELD_FLUID_VOLUME = 1; // index in the dataFields array
     
@@ -139,7 +139,7 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
 		if(fluidVolume <= 0){
 			getTank().setFluid(new FluidStack(FluidRegistry.WATER,0));
 		} else {
-			FluidStack fs = new FluidStack(FluidRegistry.getFluid(fluidID),fluidVolume);
+			FluidStack fs = new FluidStack(FluidHelper.getFluidById(fluidID),fluidVolume);
 			getTank().setFluid(fs);
 		}
 	}
@@ -165,10 +165,10 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
      */
 	public void prepareDataFieldsForSync(){
 		if(getTank().getFluid() == null || getTank().getFluidAmount() <= 0){
-			dataFields[DATAFIELD_FLUID_ID] = FluidRegistry.getFluidID(FluidRegistry.WATER);
+			dataFields[DATAFIELD_FLUID_ID] = FluidHelper.getFluidId(FluidRegistry.WATER);
 			dataFields[DATAFIELD_FLUID_VOLUME] = 0;
 		} else {
-			dataFields[DATAFIELD_FLUID_ID] = FluidRegistry.getFluidID(getTank().getFluid().getFluid());
+			dataFields[DATAFIELD_FLUID_ID] = FluidHelper.getFluidId(getTank().getFluid().getFluid());
 			dataFields[DATAFIELD_FLUID_VOLUME] = getTank().getFluidAmount();
 		}
 	}
@@ -376,7 +376,7 @@ private final ConduitType[] types = {Fluids.fluidConduit_general};
      * @return A synchronization NBT holding values from the 
      * <code>getDataFieldArray()</code> array
      */
-    public NBTTagCompound createDataFieldUpdateTag(){
+    public NBTTagCompound createDataFieldUpdateTag() {
     	this.prepareDataFieldsForSync();
     	int[] dataFields = this.getDataFieldArray();
     	NBTTagCompound nbtTag = new NBTTagCompound();

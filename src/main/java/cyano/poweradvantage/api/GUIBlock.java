@@ -1,11 +1,8 @@
 package cyano.poweradvantage.api;
 
-import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
@@ -16,10 +13,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeModContainer;
-import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 
 /**
  * <p>
@@ -130,72 +124,73 @@ public abstract class GUIBlock extends BlockContainer {
         // handle buckets and fluid containers
 		ItemStack item = player.getItemStackFromSlot(EntityEquipmentSlot.MAINHAND);
 		if(tileEntity instanceof IFluidHandler && item != null) {
+			// TODO: FIX THIS!
 			/// NEW WAY - IFluidContainerItem and the UniversalBucket FTW!
-			IFluidHandler target = (IFluidHandler) tileEntity;
-			if (item.getItem() instanceof IFluidHandler){
-				// fill from bucket
-				IFluidHandlerItem container = (IFluidHandlerItem) item.getItem();
-				if (container.getFluid(item) != null && container.getFluid(item).amount > 0) {
-					if (target.fill(
-							container.drain(item,container.getFluid(item).amount,false),
-							false)
-							== container.getFluid(item).amount){
-						// simulated fill-drain succeeded, do it for real
-						FluidStack drained = container.drain(item,container.getFluid(item).amount,!player.capabilities.isCreativeMode);
-						target.fill(drained,true);
-						return true;
-					}
-				}
-			} else if (item.getItem() == Items.BUCKET) {
-				// make universal bucket
-				for(FluidTankInfo tank : target.getTankInfo(facing)){
-					if(tank.fluid != null){
-						// special handling for water and lava (no universal bucket)
-						if(tank.fluid.getFluid() == FluidRegistry.WATER){
-							ItemStack filledBucket = new ItemStack(Items.WATER_BUCKET);
-							if(tank.fluid.amount >= 1000) {
-								FluidStack drain = tank.fluid.copy();
-								drain.amount = 1000;
-								if(target.drain(drain,false).amount == drain.amount){
-									target.drain(drain,true);
-									if(!player.capabilities.isCreativeMode)player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, filledBucket);
-								}
-							}
-							return true;
-						}
-						if(tank.fluid.getFluid() == FluidRegistry.LAVA){
-							ItemStack filledBucket = new ItemStack(Items.LAVA_BUCKET);
-							if(tank.fluid.amount >= 1000) {
-								FluidStack drain = tank.fluid.copy();
-								drain.amount = 1000;
-								if(target.drain(drain,false).amount == drain.amount){
-									target.drain(drain,true);
-									if(!player.capabilities.isCreativeMode)player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, filledBucket);
-								}
-							}
-							return true;
-						}
-						// back to your regularly scheduled algorithm...
-						UniversalBucket bucket = ForgeModContainer.getInstance().universalBucket;
-						ItemStack filledBucket = new ItemStack(bucket);
-						if(tank.fluid.amount >= bucket.getCapacity()) {
-							FluidStack drain = tank.fluid.copy();
-							drain.amount = bucket.getCapacity();
-							if(target.drain(drain,false).amount == bucket.fill(filledBucket,drain,false)){
-								bucket.fill(filledBucket,target.drain(drain,true),true);
-								if(!player.capabilities.isCreativeMode)player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, filledBucket);
-								return true;
-							}
-						}
-					}
-				}
-			} else if (item != null && FluidRegistry(item) && tileEntity instanceof IFluidHandler) {
-				/// OLD WAY - deprecated (but still might be used by other mods)
-				boolean bucketed = handleBucketInteraction(item, player, (IFluidHandler) tileEntity, w);
-				if (bucketed) {
-					return true;
-				}
-			}
+//			IFluidHandler target = (IFluidHandler) tileEntity;
+//			if (item.getItem() instanceof IFluidHandler){
+//				// fill from bucket
+//				IFluidHandlerItem container = (IFluidHandlerItem) item.getItem();
+//				if (container.getFluid(item) != null && container.getFluid(item).amount > 0) {
+//					if (target.fill(
+//							container.drain(item,container.getFluid(item).amount,false),
+//							false)
+//							== container.getFluid(item).amount){
+//						// simulated fill-drain succeeded, do it for real
+//						FluidStack drained = container.drain(item,container.getFluid(item).amount,!player.capabilities.isCreativeMode);
+//						target.fill(drained,true);
+//						return true;
+//					}
+//				}
+//			}else if (item.getItem() == BUCKET) {
+//				// make universal bucket
+//				for(FluidTankInfo tank : target.getTankInfo(facing)){
+//					if(tank.fluid != null){
+//						// special handling for water and lava (no universal bucket)
+//						if(tank.fluid.getFluid() == FluidRegistry.WATER){
+//							ItemStack filledBucket = new ItemStack(Items.WATER_BUCKET);
+//							if(tank.fluid.amount >= 1000) {
+//								FluidStack drain = tank.fluid.copy();
+//								drain.amount = 1000;
+//								if(target.drain(drain,false).amount == drain.amount){
+//									target.drain(drain,true);
+//									if(!player.capabilities.isCreativeMode)player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, filledBucket);
+//								}
+//							}
+//							return true;
+//						}
+//						if(tank.fluid.getFluid() == FluidRegistry.LAVA){
+//							ItemStack filledBucket = new ItemStack(Items.LAVA_BUCKET);
+//							if(tank.fluid.amount >= 1000) {
+//								FluidStack drain = tank.fluid.copy();
+//								drain.amount = 1000;
+//								if(target.drain(drain,false).amount == drain.amount){
+//									target.drain(drain,true);
+//									if(!player.capabilities.isCreativeMode)player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, filledBucket);
+//								}
+//							}
+//							return true;
+//						}
+//						// back to your regularly scheduled algorithm...
+//						UniversalBucket bucket = ForgeModContainer.getInstance().universalBucket;
+//						ItemStack filledBucket = new ItemStack(bucket);
+//						if(tank.fluid.amount >= bucket.getCapacity()) {
+//							FluidStack drain = tank.fluid.copy();
+//							drain.amount = bucket.getCapacity();
+//							if(target.drain(drain,false).amount == bucket.fill(filledBucket,drain,false)){
+//								bucket.fill(filledBucket,target.drain(drain,true),true);
+//								if(!player.capabilities.isCreativeMode)player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, filledBucket);
+//								return true;
+//							}
+//						}
+//					}
+//				}
+//			} else if (item != null && FluidRegistry(item) && tileEntity instanceof IFluidHandler) {
+//				/// OLD WAY - deprecated (but still might be used by other mods)
+//				boolean bucketed = handleBucketInteraction(item, player, (IFluidHandler) tileEntity, w);
+//				if (bucketed) {
+//					return true;
+//				}
+//			}
 		}
 
         // open GUI
@@ -206,60 +201,60 @@ public abstract class GUIBlock extends BlockContainer {
 
     
    
-	/**
-	 * This method is used for filling IFluidContainer instances with liquids from a player's 
-	 * bucket.
-	 * @param bucket A bucket (or other registered container item) held by the player
-	 * @param player The player interacting with the block
-	 * @param blockFace The face on the block that the player clicked on
-	 * @param target The IFluidHandler that the player interacted with
-	 * @param world World instance
-	 * @return true if fluids were transferred, false otherwise
-	 * @deprecated this method will no longer work in later versions of Minecraft Forge 1.9.x
-	 */
-	@Deprecated
-    public static boolean handleBucketInteraction(ItemStack bucket,final EntityPlayer player, 
-			final EnumFacing blockFace, IFluidHandler target, final World world) {
-		/// OLD WAY - deprecated (but still might be used by other mods)
-		if(FluidContainerRegistry.isEmpty (bucket)){
-			// pull from tank
-			FluidStack practice = target.drain(Fluid.BUCKET_VOLUME, false);
-			if(practice != null && practice.amount ==  Fluid.BUCKET_VOLUME
-					&& FluidContainerRegistry.fillFluidContainer(practice, bucket) != null){
-				FluidStack drain = target.drain(Fluid.BUCKET_VOLUME, true);
-				ItemStack newBucket = FluidContainerRegistry.fillFluidContainer(drain, bucket);
-				if(bucket.getCount() == 1){
-					player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, newBucket);
-				} else {
-					bucket.shrink(1);
-					if(newBucket != null)
-						world.spawnEntity(new EntityItem(world,player.posX,player.posY,player.posZ, newBucket));
-				}
-				return true;
-			} else {
-				return false;
-			}
-		} else if(FluidContainerRegistry.isFilledContainer(bucket)){
-			FluidStack fluid = FluidContainerRegistry.getFluidForFilledItem(bucket);
-			int practice = target.fill( fluid, false);
-			if(practice == FluidContainerRegistry.getContainerCapacity(bucket)){
-				// pour into empty tank
-				target.fill(fluid, true);
-				ItemStack newBucket = FluidContainerRegistry.drainFluidContainer(bucket);
-				if(bucket.getCount() == 1) {
-					player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, newBucket);
-				} else {
-					bucket.shrink(1);
-					world.spawnEntity(new EntityItem(world,player.posX,player.posY,player.posZ, newBucket));
-				}
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return false;
-		}
-	}
+//	/**
+//	 * This method is used for filling IFluidContainer instances with liquids from a player's
+//	 * bucket.
+//	 * @param bucket A bucket (or other registered container item) held by the player
+//	 * @param player The player interacting with the block
+//	 * @param blockFace The face on the block that the player clicked on
+//	 * @param target The IFluidHandler that the player interacted with
+//	 * @param world World instance
+//	 * @return true if fluids were transferred, false otherwise
+//	 * @deprecated this method will no longer work in later versions of Minecraft Forge 1.9.x
+//	 */
+//	@Deprecated
+//    public static boolean handleBucketInteraction(ItemStack bucket,final EntityPlayer player,
+//			final EnumFacing blockFace, IFluidHandler target, final World world) {
+//		/// OLD WAY - deprecated (but still might be used by other mods)
+//		if(FluidContainerRegistry.isEmptyContainer(bucket)){
+//			// pull from tank
+//			FluidStack practice = target.drain(blockFace, Fluid.BUCKET_VOLUME, false);
+//			if(practice != null && practice.amount ==  Fluid.BUCKET_VOLUME
+//					&& FluidContainerRegistry.fillFluidContainer(practice, bucket) != null){
+//				FluidStack drain = target.drain(blockFace, Fluid.BUCKET_VOLUME, true);
+//				ItemStack newBucket = FluidContainerRegistry.fillFluidContainer(drain, bucket);
+//				if(bucket.getCount() == 1){
+//					player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, newBucket);
+//				} else {
+//					bucket.shrink(1);
+//					if(newBucket != null)
+//						world.spawnEntity(new EntityItem(world,player.posX,player.posY,player.posZ, newBucket));
+//				}
+//				return true;
+//			} else {
+//				return false;
+//			}
+//		} else if(FluidHelper.isFluidContainer(bucket)){
+//			FluidStack fluid = FluidHelper.getContainedFluid(bucket);
+//			int practice = target.fill( fluid, false);
+//			if(practice == FluidContainerRegistry.getContainerCapacity(bucket)){
+//				// pour into empty tank
+//				target.fill(fluid, true);
+//				ItemStack newBucket = FluidContainerRegistry.drainFluidContainer(bucket);
+//				if(bucket.getCount() == 1) {
+//					player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, newBucket);
+//				} else {
+//					bucket.shrink(1);
+//					world.spawnEntity(new EntityItem(world,player.posX,player.posY,player.posZ, newBucket));
+//				}
+//				return true;
+//			} else {
+//				return false;
+//			}
+//		} else {
+//			return false;
+//		}
+//	}
     
 
 	@Override

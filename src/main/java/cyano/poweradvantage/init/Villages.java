@@ -1,10 +1,7 @@
 package cyano.poweradvantage.init;
 
-import net.minecraft.entity.passive.EntityVillager;
-import net.minecraftforge.fml.common.FMLLog;
-import org.apache.logging.log4j.Level;
-
 import com.mcmoddev.basemetals.util.VillagerTradeHelper;
+import net.minecraft.entity.passive.EntityVillager;
 
 public abstract class Villages {
 	// TODO: add machinist villager
@@ -15,12 +12,12 @@ public abstract class Villages {
 		if (initDone) return;
 
 		Entities.init();
-		try {
+//		try {
 			VillagerTradeHelper.insertTrades(3, 3, 1, new EntityVillager.ListItemForEmeralds(Items.sprocket, new EntityVillager.PriceInfo(-4, -1)));
 			VillagerTradeHelper.insertTrades(0, 1, 1, new EntityVillager.ListItemForEmeralds(Items.bioplastic_ingot, new EntityVillager.PriceInfo(-8, -4)));
-		} catch (NoSuchFieldException | IllegalAccessException e) {
-			FMLLog.log(Level.ERROR, e, "Failed to add trades to villagers");
-		}
+//		} catch (NoSuchFieldException | IllegalAccessException e) {
+//			FMLLog.log(Level.ERROR, e, "Failed to add trades to villagers");
+//		}
 
 		initDone = true;
 	}

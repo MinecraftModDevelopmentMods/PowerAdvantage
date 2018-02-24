@@ -1,17 +1,16 @@
 package cyano.poweradvantage.machines.fluidmachines;
 
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.api.PowerRequest;
-import cyano.poweradvantage.api.fluid.FluidRequest;
-import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.ForgeModContainer;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.UniversalBucket;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.PowerRequest;
+import cyano.poweradvantage.api.fluid.FluidRequest;
+import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
+import cyano.poweradvantage.util.FluidHelper;
 
 public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
 
@@ -53,16 +52,17 @@ public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
 	private FluidStack getFilter() {
 		ItemStack item = filterInventory[0];
 		if (item == null) return null;
-		if (item.getItem() instanceof UniversalBucket) {
-			UniversalBucket bucket = (UniversalBucket) item.getItem();
-			FluidStack drain = bucket.drain(item, bucket.getCapacity(), false);
-			if (drain != null && drain.amount > 0) {
-				return drain;
-			} else {
-				return null;
-			}
-		}
-		return FluidContainerRegistry.getFluidForFilledItem(item);
+		// TODO: check the logic here, but seems the following line will take care of it!
+//		if (item.getItem() instanceof UniversalBucket) {
+//			UniversalBucket bucket = (UniversalBucket) item.getItem();
+//			FluidStack drain = bucket.drain(item, bucket.getCapacity(), false);
+//			if (drain != null && drain.amount > 0) {
+//				return drain;
+//			} else {
+//				return null;
+//			}
+//		}
+		return FluidHelper.getContainedFluid(item);
 	}
 
 	/**
@@ -103,9 +103,8 @@ public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
 		if (this.getInventory() == null) return false;
 		if (slot >= this.getInventory().length) return false;
 		if (item.getItem() == ForgeModContainer.getInstance().universalBucket) return true;
-		return item.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
-		// Old
-		// return FluidContainerRegistry.isFilledContainer(item) && FluidContainerRegistry.getFluidForFilledItem(item) != null;
+		return FluidHelper.isFluidContainer(item)
+				&& FluidHelper.getContainedFluid(item) != null;
 	}
 
 	private Fluid lastFluid = null;
