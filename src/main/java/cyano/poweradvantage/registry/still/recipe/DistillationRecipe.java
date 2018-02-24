@@ -118,7 +118,7 @@ public class DistillationRecipe {
 	public Collection<FluidStack> getValidInputs() {
 		LinkedList<FluidStack> l = new LinkedList<>();
 		for (Fluid f : FluidRegistry.getRegisteredFluids().values()) {
-			FluidStack stack = new FluidStack(f, FluidContainerRegistry.BUCKET_VOLUME);
+			FluidStack stack = new FluidStack(f, Fluid.BUCKET_VOLUME);
 			if (this.isValidInput(stack)) {
 				l.add(stack);
 			}

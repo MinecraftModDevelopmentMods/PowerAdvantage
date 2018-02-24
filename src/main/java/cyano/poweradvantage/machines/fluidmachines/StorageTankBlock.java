@@ -15,6 +15,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -117,7 +118,7 @@ public class StorageTankBlock extends BlockSimpleFluidMachine {
 			dataTag = stack.getTagCompound();
 		}
 		if (dataTag.hasKey("Volume") && dataTag.hasKey("FluidID")) {
-			float buckets = (float) dataTag.getInteger("Volume") / (float) FluidContainerRegistry.BUCKET_VOLUME;
+			float buckets = (float) dataTag.getInteger("Volume") / (float) Fluid.BUCKET_VOLUME;
 			message = (I18n.translateToLocal("tooltip.poweradvantage.buckets_of")
 					.replace("%x", String.valueOf(buckets))
 					.replace("%y", FluidRegistry.getFluid(dataTag.getString("FluidID")).getName()));

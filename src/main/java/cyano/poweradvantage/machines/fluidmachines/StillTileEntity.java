@@ -11,19 +11,15 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidTank;
-import net.minecraftforge.fluids.FluidTankInfo;
+import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 public class StillTileEntity extends TileEntitySimpleFluidMachine {
 
 
 	private final ItemStack[] inventory = new ItemStack[1];
-	private final FluidTank inputTank = new FluidTank(FluidContainerRegistry.BUCKET_VOLUME);
-	private int[] dataFields = new int[6];
+	private final FluidTank inputTank = new FluidTank(Fluid.BUCKET_VOLUME);
+	private String[] dataFields = new String[6];
 	private static final int DATAFIELD_FLUID_ID1 = 0; // index in the dataFields array
 	private static final int DATAFIELD_FLUID_VOLUME1 = 1; // index in the dataFields array
 	private static final int DATAFIELD_FLUID_ID2 = 2; // index in the dataFields array
@@ -40,7 +36,7 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 
 
 	public StillTileEntity() {
-		super(FluidContainerRegistry.BUCKET_VOLUME, StillTileEntity.class.getName());
+		super(Fluid.BUCKET_VOLUME, StillTileEntity.class.getName());
 	}
 
 	@Override
@@ -303,7 +299,7 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 	 * <code>prepareDataFieldsForSync()</code> is called and read from to update
 	 * local variables when <code>onDataFieldUpdate()</code> is called.
 	 */
-	public int[] getDataFieldArray() {
+	public String[] getDataFieldArray() {
 		return dataFields;
 	}
 
@@ -369,7 +365,7 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 	 */
 	public void prepareDataFieldsForSync() {
 		if (inputTank.getFluid() == null || inputTank.getFluidAmount() <= 0) {
-			dataFields[DATAFIELD_FLUID_ID1] = FluidRegistry.getFluidID(FluidRegistry.WATER);
+			dataFields[DATAFIELD_FLUID_ID1] = FluidRegistry.getFluidName(FluidRegistry.WATER);
 			dataFields[DATAFIELD_FLUID_VOLUME1] = 0;
 		} else {
 			dataFields[DATAFIELD_FLUID_ID1] = FluidRegistry.getFluidID(inputTank.getFluid().getFluid());

@@ -26,7 +26,7 @@ import net.minecraftforge.fluids.capability.IFluidTankProperties;
 public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 
 	public FluidDrainTileEntity() {
-		super(FluidContainerRegistry.BUCKET_VOLUME, FluidDrainTileEntity.class.getName());
+		super(Fluid.BUCKET_VOLUME, FluidDrainTileEntity.class.getName());
 	}
 
 
@@ -52,7 +52,7 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 				// from fluid container
 				if (getWorld().getBlockState(space).getBlock() instanceof ITileEntityProvider && getWorld().getTileEntity(space) instanceof IFluidHandler) {
 					IFluidHandler other = (IFluidHandler) getWorld().getTileEntity(space);
-					FluidTankInfo[] tanks = other.get(cardinals[k].getOpposite());
+					FluidTankInfo[] tanks = other.getTankProperties(cardinals[k].getOpposite());
 					for (int i = 0; i < tanks.length; i++) {
 						FluidTankInfo t = tanks[i];
 						if ((t.fluid == null) || (tank.getFluidAmount() > 0 && tank.getFluid().getFluid() != t.fluid.getFluid())) {
@@ -90,7 +90,7 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 						BlockPos srcPos = scanFluidSpaceForSourceBlock(getWorld(), space, fluid, 32);
 						if (srcPos != null) {
 							// found source block
-							tank.fill(new FluidStack(fluid, FluidContainerRegistry.BUCKET_VOLUME), true);
+							tank.fill(new FluidStack(fluid, Fluid.BUCKET_VOLUME), true);
 							getWorld().setBlockToAir(srcPos);
 							break fluidScan;
 						}
@@ -101,7 +101,6 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 		}
 		super.powerUpdate();
 	}
-
 
 	private void tryPushFluid(BlockPos coord, EnumFacing otherFace) {
 		if (this.getTank().getFluidAmount() <= 0) return; // no fluid to push

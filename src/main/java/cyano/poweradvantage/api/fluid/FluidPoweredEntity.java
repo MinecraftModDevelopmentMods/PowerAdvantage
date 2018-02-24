@@ -222,7 +222,7 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param face  Face of the block being polled
 	 * @param fluid The fluid being added/removed
 	 */
-	@Override
+
 	public boolean canFill(Fluid fluid) {
 		if (getTank().getFluid() == null) return true;
 		return getTank().getFluidAmount() <= getTank().getCapacity() && fluid.equals(getTank().getFluid().getFluid());
@@ -234,7 +234,7 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param face  Face of the block being polled
 	 * @param fluid The fluid being added/removed
 	 */
-	@Override
+
 	public boolean canDrain(Fluid fluid) {
 		if (getTank().getFluid() == null) return false;
 		return getTank().getFluidAmount() > 0 && fluid.equals(getTank().getFluid().getFluid());
