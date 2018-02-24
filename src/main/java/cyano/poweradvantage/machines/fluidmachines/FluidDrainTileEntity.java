@@ -52,7 +52,7 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 				// from fluid container
 				if (getWorld().getBlockState(space).getBlock() instanceof ITileEntityProvider && getWorld().getTileEntity(space) instanceof IFluidHandler) {
 					IFluidHandler other = (IFluidHandler) getWorld().getTileEntity(space);
-					FluidTankInfo[] tanks = other.get(cardinals[k].getOpposite());
+					FluidTankInfo[] tanks = other.getTankProperties(cardinals[k].getOpposite());
 					for (int i = 0; i < tanks.length; i++) {
 						FluidTankInfo t = tanks[i];
 						if ((t.fluid == null) || (tank.getFluidAmount() > 0 && tank.getFluid().getFluid() != t.fluid.getFluid())) {
@@ -101,7 +101,6 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 		}
 		super.powerUpdate();
 	}
-
 
 	private void tryPushFluid(BlockPos coord, EnumFacing otherFace) {
 		if (this.getTank().getFluidAmount() <= 0) return; // no fluid to push
