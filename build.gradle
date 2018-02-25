@@ -21,7 +21,7 @@ apply plugin: "com.matthewprenger.cursegradle"
 
 def mod_file = getModFile()
 version = getVersion("VERSION", mod_file)
-group= "com.mcmoddev.poweradvantage"
+group= "com.mcmoddev"
 archivesBaseName = "PowerAdvantage-1.11.2"
 sourceCompatibility = targetCompatibility = "1.8"
 

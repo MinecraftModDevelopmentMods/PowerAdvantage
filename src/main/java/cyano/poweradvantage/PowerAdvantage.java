@@ -216,7 +216,7 @@ dependencies {
  *
  */
 @Mod(modid = PowerAdvantage.MODID, version = PowerAdvantage.VERSION, name=PowerAdvantage.NAME, dependencies = "required-after:basemetals",
-		acceptedMinecraftVersions = "[1.10.2,)")
+		acceptedMinecraftVersions = "[1.11.2,)")
 public class PowerAdvantage
 {
 	/** The identifier for this mod */
@@ -224,9 +224,7 @@ public class PowerAdvantage
 	/** The display name for this mod */
 	public static final String NAME = "Power Advantage";
 	/** The version of this mod, in the format major.minor.update */
-	public static final String VERSION = "2.3.0";
-	
-
+	public static final String VERSION = "2.4.0";
 
 	// TODO: add condenser (makes water from steam)
 	// TODO: add ice machine (uses water and electricity to make blocks of ice)
