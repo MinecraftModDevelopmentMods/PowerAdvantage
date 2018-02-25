@@ -6,12 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import cyano.poweradvantage.PowerAdvantage;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.FMLLog;
+import cyano.poweradvantage.PowerAdvantage;
 
 /**
  * This class handles all of the recipes for machines that "smelt" fluids.

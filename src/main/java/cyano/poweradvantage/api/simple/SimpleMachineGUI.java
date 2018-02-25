@@ -1,9 +1,10 @@
 package cyano.poweradvantage.api.simple;
 
 
-import cyano.poweradvantage.PowerAdvantage;
-import cyano.poweradvantage.math.Integer2D;
-import cyano.poweradvantage.registry.ITileEntityGUI;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+import org.lwjgl.opengl.GL11;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -14,11 +15,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.opengl.GL11;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+import cyano.poweradvantage.PowerAdvantage;
+import cyano.poweradvantage.math.Integer2D;
+import cyano.poweradvantage.registry.ITileEntityGUI;
 
 /**
  * This class provides a simple way to add a GUI for a machine. Instances of 

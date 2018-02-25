@@ -1,7 +1,7 @@
 package cyano.poweradvantage.api.modsupport.techreborn;
 
-import cyano.poweradvantage.api.ConduitType;
 import net.minecraft.entity.player.EntityPlayer;
+import cyano.poweradvantage.api.ConduitType;
 
 /**
  * Created by Chris on 4/10/2016.

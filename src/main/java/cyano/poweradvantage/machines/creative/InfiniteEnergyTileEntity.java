@@ -1,9 +1,9 @@
 package cyano.poweradvantage.machines.creative;
 
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.api.simple.TileEntitySimplePowerMachine;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.simple.TileEntitySimplePowerMachine;
 
 public class InfiniteEnergyTileEntity extends TileEntitySimplePowerMachine {
 

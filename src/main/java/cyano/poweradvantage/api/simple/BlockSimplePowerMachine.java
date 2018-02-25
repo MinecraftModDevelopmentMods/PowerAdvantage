@@ -1,7 +1,6 @@
 package cyano.poweradvantage.api.simple;
 
-import cyano.poweradvantage.api.*;
-import cyano.poweradvantage.conduitnetwork.ConduitRegistry;
+import java.util.Random;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -20,8 +19,12 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
-
-import java.util.Random;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.GUIBlock;
+import cyano.poweradvantage.api.ITypedConduit;
+import cyano.poweradvantage.api.PowerConnectorContext;
+import cyano.poweradvantage.api.PoweredEntity;
+import cyano.poweradvantage.conduitnetwork.ConduitRegistry;
 
 /**
  * This block class provides all of the standard code for creating a machine 

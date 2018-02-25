@@ -18,17 +18,9 @@ out
 /build
 /.gradle
 /eclipse/assets
-/libs
 /bin/
 /run/
 /out/
-gradle.properties
-/.idea/
-# gradle
-build
-.gradle
 
 # other
 eclipse
-run
-classes

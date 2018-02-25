@@ -1,17 +1,16 @@
 package cyano.poweradvantage.api.modsupport;
 
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.api.IPowerMachine;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.fml.common.FMLLog;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.IPowerMachine;
 
 /**
  * <p>This class provides a place to register blocks from other mods as power consumers. Such mods are 

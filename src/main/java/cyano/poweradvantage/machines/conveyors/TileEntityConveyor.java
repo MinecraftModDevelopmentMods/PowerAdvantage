@@ -1,6 +1,8 @@
 package cyano.poweradvantage.machines.conveyors;
 
-import cyano.poweradvantage.util.InventoryWrapper;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -21,10 +23,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLLog;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import cyano.poweradvantage.util.InventoryWrapper;
 
 public class TileEntityConveyor extends TileEntity implements ITickable, ISidedInventory {
 	

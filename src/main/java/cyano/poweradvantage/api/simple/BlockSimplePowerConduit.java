@@ -1,9 +1,6 @@
 package cyano.poweradvantage.api.simple;
 
-import cyano.poweradvantage.api.ConduitBlock;
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.api.PowerConnectorContext;
-import cyano.poweradvantage.util.PowerHelper;
+import java.util.List;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
@@ -17,8 +14,10 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.List;
+import cyano.poweradvantage.api.ConduitBlock;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.PowerConnectorContext;
+import cyano.poweradvantage.util.PowerHelper;
 /**
  * <p>
  * This block class implements the cyano.poweradvantage.api.ConduitBlock 

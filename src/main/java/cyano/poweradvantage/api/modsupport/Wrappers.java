@@ -1,10 +1,10 @@
 package cyano.poweradvantage.api.modsupport;
 
+import net.minecraft.util.EnumFacing;
 import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.IPowerMachine;
 import cyano.poweradvantage.api.PowerConnectorContext;
 import cyano.poweradvantage.api.PowerRequest;
-import net.minecraft.util.EnumFacing;
 
 /**
  * Created by Chris on 4/9/2016.

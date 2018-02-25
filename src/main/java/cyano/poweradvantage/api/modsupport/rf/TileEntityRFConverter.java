@@ -1,12 +1,12 @@
 package cyano.poweradvantage.api.modsupport.rf;
 
-import cyano.poweradvantage.PowerAdvantage;
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.api.modsupport.TileEntityConverter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+import cyano.poweradvantage.PowerAdvantage;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.modsupport.TileEntityConverter;
 
 public class TileEntityRFConverter extends TileEntityConverter implements cofh.api.energy.IEnergyProvider, cofh.api.energy.IEnergyReceiver {
 

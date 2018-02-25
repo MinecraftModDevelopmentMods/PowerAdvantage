@@ -1,6 +1,6 @@
 package cyano.poweradvantage.api;
 
-import cyano.poweradvantage.conduitnetwork.ConduitRegistry;
+import java.util.List;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -9,8 +9,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import java.util.List;
+import cyano.poweradvantage.conduitnetwork.ConduitRegistry;
 
 /**
  * This class is the superclass for all machines. 

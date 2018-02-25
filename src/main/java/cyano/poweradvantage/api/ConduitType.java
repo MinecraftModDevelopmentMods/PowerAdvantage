@@ -1,8 +1,7 @@
 package cyano.poweradvantage.api;
 
-import cyano.poweradvantage.util.HashCodeHelper;
-
 import java.util.Locale;
+import cyano.poweradvantage.util.HashCodeHelper;
 
 /**
  * This class is used to identify different types of power (or other transport). It is optimized for 
