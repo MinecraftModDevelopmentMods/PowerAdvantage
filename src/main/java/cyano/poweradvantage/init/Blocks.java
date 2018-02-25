@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.statemap.StateMapperBase;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
@@ -173,8 +174,16 @@ public abstract class Blocks {
 	private static Block addBlock(Block block, String name) {
 		block.setUnlocalizedName(PowerAdvantage.MODID + "." + name);
 		block.setRegistryName(name);
+		if (!(block instanceof BlockFluidBase)) {
+			block.setCreativeTab(ItemGroups.tab_powerAdvantage);
+		}
+
 		GameRegistry.register(block);
-		if ((block instanceof BlockFluidBase) == false) block.setCreativeTab(ItemGroups.tab_powerAdvantage);
+
+		ItemBlock item = new ItemBlock(block);
+		item.setRegistryName(block.getRegistryName());
+		GameRegistry.register(item);
+
 		allBlocks.put(name, block);
 		return block;
 	}

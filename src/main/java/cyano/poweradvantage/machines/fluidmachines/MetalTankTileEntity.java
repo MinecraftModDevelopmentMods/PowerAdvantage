@@ -95,6 +95,11 @@ public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
 
 	@Override
 	protected ItemStack[] getInventory() {
+		for(int i = 0; i < this.filterInventory.length; i++) {
+			if (this.filterInventory[i] == null) {
+				this.filterInventory[i] = ItemStack.EMPTY;
+			}
+		}
 		return filterInventory;
 	}
 
@@ -181,7 +186,6 @@ public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
 
 	@Override
 	public IFluidTankProperties[] getTankProperties() {
-		return null;
+		return this.tank.getTankProperties();
 	}
-
 }

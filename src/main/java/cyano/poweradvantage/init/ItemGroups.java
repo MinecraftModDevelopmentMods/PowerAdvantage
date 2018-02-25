@@ -1,22 +1,17 @@
 package cyano.poweradvantage.init;
 
 import com.mcmoddev.lib.init.MMDCreativeTab;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 
 public class ItemGroups extends com.mcmoddev.lib.init.ItemGroups {
-
-	public static CreativeTabs tab_powerAdvantage;
-
 	private static boolean initDone = false;
 	
-//	private static final MMDCreativeTab itemsTabId = addTab("items", true);
-	public static final MMDCreativeTab itemsTab = addTab("items", true); // getTab(itemsTabId);
+	public static final MMDCreativeTab tab_powerAdvantage = addTab("blocks", true);
+	public static final MMDCreativeTab itemsTab = addTab("items", true);
 
 
 	public static void init() {
 		if (initDone) return;
-
 	}
 	
 	public static void setupIcons() {
