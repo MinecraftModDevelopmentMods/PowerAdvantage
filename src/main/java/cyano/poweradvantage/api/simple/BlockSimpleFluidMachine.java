@@ -1,7 +1,7 @@
 package cyano.poweradvantage.api.simple;
 
-import cyano.poweradvantage.init.Fluids;
 import net.minecraft.block.material.Material;
+import cyano.poweradvantage.init.Fluids;
 
 /**
  * This block class provides all of the standard code for creating a machine 

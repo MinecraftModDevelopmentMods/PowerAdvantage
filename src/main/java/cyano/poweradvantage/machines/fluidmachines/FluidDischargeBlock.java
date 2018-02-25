@@ -1,10 +1,6 @@
 package cyano.poweradvantage.machines.fluidmachines;
 
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.api.PoweredEntity;
-import cyano.poweradvantage.api.simple.BlockSimpleFluidMachine;
-import cyano.poweradvantage.api.simple.TileEntitySimplePowerMachine;
-import cyano.poweradvantage.init.ItemGroups;
+import java.util.Random;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,8 +14,11 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import java.util.Random;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.PoweredEntity;
+import cyano.poweradvantage.api.simple.BlockSimpleFluidMachine;
+import cyano.poweradvantage.api.simple.TileEntitySimplePowerMachine;
+import cyano.poweradvantage.init.ItemGroups;
 
 public class FluidDischargeBlock extends BlockSimpleFluidMachine {
 

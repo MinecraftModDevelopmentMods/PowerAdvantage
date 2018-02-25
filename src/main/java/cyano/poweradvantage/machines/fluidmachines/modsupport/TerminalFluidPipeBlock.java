@@ -1,8 +1,5 @@
 package cyano.poweradvantage.machines.fluidmachines.modsupport;
 
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.init.Blocks;
-import cyano.poweradvantage.machines.fluidmachines.FluidPipeBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
@@ -14,6 +11,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.init.Blocks;
+import cyano.poweradvantage.machines.fluidmachines.FluidPipeBlock;
 
 public class TerminalFluidPipeBlock extends FluidPipeBlock implements ITileEntityProvider {
 

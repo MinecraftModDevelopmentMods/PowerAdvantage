@@ -1,15 +1,14 @@
 package cyano.poweradvantage.init;
 
-import cyano.poweradvantage.PowerAdvantage;
-import net.minecraftforge.fml.common.FMLLog;
-import org.apache.logging.log4j.Level;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import org.apache.logging.log4j.Level;
+import net.minecraftforge.fml.common.FMLLog;
+import cyano.poweradvantage.PowerAdvantage;
 
 public abstract class TreasureChests {
 

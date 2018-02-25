@@ -3,12 +3,11 @@ package cyano.poweradvantage.init;
 import com.mcmoddev.basemetals.data.MaterialNames;
 import com.mcmoddev.lib.data.Names;
 import com.mcmoddev.lib.init.Materials;
-
-import cyano.poweradvantage.registry.FuelRegistry;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.ForgeModContainer;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.UniversalBucket;
+import cyano.poweradvantage.registry.FuelRegistry;
 
 
 

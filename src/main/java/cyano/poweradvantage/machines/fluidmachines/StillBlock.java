@@ -1,8 +1,5 @@
 package cyano.poweradvantage.machines.fluidmachines;
 
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.api.PoweredEntity;
-import cyano.poweradvantage.api.simple.BlockSimpleFluidMachine;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
@@ -13,6 +10,9 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.PoweredEntity;
+import cyano.poweradvantage.api.simple.BlockSimpleFluidMachine;
 
 public class StillBlock extends BlockSimpleFluidMachine {
 

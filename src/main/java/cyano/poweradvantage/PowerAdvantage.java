@@ -15,12 +15,6 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.init.WorldGen;
-import cyano.poweradvantage.registry.FuelRegistry;
-import cyano.poweradvantage.registry.MachineGUIRegistry;
-import cyano.poweradvantage.registry.still.recipe.DistillationRecipeRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -37,6 +31,11 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.init.WorldGen;
+import cyano.poweradvantage.registry.FuelRegistry;
+import cyano.poweradvantage.registry.MachineGUIRegistry;
+import cyano.poweradvantage.registry.still.recipe.DistillationRecipeRegistry;
 
 // NOTE: other mods dependant on this one need to add the following to their @Mod annotation:
 // dependencies = "required-after:poweradvantage" 

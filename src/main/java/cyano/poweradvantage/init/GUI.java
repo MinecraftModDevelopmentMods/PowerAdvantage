@@ -3,7 +3,9 @@ package cyano.poweradvantage.init;
 import net.minecraft.util.ResourceLocation;
 import cyano.poweradvantage.PowerAdvantage;
 import cyano.poweradvantage.api.simple.SimpleMachineGUI;
-import cyano.poweradvantage.gui.*;
+import cyano.poweradvantage.gui.FilteredFluidTankGUI;
+import cyano.poweradvantage.gui.FluidTankGUI;
+import cyano.poweradvantage.gui.StillGUI;
 import cyano.poweradvantage.math.Integer2D;
 import cyano.poweradvantage.registry.MachineGUIRegistry;
 

@@ -1,10 +1,10 @@
 package cyano.poweradvantage.gui;
 
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fluids.FluidStack;
 import cyano.poweradvantage.api.simple.SimpleMachineGUI;
 import cyano.poweradvantage.machines.fluidmachines.StillTileEntity;
 import cyano.poweradvantage.math.Integer2D;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fluids.FluidStack;
 
 public class StillGUI extends SimpleMachineGUI {
 

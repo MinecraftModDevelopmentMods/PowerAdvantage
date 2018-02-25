@@ -1,11 +1,11 @@
 package cyano.poweradvantage.api.modsupport.techreborn;
 
-import cyano.poweradvantage.PowerAdvantage;
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.api.modsupport.TileEntityConverter;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+import cyano.poweradvantage.PowerAdvantage;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.modsupport.TileEntityConverter;
 import reborncore.api.power.EnumPowerTier;
 
 /**

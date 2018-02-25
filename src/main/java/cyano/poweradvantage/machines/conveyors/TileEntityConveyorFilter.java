@@ -1,6 +1,5 @@
 package cyano.poweradvantage.machines.conveyors;
 
-import cyano.poweradvantage.util.InventoryWrapper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.inventory.IInventory;
@@ -12,6 +11,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLLog;
+import cyano.poweradvantage.util.InventoryWrapper;
 
 public abstract class TileEntityConveyorFilter extends TileEntityConveyor {
 

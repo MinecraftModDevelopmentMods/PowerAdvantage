@@ -1,14 +1,14 @@
 package cyano.poweradvantage.api.modsupport.techreborn;
 
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.api.PoweredEntity;
-import cyano.poweradvantage.api.simple.BlockSimplePowerMachine;
+import org.apache.logging.log4j.Level;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLLog;
-import org.apache.logging.log4j.Level;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.PoweredEntity;
+import cyano.poweradvantage.api.simple.BlockSimplePowerMachine;
 
 /**
  * Created by Chris on 4/9/2016.

@@ -1,12 +1,11 @@
 package cyano.poweradvantage.api.modsupport;
 
+import java.util.Arrays;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.PowerRequest;
 import cyano.poweradvantage.api.simple.TileEntitySimplePowerMachine;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-
-import java.util.Arrays;
 
 /**
  * This class is a superclass used by machines that convert between other types of power. The way it 

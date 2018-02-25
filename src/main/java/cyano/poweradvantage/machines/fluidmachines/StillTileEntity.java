@@ -6,7 +6,11 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fluids.*;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import cyano.poweradvantage.api.fluid.FluidRequest;
 import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
@@ -297,7 +301,8 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 	 * <code>prepareDataFieldsForSync()</code> is called and read from to update
 	 * local variables when <code>onDataFieldUpdate()</code> is called.
 	 */
-	public String[] getDataFieldArray() {
+	@Override
+	public int[] getDataFieldArray() {
 		return dataFields;
 	}
 

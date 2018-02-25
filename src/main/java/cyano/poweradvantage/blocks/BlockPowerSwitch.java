@@ -1,9 +1,5 @@
 package cyano.poweradvantage.blocks;
 
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.api.ITypedConduit;
-import cyano.poweradvantage.api.PowerConnectorContext;
-import cyano.poweradvantage.conduitnetwork.ConduitRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -15,6 +11,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.ITypedConduit;
+import cyano.poweradvantage.api.PowerConnectorContext;
+import cyano.poweradvantage.conduitnetwork.ConduitRegistry;
 
 /**
  * This block class is a user-friendly power switch for turning power on and off. You do not need to 

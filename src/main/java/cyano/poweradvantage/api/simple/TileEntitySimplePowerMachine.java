@@ -1,10 +1,6 @@
 package cyano.poweradvantage.api.simple;
 
-import cyano.poweradvantage.api.ConduitType;
-import cyano.poweradvantage.api.PowerConnectorContext;
-import cyano.poweradvantage.api.PowerRequest;
-import cyano.poweradvantage.api.PoweredEntity;
-import cyano.poweradvantage.conduitnetwork.ConduitRegistry;
+import java.util.Arrays;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
@@ -16,8 +12,11 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
-
-import java.util.Arrays;
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.PowerConnectorContext;
+import cyano.poweradvantage.api.PowerRequest;
+import cyano.poweradvantage.api.PoweredEntity;
+import cyano.poweradvantage.conduitnetwork.ConduitRegistry;
 
 /**
  * This block implements the cyano.poweradvantage.api.PowerSourceEntity 

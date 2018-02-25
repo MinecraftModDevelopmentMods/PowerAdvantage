@@ -1,11 +1,11 @@
 package cyano.poweradvantage.gui;
 
-import cyano.poweradvantage.api.fluid.FluidPoweredEntity;
-import cyano.poweradvantage.api.simple.SimpleMachineGUI;
-import cyano.poweradvantage.math.Integer2D;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
+import cyano.poweradvantage.api.fluid.FluidPoweredEntity;
+import cyano.poweradvantage.api.simple.SimpleMachineGUI;
+import cyano.poweradvantage.math.Integer2D;
 
 public class FilteredFluidTankGUI extends SimpleMachineGUI {
 

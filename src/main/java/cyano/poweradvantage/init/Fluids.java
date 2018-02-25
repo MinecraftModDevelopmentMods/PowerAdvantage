@@ -1,14 +1,14 @@
 package cyano.poweradvantage.init;
 
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fml.common.FMLLog;
 import cyano.poweradvantage.PowerAdvantage;
 import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.fluid.ColoredFluid;
 import cyano.poweradvantage.util.ReversibleHashMap;
 import cyano.poweradvantage.util.ReversibleMap;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fml.common.FMLLog;
 
 public abstract class Fluids {
 
