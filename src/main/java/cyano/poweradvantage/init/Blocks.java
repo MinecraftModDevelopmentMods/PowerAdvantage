@@ -1,5 +1,6 @@
 package cyano.poweradvantage.init;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,8 +24,11 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fluids.BlockFluidBase;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -54,6 +58,7 @@ import cyano.poweradvantage.machines.fluidmachines.StillBlock;
 import cyano.poweradvantage.machines.fluidmachines.StorageTankBlock;
 import cyano.poweradvantage.machines.fluidmachines.modsupport.TerminalFluidPipeBlock;
 
+@Mod.EventBusSubscriber
 public abstract class Blocks {
 	private static final Map<String, Block> allBlocks = new HashMap<>();
 
@@ -171,19 +176,30 @@ public abstract class Blocks {
 		}
 	}
 
+	@SubscribeEvent
+	public static void registerBlocks(RegistryEvent.Register<Block> event){
+		event.getRegistry().registerAll(allBlocks.values().toArray(new Block[0]));
+	}
+
+	@SubscribeEvent
+	public static void registerItemBlocks(RegistryEvent.Register<Item> event) {
+		Arrays.stream(allBlocks.values().toArray(new Block[0]))
+				.filter(block -> block.getRegistryName() != null)
+				.map((block -> new ItemBlock(block).setRegistryName(block.getRegistryName())))
+				.forEach((item -> event.getRegistry().register(item)));
+	}
+
 	private static Block addBlock(Block block, String name) {
 		block.setUnlocalizedName(PowerAdvantage.MODID + "." + name);
-		block.setRegistryName(name);
+		block.setRegistryName(PowerAdvantage.MODID, name);
 		if (!(block instanceof BlockFluidBase)) {
 			block.setCreativeTab(ItemGroups.tab_powerAdvantage);
 		}
 
-		GameRegistry.register(block);
-
-		ItemBlock item = new ItemBlock(block);
-		item.setRegistryName(block.getRegistryName());
-		GameRegistry.register(item);
-
+//		GameRegistry.register(block);
+//		ItemBlock item = new ItemBlock(block);
+//		item.setRegistryName(block.getRegistryName());
+//		GameRegistry.register(item);
 		allBlocks.put(name, block);
 		return block;
 	}
