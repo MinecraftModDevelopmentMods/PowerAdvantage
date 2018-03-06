@@ -11,7 +11,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT"
+        classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
         classpath "com.matthewprenger:CurseGradle:1.0-SNAPSHOT"
     }
 }
@@ -22,13 +22,13 @@ apply plugin: "com.matthewprenger.cursegradle"
 def mod_file = getModFile()
 version = getVersion("VERSION", mod_file)
 group= "com.mcmoddev"
-archivesBaseName = "PowerAdvantage-1.11.2"
+archivesBaseName = "PowerAdvantage-1.12.2"
 sourceCompatibility = targetCompatibility = "1.8"
 
 minecraft {
-    version = "1.11.2-13.20.1.2386"
+    version = "1.12.2-14.23.2.2624"
     runDir = "run"
-    mappings = "stable_32"
+    mappings = "snapshot_20171003"
 }
 
 repositories {
@@ -58,12 +58,12 @@ repositories {
     }
 }
 dependencies {
-//	compile files(
-//			'libs/RF-API.jar'//,
-//			'libs/RebornCore-1.9-API.jar'
-//    )
-    compile "net.darkhax.tesla:Tesla:1.11-1.3.0.52"
-    deobfCompile "com.mcmoddev:BaseMetals:1.11.2-2.5.0-beta+"
+	compile files(
+			'libs/RedstoneFlux-1.12-2.0.1.2-universal.jar',
+			'libs/Tesla-1.12.2-1.0.63.jar'
+   )
+    // compile "net.darkhax.tesla:Tesla:1.12-2.1.0.63"
+    // deobfCompile "cofh:RedstoneFlux:1.12-2.0.0.1:universal"
 //    compile "codechicken:CodeChickenCore:1.8-1.0.5.36:dev"
 //    compile "codechicken:NotEnoughItems:1.8-1.0.5.104:dev"
 }
