@@ -6,7 +6,11 @@ import java.util.Set;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -14,6 +18,8 @@ import net.minecraftforge.oredict.OreDictionary;
 import cyano.poweradvantage.PowerAdvantage;
 import cyano.poweradvantage.items.RotationTool;
 
+@Mod.EventBusSubscriber
+@GameRegistry.ObjectHolder(PowerAdvantage.MODID)
 public abstract class Items {
 
 	public static Item starch;
@@ -26,7 +32,8 @@ public abstract class Items {
 
 	private static boolean initDone = false;
 
-	public static void init() {
+	@SubscribeEvent
+	public static void init(RegistryEvent.Register<Item> event) {
 		if (initDone) return;
 		Blocks.init();
 		Fluids.init();
@@ -51,10 +58,10 @@ public abstract class Items {
 		return n;
 	}
 
-	private static Item addItem(String unlocalizedName, Item i) {
+	private static Item addItem(RegistryEvent.Register<Item> event, String unlocalizedName, Item i) {
 		i.setUnlocalizedName(PowerAdvantage.MODID + "." + unlocalizedName);
-		i.setRegistryName(unlocalizedName);
-		GameRegistry.register(i);
+		i.setRegistryName(PowerAdvantage.MODID, unlocalizedName);
+		event.getRegistry().register(i);
 		i.setCreativeTab(ItemGroups.tab_powerAdvantage);
 		allItems.put(unlocalizedName, i);
 		return i;

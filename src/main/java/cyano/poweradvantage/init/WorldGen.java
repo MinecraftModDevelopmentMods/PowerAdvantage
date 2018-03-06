@@ -6,7 +6,6 @@ public abstract class WorldGen {
 
 	public static void init() {
 		if (initDone) return;
-		Items.init();
 		Blocks.init();
 
 

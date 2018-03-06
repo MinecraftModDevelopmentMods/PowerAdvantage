@@ -114,9 +114,9 @@ public class ConduitRegistry {
 						}
 					} else {
 						if (PowerAdvantage.detectedRF && PowerAdvantage.rfConversionTable.containsKey(conduitType)) {
-							if (e instanceof cofh.api.energy.IEnergyReceiver) {
+							if (e instanceof cofh.redstoneflux.api.IEnergyReceiver) {
 								requests.add(Wrappers.wrapRFPowerRequest(
-										(cofh.api.energy.IEnergyReceiver) e, energyType, PowerAdvantage.rfConversionTable.get(conduitType)
+										(cofh.redstoneflux.api.IEnergyReceiver) e, energyType, PowerAdvantage.rfConversionTable.get(conduitType)
 								));
 							}
 						}
