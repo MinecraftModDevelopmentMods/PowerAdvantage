@@ -27,7 +27,7 @@ public abstract class Items {
 	public static Item sprocket;
 	public static Item rotator_tool;
 
-	public static final Map<String, Item> allItems = new HashMap<>();
+	private static final Map<String, Item> allItems = new HashMap<>();
 
 
 	private static boolean initDone = false;
@@ -38,20 +38,20 @@ public abstract class Items {
 		Blocks.init();
 		Fluids.init();
 
-		starch = addItem("starch", new Item(), "starch");
-		bioplastic_ingot = addItem("bioplastic_ingot", new Item(), "plastic", "ingotPlastic");
+		starch = addItem(event, "starch", new Item(), "starch");
+		bioplastic_ingot = addItem(event, "bioplastic_ingot", new Item(), "plastic", "ingotPlastic");
 		if (PowerAdvantage.plasticIsAlsoRubber) {
 			OreDictionary.registerOre("rubber", bioplastic_ingot);
 			OreDictionary.registerOre("ingotRubber", bioplastic_ingot);
 		}
-		sprocket = addItem("sprocket", new Item(), "sprocket", "gear", "sprocketSteel", "gearSteel");
-		rotator_tool = addItem("rotator_tool", new RotationTool());
+		sprocket = addItem(event, "sprocket", new Item(), "sprocket", "gear", "sprocketSteel", "gearSteel");
+		rotator_tool = addItem(event, "rotator_tool", new RotationTool());
 
 		initDone = true;
 	}
 
-	private static Item addItem(String unlocalizedName, Item i, String... oreDictNames) {
-		Item n = addItem(unlocalizedName, i);
+	private static Item addItem(RegistryEvent.Register<Item> event, String unlocalizedName, Item i, String... oreDictNames) {
+		Item n = addItem(event, unlocalizedName, i);
 		for (String oreDictName : oreDictNames) {
 			OreDictionary.registerOre(oreDictName, n);
 		}
