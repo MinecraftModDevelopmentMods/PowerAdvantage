@@ -61,7 +61,7 @@ dependencies {
 	compile files(
 			'libs/RedstoneFlux-1.12-2.0.1.2-universal.jar',
 			'libs/Tesla-1.12.2-1.0.63.jar',
-            'libs/BaseMetals-1.12-2.5.0-beta4.145'
+            'libs/BaseMetals-1.12-2.5.0-beta4.145.jar'
    )
     // compile "net.darkhax.tesla:Tesla:1.12-2.1.0.63"
     // deobfCompile "cofh:RedstoneFlux:1.12-2.0.0.1:universal"
