@@ -20,7 +20,7 @@ public class FluidMapper extends StateMapperBase {
 
         final ModelResourceLocation fluidModelLocation = new ModelResourceLocation(
                 PowerAdvantage.MODID.toLowerCase() + ":" + state.getBlock().getRegistryName().getResourcePath(), "normal");
-        System.out.println(String.format("Getting resource location %s, %s", fluidModelLocation.toString(), state.getBlock().toString()));
+//        System.out.println(String.format("Getting resource location %s, %s", fluidModelLocation.toString(), state.getBlock().toString()));
         return fluidModelLocation;
     }
 }

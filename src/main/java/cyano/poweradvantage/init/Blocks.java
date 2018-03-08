@@ -138,11 +138,10 @@ public abstract class Blocks {
 
 		crude_oil_block = (BlockFluidBase) addBlock(new InteractiveFluidBlock(Fluids.crude_oil, true, (World w, EntityLivingBase e) -> {
 			e.addPotionEffect(new PotionEffect(Potion.REGISTRY.getObject(new ResourceLocation("slowness")), 200, 2));
-		}), "crude_oil");
-
+		}, 120), "crude_oil");
 		refined_oil_block = (BlockFluidBase) addBlock(new InteractiveFluidBlock(Fluids.refined_oil, true, (World w, EntityLivingBase e) -> {
 			e.addPotionEffect(new PotionEffect(Potion.REGISTRY.getObject(new ResourceLocation("nausea")), 200));
-		}), "refined_oil");
+		}, 300), "refined_oil");
 
 
 
@@ -155,7 +154,6 @@ public abstract class Blocks {
 	@SideOnly(Side.CLIENT)
 	public static void bakeModels() {
 		String modID = PowerAdvantage.MODID;
-		System.out.println("baking models on client");
 		for (Map.Entry<String, Block> e : allBlocks.entrySet()) {
 			Block b = e.getValue();
 			String name = e.getKey();
@@ -168,10 +166,10 @@ public abstract class Blocks {
 				item.setUnlocalizedName(block.getRegistryName().getResourceDomain() + "." + name);
 				final ModelResourceLocation fluidModelLocation = new ModelResourceLocation(
 						modID.toLowerCase() + ":" + name, "normal");
-				System.out.println(String.format("model registering %s", fluidModelLocation.toString()));
-				System.out.println(String.format("block registering %s", block.getRegistryName().toString()));
-				System.out.println(String.format("item is %s", item.getRegistryName().toString()));
-				System.out.println(String.format("fluid registering %s", block.getFluid().getUnlocalizedName().toString()));
+//				System.out.println(String.format("model registering %s", fluidModelLocation.toString()));
+//				System.out.println(String.format("block registering %s", block.getRegistryName().toString()));
+//				System.out.println(String.format("item is %s", item.getRegistryName().toString()));
+//				System.out.println(String.format("fluid registering %s", block.getFluid().getUnlocalizedName().toString()));
 				ModelBakery.registerItemVariants(item);
 				ModelLoader.setCustomMeshDefinition(item, new FluidMeshDefinition(fluidModelLocation));
 				ModelLoader.setCustomStateMapper(block, new FluidMapper(fluidModelLocation));
