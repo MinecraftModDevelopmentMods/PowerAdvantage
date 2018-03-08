@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import cyano.poweradvantage.api.fluid.SwimEventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -401,6 +403,7 @@ public class PowerAdvantage
 		}
 
 		FMLLog.info("%s: preinit complete", MODID);
+
 	}
 
 	@SideOnly(Side.CLIENT)
