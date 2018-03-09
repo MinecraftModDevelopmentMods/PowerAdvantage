@@ -64,7 +64,7 @@ public class StorageTankTileEntity  extends TileEntitySimpleFluidMachine {
 		return true;
 	}
 
-	private final ItemStack[] noninventory = new ItemStack[0];
+	private final ItemStack[] noninventory = new ItemStack[] {};
 
 	@Override
 	protected ItemStack[] getInventory() {

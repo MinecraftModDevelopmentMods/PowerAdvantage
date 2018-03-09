@@ -175,7 +175,7 @@ public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
 
 	@Override
 	public boolean isEmpty() {
-		return false;
+		return this.filterInventory[0] == ItemStack.EMPTY;
 	}
 
 
