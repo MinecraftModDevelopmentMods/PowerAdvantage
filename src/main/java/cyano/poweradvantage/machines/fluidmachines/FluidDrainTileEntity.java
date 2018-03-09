@@ -154,7 +154,7 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 
 	@Override
 	protected ItemStack[] getInventory() {
-		return new ItemStack[0];
+		return new ItemStack[] {ItemStack.EMPTY};
 	}
 
 
@@ -282,12 +282,8 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 
 	@Override
 	public boolean isEmpty() {
-		return false;
+		return tank.getFluidAmount() == 0;
 	}
 
 
-	@Override
-	public IFluidTankProperties[] getTankProperties() {
-		return null;
-	}
 }

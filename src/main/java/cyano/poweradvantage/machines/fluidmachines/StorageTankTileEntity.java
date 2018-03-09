@@ -121,8 +121,4 @@ public class StorageTankTileEntity  extends TileEntitySimpleFluidMachine {
 		return false;
 	}
 
-	@Override
-	public IFluidTankProperties[] getTankProperties() {
-		return null;
-	}
 }

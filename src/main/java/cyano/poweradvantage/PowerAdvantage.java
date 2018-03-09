@@ -21,6 +21,7 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -261,6 +262,9 @@ public class PowerAdvantage
 	public static boolean detectedRF = false;
 	public static boolean detectedTechReborn = false;
 
+	static {
+		FluidRegistry.enableUniversalBucket();
+	}
 	
 	private String[] distillRecipes = new String[0]; // used to pass config data to the init() method
 	

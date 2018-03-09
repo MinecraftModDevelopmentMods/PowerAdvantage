@@ -112,11 +112,10 @@ public abstract class Blocks {
 		fluid_pipe_terminal.setUnlocalizedName("fluid_pipe");
 		fluid_pipe_terminal.setCreativeTab(null);
 		fluid_switch = addBlock(new BlockPowerSwitch(Fluids.fluidConduit_general), "fluid_switch");
-		OreDictionary.registerOre("pipe", fluid_pipe);
+
 		steel_frame = addBlock(new BlockFrame(net.minecraft.block.material.Material.PISTON)
 				.setResistance(Materials.getMaterialByName(MaterialNames.STEEL).getBlock(Names.BLOCK).getExplosionResistance(null))
 				.setHardness(0.75f), "steel_frame");
-		OreDictionary.registerOre("frameSteel", steel_frame);
 
 		final float defaultMachineHardness = 0.75f;
 		final Material defaultMachineMaterial = Material.PISTON;
@@ -188,6 +187,9 @@ public abstract class Blocks {
 				.filter(block -> block.getRegistryName() != null)
 				.map((block -> new ItemBlock(block).setRegistryName(block.getRegistryName())))
 				.forEach((item -> event.getRegistry().register(item)));
+
+		OreDictionary.registerOre("pipe", fluid_pipe);
+		OreDictionary.registerOre("frameSteel", steel_frame);
 	}
 
 	private static Block addBlock(Block block, String name) {
