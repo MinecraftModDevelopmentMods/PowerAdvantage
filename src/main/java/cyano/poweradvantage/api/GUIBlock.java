@@ -131,26 +131,43 @@ public abstract class GUIBlock extends BlockContainer {
         }
         // handle buckets and fluid containers
 		ItemStack item = player.getItemStackFromSlot(EntityEquipmentSlot.MAINHAND);
-		if(tileEntity instanceof IFluidHandler && item != null) {
+		if(tileEntity instanceof IFluidHandler && item != ItemStack.EMPTY) {
 			// TODO: FIX THIS!
+			System.out.println(String.format("entity is fluid handler, item not empty %s", item.getItem().toString()));
 			/// NEW WAY - IFluidContainerItem and the UniversalBucket FTW!
 			IFluidHandler target = (IFluidHandler) tileEntity;
 			if (item.getItem() instanceof IFluidHandler){
+				System.out.println("item is fluid handler");
 				// fill from bucket
 				IFluidHandlerItem container = (IFluidHandlerItem) item.getItem();
 				FluidStack fluid = FluidHelper.getContainedFluid(item);
 				if (fluid != null && fluid.amount > 0) {
+					System.out.println(String.format("Can fill: %d", target.fill(container.drain(fluid,false), false)));
 					if (target.fill(container.drain(fluid,false), false)== fluid.amount){
 						// simulated fill-drain succeeded, do it for real
+						System.out.println("performign real drain");
 						FluidStack drained = container.drain(fluid,!player.capabilities.isCreativeMode);
 						target.fill(drained,true);
 						return true;
 					}
+				} else if (fluid == null){
+					for (IFluidTankProperties tank : target.getTankProperties()){
+						if (tank.getContents() != null && tank.getContents().amount >= Fluid.BUCKET_VOLUME){
+							Fluid tankFluid = tank.getContents().getFluid();
+							FluidStack tankStack = new FluidStack(tankFluid, Fluid.BUCKET_VOLUME);
+							if (container.fill(target.drain(tankStack, false), false) == tankStack.amount){
+								FluidStack drained = target.drain(tankStack, !player.capabilities.isCreativeMode);
+								container.fill(drained, true);
+								return true;
+							}
+						}
+					}
 				}
-			}else if (item.getItem() == Items.BUCKET) {
+			}else if (item.getItem() == Items.BUCKET || item.getItem() == Items.LAVA_BUCKET || item.getItem() == Items.WATER_BUCKET) {
 				// make universal bucket
+				System.out.println("Entitiy is bucket");
 				for (IFluidTankProperties tank : target.getTankProperties()) {
-					if (tank.getContents() != null) {
+					if (tank.getContents() != null && item.getItem() == Items.BUCKET) {
 						// special handling for water and lava (no universal bucket)
 						if (tank.getContents().getFluid() == FluidRegistry.WATER) {
 							ItemStack filledBucket = new ItemStack(Items.WATER_BUCKET);
@@ -177,20 +194,93 @@ public abstract class GUIBlock extends BlockContainer {
 								}
 							}
 							return true;
-						}
-						// back to your regularly scheduled algorithm...
-						UniversalBucket bucket = ForgeModContainer.getInstance().universalBucket;
-						ItemStack filledBucket = new ItemStack(bucket);
-						if (tank.getContents().amount >= bucket.getCapacity()) {
+						} else {
+							UniversalBucket bucket = ForgeModContainer.getInstance().universalBucket;
 							FluidStack drain = tank.getContents().copy();
 							drain.amount = bucket.getCapacity();
-							if (target.drain(drain, false).amount == bucket.getFluid(item).amount) {
+							System.out.println(String.format("Tank Amount: %d", target.drain(drain, false).amount));
+							if (target.drain(drain, false).amount == bucket.getCapacity()) {
+								FluidStack fluidForbucket = tank.getContents();
+								target.drain(drain, true);
 								if (!player.capabilities.isCreativeMode)
-									player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, FluidUtil.getFilledBucket(tank.getContents()));
+									player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, FluidUtil.getFilledBucket(fluidForbucket));
+								if (item.getCount() > 1) {
+									player.addItemStackToInventory(new ItemStack(bucket, item.getCount() - 1));
+								}
+
 								return true;
 							}
 						}
+					} else if (tank.getContents() == null && tank.getCapacity() >= Fluid.BUCKET_VOLUME) {
+
+						if (item.getItem() == Items.LAVA_BUCKET) {
+							FluidStack toFill = new FluidStack(FluidRegistry.LAVA, Fluid.BUCKET_VOLUME);
+							if (target.fill(toFill, false) == toFill.amount) {
+								target.fill(toFill, true);
+								if (!player.capabilities.isCreativeMode)
+									player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, new ItemStack(Items.BUCKET));
+								return true;
+							}
+						} else if (item.getItem() == Items.WATER_BUCKET) {
+							System.out.println("filling water bucket into tank");
+							FluidStack toFill = new FluidStack(FluidRegistry.WATER, Fluid.BUCKET_VOLUME);
+							if (target.fill(toFill, false) == toFill.amount) {
+								System.out.println("Target can fit");
+								target.fill(toFill, true);
+								if (!player.capabilities.isCreativeMode)
+									player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, new ItemStack(Items.BUCKET));
+								return true;
+							}
+						}
+				} else if (tank.getContents() != null && (item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.LAVA_BUCKET)){
+					Fluid tankFluid = tank.getContents().getFluid();
+					if (item.getItem() == Items.LAVA_BUCKET && tankFluid == FluidRegistry.LAVA){
+						FluidStack toFill = new FluidStack(FluidRegistry.LAVA, Fluid.BUCKET_VOLUME);
+						if (target.fill(toFill, false) == toFill.amount) {
+							target.fill(toFill, true);
+							if (!player.capabilities.isCreativeMode)
+								player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, new ItemStack(Items.BUCKET));
+							return true;
+						}
+					} else if (item.getItem() == Items.WATER_BUCKET && tankFluid == FluidRegistry.WATER){
+						FluidStack toFill = new FluidStack(FluidRegistry.WATER, Fluid.BUCKET_VOLUME);
+						if (target.fill(toFill, false) == toFill.amount) {
+							target.fill(toFill, true);
+							if (!player.capabilities.isCreativeMode)
+								player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, new ItemStack(Items.BUCKET));
+							return true;
+						}
 					}
+					}
+				}
+			} else if (item.getItem() instanceof UniversalBucket){
+				for (IFluidTankProperties tank : target.getTankProperties()) {
+						// back to your regularly scheduled algorithm...
+					UniversalBucket bucket = ForgeModContainer.getInstance().universalBucket;
+					FluidStack containedFluid = FluidUtil.getFluidContained(item);
+					if (tank.getContents() != null && tank.getContents().amount >= bucket.getCapacity() && containedFluid == null) {
+						FluidStack drain = tank.getContents().copy();
+						drain.amount = bucket.getCapacity();
+						System.out.println(String.format("Tank contents %s", tank.getContents().getFluid().toString()));
+						if (target.drain(drain, false).amount == bucket.getCapacity()) {
+							FluidStack fluidForbucket = tank.getContents();
+							target.drain(drain, true);
+							if (!player.capabilities.isCreativeMode)
+								player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, FluidUtil.getFilledBucket(fluidForbucket));
+								if (item.getCount() > 1){
+									player.addItemStackToInventory(new ItemStack(bucket, item.getCount() - 1));
+								}
+
+							return true;
+						}
+					} else if (containedFluid != null && target.fill(containedFluid, false) == bucket.getCapacity()) {
+						target.fill(containedFluid, true);
+						if (!player.capabilities.isCreativeMode) {
+							player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, new ItemStack(bucket));
+						}
+						return true;
+					}
+
 				}
 			}
 		}
