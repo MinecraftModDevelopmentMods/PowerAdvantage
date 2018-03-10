@@ -112,6 +112,14 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 		}
 	}
 
+	protected final void syncOne(EntityPlayerMP player) {
+		this.markDirty();
+		//this.getWorld().markBlockForUpdate(getPos());
+		Packet<?> packet = this.getUpdatePacket();
+		if (packet == null) return;
+		player.connection.sendPacket(packet);
+	}
+
 	/**
 	 * Override to keep the tile entity from being deleted each time the blockstate is updated
 	 *

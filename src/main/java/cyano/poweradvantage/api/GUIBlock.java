@@ -5,6 +5,7 @@ import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.IInventory;
@@ -278,6 +279,11 @@ public abstract class GUIBlock extends BlockContainer {
 
         // open GUI
         if(this.getGuiOwner() == null) return false;
+		// Ensures this player gets accurate data sometimes if a player have join server after the last sync and before
+		// another sync machines will show as empty. Can't think of a better fix than this.
+		if(tileEntity instanceof PoweredEntity){
+			((PoweredEntity) tileEntity).syncOne((EntityPlayerMP)player);
+		}
         player.openGui(this.getGuiOwner(), this.getGuiID(), w, coord.getX(), coord.getY(), coord.getZ());
         return true;
     }
