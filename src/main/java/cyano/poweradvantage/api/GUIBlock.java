@@ -199,9 +199,9 @@ public abstract class GUIBlock extends BlockContainer {
 								target.drain(drain, true);
 								if (!player.capabilities.isCreativeMode)
 									player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, FluidUtil.getFilledBucket(fluidForbucket));
-								if (item.getCount() > 1) {
-									player.addItemStackToInventory(new ItemStack(bucket, item.getCount() - 1));
-								}
+//								if (item.getCount() > 1) {
+//									player.addItemStackToInventory(new ItemStack(bucket, item.getCount() - 1));
+//								}
 
 								return true;
 							}
@@ -259,16 +259,16 @@ public abstract class GUIBlock extends BlockContainer {
 							target.drain(drain, true);
 							if (!player.capabilities.isCreativeMode)
 								player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, FluidUtil.getFilledBucket(fluidForbucket));
-								if (item.getCount() > 1){
-									player.addItemStackToInventory(new ItemStack(bucket, item.getCount() - 1));
-								}
+//								if (item.getCount() > 1){
+//									player.addItemStackToInventory(new ItemStack(bucket, item.getCount() - 1));
+//								}
 
 							return true;
 						}
 					} else if (containedFluid != null && target.fill(containedFluid, false) == bucket.getCapacity()) {
 						target.fill(containedFluid, true);
 						if (!player.capabilities.isCreativeMode) {
-							player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, new ItemStack(bucket));
+							player.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, new ItemStack(Items.BUCKET));
 						}
 						return true;
 					}

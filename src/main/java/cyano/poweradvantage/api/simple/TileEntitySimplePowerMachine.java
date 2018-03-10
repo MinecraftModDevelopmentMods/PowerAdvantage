@@ -315,7 +315,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 		if(inventory != null ){
 			final NBTTagList nbttaglist = new NBTTagList();
 			for (int i = 0; i < inventory.length; ++i) {
-				if (inventory[i] != null) {
+				if (inventory[i] != ItemStack.EMPTY) {
 					final NBTTagCompound nbttagcompound1 = new NBTTagCompound();
 					nbttagcompound1.setByte("Slot", (byte)i);
 					inventory[i].writeToNBT(nbttagcompound1);
@@ -441,7 +441,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	public void clear() {
 		if(this.getInventory() == null) return;
 		for(int i = 0; i < this.getInventory().length; i++){
-			this.getInventory()[i] = null;
+			this.getInventory()[i] = ItemStack.EMPTY;
 		}
 		
 	}
@@ -470,17 +470,17 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 */
 	@Override
 	public ItemStack decrStackSize(int slot, int decrement) {
-		if (this.getInventory()[slot] == null) {
-			return null;
+		if (this.getInventory()[slot] == ItemStack.EMPTY) {
+			return ItemStack.EMPTY;
 		}
 		if (this.getInventory()[slot].getCount() <= decrement) {
 			final ItemStack itemstack = this.getInventory()[slot];
-			this.getInventory()[slot] = null;
+			this.getInventory()[slot] = ItemStack.EMPTY;
 			return itemstack;
 		}
 		final ItemStack itemstack = this.getInventory()[slot].splitStack(decrement);
 		if (this.getInventory()[slot].getCount() == 0) {
-			this.getInventory()[slot] = null;
+			this.getInventory()[slot] = ItemStack.EMPTY;
 		}
 		return itemstack;
 	}
@@ -569,7 +569,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	public ItemStack removeStackFromSlot(int slot) {
 		if(this.getInventory() != null){
 			ItemStack i = this.getInventory()[slot];
-			this.getInventory()[slot] = null;
+			this.getInventory()[slot] = ItemStack.EMPTY;
 			return i;
 		} else {
 			return null;
@@ -607,7 +607,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	@Override
 	public void setInventorySlotContents(int slot, ItemStack item) {
 		if(this.getInventory() == null) return;
-		final boolean flag = item != null && item.isItemEqual(this.getInventory()[slot]) 
+		final boolean flag = item != ItemStack.EMPTY && item.isItemEqual(this.getInventory()[slot])
 				&& ItemStack.areItemStackTagsEqual(item, this.getInventory()[slot]);
 		this.getInventory()[slot] = item;
 		if (item != null && item.getCount() > this.getInventoryStackLimit()) {

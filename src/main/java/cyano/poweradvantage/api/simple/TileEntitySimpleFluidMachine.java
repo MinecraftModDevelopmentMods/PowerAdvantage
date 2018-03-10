@@ -296,7 +296,7 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
         if(inventory != null ){
 	        final NBTTagList nbttaglist = new NBTTagList();
 	        for (int i = 0; i < inventory.length; ++i) {
-	            if (inventory[i] != null) {
+	            if (inventory[i] != ItemStack.EMPTY) {
 	                final NBTTagCompound nbttagcompound1 = new NBTTagCompound();
 	                nbttagcompound1.setByte("Slot", (byte)i);
 	                inventory[i].writeToNBT(nbttagcompound1);
