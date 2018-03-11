@@ -1,6 +1,7 @@
 package cyano.poweradvantage.api.fluid;
 
 import com.mcmoddev.basemetals.init.Fluids;
+import cyano.poweradvantage.init.Blocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
@@ -8,6 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -19,7 +21,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * Created by Jacob on 3/8/2018.
  */
 @Mod.EventBusSubscriber
-public class SwimEventHandler {
+public class FluidEventHandler {
 
 //    @SubscribeEvent
 //    public static void playerSwim(EntityViewRenderEvent.FogColors e)
@@ -59,12 +61,16 @@ public class SwimEventHandler {
 		Block b2 = bs2.getBlock();
 //        System.out.println(String.format("Player swimming in %s or %s", b.getRegistryName().toString(), b2.getRegistryName().toString()));
         Block crudeOil = cyano.poweradvantage.init.Fluids.crude_oil.getBlock();
+        Block refinedOil = cyano.poweradvantage.init.Fluids.refined_oil.getBlock();
         if(b.equals(crudeOil) || b2.equals(crudeOil))
+        {
+            event.setDensity(0.7F);
+            event.setCanceled(true);
+        } else if (b.equals(refinedOil) || b2.equals(refinedOil))
         {
             event.setDensity(0.5F);
             event.setCanceled(true);
         }
-
          // must cancel event for event handler to take effect
     }
 
