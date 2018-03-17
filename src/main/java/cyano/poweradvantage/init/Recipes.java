@@ -73,7 +73,9 @@ public abstract class Recipes {
         addRecipe(event, new ItemStack(Blocks.steel_frame, 1), "xxx", "x x", "xxx", 'x', steelBars);
 
         addRecipe(event, new ItemStack(Blocks.storage_tank, 1), "xxx", "xpx", "xxx", 'x', Items.bioplastic_ingot, 'p', Blocks.fluid_pipe);
-        addRecipe(event, new ItemStack(Blocks.metal_storage_tank, 1), "xxx", "xpx", "xxx", 'x', com.mcmoddev.basemetals.init.Items.getItemByName("steel_ingot"), 'p', Blocks.fluid_pipe);
+        addRecipe(event, new ItemStack(Blocks.metal_storage_tank, 1), new ResourceLocation(PowerAdvantage.MODID, "metal_tank_steel"), "xxx", "xpx", "xxx",
+                'x', Materials.getMaterialByName(MaterialNames.STEEL).getItem(Names.INGOT),
+                'p', Blocks.fluid_pipe);
         addRecipe(event, new ItemStack(Blocks.fluid_drain, 1), " x ", "w#w", "ppp", 'x', com.mcmoddev.basemetals.init.Blocks.getBlockByName("brass_bars"), 'w', com.mcmoddev.basemetals.init.Blocks.getBlockByName("steel_plate"), '#', Blocks.steel_frame, 'p', Blocks.fluid_pipe);
         addRecipe(event, new ItemStack(Blocks.fluid_discharge, 1), "ppp", "w#w", " x ", 'x', steelBars, 'w', com.mcmoddev.basemetals.init.Blocks.getBlockByName("steel_plate"), '#', Blocks.steel_frame, 'p', Blocks.fluid_pipe);
         addRecipe(event, new ItemStack(Blocks.still, 1), "bpb", " f ", 'b', net.minecraft.init.Items.BUCKET, 'p', Blocks.fluid_pipe, 'f', net.minecraft.init.Blocks.FURNACE);
@@ -91,7 +93,7 @@ public abstract class Recipes {
                     "xxx", "   ", "xxx", 'x', com.mcmoddev.basemetals.init.Items.getItemByName("copper_ingot"));
             addRecipe(event, new ItemStack(Blocks.fluid_pipe, 6), new ResourceLocation(PowerAdvantage.MODID, "fluid_pipe_iron"),
                     "yyy", "   ", "yyy", 'y', net.minecraft.init.Items.IRON_INGOT);
-            addRecipe(event, new ItemStack(Blocks.metal_storage_tank, 1), "xxx", "xpx", "xxx", 'x', net.minecraft.init.Items.IRON_INGOT, 'p', Blocks.fluid_pipe);
+            addRecipe(event, new ItemStack(Blocks.metal_storage_tank, 1), new ResourceLocation(PowerAdvantage.MODID, "metal_tank_iron"), "xxx", "xpx", "xxx", 'x', net.minecraft.init.Items.IRON_INGOT, 'p', Blocks.fluid_pipe);
         } else if (PowerAdvantage.recipeMode == RecipeMode.TECH_PROGRESSION) {
             // make things a little more complicated with tech-progression mode
             //TODO We need a setStrongHammers(boolean b) method in MMDLib Config File to fix this.
