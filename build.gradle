@@ -22,8 +22,8 @@ buildscript {
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
-        classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.0.9'
-        classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5'
+        classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.0.10'
+        classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.2'
     }
 }
 
@@ -142,17 +142,24 @@ repositories {
         name 'jitpack'
         url 'https://jitpack.io'
     }
+	maven {
+		name = "Modmuss50"
+		url = "http://maven.modmuss50.me/"
+	}
 }
 
 dependencies {
 	compile files(
 			'libs/RF-API.jar',
-			'libs/RebornCore-1.9-API.jar'
+//			'libs/RebornCore-1.9-API.jar'
     )
     compile "net.darkhax.tesla:Tesla:1.10.2-1.2.1.50"
     deobfCompile "cyano:BaseMetals:1.10.2-2.4.0"
-    compile "codechicken:CodeChickenCore:1.8-1.0.5.36:dev"
-    compile "codechicken:NotEnoughItems:1.8-1.0.5.104:dev"
+//    compile "codechicken:CodeChickenCore:1.8-1.0.5.36:dev"
+//    compile "codechicken:NotEnoughItems:1.8-1.0.5.104:dev"
+	deobfCompile('RebornCore:RebornCore-1.10.2:+:universal') {
+		transitive = false
+	}
 }
 
 processResources {
