@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
@@ -77,7 +77,7 @@ public class FluidTankGUI extends SimpleMachineGUI {
 
 		float f1 = 0.00390625F * 16;
 		Tessellator tessellator = Tessellator.getInstance();
-		VertexBuffer vertexbuffer = tessellator.getBuffer();
+		BufferBuilder vertexbuffer = tessellator.getBuffer();
 		vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
 		vertexbuffer
 				.pos((double) (x + 0), (double) (y + height), (double) zLevel)

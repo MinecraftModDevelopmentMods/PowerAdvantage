@@ -8,7 +8,7 @@ import cyano.poweradvantage.PowerAdvantage;
 import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.modsupport.TileEntityConverter;
 
-public class TileEntityRFConverter extends TileEntityConverter implements cofh.api.energy.IEnergyProvider, cofh.api.energy.IEnergyReceiver {
+public class TileEntityRFConverter extends TileEntityConverter implements cofh.redstoneflux.api.IEnergyProvider, cofh.redstoneflux.api.IEnergyReceiver {
 
 	private final int rfBufferSize;
 	private final int halfBuffer;
@@ -32,8 +32,8 @@ public class TileEntityRFConverter extends TileEntityConverter implements cofh.a
 				if (sub < sides.length) {
 					EnumFacing dir = sides[sub];
 					TileEntity te = w.getTileEntity(getPos().offset(dir));
-					if (te instanceof cofh.api.energy.IEnergyProvider) {
-						cofh.api.energy.IEnergyProvider rfMachine = (cofh.api.energy.IEnergyProvider) te;
+					if (te instanceof cofh.redstoneflux.api.IEnergyProvider) {
+						cofh.redstoneflux.api.IEnergyProvider rfMachine = (cofh.redstoneflux.api.IEnergyProvider) te;
 						if (rfMachine.canConnectEnergy(dir.getOpposite()) && rfMachine.getEnergyStored(dir.getOpposite()) > 0) {
 							this.receiveEnergy(dir, rfMachine.extractEnergy(dir.getOpposite(), -1 * delta, false), false);
 						}
@@ -43,8 +43,8 @@ public class TileEntityRFConverter extends TileEntityConverter implements cofh.a
 				if (sub < sides.length) {
 					EnumFacing dir = sides[sub];
 					TileEntity te = w.getTileEntity(getPos().offset(dir));
-					if (te instanceof cofh.api.energy.IEnergyReceiver) {
-						cofh.api.energy.IEnergyReceiver rfMachine = (cofh.api.energy.IEnergyReceiver) te;
+					if (te instanceof cofh.redstoneflux.api.IEnergyReceiver) {
+						cofh.redstoneflux.api.IEnergyReceiver rfMachine = (cofh.redstoneflux.api.IEnergyReceiver) te;
 						if (rfMachine.canConnectEnergy(dir.getOpposite()) && rfMachine.getEnergyStored(dir.getOpposite()) < rfMachine.getMaxEnergyStored(dir.getOpposite())) {
 							rfMachine.receiveEnergy(dir.getOpposite(), this.extractEnergy(dir, delta, false), false);
 						}

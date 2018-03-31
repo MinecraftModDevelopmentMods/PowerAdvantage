@@ -1,12 +1,14 @@
 package cyano.poweradvantage.machines.fluidmachines;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockPistonBase;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityPiston;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -17,7 +19,7 @@ import cyano.poweradvantage.init.Blocks;
 public class FluidPipeBlock extends BlockSimpleFluidConduit {
 
 	public FluidPipeBlock() {
-		super(Material.PISTON, 0.75f, 4f / 16f);
+		super(Material.IRON, 0.75f, 4f / 16f);
 		super.setCreativeTab(CreativeTabs.DECORATIONS);
 	}
 

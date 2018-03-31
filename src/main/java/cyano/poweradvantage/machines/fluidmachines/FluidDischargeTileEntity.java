@@ -1,6 +1,7 @@
 package cyano.poweradvantage.machines.fluidmachines;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -40,16 +41,19 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
 			IFluidHandler other = (IFluidHandler) world.getTileEntity(space);
 			// TODO: facing was removed, this needs to work with caps, not interfaces in tile entities
 			IFluidTankProperties[] tanks = other.getTankProperties(); // EnumFacing.DOWN);
-			for (int i = 0; i < tanks.length; i++) {
-				IFluidTankProperties t = tanks[i];
-				if (t.getContents() != null && tank.getFluid().getFluid() != t.getContents().getFluid()) {
-					continue;
-				}
-				if (other.fill(tank.getFluid(), false) > 0) {
-					int amount = other.fill(tank.getFluid(), true);
-					tank.drain(amount, true);
+			if (tanks != null){
+				for (int i = 0; i < tanks.length; i++) {
+					IFluidTankProperties t = tanks[i];
+					if (t.getContents() != null && tank.getFluid().getFluid() != t.getContents().getFluid()) {
+						continue;
+					}
+					if (other.fill(tank.getFluid(), false) > 0) {
+						int amount = other.fill(tank.getFluid(), true);
+						tank.drain(amount, true);
+					}
 				}
 			}
+
 		} else
 			// place fluid block
 			if (tank.getFluidAmount() >= Fluid.BUCKET_VOLUME) {
@@ -57,9 +61,11 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
 				Fluid fluid = fstack.getFluid();
 				Block fluidBlock = fluid.getBlock();
 				BlockPos coord = space;
+				IBlockState blockAtSpot = world.getBlockState(coord);
 				if (world.isAirBlock(coord)) {
 					world.setBlockState(coord, fluidBlock.getDefaultState());
-					world.notify();
+					world.notifyBlockUpdate(coord, blockAtSpot, fluidBlock.getDefaultState(), 3);
+//					world.notify();
 					// TODO: facing was removed, this needs to work with caps, not interfaces in tile entities
 					this.drain(/*EnumFacing.DOWN, */Fluid.BUCKET_VOLUME, true);
 				} else if (world.getBlockState(coord).getBlock() == fluidBlock) {
@@ -69,7 +75,8 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
 					if (coord != null) {
 						// not a source block
 						world.setBlockState(coord, fluidBlock.getDefaultState());
-						world.notify();
+						world.notifyBlockUpdate(coord, blockAtSpot, fluidBlock.getDefaultState(), 3);
+//						world.notify();
 						// TODO: facing was removed, this needs to work with caps, not interfaces in tile entities
 						this.drain(/*EnumFacing.DOWN, */Fluid.BUCKET_VOLUME, true);
 					}

@@ -51,7 +51,7 @@ public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
 
 	private FluidStack getFilter() {
 		ItemStack item = filterInventory[0];
-		if (item == null) return null;
+		if (item == ItemStack.EMPTY) return null;
 		// TODO: check the logic here, but seems the following line will take care of it!
 //		if (item.getItem() instanceof UniversalBucket) {
 //			UniversalBucket bucket = (UniversalBucket) item.getItem();
@@ -91,15 +91,10 @@ public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
 		return true;
 	}
 
-	private final ItemStack[] filterInventory = new ItemStack[1];
+	private final ItemStack[] filterInventory = new ItemStack[] {ItemStack.EMPTY};
 
 	@Override
 	protected ItemStack[] getInventory() {
-		for(int i = 0; i < this.filterInventory.length; i++) {
-			if (this.filterInventory[i] == null) {
-				this.filterInventory[i] = ItemStack.EMPTY;
-			}
-		}
 		return filterInventory;
 	}
 
@@ -180,7 +175,7 @@ public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
 
 	@Override
 	public boolean isEmpty() {
-		return false;
+		return this.filterInventory[0] == ItemStack.EMPTY;
 	}
 
 

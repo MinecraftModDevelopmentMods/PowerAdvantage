@@ -25,6 +25,8 @@ import cyano.poweradvantage.api.fluid.FluidPoweredEntity;
 import cyano.poweradvantage.api.fluid.FluidRequest;
 import cyano.poweradvantage.init.Fluids;
 import cyano.poweradvantage.util.FluidHelper;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * This block implements the cyano.poweradvantage.api.PowerSourceEntity 
@@ -46,9 +48,16 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
 	private String customName = null;
     
     private final String unlocalizedName;
+	private boolean first_update = true;
 	private int[] dataFields = new int[2];
 	private static final int DATAFIELD_FLUID_ID = 0; // index in the dataFields array
 	private static final int DATAFIELD_FLUID_VOLUME = 1; // index in the dataFields array
+
+	@Override
+	public IFluidTankProperties[] getTankProperties() {
+
+		return this.tank.getTankProperties();
+	}
     
 	
 	/**
@@ -200,6 +209,11 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
 			oldLevel = this.getTank().getFluidAmount();
 			this.sync();
 		}
+		if (this.first_update){
+			//Make sure we sync with clients at start of lifetime, otherwise they might not have loaded state
+			this.sync();
+			this.first_update = false;
+		}
 	}
     /**
      * Specifies the minimum priority of power sinks whose requests for power will be filled. Power 
@@ -225,6 +239,7 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
     	int bucket = available.amount;
     	for(PowerRequest req : requests){
     		if(req.entity == this) continue;
+
     		if(req.priority < minumimPriority)break; // relies on list being sorted properly
     		if(req.amount <= 0)continue;
     		if(req.amount < bucket){
@@ -281,7 +296,7 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
         if(inventory != null ){
 	        final NBTTagList nbttaglist = new NBTTagList();
 	        for (int i = 0; i < inventory.length; ++i) {
-	            if (inventory[i] != null) {
+	            if (inventory[i] != ItemStack.EMPTY) {
 	                final NBTTagCompound nbttagcompound1 = new NBTTagCompound();
 	                nbttagcompound1.setByte("Slot", (byte)i);
 	                inventory[i].writeToNBT(nbttagcompound1);
@@ -423,7 +438,7 @@ private final ConduitType[] types = {Fluids.fluidConduit_general};
 	public void clear() {
 		if(this.getInventory() == null) return;
 		for(int i = 0; i < this.getInventory().length; i++){
-			this.getInventory()[i] = null;
+			this.getInventory()[i] = ItemStack.EMPTY;
 		}
 		
 	}
@@ -452,17 +467,17 @@ private final ConduitType[] types = {Fluids.fluidConduit_general};
 	 */
 	@Override
 	public ItemStack decrStackSize(int slot, int decrement) {
-		if (this.getInventory()[slot] == null) {
-            return null;
+		if (this.getInventory()[slot] == ItemStack.EMPTY) {
+            return ItemStack.EMPTY;
         }
         if (this.getInventory()[slot].getCount() <= decrement) {
             final ItemStack itemstack = this.getInventory()[slot];
-            this.getInventory()[slot] = null;
+            this.getInventory()[slot] = ItemStack.EMPTY;
             return itemstack;
         }
         final ItemStack itemstack = this.getInventory()[slot].splitStack(decrement);
         if (this.getInventory()[slot].getCount() == 0) {
-            this.getInventory()[slot] = null;
+            this.getInventory()[slot] = ItemStack.EMPTY;
         }
         return itemstack;
 	}
@@ -550,7 +565,7 @@ private final ConduitType[] types = {Fluids.fluidConduit_general};
 	public ItemStack removeStackFromSlot(int slot) {
 		if(this.getInventory() != null){
 			ItemStack i = this.getInventory()[slot];
-			this.getInventory()[slot] = null;
+			this.getInventory()[slot] = ItemStack.EMPTY;
 			return i;
 		} else {
 			return null;
@@ -589,10 +604,10 @@ private final ConduitType[] types = {Fluids.fluidConduit_general};
 	@Override
 	public void setInventorySlotContents(int slot, ItemStack item) {
 		if(this.getInventory() == null) return;
-		final boolean flag = item != null && item.isItemEqual(this.getInventory()[slot]) 
+		final boolean flag = item != ItemStack.EMPTY && item.isItemEqual(this.getInventory()[slot])
 				&& ItemStack.areItemStackTagsEqual(item, this.getInventory()[slot]);
 		this.getInventory()[slot] = item;
-		if (item != null && item.getCount() > this.getInventoryStackLimit()) {
+		if (item != ItemStack.EMPTY && item.getCount() > this.getInventoryStackLimit()) {
 			item.setCount(this.getInventoryStackLimit());
 		}
 		if (slot == 0 && !flag) {

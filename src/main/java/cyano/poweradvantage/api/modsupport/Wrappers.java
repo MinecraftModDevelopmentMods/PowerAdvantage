@@ -18,7 +18,7 @@ public abstract class Wrappers {
 	 * @param conversionFactor of RF units per power unit
 	 * @return Returns a Power Advantage compatible PowerRequest instance
 	 */
-	public static PowerRequest wrapRFPowerRequest(final cofh.api.energy.IEnergyReceiver rfMachine, ConduitType powerType, final float conversionFactor) {
+	public static PowerRequest wrapRFPowerRequest(final cofh.redstoneflux.api.IEnergyReceiver rfMachine, final ConduitType powerType, final float conversionFactor) {
 		final float invertedConversionFactor = 1.0F / conversionFactor;
 		EnumFacing s = null;
 		for (int i = 0; i < EnumFacing.values().length; i++) {
@@ -107,7 +107,7 @@ public abstract class Wrappers {
 	 * @param conversionFactor of RF units per power unit
 	 * @return Returns a Power Advantage compatible PowerRequest instance
 	 */
-	public static PowerRequest wrapTRPowerRequest(final reborncore.api.power.IEnergyInterfaceTile trMachine, ConduitType powerType, final float conversionFactor) {
+	public static PowerRequest wrapTRPowerRequest(final reborncore.api.power.IEnergyInterfaceTile trMachine, final ConduitType powerType, final float conversionFactor) {
 		final float invertedConversionFactor = 1.0F / conversionFactor;
 		final float requestSize = (float) Math.min(trMachine.getMaxInput(), trMachine.getMaxPower() - trMachine.getEnergy()) * invertedConversionFactor;
 		if (requestSize == 0) return PowerRequest.REQUEST_NOTHING;

@@ -9,16 +9,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
-import net.minecraft.block.Block;
+
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -26,7 +24,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.registry.GameData;
+//import net.minecraftforge.fml.common.registry.GameData;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -259,6 +257,9 @@ public class PowerAdvantage
 	public static boolean detectedRF = false;
 	public static boolean detectedTechReborn = false;
 
+	static {
+		FluidRegistry.enableUniversalBucket();
+	}
 	
 	private String[] distillRecipes = new String[0]; // used to pass config data to the init() method
 	
@@ -388,7 +389,7 @@ public class PowerAdvantage
 		FMLLog.info("%s: initializing fluids, blocks, items, and loot tables", MODID);
 		cyano.poweradvantage.init.Fluids.init(); 
 		cyano.poweradvantage.init.Blocks.init();
-		cyano.poweradvantage.init.Items.init();
+//		cyano.poweradvantage.init.Items.init();
 		cyano.poweradvantage.init.TreasureChests.init(event.getSuggestedConfigurationFile().toPath().getParent());
 
 		// keep this next comment, it is useful for finding Vanilla recipes
@@ -401,6 +402,7 @@ public class PowerAdvantage
 		}
 
 		FMLLog.info("%s: preinit complete", MODID);
+
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -450,7 +452,7 @@ public class PowerAdvantage
 		FMLLog.info("%s: initializing more content", MODID);
 		cyano.poweradvantage.init.Fuels.init();
 		cyano.poweradvantage.init.Entities.init();
-		cyano.poweradvantage.init.Recipes.init();
+//		cyano.poweradvantage.init.Recipes.init();
 		cyano.poweradvantage.init.Recipes.initDistillationRecipes(distillRecipes);
 		cyano.poweradvantage.init.Villages.init(); 
 		cyano.poweradvantage.init.GUI.init();
@@ -513,7 +515,7 @@ public class PowerAdvantage
 		// Clear caches
 		DistillationRecipeRegistry.clearRecipeCache();
 		
-		sortBlocksByModID();
+//		sortBlocksByModID();
 		
 		// hacking
 		// printHackingInfo(); // XXX: hacker stuff
@@ -545,15 +547,15 @@ public class PowerAdvantage
 	}
 
 	@SuppressWarnings("deprecation")
-	private Map<String, Set<Block>> sortBlocksByModID() {
-		Map<String, Set<Block>> modMap = new HashMap<>();
-		GameData.getBlockRegistry().forEach((Block b)->{
-			final String modid = GameData.getBlockRegistry().getNameForObject(b).getResourceDomain();
-			modMap.computeIfAbsent(modid, (String id)->new HashSet<Block>());
-			modMap.get(modid).add(b);
-		});
-		return Collections.unmodifiableMap(modMap);
-	}
+//	private Map<String, Set<Block>> sortBlocksByModID() {
+//		Map<String, Set<Block>> modMap = new HashMap<>();
+//		GameData.getBlockRegistry().forEach((Block b)->{
+//			final String modid = GameData.getBlockRegistry().getNameForObject(b).getResourceDomain();
+//			modMap.computeIfAbsent(modid, (String id)->new HashSet<Block>());
+//			modMap.get(modid).add(b);
+//		});
+//		return Collections.unmodifiableMap(modMap);
+//	}
 
 	//TODO Don't think we need
 	/*

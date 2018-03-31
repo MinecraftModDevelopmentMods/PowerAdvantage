@@ -51,15 +51,15 @@ public abstract class ModSupport {
 			GameRegistry.registerTileEntity(TileEntityRFElectricityConverter.class, PowerAdvantage.MODID + "." + "rf_electricity_converter_tileentity");
 			GameRegistry.registerTileEntity(TileEntityRFQuantumConverter.class, PowerAdvantage.MODID + "." + "rf_quantum_converter_tileentity");
 
-			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(converter_rf_steam, 1),
-					"xyz",
-					'x', "governor", 'y', "frameSteel", 'z', "blockRedstone"));
-			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(converter_rf_electricity, 1),
-					"xyz",
-					'x', "PSU", 'y', "frameSteel", 'z', "blockRedstone"));
-			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(converter_rf_quantum, 1),
-					"xyz",
-					'x', net.minecraft.init.Items.ENDER_PEARL, 'y', "frameSteel", 'z', "blockRedstone"));
+//			addRecipe(event, new ItemStack(converter_rf_steam, 1),
+//					"xyz",
+//					'x', "governor", 'y', "frameSteel", 'z', "blockRedstone"));
+//			addRecipe(event, new ItemStack(converter_rf_electricity, 1),
+//					"xyz",
+//					'x', "PSU", 'y', "frameSteel", 'z', "blockRedstone"));
+//			addRecipe(event, new ItemStack(converter_rf_quantum, 1),
+//					"xyz",
+//					'x', net.minecraft.init.Items.ENDER_PEARL, 'y', "frameSteel", 'z', "blockRedstone"));
 		}
 		if (techRebornSupport) {
 			FMLLog.info("Initializing Tech Reborn interface content");
@@ -67,8 +67,8 @@ public abstract class ModSupport {
 
 			converter_tr_electricity = addBlock(new BlockTRConverter(defaultMachineMaterial, defaultMachineHardness, new ConduitType("electricity"), TileEntityTRElectricityConverter.class), "converter_tr_electricity");
 			GameRegistry.registerTileEntity(TileEntityTRElectricityConverter.class, PowerAdvantage.MODID + "." + "tr_electricity_converter_tileentity");
-			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(converter_tr_electricity, 1), "XXX", "XZX", "XXX",
-					'Z', "PSU", 'X', "ingotRefinedIron"));
+//			addRecipe(event, new ItemStack(converter_tr_electricity, 1), "XXX", "XZX", "XXX",
+//					'Z', "PSU", 'X', "ingotRefinedIron"));
 		}
 		initDone = true;
 	}
@@ -76,7 +76,7 @@ public abstract class ModSupport {
 	private static Block addBlock(Block block, String name) {
 		block.setUnlocalizedName(PowerAdvantage.MODID + "." + name);
 		block.setRegistryName(name);
-		GameRegistry.register(block);
+//		GameRegistry.register(block);
 		if ((block instanceof BlockFluidBase) == false) block.setCreativeTab(ItemGroups.tab_powerAdvantage);
 		allBlocks.put(name, block);
 		return block;

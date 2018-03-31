@@ -1,11 +1,14 @@
 package cyano.poweradvantage.init;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import com.mcmoddev.basemetals.data.MaterialNames;
 import com.mcmoddev.lib.data.Names;
 import com.mcmoddev.lib.init.Materials;
+import cyano.poweradvantage.api.fluid.FluidMapper;
+import cyano.poweradvantage.api.fluid.FluidMeshDefinition;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -23,8 +26,11 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fluids.BlockFluidBase;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -54,6 +60,7 @@ import cyano.poweradvantage.machines.fluidmachines.StillBlock;
 import cyano.poweradvantage.machines.fluidmachines.StorageTankBlock;
 import cyano.poweradvantage.machines.fluidmachines.modsupport.TerminalFluidPipeBlock;
 
+@Mod.EventBusSubscriber
 public abstract class Blocks {
 	private static final Map<String, Block> allBlocks = new HashMap<>();
 
@@ -105,11 +112,10 @@ public abstract class Blocks {
 		fluid_pipe_terminal.setUnlocalizedName("fluid_pipe");
 		fluid_pipe_terminal.setCreativeTab(null);
 		fluid_switch = addBlock(new BlockPowerSwitch(Fluids.fluidConduit_general), "fluid_switch");
-		OreDictionary.registerOre("pipe", fluid_pipe);
+
 		steel_frame = addBlock(new BlockFrame(net.minecraft.block.material.Material.PISTON)
 				.setResistance(Materials.getMaterialByName(MaterialNames.STEEL).getBlock(Names.BLOCK).getExplosionResistance(null))
 				.setHardness(0.75f), "steel_frame");
-		OreDictionary.registerOre("frameSteel", steel_frame);
 
 		final float defaultMachineHardness = 0.75f;
 		final Material defaultMachineMaterial = Material.PISTON;
@@ -129,13 +135,13 @@ public abstract class Blocks {
 		infinite_quantum = (GUIBlock) addBlock(new InfiniteEnergyBlock(new ConduitType("quantum")), "infinite_quantum");
 
 
-		refined_oil_block = (BlockFluidBase) addBlock(new InteractiveFluidBlock(Fluids.refined_oil, true, (World w, EntityLivingBase e) -> {
-			e.addPotionEffect(new PotionEffect(Potion.REGISTRY.getObject(new ResourceLocation("nausea")), 200));
-		}), "refined_oil");
-
 		crude_oil_block = (BlockFluidBase) addBlock(new InteractiveFluidBlock(Fluids.crude_oil, true, (World w, EntityLivingBase e) -> {
 			e.addPotionEffect(new PotionEffect(Potion.REGISTRY.getObject(new ResourceLocation("slowness")), 200, 2));
-		}), "crude_oil");
+		}, 120), "crude_oil");
+		refined_oil_block = (BlockFluidBase) addBlock(new InteractiveFluidBlock(Fluids.refined_oil, true, (World w, EntityLivingBase e) -> {
+			e.addPotionEffect(new PotionEffect(Potion.REGISTRY.getObject(new ResourceLocation("nausea")), 200));
+		}, 300), "refined_oil");
+
 
 
 		initDone = true;
@@ -150,40 +156,53 @@ public abstract class Blocks {
 		for (Map.Entry<String, Block> e : allBlocks.entrySet()) {
 			Block b = e.getValue();
 			String name = e.getKey();
+
 			if (b instanceof BlockFluidBase) {
 				BlockFluidBase block = (BlockFluidBase) b;
 				block.getFluid();
-				Item item = Item.getItemFromBlock(block);
+				Item item = new ItemBlock(block);
+				item.setRegistryName(name); // fullName
+				item.setUnlocalizedName(block.getRegistryName().getResourceDomain() + "." + name);
 				final ModelResourceLocation fluidModelLocation = new ModelResourceLocation(
-						modID.toLowerCase() + ":" + name, "fluid");
+						modID.toLowerCase() + ":" + name, "normal");
+//				System.out.println(String.format("model registering %s", fluidModelLocation.toString()));
+//				System.out.println(String.format("block registering %s", block.getRegistryName().toString()));
+//				System.out.println(String.format("item is %s", item.getRegistryName().toString()));
+//				System.out.println(String.format("fluid registering %s", block.getFluid().getUnlocalizedName().toString()));
 				ModelBakery.registerItemVariants(item);
-				ModelLoader.setCustomMeshDefinition(item, new ItemMeshDefinition() {
-					public ModelResourceLocation getModelLocation(ItemStack stack) {
-						return fluidModelLocation;
-					}
-				});
-				ModelLoader.setCustomStateMapper(block, new StateMapperBase() {
-					protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
-						return fluidModelLocation;
-					}
-				});
+				ModelLoader.setCustomMeshDefinition(item, new FluidMeshDefinition(fluidModelLocation));
+				ModelLoader.setCustomStateMapper(block, new FluidMapper(fluidModelLocation));
 			}
 		}
 	}
 
+	@SubscribeEvent
+	public static void registerBlocks(RegistryEvent.Register<Block> event){
+		event.getRegistry().registerAll(allBlocks.values().toArray(new Block[0]));
+	}
+
+	@SubscribeEvent
+	public static void registerItemBlocks(RegistryEvent.Register<Item> event) {
+		Arrays.stream(allBlocks.values().toArray(new Block[0]))
+				.filter(block -> block.getRegistryName() != null)
+				.map((block -> new ItemBlock(block).setRegistryName(block.getRegistryName())))
+				.forEach((item -> event.getRegistry().register(item)));
+
+		OreDictionary.registerOre("pipe", fluid_pipe);
+		OreDictionary.registerOre("frameSteel", steel_frame);
+	}
+
 	private static Block addBlock(Block block, String name) {
 		block.setUnlocalizedName(PowerAdvantage.MODID + "." + name);
-		block.setRegistryName(name);
+		block.setRegistryName(PowerAdvantage.MODID, name);
 		if (!(block instanceof BlockFluidBase)) {
 			block.setCreativeTab(ItemGroups.tab_powerAdvantage);
 		}
 
-		GameRegistry.register(block);
-
-		ItemBlock item = new ItemBlock(block);
-		item.setRegistryName(block.getRegistryName());
-		GameRegistry.register(item);
-
+//		GameRegistry.register(block);
+//		ItemBlock item = new ItemBlock(block);
+//		item.setRegistryName(block.getRegistryName());
+//		GameRegistry.register(item);
 		allBlocks.put(name, block);
 		return block;
 	}

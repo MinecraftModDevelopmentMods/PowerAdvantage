@@ -21,6 +21,7 @@ public class InteractiveFluidBlock extends BlockFluidClassic {
 
 	private final java.util.function.BiConsumer<net.minecraft.world.World, net.minecraft.entity.EntityLivingBase> immersionEffect;
 	private final boolean isFlammable;
+	private final int flammability;
 
 	/**
 	 * Constructor for this fluid block.
@@ -29,10 +30,12 @@ public class InteractiveFluidBlock extends BlockFluidClassic {
 	 * @param flammable       If true, then this block can burn
 	 * @param immersionEffect A function to define what happens to swimming entities. Can be null.
 	 */
-	public InteractiveFluidBlock(Fluid fluid, boolean flammable, java.util.function.BiConsumer<net.minecraft.world.World, net.minecraft.entity.EntityLivingBase> immersionEffect) {
+	public InteractiveFluidBlock(Fluid fluid, boolean flammable, java.util.function.BiConsumer<net.minecraft.world.World, net.minecraft.entity.EntityLivingBase> immersionEffect,
+								 int flammability) {
 		super(fluid, Material.WATER);
 		this.isFlammable = flammable;
 		this.immersionEffect = immersionEffect;
+		this.flammability = flammability;
 	}
 
 	/**
@@ -42,7 +45,7 @@ public class InteractiveFluidBlock extends BlockFluidClassic {
 	 * @param immersionEffect A function to define what happens to swimming entities. Can be null.
 	 */
 	public InteractiveFluidBlock(Fluid fluid, java.util.function.BiConsumer<net.minecraft.world.World, net.minecraft.entity.EntityLivingBase> immersionEffect) {
-		this(fluid, false, immersionEffect);
+		this(fluid, false, immersionEffect, 60);
 	}
 
 	/**
@@ -51,7 +54,7 @@ public class InteractiveFluidBlock extends BlockFluidClassic {
 	 * @param fluid The Fluid of this fluid block
 	 */
 	public InteractiveFluidBlock(Fluid fluid) {
-		this(fluid, false, null);
+		this(fluid, false, null, 60);
 	}
 
 
@@ -72,9 +75,16 @@ public class InteractiveFluidBlock extends BlockFluidClassic {
 	 * @param face  The face that the fire is coming from
 	 * @return A number ranging from 0 to 300 relating used to determine if the block will be consumed by fire
 	 */
+	@Override
 	public int getFlammability(IBlockAccess world, BlockPos pos, EnumFacing face) {
-		if (isFlammable) return 60;
+		if (isFlammable) return this.flammability;
 		return 0;
+	}
+
+	@Override
+	public boolean isFlammable(IBlockAccess world, BlockPos pos, EnumFacing face)
+	{
+		return this.isFlammable;
 	}
 
 	/**
@@ -86,8 +96,9 @@ public class InteractiveFluidBlock extends BlockFluidClassic {
 	 * @param face  The face that the fire is coming from
 	 * @return A number that is used to determine the speed of fire growth around the block
 	 */
+	@Override
 	public int getFireSpreadSpeed(IBlockAccess world, BlockPos pos, EnumFacing face) {
-		if (isFlammable) return 30;
+		if (isFlammable) return 120;
 		return 0;
 	}
 

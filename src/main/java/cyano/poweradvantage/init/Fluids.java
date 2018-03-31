@@ -51,10 +51,10 @@ public abstract class Fluids {
 		fluidConduitLUT.put(FluidRegistry.WATER, fluidConduit_water);
 		fluidConduitLUT.put(FluidRegistry.LAVA, fluidConduit_lava);
 
-		crude_oil = newFluid(PowerAdvantage.MODID, "crude_oil", 850, 6000, 300, 0, 0xFFFFFFFF);//0xFF100808);
-		FluidRegistry.registerFluid(crude_oil);
-		refined_oil = newFluid(PowerAdvantage.MODID, "refined_oil", 720, 1000, 300, 0, 0xFFFFFFFF);//0xFFfef08e);
-		FluidRegistry.registerFluid(refined_oil);
+		crude_oil = newFluid(PowerAdvantage.MODID, "crude_oil", 850, 6000, 300, 0, 0xFF220B0B);//0xFF100808);
+//		FluidRegistry.registerFluid(crude_oil);
+		refined_oil = newFluid(PowerAdvantage.MODID, "refined_oil", 720, 1000, 300, 0, 0xFFfef08e);//0xFFfef08e);
+//		FluidRegistry.registerFluid(refined_oil);
 
 		initDone = true;
 	}
@@ -81,6 +81,7 @@ public abstract class Fluids {
 			return FluidRegistry.getFluid(name);
 		}
 		Fluid f = new ColoredFluid(name, new ResourceLocation(modID + ":blocks/" + name + "_still"), new ResourceLocation(modID + ":blocks/" + name + "_flow"), tintColor);
+		System.out.println(String.format("Registering: %s, %s, %s", name, new ResourceLocation(modID + ":blocks/" + name + "_still").toString(), new ResourceLocation(modID + ":blocks/" + name + "_flow").toString()));
 		f.setDensity(density);
 		f.setViscosity(viscosity);
 		f.setTemperature(temperature);

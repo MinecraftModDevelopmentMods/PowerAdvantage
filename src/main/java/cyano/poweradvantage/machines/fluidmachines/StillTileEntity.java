@@ -3,6 +3,7 @@ package cyano.poweradvantage.machines.fluidmachines;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -11,6 +12,7 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.FluidTankInfo;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import cyano.poweradvantage.api.fluid.FluidRequest;
 import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
@@ -18,9 +20,10 @@ import cyano.poweradvantage.registry.FuelRegistry;
 import cyano.poweradvantage.registry.still.recipe.DistillationRecipe;
 import cyano.poweradvantage.registry.still.recipe.DistillationRecipeRegistry;
 import cyano.poweradvantage.util.FluidHelper;
+import org.apache.commons.lang3.ArrayUtils;
 
 public class StillTileEntity extends TileEntitySimpleFluidMachine {
-	private final ItemStack[] inventory = new ItemStack[1];
+	private final ItemStack[] inventory = new ItemStack[]{ItemStack.EMPTY};
 	private final FluidTank inputTank = new FluidTank(Fluid.BUCKET_VOLUME);
 	private int[] dataFields = new int[6];
 	private static final int DATAFIELD_FLUID_ID1 = 0; // index in the dataFields array
@@ -84,7 +87,6 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 	@Override
 	public void powerUpdate() {
 		super.powerUpdate();
-
 		boolean updateFlag = false;
 
 		if (oldInput != this.inputTank.getFluidAmount()) {
@@ -151,6 +153,18 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 		return (float) burnTime / (float) totalBurnTime;
 	}
 
+	private void tryPushFluid(BlockPos coord, EnumFacing otherFace) {
+		if (this.getTank().getFluidAmount() <= 0) return; // no fluid to push
+		TileEntity e = getWorld().getTileEntity(coord);
+		if (e instanceof IFluidHandler) {
+			IFluidHandler fh = (IFluidHandler) e;
+			if (fh.fill(getTank().getFluid(), false) > 0) {
+				getTank().drain(fh.fill(getTank().getFluid(), true), true);
+				this.sync();
+			}
+		}
+	}
+
 	///// Overrides to use one tank for input and another tank for output /////
 
 	/**
@@ -193,12 +207,12 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 	/**
 	 * Fills fluid into internal tanks, distribution is left entirely to the IFluidHandler.
 	 *
-	 * @param from     Orientation the Fluid is pumped in from.
 	 * @param resource FluidStack representing the Fluid and maximum amount of fluid to be filled.
 	 * @param doFill   If false, fill will only be simulated.
 	 * @return Amount of resource that was (or would have been, if simulated) filled.
 	 */
-	public int fill(EnumFacing from, FluidStack resource, boolean doFill) {
+	@Override
+	public int fill(FluidStack resource, boolean doFill) {
 		if (resource == null) return 0;
 		if (inputTank.getFluidAmount() <= 0) {
 			if (canDistill(resource)) {
@@ -414,11 +428,12 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 
 	@Override
 	public boolean isEmpty() {
-		return false;
+		return this.inventory[0] == ItemStack.EMPTY;
 	}
 
 	@Override
 	public IFluidTankProperties[] getTankProperties() {
-		return null;
+
+		return ArrayUtils.addAll(this.inputTank.getTankProperties(), this.tank.getTankProperties());
 	}
 }

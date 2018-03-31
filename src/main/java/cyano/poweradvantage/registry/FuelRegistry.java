@@ -129,7 +129,7 @@ public class FuelRegistry implements IFuelHandler{
 	 */
 	@Override
 	public int getBurnTime(ItemStack fuel) {
-		if(fuel == null) return 0;
+		if(fuel == ItemStack.EMPTY) return 0;
 		for(Function<ItemStack,Short> algorithm : getFuelAlgorithmsForItem(fuel.getItem())){
 			short value = algorithm.apply(fuel);
 			if(value > 0) return value;
@@ -143,7 +143,7 @@ public class FuelRegistry implements IFuelHandler{
 	 * @return The number of ticks that the item should burn, or 0 if it isn't flammable
 	 */
 	public static short getActualBurntimeForItem(ItemStack fuel){
-		if(fuel == null) return 0;
+		if(fuel == ItemStack.EMPTY) return 0;
 		return (short)TileEntityFurnace.getItemBurnTime(fuel);
 	}
 
@@ -154,7 +154,7 @@ public class FuelRegistry implements IFuelHandler{
 	 * @return The item after being consumed (usually the same item with a decremented stack size)
 	 */
 	public static ItemStack decrementFuelItem(ItemStack fuelItem){
-		if(fuelItem == null) return null;
+		if(fuelItem == ItemStack.EMPTY) return ItemStack.EMPTY;
 		List<Function<ItemStack, ItemStack>> list = FuelRegistry.getInstance().getPostBurnAlgorithmsForItem(fuelItem.getItem());
 		if(list.isEmpty()){
 			fuelItem.shrink(1);
