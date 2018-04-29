@@ -1,55 +1,54 @@
 language_support_goals=english (en_US,en_EN,en_CA,en_GB, en_AU, en_PT), spanish (es_MX,es_ES), chinese (zh_CN), japanese (ja_JA), portugese (pt_BR), german (de_DE), italian (it_IT), korean (ko_KR)
-nei.poweradvantage.recipehandler.shapelessfurnace.name=Große Ofen (formlos)
-nei.poweradvantage.recipehandler.shapedfurnace.name=Große Ofen (geformt)
+nei.poweradvantage.recipehandler.shapelessfurnace.name=Großer Ofen (formlos)
+nei.poweradvantage.recipehandler.shapedfurnace.name=Großer Ofen (geformt)
 
 tooltip.poweradvantage.empty=Leer
 tooltip.poweradvantage.buckets_of=%x Eimer %y
 
-itemGroup.poweradvantage=Leistungsvorteil
+itemGroup.poweradvantage=Power Advantage
 
 tile.poweradvantage.fluid_drain.name=Ablauf
-tile.poweradvantage.fluid_discharge.name=Austragsrost
-tile.poweradvantage.fluid_storage_tank.name=Lagertank
-item.poweradvantage.fluid_storage_tank_item.name=Speicher
+tile.poweradvantage.fluid_discharge.name=Aulaufgitter
+tile.poweradvantage.fluid_storage_tank.name=Tragbarer Flüssigkeitstank
 tile.poweradvantage.fluid_pipe.name=Rohr
 
-tile.poweradvantage.item_conveyor.name=Förderer
-tile.poweradvantage.item_filter_block.name=Block Auswahl Förder
-tile.poweradvantage.item_filter_food.name=Lebensmittel Auswahl Förder
-tile.poweradvantage.item_filter_fuel.name=Brennstoff Auswahl Förder
-tile.poweradvantage.item_filter_inventory.name=Anpassbare Auswahl Förder
-tile.poweradvantage.item_filter_ore.name=Erz Auswahl Förder
-tile.poweradvantage.item_filter_plant.name=Pflanze Auswahl Förder
-tile.poweradvantage.item_filter_smelt.name=Kochbare Auswahl Förder
-tile.poweradvantage.item_filter_overflow.name=Überlauf Auswahl Förder
+tile.poweradvantage.item_conveyor.name=Förderband
+tile.poweradvantage.item_filter_block.name=Blockfilterförderband
+tile.poweradvantage.item_filter_food.name=Lebensmittelfilterförderband
+tile.poweradvantage.item_filter_fuel.name=Brennstoffilterförderband
+tile.poweradvantage.item_filter_inventory.name=Inventarfilterförderband
+tile.poweradvantage.item_filter_ore.name=Erzfilterförderband
+tile.poweradvantage.item_filter_plant.name=Pflanzenfilterförderband
+tile.poweradvantage.item_filter_smelt.name=Ofenfilterförderband
+tile.poweradvantage.item_filter_overflow.name=Überlauffilterauswahlband
 tile.poweradvantage.steel_frame.name=Stahlrahmen
 
 
 item.poweradvantage.starch.name=Kartoffelstärke
-item.poweradvantage.bioplastic_ingot.name=Biokunststoff-Barren
+item.poweradvantage.bioplastic_ingot.name=Biokunststoffbarren
 item.poweradvantage.sprocket.name=Kettenrad
 
 
-tile.poweradvantage.fluid_metal_tank.name=Metall-Lagertank
+tile.poweradvantage.fluid_metal_tank.name=Flüssigmetalltank
 item.poweradvantage.rotator_tool.name=Drehwerkzeug
 
-tile.poweradvantage.infinite_steam.name=Unendlichen Dampfkraft
-tile.poweradvantage.infinite_electricity.name=Unendliche Elektrische Leistung
-tile.poweradvantage.infinite_quantum.name=Unendliche Quanten Leistung
+tile.poweradvantage.infinite_steam.name=Unendlich Dampfkraft
+tile.poweradvantage.infinite_electricity.name=Unendlich elektrische Energie
+tile.poweradvantage.infinite_quantum.name=Unendlich Quantenenergie
 
 tile.poweradvantage.crude_oil.name=Rohöl
 fluid.poweradvantage.crude_oil=Rohöl
 item.bucket.crude_oil=Eimer Rohöl
 
 
-tile.poweradvantage.still.name=Brennerei
+tile.poweradvantage.still.name=Destillerie
 
-tile.poweradvantage.refined_oil.name=Raffiniertes Öl
-fluid.poweradvantage.refined_oil=Raffiniertes Öl
-item.bucket.refined_oil=Eimer für Raffiniertes Öl
+tile.poweradvantage.refined_oil.name=Raffinieriertes Öl
+fluid.poweradvantage.refined_oil=Raffinieriertes Öl
+item.bucket.refined_oil=EimerRaffinieriertes Öl
 tile.poweradvantage.fluid_switch.name=Ventil
 
-tile.poweradvantage.converter_rf_steam.name=Dampf-RF Leistungstransformator
-tile.poweradvantage.converter_rf_electricity.name=Elektrizität-RF Leistungstransformator
-tile.poweradvantage.converter_rf_quantum.name=Quant-RF Leistungstransformator
-tile.poweradvantage.converter_tr_electricity.name=Elektrizität-EU Leistungstransformator
+tile.poweradvantage.converter_rf_steam.name=Dampf zu RF Transformator
+tile.poweradvantage.converter_rf_electricity.name=Elektrizität zu RF Transformator
+tile.poweradvantage.converter_rf_quantum.name=Quantenenergie zu RF Transformator
+tile.poweradvantage.converter_tr_electricity.name=Elektrizität zu EU Transformator
