@@ -6,13 +6,18 @@ buildscript {
             url = "http://files.minecraftforge.net/maven"
         }
         maven {
+            name = 'gradle'
+            url 'https://plugins.gradle.org/m2/'
+		}
+        maven {
             name = "sonatype"
             url = 'https://oss.sonatype.org/content/groups/public'
         }
     }
     dependencies {
         classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
-        classpath "com.matthewprenger:CurseGradle:1.0-SNAPSHOT"
+        classpath "gradle.plugin.com.matthewprenger:CurseGradle:1.0.10"
+        classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.2'
     }
 }
 
@@ -26,9 +31,9 @@ archivesBaseName = "PowerAdvantage-1.12.2"
 sourceCompatibility = targetCompatibility = "1.8"
 
 minecraft {
-    version = "1.12.2-14.23.2.2624"
+    version = "1.12.2-14.23.3.2655"
     runDir = "run"
-    mappings = "snapshot_20171003"
+    mappings = "snapshot_20180511"
 }
 
 repositories {
@@ -56,17 +61,20 @@ repositories {
 	    name "SpongePowered"
         url 'https://repo.spongepowered.org/maven/'
     }
+	maven {
+		name = "Modmuss50"
+		url = "http://maven.modmuss50.me/"
+	}
 }
 dependencies {
-	compile files(
-			'libs/RedstoneFlux-1.12-2.0.1.2-universal.jar',
-			'libs/Tesla-1.12.2-1.0.63.jar',
-            'libs/BaseMetals-1.12-2.5.0-beta4.145.jar'
-   )
-    // compile "net.darkhax.tesla:Tesla:1.12-2.1.0.63"
-    // deobfCompile "cofh:RedstoneFlux:1.12-2.0.0.1:universal"
+    deobfCompile "net.darkhax.tesla:Tesla-1.12.2:1.0.63"
+    deobfCompile "cofh:RedstoneFlux:1.12-2.0.0.1:universal"
+    deobfCompile "com.mcmoddev:BaseMetals:1.12-2.5.0-beta+"
 //    compile "codechicken:CodeChickenCore:1.8-1.0.5.36:dev"
 //    compile "codechicken:NotEnoughItems:1.8-1.0.5.104:dev"
+	deobfCompile('RebornCore:RebornCore-1.11.2:+:universal') {
+		transitive = false
+	}
 }
 
 processResources {
