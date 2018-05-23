@@ -260,12 +260,12 @@ repositories {
 }
 
 dependencies {
-  deobfCompile "net.darkhax.tesla:Tesla-1.12.2:1.0.63"
-  deobfCompile "cofh:RedstoneFlux:1.12-2.0.0.1:universal"
-  deobfCompile "com.mcmoddev:BaseMetals:1.12-2.5.0-beta+"
-//  compile "codechicken:CodeChickenCore:1.8-1.0.5.36:dev"
-//  compile "codechicken:NotEnoughItems:1.8-1.0.5.104:dev"
-  deobfCompile('RebornCore:RebornCore-1.12.2:+:universal') {
+  deobfCompile "net.darkhax.tesla:Tesla-${mc_version}.2:${tesla_version}"
+  deobfCompile "cofh:RedstoneFlux:${mc_version}-${rfapi_version}:universal"
+  deobfCompile "com.mcmoddev:BaseMetals:${mc_version}-${bme_version}"
+//  compile "codechicken:CodeChickenCore:${mc_version}-${ccc_version}:universal"
+//  compile "codechicken:NotEnoughItems:${mc_version}-${nei_version}:universal"
+  deobfCompile("RebornCore:RebornCore-${mc_version}.2:${reborncore_version}:universal") {
     transitive = false
   }
 }
