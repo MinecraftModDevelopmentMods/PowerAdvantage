@@ -296,12 +296,10 @@ jar {
   }
 }
 
-/*
 task apiJar(type: Jar) {
   classifier = 'apiClasses'
   from apiClasses
 }
-*/
 
 task deobfJar(type: Jar) {
   classifier = 'deobf'
@@ -333,10 +331,18 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 artifacts {
-//  archives apiJar
-  archives deobfJar
-  archives sourceJar
-  archives javadocJar
+  if (project.hasProperty('doAPIJar')) {
+    archives apiJar
+  }
+  if (project.hasProperty('doDeobfJar')) {
+    archives deobfJar
+  }
+  if (project.hasProperty('doSourceJar')) {
+    archives sourceJar
+  }
+  if (project.hasProperty('doJavadocJar')) {
+    archives javadocJar
+  }
 }
 
 publishing {
@@ -346,19 +352,25 @@ publishing {
       artifactId project.archivesBaseName
       version project.version
       from components.java
-      artifact sourceJar {
-        classifier 'sources'
+      if (project.hasProperty('doSourceJar')) {
+        artifact sourceJar {
+          classifier 'sources'
+        }
       }
-/*
-      artifact apiJar {
-        classifier 'api'
+      if (project.hasProperty('doAPIJar')) {
+        artifact apiJar {
+          classifier 'api'
+        }
       }
-*/
-      artifact deobfJar {
-        classifier 'deobf'
+      if (project.hasProperty('doDeobfJar')) {
+        artifact deobfJar {
+          classifier 'deobf'
+        }
       }
-      artifact javadocJar {
-        classifier 'javadoc'
+      if (project.hasProperty('doJavadocJar')) {
+        artifact javadocJar {
+          classifier 'javadoc'
+        }
       }
     }
   }
@@ -374,12 +386,12 @@ publishing {
 }
 
 curseforge {
-  if (project.hasProperty('cf_project_id') && project.hasProperty('cf_release_type') &&
+  if (project.hasProperty('cf_project_id') && project.hasProperty('cf_release_type') && project.hasProperty('cf_changelog_filename') &&
       ((project.cf_release_type == 'alpha') || (project.cf_release_type == 'beta') || (project.cf_release_type == 'release'))) {
     apiKey = secret.curseforgeAPIKey
     project {
       id = project.cf_project_id
-      changelog = file('CHANGELOG.txt')
+      changelog = file(project.cf_changelog_filename)
       releaseType = project.cf_release_type
       addGameVersion(project.mc_version)
       mainArtifact(jar) {
@@ -390,19 +402,25 @@ curseforge {
           optionalLibrary 'additional-loot-tables'
         }
       }
-/*
-      addArtifact(apiJar) {
-        displayName = "$project.description $display_version API"
+      if (project.hasProperty('doAPIJar')) {
+        addArtifact(apiJar) {
+          displayName = "$project.description $display_version API"
+        }
       }
-*/
-      addArtifact(sourceJar) {
-        displayName = "$project.description $display_version Sources"
+      if (project.hasProperty('doSourceJar')) {
+        addArtifact(sourceJar) {
+          displayName = "$project.description $display_version Sources"
+        }
       }
-      addArtifact(deobfJar) {
-        displayName = "$project.description $display_version Development"
+      if (project.hasProperty('doDeobfJar')) {
+        addArtifact(deobfJar) {
+          displayName = "$project.description $display_version Development"
+        }
       }
-      addArtifact(javadocJar) {
-        displayName = "$project.description $display_version Javadoc"
+      if (project.hasProperty('doJavadocJar')) {
+        addArtifact(javadocJar) {
+          displayName = "$project.description $display_version Javadoc"
+        }
       }
     }
   }
