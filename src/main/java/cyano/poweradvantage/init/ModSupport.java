@@ -74,7 +74,7 @@ public abstract class ModSupport {
 	}
 
 	private static Block addBlock(Block block, String name) {
-		block.setUnlocalizedName(PowerAdvantage.MODID + "." + name);
+		block.setTranslationKey(PowerAdvantage.MODID + "." + name);
 		block.setRegistryName(name);
 //		GameRegistry.register(block);
 		if ((block instanceof BlockFluidBase) == false) block.setCreativeTab(ItemGroups.tab_powerAdvantage);

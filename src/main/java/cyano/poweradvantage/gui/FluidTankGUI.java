@@ -63,7 +63,7 @@ public class FluidTankGUI extends SimpleMachineGUI {
 	) {
 		if (fs == null || fs.getFluid() == null) return;
 		ResourceLocation fluidTexture = realTextureLocationCache.computeIfAbsent(fs.getFluid().getStill(fs),
-				(ResourceLocation r) -> new ResourceLocation(r.getResourceDomain(), "textures/".concat(r.getResourcePath()).concat(".png"))
+				(ResourceLocation r) -> new ResourceLocation(r.getNamespace(), "textures/".concat(r.getPath()).concat(".png"))
 		);
 		guiContainer.mc.renderEngine.bindTexture(fluidTexture);
 

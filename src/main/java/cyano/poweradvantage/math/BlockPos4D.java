@@ -112,9 +112,9 @@ public class BlockPos4D {
 	 */
 	public BlockPos4D offset(final EnumFacing direction, final int distance) {
 		return new BlockPos4D(this.dimension,
-				this.getX() + direction.getFrontOffsetX() * distance,
-				this.getY() + direction.getFrontOffsetY() * distance,
-				this.getZ() + direction.getFrontOffsetZ() * distance);
+				this.getX() + direction.getXOffset() * distance,
+				this.getY() + direction.getYOffset() * distance,
+				this.getZ() + direction.getZOffset() * distance);
 	}
 
 	/**

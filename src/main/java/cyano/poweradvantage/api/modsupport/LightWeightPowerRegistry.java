@@ -83,7 +83,7 @@ public class LightWeightPowerRegistry {
 	 *                                    and how to add power to that TileEntity
 	 */
 	public static void registerLightWeightPowerAcceptor(Block machineBlock, ILightWeightPowerAcceptor powerAcceptorImplementation) {
-		FMLLog.info("Registered external power acceptor interfce for block " + machineBlock.getUnlocalizedName());
+		FMLLog.info("Registered external power acceptor interfce for block " + machineBlock.getTranslationKey());
 		getInstance().externalPowerSinks.put(machineBlock, powerAcceptorImplementation);
 	}
 

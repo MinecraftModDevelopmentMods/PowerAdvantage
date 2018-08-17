@@ -46,8 +46,8 @@ public abstract class ConduitBlock extends net.minecraft.block.Block implements 
 	 * This method is called when the block is removed from the world by an entity.
 	 */
 	@Override
-	public void onBlockDestroyedByPlayer(World w, BlockPos coord, IBlockState state) {
-		super.onBlockDestroyedByPlayer(w, coord, state);
+	public void onPlayerDestroy(World w, BlockPos coord, IBlockState state) {
+		super.onPlayerDestroy(w, coord, state);
 		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.provider.getDimension(), coord, getTypes());
 	}
 
@@ -55,8 +55,8 @@ public abstract class ConduitBlock extends net.minecraft.block.Block implements 
 	 * This method is called when the block is destroyed by an explosion.
 	 */
 	@Override
-	public void onBlockDestroyedByExplosion(World w, BlockPos coord, Explosion boom) {
-		super.onBlockDestroyedByExplosion(w, coord, boom);
+	public void onExplosionDestroy(World w, BlockPos coord, Explosion boom) {
+		super.onExplosionDestroy(w, coord, boom);
 		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.provider.getDimension(), coord, getTypes());
 	}
 

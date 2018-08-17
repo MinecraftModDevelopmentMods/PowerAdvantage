@@ -109,7 +109,7 @@ public abstract class Blocks {
 		still = (GUIBlock) addBlock(new StillBlock(), "still");
 		fluid_pipe = addBlock(new FluidPipeBlock(), "fluid_pipe");
 		fluid_pipe_terminal = addBlock(new TerminalFluidPipeBlock(), "fluid_pipe_terminal");
-		fluid_pipe_terminal.setUnlocalizedName("fluid_pipe");
+		fluid_pipe_terminal.setTranslationKey("fluid_pipe");
 		fluid_pipe_terminal.setCreativeTab(null);
 		fluid_switch = addBlock(new BlockPowerSwitch(Fluids.fluidConduit_general), "fluid_switch");
 
@@ -162,7 +162,7 @@ public abstract class Blocks {
 				block.getFluid();
 				Item item = new ItemBlock(block);
 				item.setRegistryName(name); // fullName
-				item.setUnlocalizedName(block.getRegistryName().getResourceDomain() + "." + name);
+				item.setTranslationKey(block.getRegistryName().getNamespace() + "." + name);
 				final ModelResourceLocation fluidModelLocation = new ModelResourceLocation(
 						modID.toLowerCase() + ":" + name, "normal");
 //				System.out.println(String.format("model registering %s", fluidModelLocation.toString()));
@@ -193,7 +193,7 @@ public abstract class Blocks {
 	}
 
 	private static Block addBlock(Block block, String name) {
-		block.setUnlocalizedName(PowerAdvantage.MODID + "." + name);
+		block.setTranslationKey(PowerAdvantage.MODID + "." + name);
 		block.setRegistryName(PowerAdvantage.MODID, name);
 		if (!(block instanceof BlockFluidBase)) {
 			block.setCreativeTab(ItemGroups.tab_powerAdvantage);

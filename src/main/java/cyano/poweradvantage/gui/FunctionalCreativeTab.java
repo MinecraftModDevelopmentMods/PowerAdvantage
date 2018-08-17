@@ -73,7 +73,7 @@ public class FunctionalCreativeTab  extends CreativeTabs {
 	 */
 	@SideOnly(Side.CLIENT)
 	@Override
-	public ItemStack getTabIconItem() {
+	public ItemStack createIcon() {
 		return new ItemStack(itemSupplier.get());
 	}
 }

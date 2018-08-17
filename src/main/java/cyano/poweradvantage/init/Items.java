@@ -59,7 +59,7 @@ public abstract class Items {
 	}
 
 	private static Item addItem(RegistryEvent.Register<Item> event, String unlocalizedName, Item i) {
-		i.setUnlocalizedName(PowerAdvantage.MODID + "." + unlocalizedName);
+		i.setTranslationKey(PowerAdvantage.MODID + "." + unlocalizedName);
 		i.setRegistryName(PowerAdvantage.MODID, unlocalizedName);
 		event.getRegistry().register(i);
 		i.setCreativeTab(ItemGroups.tab_powerAdvantage);

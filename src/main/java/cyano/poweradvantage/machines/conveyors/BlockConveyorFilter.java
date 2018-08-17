@@ -81,7 +81,7 @@ public class BlockConveyorFilter extends GUIBlock {
 	@Override
 	public IBlockState getStateFromMeta(final int meta) {
 		if (meta < 2) return this.getDefaultState();
-		return this.getDefaultState().withProperty(FACING, EnumFacing.getFront(meta));
+		return this.getDefaultState().withProperty(FACING, EnumFacing.byIndex(meta));
 	}
 
 	@Override
