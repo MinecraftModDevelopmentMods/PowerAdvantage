@@ -14,14 +14,6 @@ buildscript {
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-/*
-// for people who want stable - not yet functional for MC 1.8.8 - we require the forgegradle 2.1 snapshot
-plugins {
-    id "net.minecraftforge.gradle.forge" version "2.0.2"
-}
-*/
-
-
 allprojects {
     apply plugin: 'java'
     sourceCompatibility = 1.8
@@ -37,10 +29,10 @@ group= "cyano.poweradvantage" // http://maven.apache.org/guides/mini/guide-namin
 archivesBaseName = "PowerAdvantage"
 
 minecraft {
-    version = "1.8.9-11.15.1.1726"
+    version = "1.8.9-11.15.1.1722"
     runDir = "run"
 
-    mappings = "stable_20"
+    mappings = "stable_22"
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
