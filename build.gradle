@@ -20,8 +20,8 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 
 allprojects {
     apply plugin: 'java'
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 }
 
 version = "0.0.6"
@@ -40,13 +40,19 @@ minecraft {
     mappings = "stable_18"
 }
 
+repositories {
+    maven { // CCL, CCC, NEI
+        name 'Chickenbones Repo'
+        url 'http://chickenbones.net/maven/'
+    }
+}
+
 dependencies {
     compile files(
-        'lib/NEI/CodeChickenCore-1.8-1.0.5.34-dev.jar',
-        'lib/NEI/NotEnoughItems-1.8-1.0.5.84-dev.jar',
         'lib/BaseMetals/basemetals-1.1.0-dev.jar'
     )
-
+    deobfCompile "codechicken:CodeChickenCore:1.8-1.0.5.+:universal"
+    deobfCompile "codechicken:NotEnoughItems:1.8-1.0.5.104:universal"
 }
 
 processResources
