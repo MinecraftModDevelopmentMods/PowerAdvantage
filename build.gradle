@@ -34,16 +34,20 @@ minecraft {
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
-dependencies {
-    compile files(
-        'lib/NEI/CodeChickenCore-1.8-1.0.5.34-dev.jar',
-        'lib/NEI/NotEnoughItems-1.8-1.0.5.84-dev.jar',
-        'lib/BaseMetals/BaseMetals-API-1.3.1.jar'
-    )
-
+repositories {
+    maven { // CCL, CCC, NEI
+        name 'Chickenbones Repo'
+        url 'http://chickenbones.net/maven/'
+    }
 }
 
-
+dependencies {
+    compile files(
+        'lib/BaseMetals/BaseMetals-API-1.5.0.jar'
+    )
+    deobfCompile "codechicken:CodeChickenCore:1.8-1.0.5.+:universal"
+    deobfCompile "codechicken:NotEnoughItems:1.8-1.0.5.104:universal"
+}
 
 processResources
 {

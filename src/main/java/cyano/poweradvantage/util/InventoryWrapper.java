@@ -62,8 +62,8 @@ public class InventoryWrapper implements ISidedInventory {
 	}
 
 	@Override
-	public String getName() {
-		return inventory.getName();
+	public String getCommandSenderName() {
+		return inventory.getCommandSenderName();
 	}
 
 	@Override

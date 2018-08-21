@@ -619,9 +619,9 @@ public abstract class TileEntitySimpleFluidSource extends FluidPoweredEntity imp
 	@Override
     public IChatComponent getDisplayName() {
         if (this.hasCustomName()) {
-            return new ChatComponentText(this.getName());
+            return new ChatComponentText(this.getCommandSenderName());
         }
-        return new ChatComponentTranslation(this.getName(), new Object[0]);
+        return new ChatComponentTranslation(this.getCommandSenderName(), new Object[0]);
     }
 
 	/**
@@ -630,7 +630,7 @@ public abstract class TileEntitySimpleFluidSource extends FluidPoweredEntity imp
 	 * given by the player (i.e. with an anvil)
 	 */
 	@Override
-	public String getName() {
+	public String getCommandSenderName() {
         return this.hasCustomName() ? this.customName : unlocalizedName;
 	}
 

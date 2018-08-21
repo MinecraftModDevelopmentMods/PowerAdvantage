@@ -370,9 +370,9 @@ public class TileEntityConveyor extends TileEntity implements IUpdatePlayerListB
 	@Override
 	public IChatComponent getDisplayName() {
 		if (this.hasCustomName()) {
-			return new ChatComponentText(this.getName());
+			return new ChatComponentText(this.getCommandSenderName());
 		}
-		return new ChatComponentTranslation(this.getName(), new Object[0]);
+		return new ChatComponentTranslation(this.getCommandSenderName(), new Object[0]);
 	}
 
 	private String customName = null;
@@ -382,7 +382,7 @@ public class TileEntityConveyor extends TileEntity implements IUpdatePlayerListB
 	 * given by the player (i.e. with an anvil)
 	 */
 	@Override
-	public String getName() {
+	public String getCommandSenderName() {
 		return this.hasCustomName() ? this.customName : this.getUnlocalizedName();
 	}
 	
