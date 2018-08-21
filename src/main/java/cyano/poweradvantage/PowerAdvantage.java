@@ -288,7 +288,7 @@ public class PowerAdvantage
 // TODO: generalize custom fluid addition into an API
 		ModelLoader.setCustomStateMapper(
 				cyano.poweradvantage.init.Blocks.crude_oil_block, 
-				(new StateMap.Builder()).addPropertiesToIgnore(BlockFluidBase.LEVEL).build());
+				(new StateMap.Builder()).ignore(BlockFluidBase.LEVEL).build());
 	}
 	@SideOnly(Side.SERVER)
 	private void serverPreInit(FMLPreInitializationEvent event){
