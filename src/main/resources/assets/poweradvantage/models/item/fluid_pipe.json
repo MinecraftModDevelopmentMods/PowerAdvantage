@@ -1,0 +1,4 @@
+{
+    "parent": "poweradvantage:block/fluid_pipe_ns",
+    "ambientocclusion": false
+}

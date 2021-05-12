@@ -1,0 +1,4 @@
+{
+    "parent": "poweradvantage:block/fluid_storage_tank",
+    "ambientocclusion": false
+}

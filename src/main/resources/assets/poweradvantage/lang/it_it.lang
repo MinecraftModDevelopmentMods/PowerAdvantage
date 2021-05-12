@@ -1,0 +1,55 @@
+language_support_goals=english (en_US,en_EN,en_CA,en_GB, en_AU, en_PT), spanish (es_MX,es_ES), chinese (zh_CN), japanese (ja_JA), portugese (pt_BR), german (de_DE), italian (it_IT), korean (ko_KR)
+nei.poweradvantage.recipehandler.shapelessfurnace.name=Grande Fornace (informe)
+nei.poweradvantage.recipehandler.shapedfurnace.name=Grande Fornace (forma)
+
+tooltip.poweradvantage.empty=vuoto
+tooltip.poweradvantage.buckets_of=%x secchi d'%y
+
+itemGroup.poweradvantage.tab=Potenza Advantage
+
+tile.poweradvantage.fluid_drain.name=Scarico
+tile.poweradvantage.fluid_discharge.name=Griglia di scarico
+tile.poweradvantage.fluid_storage_tank.name=Serbatoio
+item.poweradvantage.fluid_storage_tank_item.name=Serbatoio
+tile.poweradvantage.fluid_pipe.name=Tubo
+
+tile.poweradvantage.item_conveyor.name=Trasportatore
+tile.poweradvantage.item_filter_block.name=Filtro di blocco trasportatore
+tile.poweradvantage.item_filter_food.name=Filtro alimentare Conveyor
+tile.poweradvantage.item_filter_fuel.name=carburante Filtro Conveyor
+tile.poweradvantage.item_filter_inventory.name=Filtro Conveyor
+tile.poweradvantage.item_filter_ore.name=Ore Filtro Conveyor
+tile.poweradvantage.item_filter_plant.name=Plantable Filtro Conveyor
+tile.poweradvantage.item_filter_smelt.name=Forno Filtro Conveyor
+tile.poweradvantage.item_filter_overflow.name=Straripamento Filtro Conveyor
+tile.poweradvantage.steel_frame.name=Steel Frame
+
+
+item.poweradvantage.starch.name=Amido
+item.poweradvantage.bioplastic_ingot.name=Bioplastica Lingotto
+item.poweradvantage.sprocket.name=Sprocket
+
+
+tile.poweradvantage.fluid_metal_tank.name=Serbatoio in Metallo
+item.poweradvantage.rotator_tool.name=Strumento di Rotazione
+
+tile.poweradvantage.infinite_steam.name=Forza Vapore Infinite
+tile.poweradvantage.infinite_power.name=Elettricità Infinite
+tile.poweradvantage.infinite_quantum.name=Atomica Infinite
+
+tile.poweradvantage.crude_oil.name=Olio a Crudo
+fluid.poweradvantage.crude_oil=Olio a Crudo
+item.bucket.crude_oil.name=Secchio di Greggio
+
+
+tile.poweradvantage.still.name=Distilleria
+tile.poweradvantage.refined_oil.name=Olio Raffinato
+fluid.poweradvantage.refined_oil=Olio Raffinato
+item.bucket.refined_oil.name=Secchio di Olio Raffinato
+tile.poweradvantage.fluid_switch.name=Valvola
+
+
+tile.poweradvantage.converter_rf_steam.name=Vapore-RF Trasformatore
+tile.poweradvantage.converter_rf_electricity.name=Elettricità-RF Trasformatore
+tile.poweradvantage.converter_rf_quantum.name=Quantistico-RF Trasformatore
+tile.poweradvantage.converter_tr_electricity.name=Elettricità-EU Trasformatore
