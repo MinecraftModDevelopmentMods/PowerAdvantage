@@ -5,7 +5,7 @@
   "description": "API for power DrCyano's power systems mods.",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "",
+  "url": "https://github.com/MinecraftModDevelopmentMods/PowerAdvantage",
   "updateUrl": "",
   "authorList": ["DrCyano (aka Cyanobacterium)"],
   "credits": "The Forge and FML guys, for making the Forge modding API (you guys are awesome), engineers everywhere, and the mod author DrCyano (aka Cyanobacterium)",

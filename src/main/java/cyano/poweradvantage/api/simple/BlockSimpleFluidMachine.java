@@ -10,7 +10,7 @@ import net.minecraft.block.material.Material;
  * Example usage:<br><pre>
 int guiID = com.mcmoddev.poweradvantage.registry.MachineGUIRegistry.addGUI(new MySimpleMachineGUI());
 Block myMachineBlock = new MyBlockSimpleFluidSource(guiID,PowerAdvantage.getInstance());
-myMachineBlock.setUnlocalizedName(MODID+"."+"my_machine");
+myMachineBlock.setTranslationKey(MODID+"."+"my_machine");
 myMachineBlock.setRegistryName(MODID, "my_machine");
 net.minecraftforge.fml.common.registry.ForgeRegistries.BLOCKS.register(myMachineBlock);
  * </pre>

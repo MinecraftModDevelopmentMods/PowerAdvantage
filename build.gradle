@@ -1,287 +1,957 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net/' }
-        maven {
-            name = 'gradle'
-            url 'https://plugins.gradle.org/m2/'
-        }
-        mavenCentral()
-        jcenter()
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
-        classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.0.11'
-    }
-}
-
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-
-def enableCurseGradle = project.hasProperty('enableCurseGradle')
-if (enableCurseGradle) {
-    apply plugin: 'com.matthewprenger.cursegradle'
-}
-
 import groovy.json.JsonSlurper
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
+import java.util.jar.Manifest
+import java.util.zip.ZipFile
+import org.apache.tools.ant.filters.FixCrLfFilter
 
-description = 'Power Advantage'
-def mod_file = getModFile()
-def mc_version = '1.12.2'
-def forge_version = '14.23.5.2859'
-
-ext {
-    short_version = getVersion('VERSION', mod_file)
+plugins {
+    id 'java'
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.renamer' version '1.1.5'
+    id 'net.minecraftforge.gradle' version '7.0.34'
 }
 
-version = "${mc_version}-${short_version}"
-if (System.getenv().BUILD_NUMBER) {
-    version += ".${System.getenv().BUILD_NUMBER}"
-}
-group = 'com.mcmoddev.poweradvantage'
-archivesBaseName = 'PowerAdvantage'
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+group = project.mod_group
+version = project.mod_version
+base.archivesName = 'PowerAdvantage'
 
-sourceSets {
-    main {
-        // Forge's dev mod discovery uses the compiled classes output as the
-        // mod container, so keep processed resources beside classes for
-        // runClient/runServer instead of only under build/resources.
-        output.resourcesDir = output.classesDir
+def versionParts = project.mod_version.toString().tokenize('.')
+if (versionParts.size() != 4 || !versionParts.every { it ==~ /\d+/ }) {
+    throw new GradleException("mod_version must use Major.Minor.Bug.Target numeric form: ${project.mod_version}")
+}
+def minecraftVersionParts = project.minecraft_version.toString().tokenize('.')
+if (minecraftVersionParts.size() < 2 || minecraftVersionParts.size() > 3
+        || !minecraftVersionParts.every { it ==~ /\d+/ }) {
+    throw new GradleException("minecraft_version must use major.minor or major.minor.patch numeric form: "
+            + project.minecraft_version)
+}
+def minecraftPatch = minecraftVersionParts.size() == 3 ? minecraftVersionParts[2] : '0'
+def expectedTargetVersion = "${minecraftVersionParts[0]}" \
+        + "${minecraftVersionParts[1].padLeft(2, '0')}" \
+        + "${minecraftPatch.padLeft(2, '0')}" \
+        + project.loader_code
+if (versionParts[3] != expectedTargetVersion) {
+    throw new GradleException("mod_version target ${versionParts[3]} does not match "
+            + "Minecraft ${project.minecraft_version} ${project.loader_name} target ${expectedTargetVersion}")
+}
+
+ext.functional_version = versionParts[0..2].join('.')
+ext.display_version = project.mod_version
+ext.release_tag = project.mod_version
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+        vendor = JvmVendorSpec.ADOPTIUM
     }
+    withSourcesJar()
+    withJavadocJar()
 }
 
-// RF support is compiled against this local API jar because this legacy API is
-// no longer available from the old mod-era Maven setup.
-def localLibDir = file('libs')
-def rfApiJarName = 'RF-API.jar'
-def rfApiJar = new File(localLibDir, rfApiJarName)
-
-class Secrets {
-    def data = null
-
-    def getProperty(String key) {
-        return data ? data[key] : ''
+tasks.withType(JavaCompile).configureEach {
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(8)
+        vendor = JvmVendorSpec.ADOPTIUM
     }
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    options.encoding = 'UTF-8'
+    options.compilerArgs.addAll(['-Xmaxerrs', '1000'])
 }
 
-def secretFile
-if (System.getenv().SECRET_FILE) {
-    secretFile = file System.getenv().SECRET_FILE
-} else {
-    secretFile = file 'secret.json'
+tasks.withType(Javadoc).configureEach {
+    failOnError = false
+    options.encoding = 'UTF-8'
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addBooleanOption('notimestamp', true)
 }
 
-project.ext.secret = new Secrets()
-if (secretFile.exists()) {
-    secretFile.withReader {
-        project.ext.secret.data = new JsonSlurper().parse it
-    }
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+def archiveTextSuffixes = [
+        '.cfg', '.css', '.html', '.info', '.java', '.js', '.json', '.lang',
+        '.mcmeta', '.md', '.properties', '.txt', '.xml'
+]
+def archiveTextPatterns = archiveTextSuffixes.collect { "**/*${it}".toString() }
+archiveTextPatterns.addAll(['**/element-list', '**/package-list'])
+def normalizeArchiveLineEndings = { details ->
+    details.filter(FixCrLfFilter,
+            eol: FixCrLfFilter.CrLf.newInstance('lf'),
+            eof: FixCrLfFilter.AddAsisRemove.newInstance('asis'))
 }
 
 minecraft {
-    mappings channel: 'snapshot', version: '20171003-1.12'
-
+    mappings channel: project.mapping_channel, version: project.mapping_version
+    String configuredRunDirectory = providers.gradleProperty('powerAdvantageRunDirectory')
+            .getOrElse('run')
     runs {
-        client {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
+        configureEach {
+            workingDir.convention layout.projectDirectory.dir(configuredRunDirectory)
+            systemProperty 'forge.logging.console.level', 'debug'
         }
+        register('client')
+        register('server') {
+            args '--nogui'
+        }
+    }
+}
 
-        server {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
+// Forge 1.12 expects each development mod to expose classes and resources from
+// one classpath root. ForgeGradle 7 splits those outputs, so merge only the
+// launch output without contaminating the canonical source-set directories.
+def forge12DevelopmentOutput = layout.buildDirectory.dir('forge12-development/main')
+def syncForge12DevelopmentResources = tasks.register('syncForge12DevelopmentResources', Sync) {
+    group = 'ide'
+    description = 'Merges classes and processed resources for Forge 1.12 Gradle launches.'
+    dependsOn tasks.named('classes')
+    from tasks.named('compileJava', JavaCompile).flatMap { it.destinationDirectory }
+    from sourceSets.main.output.resourcesDir
+    into forge12DevelopmentOutput
+}
+tasks.configureEach {
+    if (name == 'runClient' || name == 'runServer') {
+        dependsOn syncForge12DevelopmentResources
+        doFirst {
+            Set<File> splitMainOutputs = [
+                    tasks.named('compileJava', JavaCompile).get().destinationDirectory.get().asFile,
+                    sourceSets.main.output.resourcesDir
+            ] as Set<File>
+            classpath = files(forge12DevelopmentOutput, classpath.filter {
+                !splitMainOutputs.contains(it)
+            })
         }
     }
 }
 
 repositories {
-    maven { // Mantle, TCon, JEI
-        name 'DVS1 Maven FS'
-        url 'http://dvs1.progwml6.com/files/maven'
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+
+    if (providers.gradleProperty('rebornCoreVerificationRepository').isPresent()) {
+        maven {
+            name = 'RebornCoreReleaseVerificationMirror'
+            url = uri(providers.gradleProperty('rebornCoreVerificationRepository').get())
+            metadataSources { artifact() }
+            content { includeGroup('curse.maven') }
+        }
     }
-    maven { // CCL, CCC, NEI
-        name 'Chickenbones Repo'
-        url 'http://chickenbones.net/maven/'
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Sponge'
+                url = 'https://repo.spongepowered.org/repository/maven-public'
+            }
+        }
+        filter { includeGroupAndSubgroups('org.spongepowered') }
     }
-    maven { // CoFH
-        name 'Covers Maven'
-        url 'http://maven.covers1624.net'
-    }
-    maven { // Tesla
-        name 'epoxide'
-        url 'http://maven.epoxide.org'
-    }
-    maven { // RebornCore / Tech Reborn
-        name 'Modmuss50'
-        url 'https://maven.modmuss50.me/'
-    }
+    mavenCentral()
     maven {
-        name 'CurseForge'
-        url 'https://minecraft.curseforge.com/api/maven/'
+        name = 'MinecraftLibraries'
+        url = 'https://libraries.minecraft.net/'
+    }
+    if (!providers.gradleProperty('rebornCoreVerificationRepository').isPresent()) {
+        maven {
+            name = 'PinnedRebornCoreRelease'
+            url = 'https://maven.modmuss50.me/'
+            content { includeGroup('RebornCore') }
+        }
     }
 }
+
+def rfApiJar = file('libs/RF-API.jar')
+def usingStagedRebornCore = providers.gradleProperty('rebornCoreVerificationRepository').isPresent()
+def rebornCoreCoordinate = usingStagedRebornCore
+        ? "curse.maven:reborncore-${project.reborncore_curse_project_id}:${project.reborncore_curse_file_id}"
+        : "RebornCore:RebornCore-1.12.2:${project.reborncore_version}:universal"
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
-    compile files(rfApiJar)
-    compile fg.deobf('RebornCore:RebornCore-1.12.2:3.19.4.529:universal') {
-        transitive = false
+    implementation minecraft.dependency(
+            "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}")
+    // Mavenizer's legacy metadata omits this compile-time Minecraft library.
+    compileOnly 'org.lwjgl.lwjgl:lwjgl_util:2.9.4-nightly-20150209'
+
+    // These integrations are optional at runtime. Compile against their APIs,
+    // but do not package or launch PowerAdvantage with the provider mods.
+    compileOnly files(rfApiJar)
+    compileOnly rebornCoreCoordinate
+}
+
+tasks.named('processResources', ProcessResources) {
+    filteringCharset = 'UTF-8'
+    inputs.property('version', project.version)
+    inputs.property('mcversion', project.minecraft_version)
+    filesMatching('mcmod.info') {
+        expand version: project.version, mcversion: project.minecraft_version
+    }
+    filesMatching(archiveTextPatterns, normalizeArchiveLineEndings)
+}
+
+def prepareEclipseResources = tasks.register('prepareEclipseResources') {
+    group = 'ide'
+    description = 'Copies Gradle-processed resources into Eclipse production output.'
+    dependsOn tasks.named('processResources')
+    doLast {
+        project.copy {
+            from(layout.buildDirectory.dir('resources/main'))
+            into(layout.projectDirectory.dir('bin/main'))
+        }
     }
 }
 
-processResources {
-    inputs.property 'version', short_version
-    inputs.property 'mcversion', mc_version
-
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-        expand 'version': short_version, 'mcversion': mc_version
-    }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-}
-
-jar {
+tasks.named('jar', Jar) {
+    archiveClassifier = 'deobf'
+    destinationDirectory = layout.buildDirectory.dir('libs-dev')
+    exclude 'fernflower_abstract_parameter_names.txt'
     manifest {
         attributes([
-            'Specification-Title': project.archivesBaseName,
-            'Specification-Vendor': 'MinecraftModDevelopmentMods',
-            'Specification-Version': '1',
-            'Implementation-Title': project.archivesBaseName,
-            'Implementation-Version': project.version,
-            'Implementation-Vendor': 'MinecraftModDevelopmentMods',
-            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+                'Maven-Artifact'        : "${project.group}:${base.archivesName.get()}:${project.version}",
+                'Specification-Title'   : project.mod_id,
+                'Specification-Vendor'  : project.mod_authors,
+                'Specification-Version' : '1',
+                'Implementation-Title'  : base.archivesName.get(),
+                'Implementation-Version': project.version,
+                'Implementation-Vendor' : project.mod_authors,
+                'Built-On-Java'         : project.java_version,
+                'Built-On'              : "${project.minecraft_version}-${project.forge_version}"
         ])
     }
 }
 
-jar.finalizedBy('reobfJar')
-
-task sourceJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+def renamedJar = renamer.classes(tasks.named('jar', Jar)) {
+    map.from minecraft.dependency.toSrgFile
+    archiveClassifier = 'renamed'
+    output.set(layout.buildDirectory.file(
+            "intermediates/renamed/${base.archivesName.get()}-${project.version}.jar"))
 }
 
-task deobfJar(type: Jar) {
-    classifier = 'deobf'
-    from sourceSets.main.output
+// Renamer adds an internal Fernflower parameter map. Repack its output so the
+// public jar is deterministic and contains only the mod plus its own manifest.
+def releaseJar = tasks.register('releaseJar', Jar) {
+    dependsOn renamedJar
+    archiveClassifier = null
+    destinationDirectory = layout.buildDirectory.dir('libs')
+    from({ zipTree(renamedJar.get().output.get().asFile) }) {
+        exclude 'META-INF/MANIFEST.MF'
+        exclude 'fernflower_abstract_parameter_names.txt'
+    }
+    manifest {
+        attributes([
+                'Maven-Artifact'        : "${project.group}:${base.archivesName.get()}:${project.version}",
+                'Specification-Title'   : project.mod_id,
+                'Specification-Vendor'  : project.mod_authors,
+                'Specification-Version' : '1',
+                'Implementation-Title'  : base.archivesName.get(),
+                'Implementation-Version': project.version,
+                'Implementation-Vendor' : project.mod_authors,
+                'Built-On-Java'         : project.java_version,
+                'Built-On'              : "${project.minecraft_version}-${project.forge_version}"
+        ])
+    }
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
+tasks.register('deobfJar') {
+    group = 'build'
+    description = 'Builds the deobfuscated development jar under build/libs-dev.'
+    dependsOn tasks.named('jar')
 }
 
-javadoc {
-    failOnError = false
+tasks.named('sourcesJar', Jar) {
+    filteringCharset = 'UTF-8'
+    includeEmptyDirs = false
+    archiveClassifier = 'sources'
+    filesMatching(archiveTextPatterns, normalizeArchiveLineEndings)
+    manifest {
+        attributes([
+                'Maven-Artifact'        : "${project.group}:${base.archivesName.get()}:${project.version}:sources",
+                'Implementation-Title'  : "${base.archivesName.get()}-sources",
+                'Implementation-Version': project.version
+        ])
+    }
 }
 
-artifacts {
-    archives deobfJar
-    archives sourceJar
-    archives javadocJar
+tasks.named('javadocJar', Jar) {
+    filteringCharset = 'UTF-8'
+    archiveClassifier = 'javadoc'
+    filesMatching(archiveTextPatterns, normalizeArchiveLineEndings)
+    manifest {
+        attributes([
+                'Maven-Artifact'        : "${project.group}:${base.archivesName.get()}:${project.version}:javadoc",
+                'Implementation-Title'  : "${base.archivesName.get()}-javadoc",
+                'Implementation-Version': project.version
+        ])
+    }
 }
+
+['apiElements', 'runtimeElements'].each { configurationName ->
+    configurations.named(configurationName) { artifacts.clear() }
+    artifacts { add(configurationName, releaseJar) }
+}
+
+tasks.named('assemble') {
+    dependsOn releaseJar
+    dependsOn tasks.named('sourcesJar')
+    dependsOn tasks.named('javadocJar')
+}
+
+def expectedReleaseFiles = providers.provider {
+    def prefix = "${base.archivesName.get()}-${project.version}"
+    ["${prefix}.jar", "${prefix}-sources.jar", "${prefix}-javadoc.jar"]
+}
+def preparedReleaseDir = providers.gradleProperty('preparedReleaseDir')
+
+tasks.register('verifyReleaseConfiguration') {
+    group = 'verification'
+    description = 'Validates release identity, target metadata, and optional integration policy.'
+    doLast {
+        if (project.mod_version != '2.4.1.112021') {
+            throw new GradleException("Unexpected PowerAdvantage release version: ${project.mod_version}")
+        }
+        if (project.minecraft_version != '1.12.2'
+                || project.forge_version != '14.23.5.2859'
+                || project.mapping_channel != 'stable'
+                || project.mapping_version != '39-1.12') {
+            throw new GradleException('Unexpected Minecraft, Forge, or mappings target')
+        }
+        if (project.loader_name != 'forge' || project.loader_code != '1'
+                || project.java_version != '8'
+                || project.java_toolchain_version != '8.0.502+7'
+                || project.gradle_java_version != '17') {
+            throw new GradleException('Unexpected release dispatcher target metadata')
+        }
+        if (project.mod_id != 'poweradvantage'
+                || project.group.toString() != 'com.mcmoddev.poweradvantage'
+                || base.archivesName.get() != 'PowerAdvantage'
+                || project.curseforge_project_id != '240982') {
+            throw new GradleException('Unexpected Forge, Maven, archive, or CurseForge identity')
+        }
+        if (project.cf_requirements != 'base-metals,mmd-orespawn'
+                || project.cf_optionals != 'additional-loot-tables'
+                || project.cf_versions != '1.12.2') {
+            throw new GradleException('Unexpected CurseForge dependency or game-version metadata')
+        }
+        if (project.reborncore_curse_project_id != '500866'
+                || project.reborncore_curse_file_id != '3386724'
+                || project.reborncore_version != '3.19.4.529'
+                || project.reborncore_download_url != 'https://maven.modmuss50.me/RebornCore/'
+                + 'RebornCore-1.12.2/3.19.4.529/RebornCore-1.12.2-3.19.4.529-universal.jar'
+                || project.reborncore_sha256 != 'B6D11200C5EC66B0031EF4E635AC0203A23CBA6B21F046D402D41E3375798667') {
+            throw new GradleException('Unexpected RebornCore compile API identity')
+        }
+        String mainSource = file(
+                'src/main/java/com/mcmoddev/poweradvantage/PowerAdvantage.java').getText('UTF-8')
+        if (!mainSource.contains('MODID = "poweradvantage"')
+                || !mainSource.contains('VERSION = "2.4.1.112021"')
+                || !mainSource.contains('dependencies = "after:basemetals"')) {
+            throw new GradleException('PowerAdvantage source identity or optional BaseMetals policy changed')
+        }
+        if (!file('src/main/java/cyano/poweradvantage/api/PoweredEntity.java').isFile()) {
+            throw new GradleException('Legacy cyano.poweradvantage.api compatibility surface is missing')
+        }
+        String entitySource = file(
+                'src/main/java/com/mcmoddev/poweradvantage/init/Entities.java').getText('UTF-8')
+        [
+                'tileentity.pipe_terminal', 'tileentity.fluid_drain',
+                'tileentity.fluid_discharge', 'tileentity.fluid_storage_tank',
+                'tileentity.fluid_metal_tank', 'tileentity.still', 'item_conveyor',
+                'item_filter_block', 'item_filter_food', 'item_filter_fuel',
+                'item_filter_inventory', 'item_filter_ore', 'item_filter_plant',
+                'item_filter_smelt', 'item_filter_overflow', 'infinite_energy_source'
+        ].each { id ->
+            if (!entitySource.contains('"' + id + '"')) {
+                throw new GradleException("Persistent tile entity id changed or disappeared: ${id}")
+            }
+        }
+        def metadata = new JsonSlurper().parse(file('src/main/resources/mcmod.info'))
+        def mod = metadata instanceof List ? metadata.first() : metadata
+        if (mod.modid != 'poweradvantage') {
+            throw new GradleException('Source mcmod.info does not use the stable poweradvantage mod id')
+        }
+    }
+}
+
+tasks.register('verifyReleaseDependencies') {
+    group = 'verification'
+    description = 'Resolves and audits Forge plus the exact optional compile APIs.'
+    dependsOn tasks.named('verifyReleaseConfiguration')
+    doLast {
+        if (!rfApiJar.isFile()) {
+            throw new GradleException("Missing tracked RF API jar: ${rfApiJar}")
+        }
+        String actualRfHash = MessageDigest.getInstance('SHA-256')
+                .digest(rfApiJar.bytes).encodeHex().toString().toUpperCase()
+        if (actualRfHash != project.rf_api_sha256) {
+            throw new GradleException("RF API SHA-256 is ${actualRfHash}, expected ${project.rf_api_sha256}")
+        }
+
+        def compileArtifacts = configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts
+        String expectedRebornCoreGroup = usingStagedRebornCore ? 'curse.maven' : 'RebornCore'
+        String expectedRebornCoreName = usingStagedRebornCore
+                ? "reborncore-${project.reborncore_curse_project_id}"
+                : 'RebornCore-1.12.2'
+        def rebornCoreArtifacts = compileArtifacts.findAll { artifact ->
+            def id = artifact.moduleVersion.id
+            id.group == expectedRebornCoreGroup && id.name == expectedRebornCoreName
+        }
+        String expectedRebornCoreVersion = usingStagedRebornCore
+                ? project.reborncore_curse_file_id
+                : project.reborncore_version
+        String expectedRebornCore = "${expectedRebornCoreGroup}:${expectedRebornCoreName}:" \
+                + expectedRebornCoreVersion
+        if (rebornCoreArtifacts.size() != 1
+                || "${rebornCoreArtifacts.first().moduleVersion.id.group}:"
+                + "${rebornCoreArtifacts.first().moduleVersion.id.name}:"
+                + "${rebornCoreArtifacts.first().moduleVersion.id.version}" != expectedRebornCore) {
+            throw new GradleException("Expected exactly ${expectedRebornCore}, found "
+                    + rebornCoreArtifacts.collect { it.moduleVersion.id })
+        }
+        File rebornCoreJar = rebornCoreArtifacts.first().file
+        String actualRebornCoreHash = MessageDigest.getInstance('SHA-256')
+                .digest(rebornCoreJar.bytes).encodeHex().toString().toUpperCase()
+        if (actualRebornCoreHash != project.reborncore_sha256) {
+            throw new GradleException("RebornCore SHA-256 is ${actualRebornCoreHash}, expected "
+                    + project.reborncore_sha256)
+        }
+        new ZipFile(rebornCoreJar).withCloseable { zip ->
+            ['reborncore/api/power/IEnergyInterfaceTile.class',
+             'reborncore/api/power/EnumPowerTier.class'].each { required ->
+                if (zip.getEntry(required) == null) {
+                    throw new GradleException("RebornCore compile API is missing ${required}")
+                }
+            }
+        }
+
+        Set<File> compileFiles = configurations.compileClasspath.files.collect { it.canonicalFile } as Set<File>
+        if (!compileFiles.contains(rfApiJar.canonicalFile)
+                || !compileFiles.contains(rebornCoreJar.canonicalFile)) {
+            throw new GradleException('Optional RF or RebornCore API is missing from compileClasspath')
+        }
+        Set<File> runtimeFiles = configurations.runtimeClasspath.files.collect { it.canonicalFile } as Set<File>
+        if (runtimeFiles.contains(rfApiJar.canonicalFile)
+                || runtimeFiles.contains(rebornCoreJar.canonicalFile)) {
+            throw new GradleException('Optional RF or RebornCore API leaked onto runtimeClasspath')
+        }
+        List<String> forbiddenRuntimeMods = runtimeFiles.collect { it.name.toLowerCase(Locale.ROOT) }
+                .findAll { name ->
+                    name.contains('basemetals') || name.contains('orespawn')
+                            || name.contains('tesla') || name.contains('reborncore')
+                }
+        if (!forbiddenRuntimeMods.isEmpty()) {
+            throw new GradleException("Optional mods leaked onto runtimeClasspath: ${forbiddenRuntimeMods}")
+        }
+    }
+}
+
+tasks.register('verifyReleaseArtifacts') {
+    group = 'verification'
+    description = 'Audits the exact three distributable jars and release-critical contents.'
+    dependsOn tasks.named('verifyReleaseDependencies')
+    dependsOn tasks.named('assemble')
+    doLast {
+        File libs = layout.buildDirectory.dir('libs').get().asFile
+        List<File> jars = (libs.listFiles() ?: [] as File[])
+                .findAll { it.name.endsWith('.jar') }.sort { it.name }
+        List<String> expected = expectedReleaseFiles.get().sort()
+        if (jars.collect { it.name } != expected) {
+            throw new GradleException("Expected exactly ${expected}, found ${jars.collect { it.name }}")
+        }
+        jars.each { candidate ->
+            if (candidate.length() == 0L) {
+                throw new GradleException("Empty release artifact: ${candidate.name}")
+            }
+            new ZipFile(candidate).withCloseable { candidateZip ->
+                candidateZip.entries().findAll { entry ->
+                    !entry.isDirectory()
+                            && (archiveTextSuffixes.any { entry.name.endsWith(it) }
+                            || entry.name.endsWith('/element-list')
+                            || entry.name.endsWith('/package-list'))
+                }.each { entry ->
+                    boolean containsCarriageReturn = candidateZip.getInputStream(entry).withCloseable { input ->
+                        input.bytes.any { value -> value == 13 }
+                    }
+                    if (containsCarriageReturn) {
+                        throw new GradleException(
+                                "${candidate.name}!/${entry.name} does not use canonical LF line endings")
+                    }
+                }
+            }
+        }
+
+        File mainJar = new File(libs, expectedReleaseFiles.get()[0])
+        new ZipFile(mainJar).withCloseable { zip ->
+            List<String> names = zip.entries().collect { it.name }
+            ['mcmod.info', 'pack.mcmeta',
+             'com/mcmoddev/poweradvantage/PowerAdvantage.class',
+             'cyano/poweradvantage/api/PoweredEntity.class',
+             'assets/poweradvantage/lang/en_us.lang'].each { required ->
+                if (!names.contains(required)) {
+                    throw new GradleException("Release jar is missing ${required}")
+                }
+            }
+            ['agent-notes/', '.codex/', 'src/test/', 'fernflower_abstract_parameter_names.txt',
+             'cofh/api/', 'reborncore/api/', 'cyano/basemetals/', 'com/mcmoddev/lib/',
+             'net/minecraft/', 'net/minecraftforge/'].each { forbidden ->
+                if (names.any { it.contains(forbidden) }) {
+                    throw new GradleException("Release jar contains forbidden entry matching ${forbidden}")
+                }
+            }
+            def metadata = new JsonSlurper().parseText(zip.getInputStream(zip.getEntry('mcmod.info'))
+                    .getText(StandardCharsets.UTF_8.name()))
+            def mod = metadata instanceof List ? metadata.first() : metadata
+            if (mod.modid != project.mod_id || mod.version != project.mod_version
+                    || mod.mcversion != project.minecraft_version) {
+                throw new GradleException('Packaged mcmod.info identity, version, or target is incorrect')
+            }
+            def manifest = new Manifest(zip.getInputStream(zip.getEntry('META-INF/MANIFEST.MF'))).mainAttributes
+            if (manifest.getValue('Implementation-Version') != project.mod_version
+                    || manifest.getValue('Built-On-Java') != project.java_version
+                    || manifest.getValue('Implementation-Timestamp') != null
+                    || manifest.getValue('Timestamp') != null) {
+                throw new GradleException('Release manifest identity is incorrect or volatile')
+            }
+            zip.entries().findAll { it.name.endsWith('.class') }.each { entry ->
+                byte[] header = new byte[8]
+                zip.getInputStream(entry).withCloseable { input ->
+                    if (input.read(header) != header.length) {
+                        throw new GradleException("Cannot inspect bytecode header for ${entry.name}")
+                    }
+                }
+                int major = ((header[6] & 0xff) << 8) | (header[7] & 0xff)
+                if (major != 52) {
+                    throw new GradleException("${entry.name} uses Java class major ${major}, expected 52")
+                }
+            }
+        }
+
+        new ZipFile(new File(libs, expectedReleaseFiles.get()[1])).withCloseable { sourceZip ->
+            if (sourceZip.getEntry('com/mcmoddev/poweradvantage/PowerAdvantage.java') == null
+                    || sourceZip.getEntry('cyano/poweradvantage/api/PoweredEntity.java') == null) {
+                throw new GradleException('Sources jar is missing implementation or legacy API sources')
+            }
+        }
+        new ZipFile(new File(libs, expectedReleaseFiles.get()[2])).withCloseable { javadocZip ->
+            if (javadocZip.getEntry('index.html') == null) {
+                throw new GradleException('Javadoc jar is missing index.html')
+            }
+        }
+    }
+}
+
+tasks.register('writeReleaseChecksums') {
+    group = 'verification'
+    description = 'Writes SHA-256 checksums for the audited release jars.'
+    dependsOn tasks.named('verifyReleaseArtifacts')
+    def outputFile = layout.buildDirectory.file('release/SHA256SUMS')
+    outputs.file(outputFile)
+    doLast {
+        File output = outputFile.get().asFile
+        output.parentFile.mkdirs()
+        File libs = layout.buildDirectory.dir('libs').get().asFile
+        String contents = expectedReleaseFiles.get().sort().collect { name ->
+            MessageDigest digest = MessageDigest.getInstance('SHA-256')
+            new File(libs, name).withInputStream { input ->
+                byte[] buffer = new byte[8192]
+                for (int read = input.read(buffer); read >= 0; read = input.read(buffer)) {
+                    if (read > 0) digest.update(buffer, 0, read)
+                }
+            }
+            "${digest.digest().encodeHex().toString().toUpperCase()}  ${name}"
+        }.join('\n') + '\n'
+        output.setText(contents, 'UTF-8')
+    }
+}
+
+tasks.register('verifyPreparedReleaseArtifacts') {
+    group = 'verification'
+    description = 'Audits an immutable release bundle before Maven publication.'
+    doLast {
+        if (!preparedReleaseDir.isPresent()) {
+            throw new GradleException('preparedReleaseDir is required for prepared artifact publication')
+        }
+        File prepared = file(preparedReleaseDir.get())
+        List<String> expected = expectedReleaseFiles.get().sort()
+        List<File> jars = (prepared.listFiles() ?: [] as File[])
+                .findAll { it.name.endsWith('.jar') }.sort { it.name }
+        if (!prepared.isDirectory() || jars.collect { it.name } != expected
+                || jars.any { it.length() == 0L }) {
+            throw new GradleException("Prepared release must contain exactly the non-empty jars ${expected}")
+        }
+        File checksums = new File(prepared, 'SHA256SUMS')
+        File changelog = new File(prepared, 'CHANGELOG.txt')
+        if (!checksums.isFile() || !changelog.isFile()) {
+            throw new GradleException('Prepared release is missing SHA256SUMS or CHANGELOG.txt')
+        }
+        List<String> actualChecksums = jars.collect { candidate ->
+            MessageDigest digest = MessageDigest.getInstance('SHA-256')
+            candidate.withInputStream { input ->
+                byte[] buffer = new byte[8192]
+                for (int read = input.read(buffer); read >= 0; read = input.read(buffer)) {
+                    if (read > 0) digest.update(buffer, 0, read)
+                }
+            }
+            "${digest.digest().encodeHex().toString().toUpperCase()}  ${candidate.name}"
+        }.sort()
+        List<String> declaredChecksums = checksums.readLines('UTF-8')
+                .findAll { !it.trim().isEmpty() }.sort()
+        if (actualChecksums != declaredChecksums) {
+            throw new GradleException('Prepared release checksums do not match the immutable jars')
+        }
+    }
+}
+
+def mavenUploadUrl = providers.environmentVariable('MAVEN_UPLOAD_URL')
+        .orElse('https://invalid.invalid/missing-maven-upload-url')
+def mavenUploadUsername = providers.environmentVariable('MAVEN_UPLOAD_USERNAME')
+def mavenUploadPassword = providers.environmentVariable('MAVEN_UPLOAD_PASSWORD')
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId project.group
-            artifactId project.archivesBaseName
-            version project.version
-            from components.java
-            artifact sourceJar {
-                classifier 'sources'
+            groupId = project.group.toString()
+            artifactId = base.archivesName.get()
+            version = project.version.toString()
+            if (preparedReleaseDir.isPresent()) {
+                File prepared = file(preparedReleaseDir.get())
+                artifact(new File(prepared, expectedReleaseFiles.get()[0]))
+                artifact(new File(prepared, expectedReleaseFiles.get()[1])) { classifier = 'sources' }
+                artifact(new File(prepared, expectedReleaseFiles.get()[2])) { classifier = 'javadoc' }
+            } else {
+                artifact(releaseJar)
+                artifact(tasks.named('sourcesJar'))
+                artifact(tasks.named('javadocJar'))
             }
-            artifact deobfJar {
-                classifier 'deobf'
-            }
-            artifact javadocJar {
-                classifier 'javadoc'
+            pom {
+                name = 'Power Advantage'
+                description = project.mod_description
+                url = 'https://github.com/MinecraftModDevelopmentMods/PowerAdvantage'
+                licenses {
+                    license {
+                        name = 'GNU Lesser General Public License, Version 3'
+                        url = 'https://www.gnu.org/licenses/lgpl-3.0.txt'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/MinecraftModDevelopmentMods/PowerAdvantage.git'
+                    developerConnection = 'scm:git:ssh://git@github.com/MinecraftModDevelopmentMods/PowerAdvantage.git'
+                    url = 'https://github.com/MinecraftModDevelopmentMods/PowerAdvantage'
+                }
             }
         }
     }
     repositories {
         maven {
+            name = 'release'
+            url = uri(mavenUploadUrl.get())
             credentials {
-                username secret.username
-                password secret.password
+                username = mavenUploadUsername.orNull ?: ''
+                password = mavenUploadPassword.orNull ?: ''
             }
-            url secret.url
         }
     }
 }
 
-if (enableCurseGradle) {
-    curseforge {
-        apiKey = secret.curseforgeAPIKey
-        project {
-            id = '240982'
-            changelog = file('CHANGELOG.txt')
-            releaseType = 'release'
-            addGameVersion(mc_version)
-            def displayVersion = getVersion('VERSION', mod_file)
-            if (System.getenv().BUILD_NUMBER) {
-                displayVersion += ".${System.getenv().BUILD_NUMBER}"
-            }
-            mainArtifact(jar) {
-                displayName = "$project.description $displayVersion"
-                relations {
-                    requiredLibrary 'mmd-orespawn'
-                    requiredLibrary 'base-metals'
-                    optionalLibrary 'additional-loot-tables'
+tasks.register('validateMavenReleaseCredentials') {
+    group = 'publishing'
+    description = 'Prevents Maven publication from using a local or incomplete destination.'
+    doLast {
+        if (!providers.environmentVariable('MAVEN_UPLOAD_URL').isPresent()
+                || !mavenUploadUsername.isPresent() || !mavenUploadPassword.isPresent()) {
+            throw new GradleException(
+                    'MAVEN_UPLOAD_URL, MAVEN_UPLOAD_USERNAME, and MAVEN_UPLOAD_PASSWORD are required')
+        }
+        if (providers.environmentVariable('MAVEN_UPLOAD_URL').get().startsWith('file:')) {
+            throw new GradleException('Maven release publication must use a remote repository')
+        }
+    }
+}
+
+tasks.withType(PublishToMavenRepository).configureEach {
+    dependsOn tasks.named('validateMavenReleaseCredentials')
+    dependsOn preparedReleaseDir.isPresent()
+            ? tasks.named('verifyPreparedReleaseArtifacts')
+            : tasks.named('verifyReleaseArtifacts')
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
+
+def obsoleteForgeGradle2EclipseLaunches = [
+        'PowerAdvantage_Client.launch': 'GradleStart',
+        'PowerAdvantage_Server.launch': 'GradleStartServer'
+]
+
+eclipse {
+    project {
+        buildCommand 'org.eclipse.buildship.core.gradleprojectbuilder'
+        natures 'org.eclipse.buildship.core.gradleprojectnature'
+    }
+    classpath {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+    synchronizationTasks 'isolateEclipseProductionRuns'
+}
+
+tasks.register('configureEclipseBuildship') {
+    group = 'ide'
+    description = 'Creates Buildship preferences for ForgeGradle 7 Eclipse imports.'
+    doLast {
+        File preferencesFile = file('.settings/org.eclipse.buildship.core.prefs')
+        Properties preferences = new Properties()
+        [
+                'eclipse.preferences.version'    : '1',
+                'connection.gradle.distribution': 'GRADLE_DISTRIBUTION(WRAPPER)',
+                'connection.gradle.user.home'   : gradle.gradleUserHomeDir.canonicalPath,
+                'connection.project.dir'        : '',
+                'gradle.user.home'               : gradle.gradleUserHomeDir.canonicalPath,
+                'override.workspace.settings'   : 'true'
+        ].each { key, value -> preferences.setProperty(key, value) }
+        preferencesFile.parentFile.mkdirs()
+        preferencesFile.withOutputStream {
+            preferences.store(it,
+                    'Generated by configureEclipseBuildship; keep Eclipse and command-line caches aligned.')
+        }
+    }
+}
+
+tasks.register('isolateEclipseProductionRuns') {
+    group = 'ide'
+    description = 'Normalizes ForgeGradle Eclipse launches for production-only execution.'
+    dependsOn tasks.named('genEclipseRuns')
+    dependsOn tasks.named('configureEclipseBuildship')
+    dependsOn prepareEclipseResources
+    doLast {
+        obsoleteForgeGradle2EclipseLaunches.each { String name, String mainClass ->
+            File launch = file(name)
+            if (launch.isFile()) {
+                String contents = launch.getText('UTF-8')
+                String obsoleteMainType =
+                        "org.eclipse.jdt.launching.MAIN_TYPE\" value=\"${mainClass}\""
+                if (contents.contains(obsoleteMainType) && !launch.delete()) {
+                    throw new GradleException("Could not remove obsolete ForgeGradle 2 launch ${name}")
                 }
             }
-            addArtifact(sourceJar) {
-                displayName = "$project.description $displayVersion Sources"
+        }
+        // ForgeGradle 7's legacy 1.12 generator leaves this token unresolved,
+        // so write the target version into every generated launch explicitly.
+        fileTree(project.projectDir) {
+            include 'run*.launch'
+        }.files.each { File launch ->
+            String contents = launch.getText('UTF-8')
+            contents = contents.replace(
+                    'key="MC_VERSION" value="${MC_VERSION}"',
+                    "key=\"MC_VERSION\" value=\"${project.minecraft_version}\"")
+            launch.setText(contents.replace('\r\n', '\n'), 'UTF-8')
+        }
+        ['runClient.launch', 'runServer.launch'].each { name ->
+            File launch = file(name)
+            if (!launch.isFile()) {
+                throw new GradleException("ForgeGradle did not generate ${name}")
             }
-            addArtifact(deobfJar) {
-                displayName = "$project.description $displayVersion Development"
+            String contents = launch.getText('UTF-8')
+            if (!contents.contains('org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE')) {
+                String marker = '</launchConfiguration>'
+                String attribute =
+                        '  <booleanAttribute key="org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE" value="true"/>'
+                contents = contents.replace(marker, attribute + '\n' + marker)
             }
-            addArtifact(javadocJar) {
-                displayName = "$project.description $displayVersion Javadoc"
+
+            // Buildship exposes compileOnly dependencies through its project
+            // container. Replace that container in production launches with
+            // Gradle's actual runtime classpath so API-only jars cannot be
+            // discovered by FML as installed mods.
+            Set<File> mainOutputs = sourceSets.main.output.files.collect {
+                it.canonicalFile
+            } as Set<File>
+            List<File> productionRuntime = configurations.runtimeClasspath.files.collect {
+                it.canonicalFile
+            }.findAll { File runtimeFile ->
+                !mainOutputs.contains(runtimeFile)
+            }
+            List<String> launchLines = contents.readLines()
+            int buildshipContainerLine = launchLines.findIndexOf {
+                it.contains('org.eclipse.buildship.core.gradleclasspathcontainer')
+            }
+            if (buildshipContainerLine < 0) {
+                throw new GradleException("${name} is missing the Buildship classpath container")
+            }
+            List<String> runtimeEntries = productionRuntime.collect { File runtimeFile ->
+                String escapedPath = runtimeFile.canonicalPath
+                        .replace('&', '&amp;amp;')
+                        .replace('<', '&amp;lt;')
+                        .replace('>', '&amp;gt;')
+                ('    <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; '
+                        + 'standalone=&quot;no&quot;?&gt;&lt;runtimeClasspathEntry externalArchive=&quot;'
+                        + escapedPath
+                        + '&quot; type=&quot;2&quot; path=&quot;5&quot; /&gt;"/>')
+            }
+            launchLines.remove(buildshipContainerLine)
+            launchLines.addAll(buildshipContainerLine, runtimeEntries)
+            contents = launchLines.join('\n') + '\n'
+
+            ['--cache', '--metadata', '--to-srg', '--to-obf'].each { option ->
+                String prefix = option + ' '
+                int valueStart = contents.indexOf(prefix)
+                if (valueStart < 0) {
+                    throw new GradleException("${name} is missing Slime Launcher argument ${option}")
+                }
+                valueStart += prefix.length()
+                int valueEnd = contents.indexOf(' --', valueStart)
+                if (valueEnd < 0) {
+                    throw new GradleException("${name} has malformed Slime Launcher argument ${option}")
+                }
+                String value = contents.substring(valueStart, valueEnd)
+                if (value.find(/\s/) != null && !value.startsWith('&quot;')) {
+                    contents = (contents.substring(0, valueStart)
+                            + '&quot;' + value + '&quot;' + contents.substring(valueEnd))
+                }
+            }
+            launch.setText(contents.replace('\r\n', '\n'), 'UTF-8')
+        }
+    }
+}
+
+tasks.register('verifyEclipseProductionClasspath') {
+    group = 'verification'
+    description = 'Verifies the generated Eclipse project and production launches.'
+    dependsOn tasks.named('eclipse')
+    dependsOn tasks.named('isolateEclipseProductionRuns')
+    doLast {
+        File preferencesFile = file('.settings/org.eclipse.buildship.core.prefs')
+        Properties preferences = new Properties()
+        preferencesFile.withInputStream { preferences.load(it) }
+        if (preferences.getProperty('connection.gradle.distribution') != 'GRADLE_DISTRIBUTION(WRAPPER)'
+                || file(preferences.getProperty('connection.gradle.user.home', '')).canonicalFile
+                != gradle.gradleUserHomeDir.canonicalFile) {
+            throw new GradleException('Eclipse Buildship does not use this wrapper and Gradle home')
+        }
+        String projectMetadata = file('.project').getText('UTF-8')
+        if (!projectMetadata.contains('org.eclipse.buildship.core.gradleprojectnature')
+                || !projectMetadata.contains('org.eclipse.buildship.core.gradleprojectbuilder')) {
+            throw new GradleException('Eclipse project metadata is missing its Buildship nature or builder')
+        }
+        File eclipseModMetadata = file('bin/main/mcmod.info')
+        def eclipseMetadata = new JsonSlurper().parseText(eclipseModMetadata.getText('UTF-8'))
+        def eclipseMod = eclipseMetadata instanceof List ? eclipseMetadata.first() : eclipseMetadata
+        if (eclipseMod.modid != project.mod_id || eclipseMod.version != project.mod_version
+                || eclipseMod.mcversion != project.minecraft_version) {
+            throw new GradleException('Eclipse output contains incorrect mod metadata')
+        }
+        ['runClient.launch', 'runServer.launch'].each { name ->
+            String contents = file(name).getText('UTF-8').replace('\\', '/')
+            if (!contents.contains('org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE')
+                    || !contents.contains('value="true"')
+                    || contents.contains('src/test') || contents.contains('bin/test')) {
+                throw new GradleException("${name} does not isolate production code")
+            }
+            if (!contents.contains('PROJECT_ATTR" value="PowerAdvantage"')) {
+                throw new GradleException("${name} targets the wrong Eclipse project")
+            }
+            if (contents.contains('org.eclipse.buildship.core.gradleclasspathcontainer')) {
+                throw new GradleException("${name} exposes compileOnly dependencies at runtime")
+            }
+            ['RF-API.jar', 'RebornCore-1.12.2'].each { forbiddenDependency ->
+                if (contents.toLowerCase(Locale.ROOT).contains(forbiddenDependency.toLowerCase(Locale.ROOT))) {
+                    throw new GradleException(
+                            "${name} includes compile-only dependency ${forbiddenDependency}")
+                }
+            }
+            if (!contents.contains("forge-${project.minecraft_version}-${project.forge_version}")) {
+                throw new GradleException("${name} is missing the Forge development runtime")
+            }
+            List<String> bootstrapArtifacts = [
+                    "forge-${project.minecraft_version}-${project.forge_version}",
+                    "client-extra-${project.minecraft_version}",
+                    "mappings_${project.mapping_channel}-${project.minecraft_version}"
+            ]
+            List<Integer> bootstrapPositions = bootstrapArtifacts.collect { artifact ->
+                contents.indexOf(artifact)
+            }
+            if (bootstrapPositions.any { it < 0 }
+                    || bootstrapPositions != bootstrapPositions.sort(false)) {
+                throw new GradleException(
+                        "${name} does not preserve the Forge bootstrap classpath order")
+            }
+            if (contents.contains('${MC_VERSION}')
+                    || !contents.contains(
+                    "key=\"MC_VERSION\" value=\"${project.minecraft_version}\"")) {
+                throw new GradleException("${name} does not define a literal Minecraft version")
             }
         }
     }
 }
 
-String getModFile() {
-    String path = ''
-    FileTree tree = fileTree(dir: 'src/main/java')
-    tree.include '**/*.java'
-    tree.visit { element ->
-        if (element.file.isFile()) {
-            element.file.eachLine { String s ->
-                s = s.trim()
-                if (s.startsWith('@Mod(')) {
-                    path = "src/main/java/$element.relativePath"
+tasks.register('verifyModelAssets') {
+    group = 'verification'
+    description = 'Verifies that PowerAdvantage model references resolve to packaged assets.'
+    File resourceRoot = file('src/main/resources')
+    File modelRoot = new File(resourceRoot, "assets/${project.mod_id}/models")
+    File blockstateRoot = new File(resourceRoot, "assets/${project.mod_id}/blockstates")
+    inputs.dir(modelRoot)
+    inputs.dir(blockstateRoot)
+
+    doLast {
+        def verifyReference = { String reference, String assetType, String sourcePath ->
+            if (reference.startsWith('#')) return
+            int separator = reference.indexOf(':')
+            String namespace = separator >= 0 ? reference.substring(0, separator) : 'minecraft'
+            String path = separator >= 0 ? reference.substring(separator + 1) : reference
+            if (namespace != project.mod_id) return
+
+            File target = new File(resourceRoot,
+                    "assets/${namespace}/${assetType}/${path}.json")
+            if (assetType == 'textures') {
+                target = new File(resourceRoot, "assets/${namespace}/textures/${path}.png")
+            }
+            if (!target.isFile()) {
+                throw new GradleException(
+                        "${sourcePath} references missing ${assetType} asset ${reference}")
+            }
+        }
+
+        fileTree(modelRoot) { include '**/*.json' }.files.sort().each { File modelFile ->
+            def model = new JsonSlurper().parse(modelFile)
+            if (model.parent instanceof String) {
+                verifyReference(model.parent, 'models', modelFile.path)
+            }
+            if (model.textures instanceof Map) {
+                model.textures.values().findAll { it instanceof String }.each { String texture ->
+                    verifyReference(texture, 'textures', modelFile.path)
                 }
             }
         }
-    }
-    return path
-}
 
-String getVersion(String type, String mod_file) {
-    String major = '0'
-    String revision = '0'
-    String patch = '0'
-    String prefix = "public static final String $type = \""
-    File file = file(mod_file)
-    file.eachLine { String s ->
-        s = s.trim()
-        if (s.startsWith(prefix)) {
-            s = s.substring(prefix.length(), s.length() - 2)
-            String[] pts = s.split("\\.")
-
-            major = pts[0]
-            revision = pts[1]
-            patch = pts[2]
+        Closure verifyBlockstateModels
+        verifyBlockstateModels = { Object node, String sourcePath ->
+            if (node instanceof Map) {
+                node.each { key, value ->
+                    if (key == 'model' && value instanceof String) {
+                        verifyReference(value, 'models/block', sourcePath)
+                    } else {
+                        verifyBlockstateModels(value, sourcePath)
+                    }
+                }
+            } else if (node instanceof Collection) {
+                node.each { verifyBlockstateModels(it, sourcePath) }
+            }
+        }
+        fileTree(blockstateRoot) { include '**/*.json' }.files.sort().each { File blockstateFile ->
+            verifyBlockstateModels(new JsonSlurper().parse(blockstateFile), blockstateFile.path)
         }
     }
-    return "$major.$revision.$patch"
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyReleaseConfiguration')
+    dependsOn tasks.named('verifyModelAssets')
 }

@@ -3,6 +3,7 @@ package cyano.poweradvantage.api;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.tileentity.TileEntity;
@@ -37,6 +38,10 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
 	public GUIBlock(Material m) {
 		super(m);
         this.setLightOpacity(0);
+	}
+
+	protected void setPowerAdvantageHardness(float hardness) {
+		super.setHardness(hardness);
 	}
 	
 	private int guiId = 0;
@@ -131,6 +136,9 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
 
         // open GUI
         if(this.getGuiOwner() == null) return false;
+		if(tileEntity instanceof PoweredEntity && player instanceof EntityPlayerMP){
+			((PoweredEntity)tileEntity).syncPowerAdvantageDataTo((EntityPlayerMP)player);
+		}
         player.openGui(this.getGuiOwner(), this.getGuiID(), w, coord.getX(), coord.getY(), coord.getZ());
         return true;
     }

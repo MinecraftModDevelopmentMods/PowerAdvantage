@@ -10,14 +10,14 @@ import cyano.poweradvantage.api.modsupport.techreborn.BlockTRConverter;
 import cyano.poweradvantage.api.modsupport.techreborn.TileEntityTRElectricityConverter;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fluids.BlockFluidBase;
 import net.minecraftforge.fml.common.FMLLog;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -36,11 +36,12 @@ public abstract class ModSupport {
 
 	private static final Map<String, Block> allBlocks = new HashMap<>();
 
-	private static boolean initDone = false;
+	private static boolean contentRegistrationDone = false;
+	private static boolean recipeRegistrationDone = false;
 	private static int generatedRecipeId = 0;
 
-	public static void init(boolean rfSupport, boolean techRebornSupport) {
-		if (initDone) return;
+	public static void registerContent(boolean rfSupport, boolean techRebornSupport) {
+		if (contentRegistrationDone) return;
 
 		final float defaultMachineHardness = 0.75f;
 		final Material defaultMachineMaterial = Material.PISTON;
@@ -55,6 +56,22 @@ public abstract class ModSupport {
 			Entities.registerTileEntity(TileEntityRFElectricityConverter.class, "rf_electricity_converter_tileentity");
 			Entities.registerTileEntity(TileEntityRFQuantumConverter.class, "rf_quantum_converter_tileentity");
 
+		}
+		if (techRebornSupport) {
+			FMLLog.info("Initializing Tech Reborn interface content");
+			converter_tr_electricity = addBlock(new BlockTRConverter(defaultMachineMaterial, defaultMachineHardness, new ConduitType("electricity"), TileEntityTRElectricityConverter.class), "converter_tr_electricity");
+			Entities.registerTileEntity(TileEntityTRElectricityConverter.class, "tr_electricity_converter_tileentity");
+		}
+		contentRegistrationDone = true;
+	}
+
+	public static void registerRecipes() {
+		if (recipeRegistrationDone) return;
+		if (!contentRegistrationDone) {
+			throw new IllegalStateException("Mod support content must be registered before its recipes");
+		}
+
+		if (converter_rf_steam != null) {
 			ForgeRegistries.RECIPES.register(recipe(new ItemStack(converter_rf_steam, 1),
 					"xyz",
 					'x', "governor", 'y', "frameSteel", 'z', "blockRedstone"));
@@ -65,16 +82,11 @@ public abstract class ModSupport {
 					"xyz",
 					'x', net.minecraft.init.Items.ENDER_PEARL, 'y', "frameSteel", 'z', "blockRedstone"));
 		}
-		if (techRebornSupport) {
-			FMLLog.info("Initializing Tech Reborn interface content");
-			// first, register transformers in Ore Dictionary
-
-			converter_tr_electricity = addBlock(new BlockTRConverter(defaultMachineMaterial, defaultMachineHardness, new ConduitType("electricity"), TileEntityTRElectricityConverter.class), "converter_tr_electricity");
-			Entities.registerTileEntity(TileEntityTRElectricityConverter.class, "tr_electricity_converter_tileentity");
+		if (converter_tr_electricity != null) {
 			ForgeRegistries.RECIPES.register(recipe(new ItemStack(converter_tr_electricity, 1), "XXX", "XZX", "XXX",
 					'Z', "PSU", 'X', "ingotRefinedIron"));
 		}
-		initDone = true;
+		recipeRegistrationDone = true;
 	}
 
 	private static ShapedOreRecipe recipe(ItemStack output, Object... params) {
@@ -87,7 +99,7 @@ public abstract class ModSupport {
 
 	@SuppressWarnings("deprecation")
 	private static Block addBlock(Block block, String name) {
-		block.setUnlocalizedName(PowerAdvantage.MODID + "." + name);
+		block.setTranslationKey(PowerAdvantage.MODID + "." + name);
 		ResourceLocation registryName = new ResourceLocation(PowerAdvantage.MODID, name);
 		block.setRegistryName(registryName);
 		ForgeRegistries.BLOCKS.register(block);
@@ -101,13 +113,12 @@ public abstract class ModSupport {
 
 
 	@SideOnly(Side.CLIENT)
-	public static void registerItemRenders(FMLInitializationEvent event) {
+	public static void bakeModels() {
 		for (Map.Entry<String, Block> e : allBlocks.entrySet()) {
 			String name = e.getKey();
 			Block block = e.getValue();
-			Minecraft.getMinecraft().getRenderItem().getItemModelMesher()
-					.register(net.minecraft.item.Item.getItemFromBlock(block), 0,
-							new ModelResourceLocation(PowerAdvantage.MODID + ":" + name, "inventory"));
+			ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), 0,
+					new ModelResourceLocation(PowerAdvantage.MODID + ":" + name, "inventory"));
 		}
 	}
 }

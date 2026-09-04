@@ -55,7 +55,7 @@ public abstract class Items {
 
 	@SuppressWarnings("deprecation")
 	private static Item addItem(String unlocalizedName, Item i) {
-		i.setUnlocalizedName(PowerAdvantage.MODID + "." + unlocalizedName);
+		i.setTranslationKey(PowerAdvantage.MODID + "." + unlocalizedName);
 		i.setRegistryName(new ResourceLocation(PowerAdvantage.MODID, unlocalizedName));
 		ForgeRegistries.ITEMS.register(i);
 		i.setCreativeTab(ItemGroups.tab_powerAdvantage);

@@ -36,7 +36,7 @@ public class BlockTRConverter extends BlockSimplePowerMachine {
 		try {
 			return tileEntity.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
-			FMLLog.log(Level.ERROR,e,"Failed to initialize TileEntity instance for block %s",this.getUnlocalizedName());
+			FMLLog.log(Level.ERROR,e,"Failed to initialize TileEntity instance for block %s",this.getTranslationKey());
 			return null;
 		}
 	}

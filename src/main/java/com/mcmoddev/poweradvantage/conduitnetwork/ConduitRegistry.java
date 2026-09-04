@@ -28,6 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ConduitRegistry {
 
 	private final Map<ConduitType, ConduitNetworkManager> networkManagers = new HashMap<>();
+	private final Map<Integer, World> activeWorlds = new HashMap<>();
 
 	// thread-safe singleton instantiation
 	private static ConduitRegistry instance = null;
@@ -86,13 +87,25 @@ public class ConduitRegistry {
 	 * priority.
 	 */
 	public List<PowerRequest> getRequestsForPower(World w, BlockPos coord, ConduitType conduitType, ConduitType energyType) {
-		List<PowerRequest> requests = new ArrayList<>();
+		int dimension = w.provider.getDimension();
+		clearIfWorldChanged(w, dimension);
 		ConduitNetworkManager manager = getConduitNetworkManager(conduitType);
-		BlockPos4D bp = new BlockPos4D(w.provider.getDimension(), coord);
-		if (!manager.isValidatedNetwork(bp)) {
+		BlockPos4D bp = new BlockPos4D(dimension, coord);
+		boolean wasValidated = manager.isValidatedNetwork(bp);
+		if (!wasValidated) {
 			manager.revalidate(bp, w, conduitType);
 		}
-		List<BlockPos4D> net = manager.getNetwork(bp);
+		List<PowerRequest> requests = collectRequests(w, manager.getNetwork(bp), conduitType, energyType);
+		if (requests.isEmpty() && wasValidated) {
+			manager.revalidate(bp, w, conduitType);
+			requests = collectRequests(w, manager.getNetwork(bp), conduitType, energyType);
+		}
+		Collections.sort(requests);
+		return requests;
+	}
+
+	private List<PowerRequest> collectRequests(World w, List<BlockPos4D> net, ConduitType conduitType, ConduitType energyType) {
+		List<PowerRequest> requests = new ArrayList<>();
 		for (BlockPos4D pos : net) {
 			Block b = w.getBlockState(pos.pos).getBlock();
 			if (b instanceof ITileEntityProvider) {
@@ -128,7 +141,6 @@ public class ConduitRegistry {
 				}
 			}
 		}
-		Collections.sort(requests);
 		return requests;
 	}
 
@@ -208,6 +220,7 @@ public class ConduitRegistry {
 	 */
 	public void conduitBlockPlacedEvent(World w, int dimension, BlockPos location, ConduitType type) {
 		if (w.isRemote) return; // ignore client-side
+		clearIfWorldChanged(w, dimension);
 		BlockPos4D coord = new BlockPos4D(dimension, location);
 		ConduitNetworkManager manager = getConduitNetworkManager(type);
 		manager.invalidate(coord);
@@ -233,6 +246,23 @@ public class ConduitRegistry {
 	}
 
 	/**
+	 * Clears cached networks after a powered tile is loaded. A local invalidation
+	 * is insufficient when another source cached a partial network before all
+	 * neighboring chunks and tile entities were available.
+	 *
+	 * @param w world containing the loaded tile
+	 * @param dimension dimension containing the loaded tile
+	 * @param types power types whose cached networks must be rebuilt
+	 */
+	public void conduitBlockLoadedEvent(World w, int dimension, ConduitType... types) {
+		if (w.isRemote) return;
+		clearIfWorldChanged(w, dimension);
+		for (ConduitType type : types) {
+			getConduitNetworkManager(type).invalidateAll();
+		}
+	}
+
+	/**
 	 * Invoke this method anytime a conduit block is removed from the world
 	 *
 	 * @param w         The world instance for this dimension
@@ -242,6 +272,7 @@ public class ConduitRegistry {
 	 */
 	public void conduitBlockRemovedEvent(World w, int dimension, BlockPos location, ConduitType type) {
 		if (w.isRemote) return; // ignore client-side
+		clearIfWorldChanged(w, dimension);
 		BlockPos4D coord = new BlockPos4D(dimension, location);
 		ConduitNetworkManager manager = getConduitNetworkManager(type);
 		manager.invalidate(coord);
@@ -274,5 +305,15 @@ public class ConduitRegistry {
 			networkManagers.put(type, manager);
 			return manager;
 		}
+	}
+
+	private void clearIfWorldChanged(World w, int dimension) {
+		World knownWorld = activeWorlds.get(dimension);
+		if (knownWorld == w) return;
+		if (knownWorld != null) {
+			networkManagers.clear();
+			activeWorlds.clear();
+		}
+		activeWorlds.put(dimension, w);
 	}
 }

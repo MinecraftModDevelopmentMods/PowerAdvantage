@@ -77,7 +77,7 @@ public abstract class Fluids {
 		if (PowerAdvantage.useOtherFluids && FluidRegistry.isFluidRegistered(name)) {
 			// fluid already exists. Use that one.
 			FMLLog.warning("Using fluid %s from %s instead of creating a new fluid %s:%s", FluidRegistry.getFluid(name).getName(),
-					FluidRegistry.getFluid(name).getFlowing().getResourceDomain(), modID, name);
+					FluidRegistry.getFluid(name).getFlowing().getNamespace(), modID, name);
 			return FluidRegistry.getFluid(name);
 		}
 		Fluid f = new ColoredFluid(name, new ResourceLocation(modID + ":blocks/" + name + "_still"), new ResourceLocation(modID + ":blocks/" + name + "_flow"), tintColor);

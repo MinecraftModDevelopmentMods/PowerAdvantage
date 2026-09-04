@@ -88,7 +88,7 @@ public abstract class Blocks {
 		still = (GUIBlock) addBlock(new StillBlock(), "still");
 		fluid_pipe = addBlock(new FluidPipeBlock(), "fluid_pipe");
 		fluid_pipe_terminal = addBlock(new TerminalFluidPipeBlock(), "fluid_pipe_terminal");
-		fluid_pipe_terminal.setUnlocalizedName("fluid_pipe");
+		fluid_pipe_terminal.setTranslationKey("fluid_pipe");
 		fluid_pipe_terminal.setCreativeTab(null);
 		fluid_switch = addBlock(new BlockPowerSwitch(Fluids.fluidConduit_general), "fluid_switch");
 		OreDictionary.registerOre("pipe", fluid_pipe);
@@ -159,7 +159,7 @@ public abstract class Blocks {
 
 	@SuppressWarnings("deprecation")
 	private static Block addBlock(Block block, String name) {
-		block.setUnlocalizedName(PowerAdvantage.MODID + "." + name);
+		block.setTranslationKey(PowerAdvantage.MODID + "." + name);
 		ResourceLocation registryName = new ResourceLocation(PowerAdvantage.MODID, name);
 		block.setRegistryName(registryName);
 		ForgeRegistries.BLOCKS.register(block);

@@ -1,0 +1,10 @@
+Power Advantage 2.4.1.112021
+
+- Restore conduit networks and machine GUI state after a world reload.
+- Move the Minecraft 1.12.2 build to ForgeGradle 7 and Gradle 9.6.1.
+- Build with a Java 8 toolchain while running Gradle on Java 17.
+- Pin optional compile APIs and keep Base Metals and OreSpawn off the build classpath.
+- Add reproducible release jars, dependency and artifact audits, checksums, and GitHub CI.
+- Preserve the poweradvantage runtime identity and cyano.poweradvantage.api compatibility surface.
+- Register optional RF and Tech Reborn converters before the 1.12 model-baking phase.
+- Keep compile-only RF and RebornCore APIs out of generated Eclipse production launches.

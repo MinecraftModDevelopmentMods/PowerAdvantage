@@ -221,7 +221,7 @@ public class PowerAdvantage
 	/** The display name for this mod */
 	public static final String NAME = "Power Advantage";
 	/** The version of this mod, in the format major.minor.update */
-	public static final String VERSION = "2.4.1";
+	public static final String VERSION = "2.4.1.112021";
 	
 
 
@@ -395,6 +395,8 @@ public class PowerAdvantage
 		com.mcmoddev.poweradvantage.init.Blocks.init();
 		com.mcmoddev.poweradvantage.init.Items.init();
 		com.mcmoddev.poweradvantage.init.TreasureChests.init(event.getSuggestedConfigurationFile().toPath().getParent());
+		detectOptionalPowerApis();
+		com.mcmoddev.poweradvantage.init.ModSupport.registerContent(detectedRF, detectedTechReborn);
 
 		// keep this next comment, it is useful for finding Vanilla recipes
 		//OreDictionary.initVanillaEntries();
@@ -412,6 +414,7 @@ public class PowerAdvantage
 	private void clientPreInit(FMLPreInitializationEvent event){
 		// client-only code
 		com.mcmoddev.poweradvantage.init.Blocks.bakeModels();
+		com.mcmoddev.poweradvantage.init.ModSupport.bakeModels();
 	}
 	@SideOnly(Side.SERVER)
 	private void serverPreInit(FMLPreInitializationEvent event){
@@ -428,6 +431,34 @@ public class PowerAdvantage
 	{
 
 		FMLLog.info("%s: starting main inititalization", MODID);
+
+		FMLLog.info("%s: adding GUI handler", MODID);
+		NetworkRegistry.INSTANCE.registerGuiHandler(PowerAdvantage.getInstance(), MachineGUIRegistry.getInstance());
+		GameRegistry.registerFuelHandler(FuelRegistry.getInstance());
+
+		FMLLog.info("%s: initializing more content", MODID);
+		com.mcmoddev.poweradvantage.init.Fuels.init();
+		com.mcmoddev.poweradvantage.init.Entities.init();
+		com.mcmoddev.poweradvantage.init.Recipes.init();
+		com.mcmoddev.poweradvantage.init.Recipes.initDistillationRecipes(distillRecipes);
+		com.mcmoddev.poweradvantage.init.Villages.init(); 
+		com.mcmoddev.poweradvantage.init.GUI.init();
+
+		FMLLog.info("%s: mod support data registries", MODID);
+		com.mcmoddev.poweradvantage.init.ModSupport.registerRecipes();
+
+
+		if(event.getSide() == Side.CLIENT){
+			clientInit(event);
+		}
+		if(event.getSide() == Side.SERVER){
+			serverInit(event);
+		}
+
+		FMLLog.info("%s: initialize phase complete", MODID);
+	}
+
+	private void detectOptionalPowerApis() {
 		try {
 			FMLLog.info("%s: testing whether we have to support redstone flux", MODID);
 			Class<?> rfClass = Class.forName("cofh.api.energy.IEnergyReceiver", false, getClass().getClassLoader());
@@ -446,32 +477,6 @@ public class PowerAdvantage
 			detectedTechReborn = false;
 			FMLLog.info("%s: did not detect Tech Reborn classes: %s", MODID, e.getMessage());
 		}
-
-
-		FMLLog.info("%s: adding GUI handler", MODID);
-		NetworkRegistry.INSTANCE.registerGuiHandler(PowerAdvantage.getInstance(), MachineGUIRegistry.getInstance());
-		GameRegistry.registerFuelHandler(FuelRegistry.getInstance());
-
-		FMLLog.info("%s: initializing more content", MODID);
-		com.mcmoddev.poweradvantage.init.Fuels.init();
-		com.mcmoddev.poweradvantage.init.Entities.init();
-		com.mcmoddev.poweradvantage.init.Recipes.init();
-		com.mcmoddev.poweradvantage.init.Recipes.initDistillationRecipes(distillRecipes);
-		com.mcmoddev.poweradvantage.init.Villages.init(); 
-		com.mcmoddev.poweradvantage.init.GUI.init();
-
-		FMLLog.info("%s: mod support data registries", MODID);
-		com.mcmoddev.poweradvantage.init.ModSupport.init(detectedRF,detectedTechReborn);
-
-
-		if(event.getSide() == Side.CLIENT){
-			clientInit(event);
-		}
-		if(event.getSide() == Side.SERVER){
-			serverInit(event);
-		}
-
-		FMLLog.info("%s: initialize phase complete", MODID);
 	}
 
 
@@ -481,7 +486,6 @@ public class PowerAdvantage
 		FMLLog.info("%s: initializing renders", MODID);
 		com.mcmoddev.poweradvantage.init.Items.registerItemRenders(event);
 		com.mcmoddev.poweradvantage.init.Blocks.registerItemRenders(event);
-		com.mcmoddev.poweradvantage.init.ModSupport.registerItemRenders(event);
 	}
 	@SideOnly(Side.SERVER)
 	private void serverInit(FMLInitializationEvent event){
@@ -552,7 +556,7 @@ public class PowerAdvantage
 	private Map<String, Set<Block>> sortBlocksByModID() {
 		Map<String, Set<Block>> modMap = new HashMap<>();
 		ForgeRegistries.BLOCKS.forEach((Block b)->{
-			final String modid = ForgeRegistries.BLOCKS.getKey(b).getResourceDomain();
+			final String modid = ForgeRegistries.BLOCKS.getKey(b).getNamespace();
 			modMap.computeIfAbsent(modid, (String id)->new HashSet<Block>());
 			modMap.get(modid).add(b);
 		});
@@ -564,10 +568,10 @@ public class PowerAdvantage
 		try {
 			// Object dump all blocks and class dump all tile entities
 			ForgeRegistries.BLOCKS.forEach((Block b) -> {
-				FMLLog.info("Block: %s %s", b.getUnlocalizedName(), objectDump(b));
+				FMLLog.info("Block: %s %s", b.getTranslationKey(), objectDump(b));
 			});
 			ForgeRegistries.ITEMS.forEach((Item i) -> {
-				FMLLog.info("Item: %s %s", i.getUnlocalizedName(), objectDump(i));
+				FMLLog.info("Item: %s %s", i.getTranslationKey(), objectDump(i));
 			});
 			FMLLog.info("class TileEntity: %s", superDump(null, TileEntity.class));
 			try {

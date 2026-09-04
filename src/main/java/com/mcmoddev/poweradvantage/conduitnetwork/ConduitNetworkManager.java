@@ -110,6 +110,20 @@ public class ConduitNetworkManager {
 	}
 
 	/**
+	 * Clears every cached network for this power type. This is used after chunks
+	 * load because a network scanned while neighboring chunks are still loading
+	 * can otherwise remain permanently incomplete.
+	 */
+	public void invalidateAll() {
+		lock.writeLock().lock();
+		try {
+			networkCache.clear();
+		} finally {
+			lock.writeLock().unlock();
+		}
+	}
+
+	/**
 	 * Invalidates the cached network at a block location and then rescans the world to make a new
 	 * cached network
 	 *

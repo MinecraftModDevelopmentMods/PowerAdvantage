@@ -1,34 +1,61 @@
-*.class
-*.iml
+# Eclipse
+/bin/
+*.launch
+/.settings/
+/.metadata/
+/.classpath
+/.project
+/.eclipse/
+
+# IntelliJ IDEA
+/out/
 *.ipr
 *.iws
-*.classpath
-*.project
-*.prefs
-.metadata/
-*.launch
-/output
+*.iml
+/.idea/
 
-# Local agent notes
-/AGENT.md
+# Gradle and Forge run output
+/build/
+/.gradle/
+/eclipse/
+/run/
+/run-data/
+/run.*
+/*.log
+/classes/
+/logs/
+/mcmodsrepo/
+/.ci-dependencies/
+
+# Machine-specific agent context
 /AGENTS.md
+/AGENT.md
 /agent-notes/
-.agent/
-.agents/
-.codex/
-.claude/
-CLAUDE.md
-.aider*
-.cursor/
-.cursorrules
+/.agent/
+/.agents/
+/.codex/
+/.claude/
+/.gemini/
+/CLAUDE.md
+/agent-*.md
+/codex-*.md
 
-#ForgeGradle
-/build
-/.gradle
-/eclipse/assets
+# Local verification and profiling evidence
+/run-*/
+/benchmark-*/
+/regression-*/
+/evidence/
+/evidence-*/
+/*-evidence/
+/*.jfr
+/*.hprof
+/hs_err_pid*.log
+/replay_pid*.log
+
+# Local dependency experiments; the RF API is an intentional tracked input.
 /libs/*
 !/libs/RF-API.jar
 !/libs/RF-API.zip
-/bin/
-/run/
-/out/
+
+/secret.json
+/.DS_Store

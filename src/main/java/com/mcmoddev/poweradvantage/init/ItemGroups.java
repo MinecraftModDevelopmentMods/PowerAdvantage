@@ -41,7 +41,7 @@ public class ItemGroups {
 	private static String catagorize(ItemStack i) {
 		StringBuilder sb = new StringBuilder();
 		Item item = i.getItem();
-		sb.append(ForgeRegistries.ITEMS.getKey(item).getResourceDomain());
+		sb.append(ForgeRegistries.ITEMS.getKey(item).getNamespace());
 		if (item instanceof ItemBlock) {
 			if (((ItemBlock) item).getBlock() instanceof ITileEntityProvider) {
 				sb.append("A");
@@ -51,7 +51,7 @@ public class ItemGroups {
 		} else {
 			sb.append("I");
 		}
-		sb.append(item.getUnlocalizedName());
+		sb.append(item.getTranslationKey());
 		sb.append(i.getMetadata());
 
 		return sb.toString();

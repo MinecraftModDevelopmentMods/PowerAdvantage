@@ -27,6 +27,7 @@ import java.util.List;
 public abstract class PoweredEntity extends TileEntity implements ITickable, IPowerMachine {
 
 	private final int powerUpdateInterval = 8;
+	private int conduitRefreshDelay = 2;
 
 	/**
 	 * Gets the amount of energy that can be stored in this machine.
@@ -127,11 +128,35 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 		return oldState.getBlock() != newSate.getBlock();
 	}
 
+	protected final World powerAdvantageWorld() {
+		return super.getWorld();
+	}
+
+	protected final BlockPos powerAdvantagePos() {
+		return super.getPos();
+	}
+
 	@Override
 	public void onLoad() {
 		super.onLoad();
+		this.conduitRefreshDelay = 2;
 		if (this.world != null && !this.world.isRemote) {
-			ConduitRegistry.getInstance().conduitBlockPlacedEvent(this.world, this.world.provider.getDimension(), this.pos, this.getTypes());
+			ConduitRegistry.getInstance().conduitBlockLoadedEvent(this.world, this.world.provider.getDimension(), this.getTypes());
+		}
+	}
+
+	/**
+	 * Sends this tile's current update packet to one player. GUI blocks use this
+	 * when opening a machine so indicators never depend on a previous energy
+	 * change having triggered a broadcast packet.
+	 *
+	 * @param player player receiving the current machine state
+	 */
+	public final void syncPowerAdvantageDataTo(EntityPlayerMP player) {
+		this.markDirty();
+		Packet<?> packet = this.getUpdatePacket();
+		if (packet != null) {
+			player.connection.sendPacket(packet);
 		}
 	}
 
@@ -142,10 +167,19 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 	@Override
 	public final void update() {
 		// this method was moved from TileEntity to IUpdatePlayerListBox
+		if (this.isServer()) {
+			this.refreshConduitNetworkAfterLoad();
+		}
 		this.tickUpdate(this.isServer());
 		if (this.isServer() && ((this.getWorld().getTotalWorldTime() + this.getTickOffset()) % powerUpdateInterval == 0)) {
 			this.powerUpdate();
 		}
+	}
+
+	private void refreshConduitNetworkAfterLoad() {
+		if (this.conduitRefreshDelay < 0) return;
+		if (this.conduitRefreshDelay-- > 0) return;
+		ConduitRegistry.getInstance().conduitBlockLoadedEvent(this.world, this.world.provider.getDimension(), this.getTypes());
 	}
 
 	/**
@@ -205,6 +239,7 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 	@Override
 	public void readFromNBT(final NBTTagCompound tagRoot) {
 		super.readFromNBT(tagRoot);
+		this.conduitRefreshDelay = 2;
 		if (tagRoot.hasKey("Energy")) {
 			int[] data = tagRoot.getIntArray("Energy");
 			for (int i = 0; i < data.length; i++) {
