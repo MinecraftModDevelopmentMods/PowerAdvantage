@@ -1,0 +1,179 @@
+import org.apache.tools.ant.filters.FixCrLfFilter
+
+plugins {
+    id 'java'
+    id 'net.minecraftforge.renamer' version '1.1.5'
+    id 'net.minecraftforge.gradle' version '7.0.34'
+}
+
+group = 'zone.moddev.mc.advantageworks'
+version = project.harness_version
+base.archivesName = 'AdvantageWorksTestHarness'
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(8)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+sourceSets {
+    main.java.srcDir 'shared-probe'
+    runner {
+        java.srcDir 'src/runner/java'
+        resources.srcDir 'src/runner/resources'
+    }
+}
+
+minecraft {
+    mappings channel: project.mapping_channel, version: project.mapping_version
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
+    maven {
+        name = 'MinecraftLibraries'
+        url = 'https://libraries.minecraft.net/'
+    }
+}
+
+dependencies {
+    implementation minecraft.dependency(
+            "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}")
+    compileOnly 'org.lwjgl.lwjgl:lwjgl_util:2.9.4-nightly-20150209'
+    runnerImplementation 'com.google.code.gson:gson:2.8.0'
+    testImplementation 'junit:junit:4.13.2'
+    compileOnly files(project.findProperty('powerAdvantageDeobfJar')
+            ?: '../build/libs-dev/PowerAdvantage-2.4.4.113021-deobf.jar')
+}
+
+tasks.named('processResources', ProcessResources) {
+    filteringCharset = 'UTF-8'
+    inputs.property('version', project.version)
+    inputs.property('mcversion', project.minecraft_version)
+    filesMatching('META-INF/mods.toml') {
+        expand version: project.version
+    }
+    filesMatching(['**/*.json', '**/*.info', '**/*.properties', '**/*.md']) {
+        filter(FixCrLfFilter,
+                eol: FixCrLfFilter.CrLf.newInstance('lf'),
+                eof: FixCrLfFilter.AddAsisRemove.newInstance('asis'))
+    }
+}
+
+tasks.named('jar', Jar) {
+    archiveClassifier = 'deobf'
+    destinationDirectory = layout.buildDirectory.dir('libs-dev')
+    manifest {
+        attributes([
+                'Implementation-Title': base.archivesName.get(),
+                'Implementation-Version': project.version,
+                'Built-On': "${project.minecraft_version}-${project.forge_version}"
+        ])
+    }
+}
+
+def releaseJar = renamer.classes(tasks.named('jar', Jar)) {
+    map.from minecraft.dependency.toSrgFile
+    archiveClassifier = null
+}
+
+tasks.register('runnerJar', Jar) {
+    dependsOn tasks.named('runnerClasses')
+    archiveClassifier = 'runner'
+    from sourceSets.runner.output
+    manifest.attributes('Main-Class': 'zone.moddev.mc.advantageworks.runner.WorksRunner')
+}
+
+tasks.named('assemble') {
+    dependsOn releaseJar
+    dependsOn tasks.named('runnerJar')
+}
+
+def registerWorksRunner = { String taskName, String profileName, boolean automated, String taskDescription ->
+    tasks.register(taskName, JavaExec) {
+        group = 'verification'
+        description = taskDescription
+        dependsOn tasks.named('jar')
+        dependsOn releaseJar
+        dependsOn tasks.named('runnerClasses')
+        classpath = sourceSets.runner.runtimeClasspath
+        mainClass = 'zone.moddev.mc.advantageworks.runner.WorksRunner'
+        if (!automated) standardInput = System.in
+        args '--profile', file("profiles/${profileName}.json").absolutePath
+        if (automated) args '--automated'
+        if (project.hasProperty('worksStations')) {
+            args '--stations', project.property('worksStations').toString()
+        }
+        if (project.hasProperty('worksRunSeconds')) {
+            args '--run-seconds', project.property('worksRunSeconds').toString()
+        }
+        if (project.hasProperty('worksServerPort')) {
+            args '--server-port', project.property('worksServerPort').toString()
+        }
+    }
+}
+
+registerWorksRunner('runWorksDev', 'dev-core', false,
+        'Builds and launches a disposable interactive 1.13.2 Advantage Works development server.')
+registerWorksRunner('verifyWorksDev', 'dev-core', true,
+        'Generates, checks, restarts, and rechecks the disposable development works.')
+registerWorksRunner('verifyWorksTechProgression', 'dev-core-tech-progression', true,
+        'Checks registration and construction with TECH_PROGRESSION recipes.')
+registerWorksRunner('verifyWorksApocalyptic', 'dev-core-apocalyptic', true,
+        'Checks registration and construction with APOCALYPTIC recipes.')
+registerWorksRunner('verifyWorksPackagedCurrent', 'packaged-current', true,
+        'Runs packaged Advantage mods with current BaseMetals and pinned OreSpawn 4.')
+registerWorksRunner('verifyWorksPackagedDecoupled', 'packaged-decoupled', true,
+        'Runs packaged Advantage mods without BaseMetals or Mineralogy, retaining required OreSpawn 4.')
+registerWorksRunner('verifyWorksPackagedMineralogy', 'packaged-mineralogy', true,
+        'Runs Mineralogy crude oil through packaged Power distillation and Steam boilers.')
+registerWorksRunner('verifyWorksPackagedOptionalPower', 'packaged-optional-power', true,
+        'Exercises the preserved RF- and Tech Reborn-labelled converter IDs through Forge Energy.')
+registerWorksRunner('verifyWorksWorldgenAdvantage', 'worldgen-advantage', true,
+        'Samples Advantage fallback ores and desert oil, then verifies profile overrides through restart.')
+registerWorksRunner('verifyWorksWorldgenMineralogy', 'worldgen-mineralogy', true,
+        'Samples Mineralogy-owned sulfur/ocean oil and Advantage fallbacks through restart.')
+registerWorksRunner('verifyWorksWorldgenLegacyImport', 'worldgen-legacy-import', true,
+        'Imports legacy Power/Electric OreSpawn files and rejects duplicate active modern rules.')
+registerWorksRunner('runWorksPackagedCurrent', 'packaged-current', false,
+        'Launches the complete packaged works on localhost for manual inspection.')
+
+tasks.register('verifyHarnessIsolation') {
+    group = 'verification'
+    description = 'Confirms the PowerAdvantage release contains no test-harness content.'
+    doLast {
+        File powerJar = file('../build/libs/PowerAdvantage-2.4.4.113021.jar')
+        if (!powerJar.isFile()) {
+            throw new GradleException("Build PowerAdvantage first: ${powerJar}")
+        }
+        def forbidden = ['zone/moddev/mc/advantageworks/', 'assets/advantageworkstest/']
+        def zip = new java.util.zip.ZipFile(powerJar)
+        try {
+            def leaked = zip.entries().findAll { entry -> forbidden.any { entry.name.startsWith(it) } }
+            if (leaked) {
+                throw new GradleException("Harness content leaked into PowerAdvantage: ${leaked*.name}")
+            }
+        } finally {
+            zip.close()
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyHarnessIsolation')
+}

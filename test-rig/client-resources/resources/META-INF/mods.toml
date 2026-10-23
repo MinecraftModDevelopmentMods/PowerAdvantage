@@ -1,0 +1,16 @@
+modLoader="javafml"
+loaderVersion="[25,)"
+license="GPL-3.0-only"
+
+[[mods]]
+modId="advantageclientresources"
+version="1"
+displayName="Advantage Client Resource Probe"
+description='''Build-only model, texture and translation checks. Never distribute with the mod.'''
+
+[[dependencies.advantageclientresources]]
+modId="poweradvantage"
+mandatory=true
+versionRange="[2.4.4.113021,)"
+ordering="AFTER"
+side="CLIENT"

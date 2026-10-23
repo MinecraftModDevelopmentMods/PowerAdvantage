@@ -1,0 +1,21 @@
+{
+  "type": "basemetals:crushing",
+  "ingredient": [
+    {
+      "item": "minecraft:potato"
+    },
+    {
+      "item": "minecraft:poisonous_potato"
+    }
+  ],
+  "result": {
+    "item": "poweradvantage:starch",
+    "count": 1
+  },
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "basemetals"
+    }
+  ]
+}

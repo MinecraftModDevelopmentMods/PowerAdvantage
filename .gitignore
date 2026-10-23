@@ -21,6 +21,9 @@
 /run/
 /run-data/
 /run.*
+/$run/
+/eula.txt
+/server.properties
 /*.log
 /classes/
 /logs/
@@ -52,10 +55,39 @@
 /hs_err_pid*.log
 /replay_pid*.log
 
-# Local dependency experiments; the RF API is an intentional tracked input.
+# Nested Advantage Works outputs
+/test-rig/.gradle/
+/test-rig/.cache/
+/test-rig/build/
+/test-rig/migration-probe/.gradle/
+/test-rig/migration-probe/build/
+/test-rig/migration/.venv/
+/test-rig/migration/__pycache__/
+
+# Local dependency artifacts; 1.13 converters use Forge Energy instead.
 /libs/*
-!/libs/RF-API.jar
-!/libs/RF-API.zip
+*.jar
+*.zip
+!/gradle/wrapper/gradle-wrapper.jar
 
 /secret.json
+# Nested local tooling and generated output
+AGENTS.md
+AGENT.md
+CLAUDE.md
+GEMINI.md
+ARCHITECT.md
+agent-notes/
+.codex/
+.agent/
+.agents/
+.claude/
+.gemini/
+.cursor/
+agent-*.md
+codex-*.md
+*.log
+*.class
+__pycache__/
+*.pyc
 /.DS_Store

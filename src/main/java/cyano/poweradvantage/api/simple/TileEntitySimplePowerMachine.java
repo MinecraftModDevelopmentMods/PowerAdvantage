@@ -4,7 +4,7 @@ import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.PowerConnectorContext;
 import cyano.poweradvantage.api.PowerRequest;
 import cyano.poweradvantage.api.PoweredEntity;
-import com.mcmoddev.poweradvantage.conduitnetwork.ConduitRegistry;
+import zone.moddev.mc.poweradvantage.conduitnetwork.ConduitRegistry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
@@ -12,6 +12,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -49,7 +50,8 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * @param unlocalizedName The string used for language look-up and 
 	 * entity registration. 
 	 */
-	public TileEntitySimplePowerMachine(ConduitType type, float energyBufferSize, String unlocalizedName){
+	public TileEntitySimplePowerMachine(TileEntityType<?> tileType, ConduitType type, float energyBufferSize, String unlocalizedName){
+		super(tileType);
 		this.types = new ConduitType[1];
 		this.types[0] = type;
 		this.energyBufferSizes = new float[1];
@@ -67,7 +69,8 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * @param unlocalizedName The string used for language look-up and
 	 * entity registration.
 	 */
-	public TileEntitySimplePowerMachine(ConduitType[] typeList, float[] energyBufferSize, String unlocalizedName){
+	public TileEntitySimplePowerMachine(TileEntityType<?> tileType, ConduitType[] typeList, float[] energyBufferSize, String unlocalizedName){
+		super(tileType);
 		if(typeList.length != energyBufferSize.length) throw new IllegalArgumentException("Array length mismatch. Number of ConduitTypes and number of buffer sizes must be equal.");
 		this.types = Arrays.copyOf(typeList,typeList.length);
 		this.energyBufferSizes = Arrays.copyOf(energyBufferSize,energyBufferSize.length);
@@ -279,41 +282,41 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	}
 	
 	/**
-	 * You must override this method and call super.readFromNBT(...).<br><br>
+	 * You must override this method and call super.read(...).<br><br>
 	 * This method reads data from an NBT data tag (either from a data packet 
 	 * or loaded from the Chunk).
 	 * @param tagRoot The root of the NBT
 	 */
 	@Override
-	public void readFromNBT(final NBTTagCompound tagRoot) {
-		super.readFromNBT(tagRoot);
+	public void read(final NBTTagCompound tagRoot) {
+		super.read(tagRoot);
 		ItemStack[] inventory = this.getInventory();
 		if(inventory != null ){
 			Arrays.fill(inventory, null);
-			final NBTTagList nbttaglist = tagRoot.getTagList("Items", 10);
-			for (int i = 0; i < nbttaglist.tagCount() && i < inventory.length; ++i) {
-				final NBTTagCompound nbttagcompound1 = nbttaglist.getCompoundTagAt(i);
+			final NBTTagList nbttaglist = tagRoot.getList("Items", 10);
+			for (int i = 0; i < nbttaglist.size() && i < inventory.length; ++i) {
+				final NBTTagCompound nbttagcompound1 = nbttaglist .getCompound(i);
 				final byte n = nbttagcompound1.getByte("Slot");
 				if (n >= 0 && n < inventory.length) {
-					ItemStack stack = new ItemStack(nbttagcompound1);
+					ItemStack stack = ItemStack.read(nbttagcompound1);
 					inventory[n] = stack.isEmpty() ? null : stack;
 				}
 			}
 		}
-		if (tagRoot.hasKey("CustomName", 8)) {
+		if (tagRoot .contains("CustomName", 8)) {
 			this.customName = tagRoot.getString("CustomName");
 		}
 	}
 	
 	/**
-	 * You must override this method and call super.writeToNBT(...).<br><br>
+	 * You must override this method and call super .write(...).<br><br>
 	 * This method writes data to an NBT data tag (either to a data packet 
 	 * or saved to the Chunk).
 	 * @param tagRoot The root of the NBT
 	 */
 	@Override
-	public NBTTagCompound writeToNBT(final NBTTagCompound tagRoot) {
-		super.writeToNBT(tagRoot);
+	public NBTTagCompound write(final NBTTagCompound tagRoot) {
+		super .write(tagRoot);
 		ItemStack[] inventory = this.getInventory();
 		if(inventory != null ){
 			final NBTTagList nbttaglist = new NBTTagList();
@@ -321,8 +324,8 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 				if (inventory[i] != null && !inventory[i].isEmpty()) {
 					final NBTTagCompound nbttagcompound1 = new NBTTagCompound();
 					nbttagcompound1.setByte("Slot", (byte)i);
-					inventory[i].writeToNBT(nbttagcompound1);
-					nbttaglist.appendTag(nbttagcompound1);
+					inventory[i] .write(nbttagcompound1);
+					nbttaglist .add(nbttagcompound1);
 				}
 			}
 			tagRoot.setTag("Items", nbttaglist);
@@ -490,7 +493,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 			this.getInventory()[slot] = null;
 			return itemstack;
 		}
-		final ItemStack itemstack = this.getInventory()[slot].splitStack(decrement);
+		final ItemStack itemstack = this.getInventory()[slot] .split(decrement);
 		if (this.getInventory()[slot].isEmpty()) {
 			this.getInventory()[slot] = null;
 		}
@@ -638,10 +641,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 */
 	@Override
 	public ITextComponent getDisplayName() {
-		if (this.hasCustomName()) {
-			return new TextComponentString(this.getName());
-		}
-		return new TextComponentTranslation(this.getName(), new Object[0]);
+		return getName();
 	}
 
 	/**
@@ -650,8 +650,14 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * given by the player (i.e. with an anvil)
 	 */
 	@Override
-	public String getName() {
-		return this.hasCustomName() ? this.customName : unlocalizedName;
+	public ITextComponent getName() {
+		return this.hasCustomName() ? new TextComponentString(this.customName)
+				: new TextComponentTranslation(unlocalizedName);
+	}
+
+	@Override
+	public ITextComponent getCustomName() {
+		return this.hasCustomName() ? new TextComponentString(this.customName) : null;
 	}
 
 	/**

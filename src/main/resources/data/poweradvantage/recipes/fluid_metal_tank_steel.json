@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx",
+    "xpx",
+    "xxx"
+  ],
+  "key": {
+    "x": {
+      "tag": "forge:ingots/steel"
+    },
+    "p": {
+      "tag": "forge:pipes"
+    }
+  },
+  "result": {
+    "item": "poweradvantage:fluid_metal_tank"
+  },
+  "group": "poweradvantage:fluid_metal_tank",
+  "conditions": [
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:ingots/steel"
+    },
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:pipes"
+    }
+  ]
+}

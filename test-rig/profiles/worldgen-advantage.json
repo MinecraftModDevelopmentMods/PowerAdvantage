@@ -1,0 +1,150 @@
+{
+  "mode": "packaged",
+  "runtimeBase": "../run-advantage-works",
+  "serverPort": 25565,
+  "startupTimeoutSeconds": 180,
+  "stationRunSeconds": 5,
+  "recipeMode": "NORMAL",
+  "sourceCommit": "working-tree-from-40811a0",
+  "sourceVersion": "2.4.4.113021",
+  "forge": {
+    "version": "1.13.2-25.0.223",
+    "installerPath": ".cache/forge-1.13.2-25.0.223-installer.jar",
+    "url": "https://maven.minecraftforge.net/net/minecraftforge/forge/1.13.2-25.0.223/forge-1.13.2-25.0.223-installer.jar",
+    "sha256": "D46CB326E7DC32695084090C8169BB57F32F1C23B801DDB35A336F252E381191"
+  },
+  "mods": [
+    {
+      "id": "advantageworkstest",
+      "version": "1.1.0.113021",
+      "file": "AdvantageWorksTestHarness-1.1.0.113021.jar",
+      "path": "build/libs/AdvantageWorksTestHarness-1.1.0.113021.jar",
+      "workspaceProduced": true,
+      "sha256": "2A260DF4B66454B57ECB6B021BCF26B3A812CA5FC0A8B9C4C9E904879AA67A1C"
+    },
+    {
+      "id": "poweradvantage",
+      "version": "2.4.4.113021",
+      "file": "PowerAdvantage-2.4.4.113021.jar",
+      "path": "../build/libs/PowerAdvantage-2.4.4.113021.jar",
+      "sha256": "E5B62769812AE02393A305CF33D2E168BFB2B6D370AB04D43409B94F5740D193"
+    },
+    {
+      "id": "steamadvantage",
+      "version": "2.2.5.113021",
+      "file": "SteamAdvantage-2.2.5.113021.jar",
+      "path": "../../SteamAdvantage/SteamAdvantage/build/libs/SteamAdvantage-2.2.5.113021.jar",
+      "sha256": "A87F141913D511DB025FEE6D6FBA4000098598D8692B4BA53E7E80C67B14ACCA"
+    },
+    {
+      "id": "electricadvantage",
+      "version": "2.2.5.113021",
+      "file": "ElectricAdvantage-2.2.5.113021.jar",
+      "path": "../../ElectricAdvantage/ElectricAdvantage/build/libs/ElectricAdvantage-2.2.5.113021.jar",
+      "sha256": "C785155C05133D1A408613D2C9738A32C9818E31C2599ECBD9F2FE76965DB5BA"
+    },
+    {
+      "id": "orespawn",
+      "version": "4.1.0.113021",
+      "file": "OreSpawn-4.1.0.113021.jar",
+      "path": "../../../../MinecraftMineralogy/OS113/OreSpawn/build/libs/OreSpawn-4.1.0.113021.jar",
+      "sha256": "66C9CC5F8BE8F08F3DD5FA26EBEA79B52972B2FB86CB4DADBEEBC29AC01D3435",
+      "workspaceProduced": true
+    }
+  ],
+  "name": "worldgen-advantage",
+  "levelName": "AdvantageWorksWorldgen",
+  "levelSeed": "advantage-works-worldgen-1.13.2-v1",
+  "levelType": "DEFAULT",
+  "generatorSettings": "",
+  "buildWorks": false,
+  "worldgenSampleRadius": 8,
+  "shutdownTimeoutSeconds": 300,
+  "lifecycleStations": [],
+  "firstProfileAssertions": [
+    {
+      "id": "desert-oil-visible",
+      "section": "fluid_deposits",
+      "entry": "poweradvantage:fluid_deposit/desert_crude_oil",
+      "present": true,
+      "field": "enabled",
+      "expectedBoolean": true
+    },
+    {
+      "id": "desert-oil-owner",
+      "section": "fluid_deposits",
+      "entry": "poweradvantage:fluid_deposit/desert_crude_oil",
+      "present": true,
+      "field": "source_provider",
+      "expectedString": "poweradvantage"
+    },
+    {
+      "id": "electric-sulfur-default",
+      "section": "ores",
+      "entry": "electricadvantage:ore/sulfur",
+      "present": true,
+      "field": "enabled",
+      "expectedBoolean": true
+    },
+    {
+      "id": "electric-lithium-default",
+      "section": "ores",
+      "entry": "electricadvantage:ore/lithium",
+      "present": true,
+      "field": "enabled",
+      "expectedBoolean": true
+    }
+  ],
+  "profileMutations": [
+    {
+      "section": "fluid_deposits",
+      "entry": "poweradvantage:fluid_deposit/desert_crude_oil",
+      "field": "enabled",
+      "booleanValue": false
+    },
+    {
+      "section": "ores",
+      "entry": "electricadvantage:ore/sulfur",
+      "field": "enabled",
+      "booleanValue": false
+    }
+  ],
+  "restartProfileAssertions": [
+    {
+      "id": "desert-oil-user-disable-persists",
+      "section": "fluid_deposits",
+      "entry": "poweradvantage:fluid_deposit/desert_crude_oil",
+      "present": true,
+      "field": "enabled",
+      "expectedBoolean": false
+    },
+    {
+      "id": "electric-sulfur-user-disable-persists",
+      "section": "ores",
+      "entry": "electricadvantage:ore/sulfur",
+      "present": true,
+      "field": "enabled",
+      "expectedBoolean": false
+    },
+    {
+      "id": "electric-lithium-remains-enabled",
+      "section": "ores",
+      "entry": "electricadvantage:ore/lithium",
+      "present": true,
+      "field": "enabled",
+      "expectedBoolean": true
+    }
+  ],
+  "worldgenExpectations": {
+    "minimumCounts": {
+      "poweradvantage:crude_oil": 1,
+      "electricadvantage:li_ore": 1,
+      "electricadvantage:sulfur_ore": 1
+    },
+    "maximumCounts": {
+      "mineralogy:crude_oil": 0,
+      "mineralogy:sulfur_ore": 0
+    },
+    "zeroBiomeViolations": true
+  }
+}

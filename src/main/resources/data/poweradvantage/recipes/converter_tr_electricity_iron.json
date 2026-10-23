@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "XXX",
+    "XZX",
+    "XXX"
+  ],
+  "key": {
+    "X": {
+      "tag": "forge:ingots/iron"
+    },
+    "Z": {
+      "tag": "forge:power_supply_units"
+    }
+  },
+  "result": {
+    "item": "poweradvantage:converter_tr_electricity"
+  },
+  "conditions": [
+    {
+      "type": "poweradvantage:tag_empty",
+      "tag": "forge:ingots/refined_iron"
+    },
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:ingots/iron"
+    },
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:power_supply_units"
+    }
+  ],
+  "group": "poweradvantage:converter_tr_electricity"
+}

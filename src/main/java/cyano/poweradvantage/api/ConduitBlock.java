@@ -1,6 +1,6 @@
 package cyano.poweradvantage.api;
 
-import com.mcmoddev.poweradvantage.conduitnetwork.ConduitRegistry;
+import zone.moddev.mc.poweradvantage.conduitnetwork.ConduitRegistry;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -30,25 +30,31 @@ public abstract class ConduitBlock extends net.minecraft.block.Block implements 
 	 * @param mat Block material, typically Material.iron
 	 */
 	protected ConduitBlock(Material mat) {
-		super(mat);
+		this(mat, 1.0F);
+	}
+
+	protected ConduitBlock(Material mat, float hardness) {
+		super(Properties.create(mat).hardnessAndResistance(hardness));
 	}
 
 	/**
 	 * This method is called whenever the block is placed into the world
 	 */
 	@Override
-	public void onBlockAdded(World w, BlockPos coord, IBlockState state) {
-		super.onBlockAdded(w, coord, state);
-		ConduitRegistry.getInstance().conduitBlockPlacedEvent(w, w.provider.getDimension(), coord, getTypes());
+	public void onBlockAdded(IBlockState state, World w, BlockPos coord, IBlockState oldState) {
+		super.onBlockAdded(state, w, coord, oldState);
+		ConduitRegistry.getInstance().conduitBlockPlacedEvent(w, w.dimension.getType().getId(), coord, getTypes());
 	}
 
 	/**
 	 * This method is called when the block is removed from the world by an entity.
 	 */
 	@Override
-	public void onPlayerDestroy(World w, BlockPos coord, IBlockState state) {
-		super.onPlayerDestroy(w, coord, state);
-		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.provider.getDimension(), coord, getTypes());
+	public void onReplaced(IBlockState state, World w, BlockPos coord, IBlockState newState, boolean isMoving) {
+		if (state.getBlock() != newState.getBlock()) {
+			ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.dimension.getType().getId(), coord, getTypes());
+		}
+		super.onReplaced(state, w, coord, newState, isMoving);
 	}
 
 	/**
@@ -57,7 +63,7 @@ public abstract class ConduitBlock extends net.minecraft.block.Block implements 
 	@Override
 	public void onExplosionDestroy(World w, BlockPos coord, Explosion boom) {
 		super.onExplosionDestroy(w, coord, boom);
-		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.provider.getDimension(), coord, getTypes());
+		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.dimension.getType().getId(), coord, getTypes());
 	}
 
 }

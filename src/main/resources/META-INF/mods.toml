@@ -1,0 +1,40 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="LGPL-3.0-only"
+issueTrackerURL="https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/issues"
+
+[[mods]]
+modId="poweradvantage"
+version="${version}"
+displayName="Power Advantage"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/power-advantage"
+authors="DrCyano (aka Cyanobacterium), the MMD Team"
+description='''API and shared machines for pressure, electricity, quantum power, fluids, and item transport.'''
+
+[[dependencies.poweradvantage]]
+modId="basemetals"
+mandatory=false
+versionRange="[3.0.1.113021,4.0.0)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.poweradvantage]]
+modId="orespawn"
+mandatory=true
+versionRange="[4.1.0.113021,5.0.0)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.poweradvantage]]
+modId="forge"
+mandatory=true
+versionRange="${forge_version_range}"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.poweradvantage]]
+modId="minecraft"
+mandatory=true
+versionRange="${minecraft_version_range}"
+ordering="NONE"
+side="BOTH"

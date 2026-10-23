@@ -5,8 +5,8 @@ import cyano.poweradvantage.api.IPowerMachine;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.fml.common.FMLLog;
+import net.minecraft.world.IBlockReader;
+import zone.moddev.mc.poweradvantage.PowerAdvantage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -84,7 +84,7 @@ public class LightWeightPowerRegistry {
 	 *                                    and how to add power to that TileEntity
 	 */
 	public static void registerLightWeightPowerAcceptor(Block machineBlock, ILightWeightPowerAcceptor powerAcceptorImplementation) {
-		FMLLog.info("Registered external power acceptor interfce for block " + machineBlock.getTranslationKey());
+		PowerAdvantage.LOGGER.info("Registered external power acceptor interface for block {}", machineBlock.getTranslationKey());
 		getInstance().externalPowerSinks.put(machineBlock, powerAcceptorImplementation);
 	}
 
@@ -109,7 +109,7 @@ public class LightWeightPowerRegistry {
 	 * @param energyType The type of energy being offered
 	 * @return How much of the offered energy the target machine would like to receive.
 	 */
-	public float getRequestedPowerAmount(IBlockAccess w, BlockPos coord, ConduitType energyType) {
+	public float getRequestedPowerAmount(IBlockReader w, BlockPos coord, ConduitType energyType) {
 		Block b = w.getBlockState(coord).getBlock();
 		TileEntity te = w.getTileEntity(coord);
 		if (te == null) return 0;
@@ -132,7 +132,7 @@ public class LightWeightPowerRegistry {
 	 * @return The amount of energy that the target machine actually added (may be less than the
 	 * amount provided)
 	 */
-	public float addPower(IBlockAccess w, BlockPos coord, ConduitType energyType, float amount) {
+	public float addPower(IBlockReader w, BlockPos coord, ConduitType energyType, float amount) {
 		Block b = w.getBlockState(coord).getBlock();
 		TileEntity te = w.getTileEntity(coord);
 		if (te == null) return 0;

@@ -3,310 +3,120 @@ package cyano.poweradvantage.api.simple;
 import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.PowerConnectorContext;
 import cyano.poweradvantage.api.fluid.FluidConduitBlock;
-import com.mcmoddev.poweradvantage.util.PowerHelper;
+import zone.moddev.mc.poweradvantage.util.PowerHelper;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.properties.PropertyBool;
-import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
+import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.pathfinding.PathType;
+import net.minecraft.state.BooleanProperty;
+import net.minecraft.state.StateContainer;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorld;
 
-import java.util.List;
 /**
- * <p>
- * This block class implements the cyano.poweradvantage.api.ConduitBlock 
- * class and renders as a pipe. You will need to have the appropriate blockstate 
- * and block model json files for it to render as pipes.
- * </p><p>
- * Extend this class to create your own fluid conduits with minimal effort.
- * </p>
- * @author DrCyano
- *
+ * Standard six-way fluid conduit block used by PowerAdvantage and extensions.
  */
 public abstract class BlockSimpleFluidConduit extends FluidConduitBlock {
+    public static final BooleanProperty SOUTH = BooleanProperty.create("south");
+    public static final BooleanProperty NORTH = BooleanProperty.create("north");
+    public static final BooleanProperty EAST = BooleanProperty.create("east");
+    public static final BooleanProperty WEST = BooleanProperty.create("west");
+    public static final BooleanProperty UP = BooleanProperty.create("up");
+    public static final BooleanProperty DOWN = BooleanProperty.create("down");
 
-	/**
-	 * radius of the pipe model, in meters (0.0625 per pixel)
-	 */
-	private final float pipeRadius; // in fraction of a block (aka meters)
-	/**
-	 * Blockstate property
-	 */
-	public static final PropertyBool SOUTH = PropertyBool.create("south");
-	/**
-	 * Blockstate property
-	 */
-	public static final PropertyBool NORTH = PropertyBool.create("north");
-	/**
-	 * Blockstate property
-	 */
-	public static final PropertyBool EAST = PropertyBool.create("east");
-	/**
-	 * Blockstate property
-	 */
-	public static final PropertyBool WEST = PropertyBool.create("west");
-	/**
-	 * Blockstate property
-	 */
-	public static final PropertyBool UP = PropertyBool.create("up");
-	/**
-	 * Blockstate property
-	 */
-	public static final PropertyBool DOWN = PropertyBool.create("down");
+    private final double pipeRadius;
 
-	/**
-	 * Standard constructor. Must be called in the first line of code in the
-	 * constructor of extending classes.
-	 *
-	 * @param blockMaterial This is the material for the block. Typically is set
-	 *                      to net.minecraft.block.material.Material.piston, though any material can
-	 *                      be used.
-	 * @param hardness      This affects how long it takes to break the block. 0.5 is
-	 *                      a good value if you want it to be easy to break.
-	 * @param pipeRadius_m  This is used to determine the size of the hit-boxes
-	 *                      around the conduit pipes (measured in meters). For each pixel of radius,
-	 *                      add 0.0625 (1/16).
-	 *                      For example, if your block model files use
-	 *                      <i>poweradvantage:block/pipe3_*</i> as the parent model, then the radius
-	 *                      of the model will be 3 pixels (6 pixels wide) and you will want to use
-	 *                      0.1875 (3/16) as the pipeRadius. A pixel in Minecraft is defines as 1/16
-	 *                      of a block, regardless of the texture resolution.
-	 */
-	public BlockSimpleFluidConduit(Material blockMaterial, float hardness, float pipeRadius_m) {
-		super(blockMaterial);
-		super.setHardness(hardness);
-		this.pipeRadius = pipeRadius_m;
-		this.setDefaultState(this.blockState.getBaseState()
-				.withProperty(WEST, false)
-				.withProperty(DOWN, false)
-				.withProperty(SOUTH, false)
-				.withProperty(EAST, false)
-				.withProperty(UP, false)
-				.withProperty(NORTH, false));
-	}
+    public BlockSimpleFluidConduit(Material material, float hardness, float pipeRadius) {
+        super(material, hardness);
+        this.pipeRadius = pipeRadius;
+        setDefaultState(getStateContainer().getBaseState()
+                .with(WEST, false).with(DOWN, false).with(SOUTH, false)
+                .with(EAST, false).with(UP, false).with(NORTH, false));
+    }
 
+    @Override public boolean isPowerSink(ConduitType conduitType) { return false; }
+    @Override public boolean isPowerSource(ConduitType conduitType) { return false; }
 
-	/**
-	 * Determines whether this block/entity should receive energy
-	 *
-	 * @param powerType Type of power
-	 * @return true if this block/entity should receive energy
-	 */
-	@Override
-	public boolean isPowerSink(ConduitType powerType) {
-		return false;
-	}
+    @Override
+    protected void fillStateContainer(StateContainer.Builder<Block, IBlockState> builder) {
+        builder.add(WEST, DOWN, SOUTH, EAST, UP, NORTH);
+    }
 
-	/**
-	 * Determines whether this block/entity can provide energy
-	 *
-	 * @param powerType Type of power
-	 * @return true if this block/entity can provide energy
-	 */
-	@Override
-	public boolean isPowerSource(ConduitType powerType) {
-		return false;
-	}
+    @Override
+    public IBlockState getStateForPlacement(BlockItemUseContext context) {
+        return connectedState(getDefaultState(), context.getWorld(), context.getPos());
+    }
 
-	/**
-	 * Creates a blockstate instance.
-	 */
-	@Override
-	protected BlockStateContainer createBlockState() {
-		return new BlockStateContainer(this, new IProperty[]{WEST, DOWN, SOUTH, EAST, UP, NORTH});
-	}
+    @Override
+    public IBlockState updatePostPlacement(IBlockState state, EnumFacing facing, IBlockState facingState,
+            IWorld world, BlockPos currentPos, BlockPos facingPos) {
+        return state.with(property(facing), canConnectTo(world, currentPos, state, facing));
+    }
 
-	/**
-	 * Sets the data values of a BlockState instance to represent this block
-	 */
-	@Override
-	public IBlockState getActualState(final IBlockState bs, final IBlockAccess world, final BlockPos coord) {
-		IBlockState oldBS = bs;
-		return bs
-				.withProperty(WEST, this.canConnectTo(world, coord, oldBS, EnumFacing.WEST, coord.west()))
-				.withProperty(DOWN, this.canConnectTo(world, coord, oldBS, EnumFacing.DOWN, coord.down()))
-				.withProperty(SOUTH, this.canConnectTo(world, coord, oldBS, EnumFacing.SOUTH, coord.south()))
-				.withProperty(EAST, this.canConnectTo(world, coord, oldBS, EnumFacing.EAST, coord.east()))
-				.withProperty(UP, this.canConnectTo(world, coord, oldBS, EnumFacing.UP, coord.up()))
-				.withProperty(NORTH, this.canConnectTo(world, coord, oldBS, EnumFacing.NORTH, coord.north()));
-	}
+    private IBlockState connectedState(IBlockState state, IBlockReader world, BlockPos pos) {
+        return state.with(WEST, canConnectTo(world, pos, state, EnumFacing.WEST))
+                .with(DOWN, canConnectTo(world, pos, state, EnumFacing.DOWN))
+                .with(SOUTH, canConnectTo(world, pos, state, EnumFacing.SOUTH))
+                .with(EAST, canConnectTo(world, pos, state, EnumFacing.EAST))
+                .with(UP, canConnectTo(world, pos, state, EnumFacing.UP))
+                .with(NORTH, canConnectTo(world, pos, state, EnumFacing.NORTH));
+    }
 
+    private static BooleanProperty property(EnumFacing facing) {
+        switch (facing) {
+            case DOWN: return DOWN;
+            case UP: return UP;
+            case NORTH: return NORTH;
+            case SOUTH: return SOUTH;
+            case WEST: return WEST;
+            case EAST: return EAST;
+            default: throw new IllegalArgumentException(String.valueOf(facing));
+        }
+    }
 
-	/**
-	 * Calculates the collision boxes for this block.
-	 */
-	@Override
-	public AxisAlignedBB getBoundingBox(final IBlockState bs, final IBlockAccess world, final BlockPos coord) {
-		IBlockState oldBS = bs;
-		final boolean connectNorth = this.canConnectTo(world, coord, oldBS, EnumFacing.NORTH, coord.north());
-		final boolean connectSouth = this.canConnectTo(world, coord, oldBS, EnumFacing.SOUTH, coord.south());
-		final boolean connectWest = this.canConnectTo(world, coord, oldBS, EnumFacing.WEST, coord.west());
-		final boolean connectEast = this.canConnectTo(world, coord, oldBS, EnumFacing.EAST, coord.east());
-		final boolean connectUp = this.canConnectTo(world, coord, oldBS, EnumFacing.UP, coord.up());
-		final boolean connectDown = this.canConnectTo(world, coord, oldBS, EnumFacing.DOWN, coord.down());
-		final boolean allFalse = !(connectNorth || connectSouth || connectWest || connectEast || connectUp || connectDown);
+    protected boolean canConnectTo(IBlockReader world, BlockPos pos, IBlockState state,
+            EnumFacing face) {
+        for (ConduitType type : getTypes()) {
+            if (PowerHelper.areConnectable(new PowerConnectorContext(type, world, state, pos, face))) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-		float radius = pipeRadius;
-		float rminus = 0.5f - radius;
-		float rplus = 0.5f + radius;
+    @Override
+    public VoxelShape getShape(IBlockState state, IBlockReader world, BlockPos pos) {
+        double min = 8.0D - pipeRadius * 16.0D;
+        double max = 8.0D + pipeRadius * 16.0D;
+        VoxelShape shape = Block.makeCuboidShape(min, min, min, max, max, max);
+        boolean connected = false;
+        for (EnumFacing facing : EnumFacing.values()) {
+            if (!state.get(property(facing))) continue;
+            connected = true;
+            switch (facing) {
+                case DOWN: shape = VoxelShapes.or(shape, Block.makeCuboidShape(min, 0, min, max, min, max)); break;
+                case UP: shape = VoxelShapes.or(shape, Block.makeCuboidShape(min, max, min, max, 16, max)); break;
+                case NORTH: shape = VoxelShapes.or(shape, Block.makeCuboidShape(min, min, 0, max, max, min)); break;
+                case SOUTH: shape = VoxelShapes.or(shape, Block.makeCuboidShape(min, min, max, max, max, 16)); break;
+                case WEST: shape = VoxelShapes.or(shape, Block.makeCuboidShape(0, min, min, min, max, max)); break;
+                case EAST: shape = VoxelShapes.or(shape, Block.makeCuboidShape(max, min, min, 16, max, max)); break;
+            }
+        }
+        if (!connected) {
+            shape = VoxelShapes.or(shape, Block.makeCuboidShape(0, min, min, 16, max, max));
+            shape = VoxelShapes.or(shape, Block.makeCuboidShape(min, min, 0, max, max, 16));
+        }
+        return shape;
+    }
 
-		float x1 = rminus;
-		float x2 = rplus;
-		float y1 = rminus;
-		float y2 = rplus;
-		float z1 = rminus;
-		float z2 = rplus;
-		if (connectNorth) {
-			z1 = 0.0f;
-		}
-		if (connectSouth) {
-			z2 = 1.0f;
-		}
-		if (connectWest) {
-			x1 = 0.0f;
-		}
-		if (connectEast) {
-			x2 = 1.0f;
-		}
-		if (connectDown) {
-			y1 = 0.0f;
-		}
-		if (connectUp) {
-			y2 = 1.0f;
-		}
-		if (allFalse) {// Horizontal '+' when making no connections
-			z1 = 0.0f;
-			z2 = 1.0f;
-			x1 = 0.0f;
-			x2 = 1.0f;
-		}
-		return new AxisAlignedBB(x1, y1, z1, x2, y2, z2);
-	}
+    @Override public boolean isFullCube(IBlockState state) { return false; }
+    @Override public boolean allowsMovement(IBlockState state, IBlockReader world, BlockPos pos, PathType type) { return false; }
 
-	/**
-	 * Calculates the collision boxes for this block.
-	 */
-	@Override
-	public void addCollisionBoxToList(
-			final IBlockState bs, final World world, final BlockPos coord,
-			final AxisAlignedBB box, final List<AxisAlignedBB> collisionBoxList,
-			final Entity entity, final boolean isActualState
-	) {
-		IBlockState oldBS = bs;
-		final boolean connectNorth = this.canConnectTo(world, coord, oldBS, EnumFacing.NORTH, coord.north());
-		final boolean connectSouth = this.canConnectTo(world, coord, oldBS, EnumFacing.SOUTH, coord.south());
-		final boolean connectWest = this.canConnectTo(world, coord, oldBS, EnumFacing.WEST, coord.west());
-		final boolean connectEast = this.canConnectTo(world, coord, oldBS, EnumFacing.EAST, coord.east());
-		final boolean connectUp = this.canConnectTo(world, coord, oldBS, EnumFacing.UP, coord.up());
-		final boolean connectDown = this.canConnectTo(world, coord, oldBS, EnumFacing.DOWN, coord.down());
-		final boolean allFalse = !(connectNorth || connectSouth || connectWest || connectEast || connectUp || connectDown);
-		// Horizontal '+' when making no connections
-
-		float radius = pipeRadius;
-		float rminus = 0.5f - radius;
-		float rplus = 0.5f + radius;
-
-		AxisAlignedBB newBox;
-		newBox = new AxisAlignedBB(rminus, rminus, rminus, rplus, rplus, rplus);
-		super.addCollisionBoxToList(coord, box, collisionBoxList, newBox);
-
-		if (connectUp) {
-			newBox = new AxisAlignedBB(rminus, rminus, rminus, rplus, 1f, rplus);
-			super.addCollisionBoxToList(coord, box, collisionBoxList, newBox);
-		}
-		if (connectDown) {
-			newBox = new AxisAlignedBB(rminus, 0f, rminus, rplus, rplus, rplus);
-			super.addCollisionBoxToList(coord, box, collisionBoxList, newBox);
-		}
-		if (allFalse || connectEast) {
-			newBox = new AxisAlignedBB(rminus, rminus, rminus, 1f, rplus, rplus);
-			super.addCollisionBoxToList(coord, box, collisionBoxList, newBox);
-		}
-		if (allFalse || connectWest) {
-			newBox = new AxisAlignedBB(0f, rminus, rminus, rplus, rplus, rplus);
-			super.addCollisionBoxToList(coord, box, collisionBoxList, newBox);
-		}
-		if (allFalse || connectSouth) {
-			newBox = new AxisAlignedBB(rminus, rminus, rminus, rplus, rplus, 1f);
-			super.addCollisionBoxToList(coord, box, collisionBoxList, newBox);
-		}
-		if (allFalse || connectNorth) {
-			newBox = new AxisAlignedBB(rminus, rminus, 0f, rplus, rplus, rplus);
-			super.addCollisionBoxToList(coord, box, collisionBoxList, newBox);
-		}
-	}
-
-
-	/**
-	 * This method determines whether to connect to a neighboring block.
-	 * Override this method to change block connection behavior.
-	 *
-	 * @param w          World instance
-	 * @param thisBlock  The block that is checking its neighbor
-	 * @param bs         Block state of this block
-	 * @param face       The face on the first block through which the connection would happen
-	 * @param otherBlock Coordinate of neighboring block
-	 * @return Default implementation: true if the neighboring block implements
-	 * ITypedConductor and has the same energy type as this block. Overriding
-	 * the canConnectTo(ConductorType) method will change the results of this
-	 * method.
-	 */
-	protected boolean canConnectTo(IBlockAccess w, BlockPos thisBlock, IBlockState bs, EnumFacing face, BlockPos otherBlock) {
-		w.getBlockState(otherBlock);
-		ConduitType[] types = getTypes();
-		for (int i = 0; i < types.length; i++) {
-			if (PowerHelper.areConnectable(new PowerConnectorContext(types[i], w, bs, thisBlock, face))) return true;
-		}
-		return false;
-	}
-
-
-	/**
-	 * Override of default block behavior
-	 */
-	@Override
-	public boolean isOpaqueCube(IBlockState bs) {
-		return false;
-	}
-
-	/**
-	 * Override of default block behavior
-	 */
-	@Override
-	public boolean isFullCube(IBlockState bs) {
-		return false;
-	}
-
-	/**
-	 * Override of default block behavior
-	 */
-	@Override
-	public boolean isPassable(final IBlockAccess world, final BlockPos coord) {
-		return false;
-	}
-
-
-	/**
-	 * Metadata not used.
-	 */
-	@Override
-	public int getMetaFromState(final IBlockState bs) {
-		return 0;
-	}
-
-	/**
-	 * Override of default block behavior
-	 */
-	@SideOnly(Side.CLIENT)
-	@Override
-	public boolean shouldSideBeRendered(IBlockState bs, final IBlockAccess world, final BlockPos coord, final EnumFacing face) {
-		return true;
-	}
+    /** Legacy metadata bridge retained for migration tests. */
+    public int getMetaFromState(IBlockState state) { return 0; }
 }

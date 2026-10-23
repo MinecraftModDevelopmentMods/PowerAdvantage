@@ -3,13 +3,12 @@ package cyano.poweradvantage.api.fluid;
 import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.PowerRequest;
 import cyano.poweradvantage.api.PoweredEntity;
-import com.mcmoddev.poweradvantage.conduitnetwork.ConduitRegistry;
-import com.mcmoddev.poweradvantage.init.Fluids;
+import zone.moddev.mc.poweradvantage.conduitnetwork.ConduitRegistry;
+import zone.moddev.mc.poweradvantage.init.Fluids;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.EnumFacing;
-import net.minecraftforge.fluids.*;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 import java.util.List;
 
@@ -29,8 +28,11 @@ import java.util.List;
  * @author DrCyano
  *
  */
-@SuppressWarnings("deprecation")
-public abstract class FluidPoweredEntity extends PoweredEntity implements IFluidHandler {
+public abstract class FluidPoweredEntity extends PoweredEntity implements IAdvantageFluidHandler {
+
+	protected FluidPoweredEntity(TileEntityType<?> type) {
+		super(type);
+	}
 
 
 	/**
@@ -77,8 +79,8 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	public NBTTagCompound writeToNBT(final NBTTagCompound tagRoot) {
-		super.writeToNBT(tagRoot);
+	public NBTTagCompound write(final NBTTagCompound tagRoot) {
+		super.write(tagRoot);
 		NBTTagCompound tankTag = new NBTTagCompound();
 		this.getTank().writeToNBT(tankTag);
 		tagRoot.setTag("Tank", tankTag);
@@ -91,12 +93,12 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	public void readFromNBT(final NBTTagCompound tagRoot) {
-		super.readFromNBT(tagRoot);
-		if (tagRoot.hasKey("Tank")) {
-			NBTTagCompound tankTag = tagRoot.getCompoundTag("Tank");
+	public void read(final NBTTagCompound tagRoot) {
+		super.read(tagRoot);
+		if (tagRoot.contains("Tank", 10)) {
+			NBTTagCompound tankTag = tagRoot .getCompound("Tank");
 			getTank().readFromNBT(tankTag);
-			if (tankTag.hasKey("Empty")) {
+			if (tankTag.contains("Empty", 1)) {
 				// empty the tank if NBT says its empty (not default behavior of Tank.readFromNBT(...) )
 				getTank().setFluid(null);
 			}
@@ -151,7 +153,8 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	public float subtractEnergy(float amount, ConduitType type) {
 		if (Fluids.isFluidType(type)) {
 			if (this.canDrain(null, Fluids.conduitTypeToFluid(type))) {
-				return this.drain(null, new FluidStack(Fluids.conduitTypeToFluid(type), (int) amount), true).amount;
+				FluidStack drained = this.drain(null, new FluidStack(Fluids.conduitTypeToFluid(type), (int) amount), true);
+				return drained == null ? 0 : drained.amount;
 			} else {
 				return 0;
 			}
@@ -171,17 +174,8 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 
 
 	/**
-	 * Implementation of IFluidHandler
+	 * Adds fluid to this machine's native-fluid-backed tank.
 	 */
-	@Override
-	public IFluidTankProperties[] getTankProperties() {
-		return getTank().getTankProperties();
-	}
-
-	/**
-	 * Implementation of IFluidHandler
-	 */
-	@Override
 	public int fill(FluidStack fluid, boolean forReal) {
 		return fill(null, fluid, forReal);
 	}
@@ -189,7 +183,6 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	/**
 	 * Implementation of IFluidHandler
 	 */
-	@Override
 	public FluidStack drain(FluidStack fluid, boolean forReal) {
 		return drain(null, fluid, forReal);
 	}
@@ -197,7 +190,6 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	/**
 	 * Implementation of IFluidHandler
 	 */
-	@Override
 	public FluidStack drain(int amount, boolean forReal) {
 		return drain(null, amount, forReal);
 	}
@@ -210,7 +202,7 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param forReal if true, then the fluid in the tank will change
 	 */
 	public int fill(EnumFacing face, FluidStack fluid, boolean forReal) {
-		if (getTank().getFluidAmount() <= 0 || getTank().getFluid().getFluid().equals(fluid.getFluid())) {
+		if (fluid != null && (getTank().getFluidAmount() <= 0 || getTank().getFluid().getFluid().isEquivalentTo(fluid.getFluid()))) {
 			return getTank().fill(fluid, forReal);
 		} else {
 			return 0;
@@ -225,7 +217,7 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param forReal if true, then the fluid in the tank will change
 	 */
 	public FluidStack drain(EnumFacing face, FluidStack fluid, boolean forReal) {
-		if (getTank().getFluidAmount() > 0 && getTank().getFluid().getFluid().equals(fluid.getFluid())) {
+		if (fluid != null && getTank().getFluidAmount() > 0 && getTank().getFluid().getFluid().isEquivalentTo(fluid.getFluid())) {
 			return getTank().drain(fluid.amount, forReal);
 		} else {
 			return new FluidStack(fluid.getFluid(), 0);
@@ -254,6 +246,7 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param fluid The fluid being added/removed
 	 */
 	public boolean canFill(EnumFacing face, Fluid fluid) {
+		if (fluid == null) return false;
 		if (getTank().getFluid() == null) return true;
 		return getTank().getFluidAmount() <= getTank().getCapacity() && fluid.equals(getTank().getFluid().getFluid());
 	}
@@ -265,6 +258,7 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IFluid
 	 * @param fluid The fluid being added/removed
 	 */
 	public boolean canDrain(EnumFacing face, Fluid fluid) {
+		if (fluid == null) return false;
 		if (getTank().getFluid() == null) return false;
 		return getTank().getFluidAmount() > 0 && fluid.equals(getTank().getFluid().getFluid());
 	}

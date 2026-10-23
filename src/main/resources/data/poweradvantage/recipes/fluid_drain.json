@@ -1,0 +1,44 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " x ",
+    "w#w",
+    "ppp"
+  ],
+  "key": {
+    "x": {
+      "tag": "forge:bars"
+    },
+    "w": {
+      "tag": "forge:plates/steel"
+    },
+    "#": {
+      "tag": "forge:frames/steel"
+    },
+    "p": {
+      "tag": "forge:pipes"
+    }
+  },
+  "result": {
+    "item": "poweradvantage:fluid_drain"
+  },
+  "group": "poweradvantage:fluid_drain",
+  "conditions": [
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:bars"
+    },
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:frames/steel"
+    },
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:pipes"
+    },
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:plates/steel"
+    }
+  ]
+}

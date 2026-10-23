@@ -1,0 +1,39 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " x ",
+    "x/x",
+    " x "
+  ],
+  "key": {
+    "x": {
+      "tag": "forge:ingots/steel"
+    },
+    "/": {
+      "tag": "forge:nuggets/bronze"
+    }
+  },
+  "result": {
+    "item": "poweradvantage:sprocket",
+    "count": 4
+  },
+  "conditions": [
+    {
+      "type": "poweradvantage:recipe_mode",
+      "mode": "TECH_PROGRESSION"
+    },
+    {
+      "type": "poweradvantage:tag_empty",
+      "tag": "forge:rods"
+    },
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:ingots/steel"
+    },
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:nuggets/bronze"
+    }
+  ],
+  "group": "poweradvantage:sprocket"
+}

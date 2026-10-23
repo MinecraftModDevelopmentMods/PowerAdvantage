@@ -1,11 +1,12 @@
 package cyano.poweradvantage.api;
 
-import com.mcmoddev.poweradvantage.conduitnetwork.ConduitRegistry;
+import zone.moddev.mc.poweradvantage.conduitnetwork.ConduitRegistry;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -28,6 +29,10 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 
 	private final int powerUpdateInterval = 8;
 	private int conduitRefreshDelay = 2;
+
+	protected PoweredEntity(TileEntityType<?> type) {
+		super(type);
+	}
 
 	/**
 	 * Gets the amount of energy that can be stored in this machine.
@@ -123,7 +128,6 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 	 * @param newSate  State after change
 	 * @return true if this TileEntity should be invalidated (deleted and recreated), false otherwise
 	 */
-	@Override
 	public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) {
 		return oldState.getBlock() != newSate.getBlock();
 	}
@@ -141,7 +145,7 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 		super.onLoad();
 		this.conduitRefreshDelay = 2;
 		if (this.world != null && !this.world.isRemote) {
-			ConduitRegistry.getInstance().conduitBlockLoadedEvent(this.world, this.world.provider.getDimension(), this.getTypes());
+			ConduitRegistry.getInstance().conduitBlockLoadedEvent(this.world, this.world.dimension.getType().getId(), this.getTypes());
 		}
 	}
 
@@ -165,13 +169,13 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 	 * to do tick updates
 	 */
 	@Override
-	public final void update() {
+	public final void tick() {
 		// this method was moved from TileEntity to IUpdatePlayerListBox
 		if (this.isServer()) {
 			this.refreshConduitNetworkAfterLoad();
 		}
 		this.tickUpdate(this.isServer());
-		if (this.isServer() && ((this.getWorld().getTotalWorldTime() + this.getTickOffset()) % powerUpdateInterval == 0)) {
+		if (this.isServer() && ((this.getWorld().getGameTime() + this.getTickOffset()) % powerUpdateInterval == 0)) {
 			this.powerUpdate();
 		}
 	}
@@ -179,7 +183,7 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 	private void refreshConduitNetworkAfterLoad() {
 		if (this.conduitRefreshDelay < 0) return;
 		if (this.conduitRefreshDelay-- > 0) return;
-		ConduitRegistry.getInstance().conduitBlockLoadedEvent(this.world, this.world.provider.getDimension(), this.getTypes());
+		ConduitRegistry.getInstance().conduitBlockLoadedEvent(this.world, this.world.dimension.getType().getId(), this.getTypes());
 	}
 
 	/**
@@ -237,10 +241,10 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 	 * packet.
 	 */
 	@Override
-	public void readFromNBT(final NBTTagCompound tagRoot) {
-		super.readFromNBT(tagRoot);
+	public void read(final NBTTagCompound tagRoot) {
+		super.read(tagRoot);
 		this.conduitRefreshDelay = 2;
-		if (tagRoot.hasKey("Energy")) {
+		if (tagRoot.contains("Energy", 11)) {
 			int[] data = tagRoot.getIntArray("Energy");
 			for (int i = 0; i < data.length; i++) {
 				if (i >= this.getTypes().length) break;
@@ -254,8 +258,8 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 	 * the network.
 	 */
 	@Override
-	public NBTTagCompound writeToNBT(final NBTTagCompound tagRoot) {
-		super.writeToNBT(tagRoot);
+	public NBTTagCompound write(final NBTTagCompound tagRoot) {
+		super.write(tagRoot);
 		int[] data = new int[this.getTypes().length];
 		for (int i = 0; i < data.length; i++) {
 			data[i] = Float.floatToIntBits(this.getEnergy(this.getTypes()[i]));

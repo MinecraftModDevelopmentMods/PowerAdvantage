@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "bpb",
+    " f "
+  ],
+  "key": {
+    "b": {
+      "item": "minecraft:bucket"
+    },
+    "p": {
+      "tag": "forge:pipes"
+    },
+    "f": {
+      "item": "minecraft:furnace"
+    }
+  },
+  "result": {
+    "item": "poweradvantage:still"
+  },
+  "group": "poweradvantage:still",
+  "conditions": [
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:pipes"
+    }
+  ]
+}

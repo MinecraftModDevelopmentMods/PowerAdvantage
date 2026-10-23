@@ -1,6 +1,8 @@
 package cyano.poweradvantage.api;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -12,8 +14,10 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraft.world.IBlockReader;
+import zone.moddev.mc.poweradvantage.registry.MachineGUIRegistry;
+import cyano.poweradvantage.api.fluid.IAdvantageFluidHandler;
+import zone.moddev.mc.poweradvantage.util.FluidContainerHelper;
 
 /**
  * <p>
@@ -36,12 +40,20 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
 	 * other Minecraft rules).
 	 */
 	public GUIBlock(Material m) {
-		super(m);
-        this.setLightOpacity(0);
+		this(m, 1.0F);
 	}
 
+	public GUIBlock(Material m, float hardness) {
+		this(Block.Properties.create(m).hardnessAndResistance(hardness).variableOpacity());
+	}
+
+	protected GUIBlock(Block.Properties properties) {
+		super(properties);
+	}
+
+	@Deprecated
 	protected void setPowerAdvantageHardness(float hardness) {
-		super.setHardness(hardness);
+		// Block properties are immutable after construction in 1.13.
 	}
 	
 	private int guiId = 0;
@@ -93,8 +105,13 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
 	/**
 	 * Boilerplate code
 	 */
-	@Override
     public boolean isOpaqueCube(IBlockState bs) {
+        return false;
+    }
+
+    /** 1.13 uses this flag, not the legacy opacity overload, to cull neighbours. */
+    @Override
+    public boolean isSolid(IBlockState state) {
         return false;
     }
 	
@@ -116,7 +133,7 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
      */
 	@SuppressWarnings("deprecation")
     @Override
-    public boolean onBlockActivated(World w, BlockPos coord, IBlockState bs,
+    public boolean onBlockActivated(IBlockState bs, World w, BlockPos coord,
 									EntityPlayer player, EnumHand hand, EnumFacing facing,
 									float hitX, float hitY, float hitZ) {
         if (w.isRemote) {
@@ -128,9 +145,8 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
         }
         // handle buckets and fluid containers
 		net.minecraft.item.ItemStack item = player.getHeldItem(hand);
-		if(item != null && !item.isEmpty()
-				&& tileEntity.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, facing)
-				&& FluidUtil.interactWithFluidHandler(player, hand, w, coord, facing)) {
+		if(item != null && !item.isEmpty() && tileEntity instanceof IAdvantageFluidHandler
+				&& FluidContainerHelper.interact(player, hand, (IAdvantageFluidHandler) tileEntity, facing)) {
 			return true;
 		}
 
@@ -139,22 +155,25 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
 		if(tileEntity instanceof PoweredEntity && player instanceof EntityPlayerMP){
 			((PoweredEntity)tileEntity).syncPowerAdvantageDataTo((EntityPlayerMP)player);
 		}
-        player.openGui(this.getGuiOwner(), this.getGuiID(), w, coord.getX(), coord.getY(), coord.getZ());
+		if (!(player instanceof EntityPlayerMP)) return false;
+		MachineGUIRegistry.open((EntityPlayerMP) player, w, coord, this.getGuiID());
         return true;
     }
 
     
    
 	@Override
-	public void breakBlock(World world, BlockPos pos, IBlockState state){
-		TileEntity te = world.getTileEntity(pos);
-		if (te instanceof IInventory)
-		{
-			InventoryHelper.dropInventoryItems(world, pos, (IInventory)te);
-			((IInventory)te).clear();
-			world.updateComparatorOutputLevel(pos, this);
+	public void onReplaced(IBlockState state, World world, BlockPos pos, IBlockState newState,
+			boolean isMoving) {
+		if (state.getBlock() != newState.getBlock()) {
+			TileEntity te = world.getTileEntity(pos);
+			if (te instanceof IInventory) {
+				InventoryHelper.dropInventoryItems(world, pos, (IInventory) te);
+				((IInventory) te).clear();
+				world.updateComparatorOutputLevel(pos, this);
+			}
+			super.onReplaced(state, world, pos, newState, isMoving);
 		}
-		super.breakBlock(world, pos, state);
 	}
 
 }

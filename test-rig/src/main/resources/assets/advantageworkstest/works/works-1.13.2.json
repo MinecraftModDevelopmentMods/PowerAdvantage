@@ -1,0 +1,6547 @@
+{
+  "format": 1,
+  "minecraft": "1.13.2",
+  "title": "Advantage Works 1.13.2 Commissioning Ground",
+  "handbook": "docs/1.10/commissioning-and-fault-finding.md",
+  "districts": [
+    {
+      "id": "power",
+      "name": "Power Works",
+      "woolMeta": 4
+    },
+    {
+      "id": "steam",
+      "name": "Steam Works",
+      "woolMeta": 1
+    },
+    {
+      "id": "electric",
+      "name": "Electric Works",
+      "woolMeta": 3
+    }
+  ],
+  "stations": [
+    {
+      "id": "W-01",
+      "name": "Fluid Transfer and Persistence",
+      "district": "power",
+      "origin": [
+        -128,
+        3,
+        -32
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": false,
+      "requiredMods": [
+        "poweradvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            3,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_drain",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            5,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_storage_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            7,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_switch",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            9,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_metal_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            9,
+            1,
+            8
+          ],
+          "block": "poweradvantage:fluid_discharge",
+          "meta": 0
+        },
+        {
+          "pos": [
+            13,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_storage_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            15,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_metal_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            17,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_pipe_terminal",
+          "meta": 0
+        },
+        {
+          "pos": [
+            20,
+            1,
+            7
+          ],
+          "block": "poweradvantage:steel_frame",
+          "meta": 0
+        },
+        {
+          "pos": [
+            20,
+            2,
+            7
+          ],
+          "block": "poweradvantage:infinite_steam",
+          "meta": 0
+        },
+        {
+          "pos": [
+            21,
+            2,
+            7
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        },
+        {
+          "pos": [
+            22,
+            2,
+            7
+          ],
+          "block": "poweradvantage:infinite_quantum",
+          "meta": 0
+        },
+        {
+          "pos": [20, 1, 14],
+          "block": "poweradvantage:converter_rf_steam",
+          "meta": 0,
+          "optional": true
+        },
+        {
+          "pos": [21, 1, 14],
+          "block": "poweradvantage:converter_rf_electricity",
+          "meta": 0,
+          "optional": true
+        },
+        {
+          "pos": [22, 1, 14],
+          "block": "poweradvantage:converter_rf_quantum",
+          "meta": 0,
+          "optional": true
+        },
+        {
+          "pos": [23, 1, 14],
+          "block": "poweradvantage:converter_tr_electricity",
+          "meta": 0,
+          "optional": true
+        },
+        {
+          "pos": [
+            20,
+            1,
+            10
+          ],
+          "block": "poweradvantage:crude_oil",
+          "meta": 0
+        },
+        {
+          "pos": [
+            21,
+            1,
+            10
+          ],
+          "block": "poweradvantage:refined_oil",
+          "meta": 0
+        },
+        {
+          "pos": [
+            24,
+            1,
+            24
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        }
+      ],
+      "setupActions": [
+        {
+          "type": "setInventory",
+          "pos": [
+            24,
+            1,
+            24
+          ],
+          "slot": 0,
+          "item": "poweradvantage:starch",
+          "count": 16
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            24,
+            1,
+            24
+          ],
+          "slot": 1,
+          "item": "poweradvantage:bioplastic_ingot",
+          "count": 16
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            24,
+            1,
+            24
+          ],
+          "slot": 2,
+          "item": "poweradvantage:sprocket",
+          "count": 16
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            24,
+            1,
+            24
+          ],
+          "slot": 3,
+          "item": "poweradvantage:rotator_tool",
+          "count": 1
+        },
+        {
+          "type": "setFluid",
+          "pos": [13, 1, 7],
+          "fluid": "water",
+          "value": 2000
+        }
+      ],
+      "startActions": [
+        {
+          "type": "setBlock",
+          "pos": [
+            2,
+            1,
+            7
+          ],
+          "block": "minecraft:water",
+          "meta": 0
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            2,
+            1,
+            7
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "drain-present",
+          "type": "block",
+          "pos": [
+            3,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_drain"
+        },
+        {
+          "id": "portable-tank-tile",
+          "type": "tileExists",
+          "pos": [
+            5,
+            1,
+            7
+          ]
+        },
+        {
+          "id": "metal-tank-tile",
+          "type": "tileExists",
+          "pos": [
+            9,
+            1,
+            7
+          ]
+        },
+        {
+          "id": "calibration-tank-volume",
+          "type": "nbtNumber",
+          "pos": [13, 1, 7],
+          "nbtPath": "Tank.Amount",
+          "value": 2000,
+          "operator": "equals"
+        },
+        {
+          "id": "power-items",
+          "type": "registryItem",
+          "pos": null,
+          "item": "poweradvantage:rotator_tool"
+        },
+        {
+          "id": "orespawn-integration",
+          "type": "modLoaded",
+          "pos": null,
+          "item": "orespawn",
+          "requiredMods": ["orespawn"]
+        },
+        {
+          "id": "rf-steam-converter",
+          "type": "registryBlock",
+          "pos": null,
+          "block": "poweradvantage:converter_rf_steam",
+          "optional": true
+        },
+        {
+          "id": "rf-electric-converter",
+          "type": "registryBlock",
+          "pos": null,
+          "block": "poweradvantage:converter_rf_electricity",
+          "optional": true
+        },
+        {
+          "id": "rf-quantum-converter",
+          "type": "registryBlock",
+          "pos": null,
+          "block": "poweradvantage:converter_rf_quantum",
+          "optional": true
+        },
+        {
+          "id": "tech-reborn-converter",
+          "type": "registryBlock",
+          "pos": null,
+          "block": "poweradvantage:converter_tr_electricity",
+          "optional": true
+        }
+      ],
+      "manualChecks": [
+        "Start, allow water transfer, and compare source loss with both tank gains.",
+        "Power the fluid switch with redstone; verify complete isolation and recovery.",
+        "Test empty, partial, full, matching-filter, and nonmatching-filter metal tanks.",
+        "Checkpoint quantities before same-session reload, full restart, and chunk reload.",
+        "Break/place the portable tank and confirm fluid stays on its item; metal tank loss is expected.",
+        "Run a bounded 30-minute transfer and reconcile every millibucket."
+      ]
+    },
+    {
+      "id": "W-02",
+      "name": "Drain and Discharge Reach",
+      "district": "power",
+      "origin": [
+        -96,
+        3,
+        -32
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": true,
+      "requiredMods": [
+        "poweradvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            4,
+            1,
+            8
+          ],
+          "block": "poweradvantage:fluid_drain",
+          "meta": 0
+        },
+        {
+          "pos": [
+            5,
+            1,
+            8
+          ],
+          "block": "poweradvantage:fluid_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            1,
+            8
+          ],
+          "block": "poweradvantage:fluid_metal_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            14,
+            1,
+            8
+          ],
+          "block": "poweradvantage:fluid_metal_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            15,
+            1,
+            8
+          ],
+          "block": "poweradvantage:fluid_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            16,
+            1,
+            8
+          ],
+          "block": "poweradvantage:fluid_discharge",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            1,
+            7
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            1,
+            8
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            1,
+            9
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            16,
+            0,
+            7
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            16,
+            0,
+            8
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            16,
+            0,
+            9
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        }
+      ],
+      "setupActions": [
+        {
+          "type": "setFluid",
+          "pos": [
+            14,
+            1,
+            8
+          ],
+          "fluid": "water",
+          "value": 3000
+        }
+      ],
+      "startActions": [
+        {
+          "type": "setBlock",
+          "pos": [
+            3,
+            1,
+            8
+          ],
+          "block": "minecraft:water",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            2,
+            1,
+            8
+          ],
+          "block": "minecraft:flowing_water",
+          "meta": 4
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            3,
+            1,
+            8
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            2,
+            1,
+            8
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "drain-tile",
+          "type": "tileExists",
+          "pos": [
+            4,
+            1,
+            8
+          ]
+        },
+        {
+          "id": "discharge-tile",
+          "type": "tileExists",
+          "pos": [
+            16,
+            1,
+            8
+          ]
+        }
+      ],
+      "manualChecks": [
+        "Use marked source and flowing water; verify only true source blocks are collected.",
+        "Move the nearest source through a stepped field and prove the search remains bounded to 32 steps.",
+        "Fill the destination and confirm drain backpressure without deletion.",
+        "Discharge into the sealed catch basin and reconcile tank loss with placed source blocks.",
+        "Repeat through a Forge fluid-handler block on every accessible face."
+      ]
+    },
+    {
+      "id": "W-03",
+      "name": "Oil Distillation House",
+      "district": "power",
+      "origin": [
+        -128,
+        3,
+        0
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": false,
+      "requiredMods": [
+        "poweradvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            4,
+            1,
+            8
+          ],
+          "block": "poweradvantage:fluid_storage_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            5,
+            1,
+            8
+          ],
+          "block": "poweradvantage:fluid_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            1,
+            8
+          ],
+          "block": "poweradvantage:still",
+          "meta": 0
+        },
+        {
+          "pos": [
+            7,
+            1,
+            8
+          ],
+          "block": "poweradvantage:fluid_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            1,
+            8
+          ],
+          "block": "poweradvantage:fluid_metal_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            1,
+            10
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [4, 1, 14],
+          "block": "poweradvantage:fluid_storage_tank",
+          "meta": 0,
+          "requiredMods": ["mineralogy"]
+        },
+        {
+          "pos": [5, 1, 14],
+          "block": "poweradvantage:fluid_pipe",
+          "meta": 0,
+          "requiredMods": ["mineralogy"]
+        },
+        {
+          "pos": [6, 1, 14],
+          "block": "poweradvantage:still",
+          "meta": 0,
+          "requiredMods": ["mineralogy"]
+        },
+        {
+          "pos": [7, 1, 14],
+          "block": "poweradvantage:fluid_pipe",
+          "meta": 0,
+          "requiredMods": ["mineralogy"]
+        },
+        {
+          "pos": [8, 1, 14],
+          "block": "poweradvantage:fluid_metal_tank",
+          "meta": 0,
+          "requiredMods": ["mineralogy"]
+        }
+      ],
+      "setupActions": [
+        {
+          "type": "setInventory",
+          "pos": [
+            6,
+            1,
+            10
+          ],
+          "slot": 0,
+          "item": "minecraft:coal",
+          "count": 16
+        }
+      ],
+      "startActions": [
+        {
+          "type": "setFluid",
+          "pos": [6, 1, 8],
+          "fluid": "poweradvantage:crude_oil",
+          "value": 0
+        },
+        {
+          "type": "setFluid",
+          "pos": [8, 1, 8],
+          "fluid": "poweradvantage:refined_oil",
+          "value": 0
+        },
+        {
+          "type": "setFluid",
+          "pos": [4, 1, 8],
+          "fluid": "poweradvantage:crude_oil",
+          "value": 2000
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            6,
+            1,
+            8
+          ],
+          "slot": 0,
+          "item": "minecraft:coal",
+          "count": 8
+        },
+        {
+          "type": "setFluid",
+          "pos": [6, 1, 14],
+          "fluid": "mineralogy_crude_oil",
+          "value": 0,
+          "requiredMods": ["mineralogy"]
+        },
+        {
+          "type": "setFluid",
+          "pos": [8, 1, 14],
+          "fluid": "poweradvantage:refined_oil",
+          "value": 0,
+          "requiredMods": ["mineralogy"]
+        },
+        {
+          "type": "setFluid",
+          "pos": [4, 1, 14],
+          "fluid": "mineralogy_crude_oil",
+          "value": 2000,
+          "requiredMods": ["mineralogy"]
+        },
+        {
+          "type": "setInventory",
+          "pos": [6, 1, 14],
+          "slot": 0,
+          "item": "minecraft:coal",
+          "count": 8,
+          "requiredMods": ["mineralogy"]
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "clearInventory",
+          "pos": [
+            6,
+            1,
+            8
+          ]
+        },
+        {
+          "type": "clearInventory",
+          "pos": [6, 1, 14],
+          "requiredMods": ["mineralogy"]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "still-tile",
+          "type": "tileExists",
+          "pos": [
+            6,
+            1,
+            8
+          ]
+        },
+        {
+          "id": "input-tank",
+          "type": "tileExists",
+          "pos": [
+            4,
+            1,
+            8
+          ]
+        },
+        {
+          "id": "output-tank",
+          "type": "tileExists",
+          "pos": [
+            8,
+            1,
+            8
+          ]
+        },
+        {
+          "id": "power-oil-input-consumed",
+          "type": "fluidAmount",
+          "positions": [[6, 1, 8]],
+          "nbtPath": "InputTank",
+          "value": 0
+        },
+        {
+          "id": "power-oil-output-created",
+          "type": "fluidAmount",
+          "positions": [[4, 1, 8], [6, 1, 8], [8, 1, 8]],
+          "nbtPath": "Tank",
+          "value": 1000
+        },
+        {
+          "id": "power-oil-output-fluid",
+          "type": "fluidAmount",
+          "positions": [[4, 1, 8], [6, 1, 8], [8, 1, 8]],
+          "nbtPath": "Tank",
+          "fluid": "poweradvantage:refined_oil",
+          "value": 1000
+        },
+        {
+          "id": "mineralogy-oil-input-consumed",
+          "type": "fluidAmount",
+          "positions": [[6, 1, 14]],
+          "nbtPath": "InputTank",
+          "value": 0,
+          "requiredMods": ["mineralogy"]
+        },
+        {
+          "id": "mineralogy-oil-output-created",
+          "type": "fluidAmount",
+          "positions": [[4, 1, 14], [6, 1, 14], [8, 1, 14]],
+          "nbtPath": "Tank",
+          "value": 1000,
+          "requiredMods": ["mineralogy"]
+        },
+        {
+          "id": "mineralogy-oil-output-fluid",
+          "type": "fluidAmount",
+          "positions": [[4, 1, 14], [6, 1, 14], [8, 1, 14]],
+          "nbtPath": "Tank",
+          "fluid": "poweradvantage:refined_oil",
+          "value": 1000,
+          "requiredMods": ["mineralogy"]
+        }
+      ],
+      "manualChecks": [
+        "Distil exactly 2,000 mB crude oil into 1,000 mB refined oil under the default recipe.",
+        "Checkpoint input, output, fuel, burn time, and progress at mid-cycle.",
+        "Repeat same-session, full-process, and chunk reloads without duplicating fluid.",
+        "When Mineralogy is loaded, compare both crude-oil lanes and require the same 2:1 refined-oil yield.",
+        "Run NORMAL, TECH_PROGRESSION, and APOCALYPTIC recipe overlays."
+      ]
+    },
+    {
+      "id": "W-04",
+      "name": "Conveyor Sorting Hall",
+      "district": "power",
+      "origin": [
+        -96,
+        3,
+        0
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": false,
+      "requiredMods": [
+        "poweradvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            2,
+            1,
+            6
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            1,
+            6
+          ],
+          "block": "poweradvantage:item_conveyor",
+          "meta": 5
+        },
+        {
+          "pos": [
+            4,
+            1,
+            6
+          ],
+          "block": "poweradvantage:item_conveyor",
+          "meta": 5
+        },
+        {
+          "pos": [
+            5,
+            1,
+            6
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            2,
+            1,
+            9
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            1,
+            9
+          ],
+          "block": "poweradvantage:item_filter_inventory",
+          "meta": 5
+        },
+        {
+          "pos": [
+            4,
+            1,
+            9
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            0,
+            9
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            2,
+            1,
+            12
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "block": "poweradvantage:item_filter_block",
+          "meta": 5
+        },
+        {
+          "pos": [
+            4,
+            1,
+            12
+          ],
+          "block": "poweradvantage:item_filter_food",
+          "meta": 5
+        },
+        {
+          "pos": [
+            5,
+            1,
+            12
+          ],
+          "block": "poweradvantage:item_filter_fuel",
+          "meta": 5
+        },
+        {
+          "pos": [
+            6,
+            1,
+            12
+          ],
+          "block": "poweradvantage:item_filter_ore",
+          "meta": 5
+        },
+        {
+          "pos": [
+            7,
+            1,
+            12
+          ],
+          "block": "poweradvantage:item_filter_plant",
+          "meta": 5
+        },
+        {
+          "pos": [
+            8,
+            1,
+            12
+          ],
+          "block": "poweradvantage:item_filter_smelt",
+          "meta": 5
+        },
+        {
+          "pos": [
+            9,
+            1,
+            12
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            1,
+            9
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            13,
+            1,
+            9
+          ],
+          "block": "poweradvantage:item_filter_overflow",
+          "meta": 5
+        },
+        {
+          "pos": [
+            14,
+            1,
+            9
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            13,
+            0,
+            9
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            18,
+            1,
+            6
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            19,
+            1,
+            6
+          ],
+          "block": "poweradvantage:item_conveyor",
+          "meta": 1
+        },
+        {
+          "pos": [
+            19,
+            2,
+            6
+          ],
+          "block": "poweradvantage:item_conveyor",
+          "meta": 5
+        },
+        {
+          "pos": [
+            20,
+            2,
+            6
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            18,
+            1,
+            12
+          ],
+          "block": "poweradvantage:item_conveyor",
+          "meta": 5
+        },
+        {
+          "pos": [
+            19,
+            1,
+            12
+          ],
+          "block": "poweradvantage:item_conveyor",
+          "meta": 5
+        },
+        {
+          "pos": [
+            20,
+            1,
+            12
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [2, 1, 15],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [3, 1, 15],
+          "block": "poweradvantage:item_filter_inventory",
+          "meta": 5
+        },
+        {
+          "pos": [4, 1, 15],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [3, 0, 15],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [2, 1, 18],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [3, 1, 18],
+          "block": "poweradvantage:item_filter_inventory",
+          "meta": 5
+        },
+        {
+          "pos": [4, 1, 18],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [3, 0, 18],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [3, 0, 12],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [4, 0, 12],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [5, 0, 12],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [6, 0, 12],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [7, 0, 12],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [8, 0, 12],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [12, 1, 15],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [13, 1, 15],
+          "block": "poweradvantage:item_filter_overflow",
+          "meta": 5
+        },
+        {
+          "pos": [14, 1, 15],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [13, 0, 15],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [12, 1, 18],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [13, 1, 18],
+          "block": "poweradvantage:item_filter_overflow",
+          "meta": 5
+        },
+        {
+          "pos": [14, 1, 18],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [13, 0, 18],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [12, 1, 21],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [13, 1, 21],
+          "block": "poweradvantage:item_filter_overflow",
+          "meta": 5
+        },
+        {
+          "pos": [14, 1, 21],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [13, 0, 21],
+          "block": "minecraft:chest",
+          "meta": 0
+        }
+      ],
+      "setupActions": [
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            9
+          ],
+          "slot": 1,
+          "item": "minecraft:dirt",
+          "count": 1
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            9
+          ],
+          "slot": 2,
+          "item": "minecraft:cobblestone",
+          "count": 1
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            9
+          ],
+          "slot": 3,
+          "item": "minecraft:coal",
+          "count": 1
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 18],
+          "slot": 1,
+          "item": "minecraft:dirt",
+          "count": 1
+        },
+        {
+          "type": "fillInventory",
+          "pos": [13, 0, 15],
+          "item": "minecraft:cobblestone",
+          "count": 64
+        },
+        {
+          "type": "fillInventory",
+          "pos": [14, 1, 18],
+          "item": "minecraft:cobblestone",
+          "count": 64
+        },
+        {
+          "type": "fillInventory",
+          "pos": [13, 0, 21],
+          "item": "minecraft:cobblestone",
+          "count": 64
+        },
+        {
+          "type": "fillInventory",
+          "pos": [14, 1, 21],
+          "item": "minecraft:cobblestone",
+          "count": 64
+        }
+      ],
+      "startActions": [
+        {
+          "type": "setInventory",
+          "pos": [
+            2,
+            1,
+            6
+          ],
+          "slot": 0,
+          "item": "minecraft:dirt",
+          "count": 16
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            2,
+            1,
+            9
+          ],
+          "slot": 0,
+          "item": "minecraft:dirt",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            2,
+            1,
+            9
+          ],
+          "slot": 1,
+          "item": "minecraft:apple",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            2,
+            1,
+            12
+          ],
+          "slot": 0,
+          "item": "minecraft:cobblestone",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            2,
+            1,
+            12
+          ],
+          "slot": 1,
+          "item": "minecraft:apple",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            2,
+            1,
+            12
+          ],
+          "slot": 2,
+          "item": "minecraft:coal",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            18,
+            1,
+            6
+          ],
+          "slot": 0,
+          "item": "minecraft:dirt",
+          "count": 8
+        },
+        {
+          "type": "spawnItem",
+          "pos": [
+            18,
+            2,
+            12
+          ],
+          "item": "minecraft:dirt",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [2, 1, 15],
+          "slot": 0,
+          "item": "minecraft:dirt",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [2, 1, 15],
+          "slot": 1,
+          "item": "minecraft:apple",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [2, 1, 18],
+          "slot": 0,
+          "item": "minecraft:dirt",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [2, 1, 18],
+          "slot": 1,
+          "item": "minecraft:apple",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 12],
+          "slot": 0,
+          "item": "minecraft:cobblestone",
+          "count": 4
+        },
+        {
+          "type": "setInventory",
+          "pos": [4, 1, 12],
+          "slot": 0,
+          "item": "minecraft:apple",
+          "count": 4
+        },
+        {
+          "type": "setInventory",
+          "pos": [5, 1, 12],
+          "slot": 0,
+          "item": "minecraft:coal",
+          "count": 4
+        },
+        {
+          "type": "setInventory",
+          "pos": [6, 1, 12],
+          "slot": 0,
+          "item": "minecraft:iron_ingot",
+          "count": 4
+        },
+        {
+          "type": "setInventory",
+          "pos": [7, 1, 12],
+          "slot": 0,
+          "item": "minecraft:sapling",
+          "count": 4
+        },
+        {
+          "type": "setInventory",
+          "pos": [8, 1, 12],
+          "slot": 0,
+          "item": "minecraft:sand",
+          "count": 4
+        },
+        {
+          "type": "setInventory",
+          "pos": [12, 1, 9],
+          "slot": 0,
+          "item": "minecraft:dirt",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [12, 1, 15],
+          "slot": 0,
+          "item": "minecraft:dirt",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [12, 1, 18],
+          "slot": 0,
+          "item": "minecraft:dirt",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [12, 1, 21],
+          "slot": 0,
+          "item": "minecraft:dirt",
+          "count": 8
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "clearInventory",
+          "pos": [
+            2,
+            1,
+            6
+          ]
+        },
+        {
+          "type": "clearInventory",
+          "pos": [
+            2,
+            1,
+            9
+          ]
+        },
+        {
+          "type": "clearInventory",
+          "pos": [
+            2,
+            1,
+            12
+          ]
+        },
+        {
+          "type": "clearInventory",
+          "pos": [
+            18,
+            1,
+            6
+          ]
+        },
+        {
+          "type": "clearInventory",
+          "pos": [2, 1, 15]
+        },
+        {
+          "type": "clearInventory",
+          "pos": [2, 1, 18]
+        },
+        {
+          "type": "clearInventory",
+          "pos": [3, 1, 12]
+        },
+        {
+          "type": "clearInventory",
+          "pos": [4, 1, 12]
+        },
+        {
+          "type": "clearInventory",
+          "pos": [5, 1, 12]
+        },
+        {
+          "type": "clearInventory",
+          "pos": [6, 1, 12]
+        },
+        {
+          "type": "clearInventory",
+          "pos": [7, 1, 12]
+        },
+        {
+          "type": "clearInventory",
+          "pos": [8, 1, 12]
+        },
+        {
+          "type": "clearInventory",
+          "pos": [12, 1, 9]
+        },
+        {
+          "type": "clearInventory",
+          "pos": [12, 1, 15]
+        },
+        {
+          "type": "clearInventory",
+          "pos": [12, 1, 18]
+        },
+        {
+          "type": "clearInventory",
+          "pos": [12, 1, 21]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "plain-conveyor",
+          "type": "block",
+          "pos": [
+            3,
+            1,
+            6
+          ],
+          "block": "poweradvantage:item_conveyor",
+          "meta": 5
+        },
+        {
+          "id": "inventory-filter",
+          "type": "tileExists",
+          "pos": [
+            3,
+            1,
+            9
+          ]
+        },
+        {
+          "id": "overflow-filter",
+          "type": "tileExists",
+          "pos": [
+            13,
+            1,
+            9
+          ]
+        },
+        {
+          "id": "inventory-filter-zero",
+          "type": "tileExists",
+          "pos": [3, 1, 15]
+        },
+        {
+          "id": "inventory-filter-one",
+          "type": "tileExists",
+          "pos": [3, 1, 18]
+        },
+        {
+          "id": "overflow-lower-full",
+          "type": "tileExists",
+          "pos": [13, 1, 15]
+        },
+        {
+          "id": "overflow-forward-full",
+          "type": "tileExists",
+          "pos": [13, 1, 18]
+        },
+        {
+          "id": "overflow-both-full",
+          "type": "tileExists",
+          "pos": [13, 1, 21]
+        },
+        {
+          "id": "filter-slots-persist",
+          "type": "inventoryCount",
+          "pos": [
+            3,
+            1,
+            9
+          ],
+          "item": "minecraft:dirt",
+          "count": 1,
+          "operator": "min"
+        }
+      ],
+      "manualChecks": [
+        "Run plain horizontal and upward lanes between inventories and from dropped entities.",
+        "Exercise the configurable filter with zero, one, and several distinct filters; test matches and nonmatches.",
+        "Checkpoint filter slots and comparator levels through same-session and full restarts.",
+        "Feed representative block, food, fuel, ore-dictionary, plant, and smeltable items.",
+        "For overflow, test lower available/full, forward available/full, and both blocked.",
+        "Block every destination and prove no item duplication or silent deletion.",
+        "Run the fast lane only while attended; reconcile all bounded items after 30 minutes."
+      ]
+    },
+    {
+      "id": "S-01",
+      "name": "Boiler Calibration House",
+      "district": "steam",
+      "origin": [
+        -64,
+        3,
+        -128
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": false,
+      "requiredMods": [
+        "poweradvantage",
+        "steamadvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            3,
+            1,
+            7
+          ],
+          "block": "steamadvantage:steam_boiler_coal",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            1,
+            7
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            5,
+            1,
+            7
+          ],
+          "block": "steamadvantage:steam_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "block": "steamadvantage:steam_boiler_electric",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            1,
+            12
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            5,
+            1,
+            12
+          ],
+          "block": "steamadvantage:steam_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            1,
+            7
+          ],
+          "block": "steamadvantage:steam_boiler_geothermal",
+          "meta": 0
+        },
+        {
+          "pos": [
+            13,
+            1,
+            7
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            14,
+            1,
+            7
+          ],
+          "block": "steamadvantage:steam_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            1,
+            12
+          ],
+          "block": "steamadvantage:steam_boiler_oil",
+          "meta": 0
+        },
+        {
+          "pos": [
+            13,
+            1,
+            12
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            14,
+            1,
+            12
+          ],
+          "block": "steamadvantage:steam_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            20,
+            1,
+            20
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        }
+      ],
+      "setupActions": [
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            7
+          ],
+          "slot": 0,
+          "item": "minecraft:coal",
+          "count": 16
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            20,
+            1,
+            20
+          ],
+          "slot": 0,
+          "item": "steamadvantage:steam_governor",
+          "count": 4
+        },
+        {
+          "type": "mergeNbt",
+          "pos": [
+            12,
+            1,
+            7
+          ],
+          "nbt": {
+            "Tempoerature": 900.0,
+            "Temperature": 900.0
+          }
+        }
+      ],
+      "startActions": [
+        {
+          "type": "setBlock",
+          "pos": [
+            3,
+            1,
+            6
+          ],
+          "block": "poweradvantage:fluid_storage_tank",
+          "meta": 0
+        },
+        {
+          "type": "setFluid",
+          "pos": [
+            3,
+            1,
+            6
+          ],
+          "fluid": "water",
+          "value": 4000
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            3,
+            1,
+            13
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            12,
+            0,
+            7
+          ],
+          "block": "minecraft:lava",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            12,
+            1,
+            13
+          ],
+          "block": "poweradvantage:fluid_storage_tank",
+          "meta": 0
+        },
+        {
+          "type": "setFluid",
+          "pos": [
+            12,
+            1,
+            13
+          ],
+          "fluid": "crude_oil",
+          "value": 4000
+        },
+        {
+          "type": "setFluid",
+          "pos": [12, 1, 13],
+          "fluid": "mineralogy_crude_oil",
+          "value": 4000,
+          "requiredMods": ["mineralogy"]
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            3,
+            1,
+            6
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            3,
+            1,
+            13
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            12,
+            1,
+            13
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "coal-boiler",
+          "type": "tileExists",
+          "pos": [
+            3,
+            1,
+            7
+          ]
+        },
+        {
+          "id": "electric-boiler",
+          "type": "tileExists",
+          "pos": [
+            3,
+            1,
+            12
+          ]
+        },
+        {
+          "id": "geothermal-boiler",
+          "type": "tileExists",
+          "pos": [
+            12,
+            1,
+            7
+          ]
+        },
+        {
+          "id": "geothermal-temperature-persisted",
+          "type": "nbtNumber",
+          "pos": [
+            12,
+            1,
+            7
+          ],
+          "nbtPath": "Temperature",
+          "operator": "greater",
+          "value": 0
+        },
+        {
+          "id": "oil-boiler",
+          "type": "tileExists",
+          "pos": [
+            12,
+            1,
+            12
+          ]
+        }
+      ],
+      "manualChecks": [
+        "Calibrate all four boilers into isolated tanks with no consumers attached.",
+        "Coal: valid/invalid fuels, water scarcity, burn time, and restart persistence.",
+        "Electric: verify the 16 electricity to 0.5 steam per-tick relationship.",
+        "Geothermal: compare fire and lava, then full-restart temperature for SA-110-002.",
+        "Oil: compare Power and Mineralogy crude oil at the same built-in burn value, then verify explicit fuel configuration still overrides it.",
+        "Add sustained rated load, isolate output, interrupt supply, and reconcile steam."
+      ]
+    },
+    {
+      "id": "S-02",
+      "name": "Steam Distribution Gallery",
+      "district": "steam",
+      "origin": [
+        -32,
+        3,
+        -128
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": false,
+      "requiredMods": [
+        "poweradvantage",
+        "steamadvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            2,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            5,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_furnace",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_drill",
+          "meta": 1
+        },
+        {
+          "pos": [
+            7,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_crusher",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            1,
+            7
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            1,
+            6
+          ],
+          "block": "steamadvantage:steam_switch",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            1,
+            9
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            1,
+            10
+          ],
+          "block": "steamadvantage:steam_drill",
+          "meta": 3
+        },
+        {
+          "pos": [6, 2, 8],
+          "block": "minecraft:bedrock",
+          "meta": 0
+        },
+        {
+          "pos": [6, 1, 11],
+          "block": "minecraft:bedrock",
+          "meta": 0
+        },
+        {
+          "pos": [
+            13,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            14,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            15,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            16,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            17,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_tank",
+          "meta": 0
+        }
+      ],
+      "setupActions": [],
+      "startActions": [
+        {
+          "type": "setBlock",
+          "pos": [
+            1,
+            1,
+            8
+          ],
+          "block": "poweradvantage:infinite_steam",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            12,
+            1,
+            8
+          ],
+          "block": "poweradvantage:infinite_steam",
+          "meta": 0
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            1,
+            1,
+            8
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            12,
+            1,
+            8
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "steam-pipe",
+          "type": "block",
+          "pos": [
+            2,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_pipe"
+        },
+        {
+          "id": "steam-switch",
+          "type": "block",
+          "pos": [
+            6,
+            1,
+            6
+          ],
+          "block": "steamadvantage:steam_switch"
+        },
+        {
+          "id": "middle-drill",
+          "type": "tileExists",
+          "pos": [
+            6,
+            1,
+            8
+          ]
+        }
+      ],
+      "manualChecks": [
+        "Compare short and long networks; current code has no distance pressure loss.",
+        "Verify machine-to-machine conduction through the middle consumer.",
+        "Read every GUI after at least two eight-tick distribution intervals.",
+        "Test scarcity, switch redstone, pipe interruption, and recovery without replacement.",
+        "Checkpoint work output as well as animation before both reload types.",
+        "Confirm GUI and server NBT agree when one middle machine displays low pressure."
+      ]
+    },
+    {
+      "id": "S-03",
+      "name": "Steam Storage and Scarcity",
+      "district": "steam",
+      "origin": [
+        0,
+        3,
+        -128
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": false,
+      "requiredMods": [
+        "poweradvantage",
+        "steamadvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            3,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_boiler_coal",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            5,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            7,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_furnace",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            1,
+            8
+          ],
+          "block": "steamadvantage:steam_crusher",
+          "meta": 0
+        },
+        {
+          "pos": [
+            5,
+            1,
+            10
+          ],
+          "block": "steamadvantage:steam_switch",
+          "meta": 0
+        }
+      ],
+      "setupActions": [
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            8
+          ],
+          "slot": 0,
+          "item": "minecraft:coal",
+          "count": 4
+        }
+      ],
+      "startActions": [
+        {
+          "type": "setBlock",
+          "pos": [
+            3,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_storage_tank",
+          "meta": 0
+        },
+        {
+          "type": "setFluid",
+          "pos": [
+            3,
+            1,
+            7
+          ],
+          "fluid": "water",
+          "value": 2000
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            3,
+            1,
+            7
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "steam-tank",
+          "type": "tileExists",
+          "pos": [
+            5,
+            1,
+            8
+          ]
+        },
+        {
+          "id": "consumer-one",
+          "type": "tileExists",
+          "pos": [
+            7,
+            1,
+            8
+          ]
+        },
+        {
+          "id": "consumer-two",
+          "type": "tileExists",
+          "pos": [
+            8,
+            1,
+            8
+          ]
+        }
+      ],
+      "manualChecks": [
+        "Run below combined demand and observe ordinary demand before backup-priority storage.",
+        "Apply redstone to the tank/switch branch and prove the remaining network continues.",
+        "Record local buffers under scarcity, restored supply, and full restart.",
+        "Reconcile boiler steam, tank steam, and actual machine work."
+      ]
+    },
+    {
+      "id": "S-04",
+      "name": "Steam Processing Mill",
+      "district": "steam",
+      "origin": [
+        32,
+        3,
+        -128
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": false,
+      "requiredMods": [
+        "poweradvantage",
+        "steamadvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            2,
+            1,
+            7
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            1,
+            7
+          ],
+          "block": "steamadvantage:steam_furnace",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            1,
+            7
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            1,
+            6
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            2,
+            1,
+            13
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            1,
+            13
+          ],
+          "block": "steamadvantage:steam_crusher",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            1,
+            13
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            1,
+            13
+          ],
+          "block": "steamadvantage:steam_still",
+          "meta": 0
+        },
+        {
+          "pos": [
+            20,
+            1,
+            13
+          ],
+          "block": "steamadvantage:steam_crusher",
+          "meta": 0
+        }
+      ],
+      "setupActions": [
+        {
+          "type": "setInventory",
+          "pos": [
+            20,
+            1,
+            13
+          ],
+          "slot": 0,
+          "item": "minecraft:cobblestone",
+          "count": 1
+        }
+      ],
+      "startActions": [
+        {
+          "type": "setBlock",
+          "pos": [
+            3,
+            1,
+            5
+          ],
+          "block": "poweradvantage:infinite_steam",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            3,
+            1,
+            11
+          ],
+          "block": "poweradvantage:infinite_steam",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            8,
+            1,
+            12
+          ],
+          "block": "poweradvantage:infinite_steam",
+          "meta": 0
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            2,
+            1,
+            7
+          ],
+          "slot": 0,
+          "item": "minecraft:iron_ore",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            2,
+            1,
+            13
+          ],
+          "slot": 0,
+          "item": "minecraft:cobblestone",
+          "count": 8
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            3,
+            1,
+            5
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            3,
+            1,
+            11
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            8,
+            1,
+            12
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "furnace-tile",
+          "type": "tileExists",
+          "pos": [
+            3,
+            1,
+            7
+          ]
+        },
+        {
+          "id": "crusher-tile",
+          "type": "tileExists",
+          "pos": [
+            3,
+            1,
+            13
+          ]
+        },
+        {
+          "id": "steam-still-tile",
+          "type": "tileExists",
+          "pos": [
+            8,
+            1,
+            13
+          ]
+        },
+        {
+          "id": "crusher-one-item-signal",
+          "type": "comparatorOutput",
+          "pos": [
+            20,
+            1,
+            13
+          ],
+          "value": 1
+        },
+        {
+          "id": "base-metals-steel-plate",
+          "type": "registryItem",
+          "pos": null,
+          "item": "basemetals:steel_plate",
+          "requiredMods": ["basemetals"]
+        }
+      ],
+      "manualChecks": [
+        "Furnace: valid and invalid inputs, three lanes, fuel, full outputs, automation faces, and mid-cycle restart.",
+        "Crusher: BaseMetals recipe and vanilla fallback, invalid input, full five-slot output, and restart.",
+        "Compare comparator levels at empty, one, half, and full for SA-110-003.",
+        "Measure no-steam versus rated-steam completion without crossing output lanes.",
+        "Reconcile all input and output items after interruption and 30-minute operation."
+      ]
+    },
+    {
+      "id": "S-05",
+      "name": "Steam Drill Proving Ground",
+      "district": "steam",
+      "origin": [
+        -64,
+        3,
+        64
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": true,
+      "enclosed": true,
+      "requiredMods": [
+        "poweradvantage",
+        "steamadvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            4,
+            2,
+            6
+          ],
+          "block": "steamadvantage:steam_drill",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            2,
+            6
+          ],
+          "block": "steamadvantage:steam_drill",
+          "meta": 1
+        },
+        {
+          "pos": [
+            12,
+            2,
+            6
+          ],
+          "block": "steamadvantage:steam_drill",
+          "meta": 2
+        },
+        {
+          "pos": [
+            16,
+            2,
+            6
+          ],
+          "block": "steamadvantage:steam_drill",
+          "meta": 3
+        },
+        {
+          "pos": [
+            20,
+            2,
+            6
+          ],
+          "block": "steamadvantage:steam_drill",
+          "meta": 4
+        },
+        {
+          "pos": [
+            24,
+            2,
+            6
+          ],
+          "block": "steamadvantage:steam_drill",
+          "meta": 5
+        },
+        {
+          "pos": [
+            4,
+            3,
+            6
+          ],
+          "block": "steamadvantage:steam_track",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            1,
+            6
+          ],
+          "block": "steamadvantage:steam_track",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            2,
+            7
+          ],
+          "block": "steamadvantage:steam_track",
+          "meta": 0
+        },
+        {
+          "pos": [
+            16,
+            2,
+            5
+          ],
+          "block": "steamadvantage:steam_track",
+          "meta": 0
+        },
+        {
+          "pos": [
+            21,
+            2,
+            6
+          ],
+          "block": "steamadvantage:steam_track",
+          "meta": 0
+        },
+        {
+          "pos": [
+            23,
+            2,
+            6
+          ],
+          "block": "steamadvantage:steam_track",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            1,
+            6
+          ],
+          "block": "steamadvantage:drillbit",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            3,
+            6
+          ],
+          "block": "steamadvantage:drillbit",
+          "meta": 1
+        },
+        {
+          "pos": [
+            12,
+            2,
+            5
+          ],
+          "block": "steamadvantage:drillbit",
+          "meta": 2
+        },
+        {
+          "pos": [
+            16,
+            2,
+            7
+          ],
+          "block": "steamadvantage:drillbit",
+          "meta": 3
+        },
+        {
+          "pos": [
+            19,
+            2,
+            6
+          ],
+          "block": "steamadvantage:drillbit",
+          "meta": 4
+        },
+        {
+          "pos": [
+            25,
+            2,
+            6
+          ],
+          "block": "steamadvantage:drillbit",
+          "meta": 5
+        },
+        {
+          "pos": [
+            3,
+            2,
+            6
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            9,
+            2,
+            6
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            2,
+            8
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            16,
+            2,
+            4
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            22,
+            2,
+            6
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            26,
+            2,
+            6
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        }
+      ],
+      "setupActions": [],
+      "startActions": [
+        {
+          "type": "setBlock",
+          "pos": [
+            4,
+            2,
+            7
+          ],
+          "block": "poweradvantage:infinite_steam",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            8,
+            2,
+            7
+          ],
+          "block": "poweradvantage:infinite_steam",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            12,
+            2,
+            9
+          ],
+          "block": "poweradvantage:infinite_steam",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            16,
+            2,
+            3
+          ],
+          "block": "poweradvantage:infinite_steam",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            22,
+            2,
+            7
+          ],
+          "block": "poweradvantage:infinite_steam",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            26,
+            2,
+            7
+          ],
+          "block": "poweradvantage:infinite_steam",
+          "meta": 0
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            4,
+            2,
+            7
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            8,
+            2,
+            7
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            12,
+            2,
+            9
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            16,
+            2,
+            3
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            22,
+            2,
+            7
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            26,
+            2,
+            7
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "down-facing",
+          "type": "block",
+          "pos": [
+            4,
+            2,
+            6
+          ],
+          "block": "steamadvantage:steam_drill",
+          "meta": 0
+        },
+        {
+          "id": "up-facing",
+          "type": "block",
+          "pos": [
+            8,
+            2,
+            6
+          ],
+          "block": "steamadvantage:steam_drill",
+          "meta": 1
+        },
+        {
+          "id": "north-facing",
+          "type": "block",
+          "pos": [
+            12,
+            2,
+            6
+          ],
+          "block": "steamadvantage:steam_drill",
+          "meta": 2
+        },
+        {
+          "id": "south-facing",
+          "type": "block",
+          "pos": [
+            16,
+            2,
+            6
+          ],
+          "block": "steamadvantage:steam_drill",
+          "meta": 3
+        },
+        {
+          "id": "west-facing",
+          "type": "block",
+          "pos": [
+            20,
+            2,
+            6
+          ],
+          "block": "steamadvantage:steam_drill",
+          "meta": 4
+        },
+        {
+          "id": "east-facing",
+          "type": "block",
+          "pos": [
+            24,
+            2,
+            6
+          ],
+          "block": "steamadvantage:steam_drill",
+          "meta": 5
+        }
+      ],
+      "manualChecks": [
+        "Exercise all six facings in bounded stone targets with rear inventories.",
+        "Confirm drops enter the drill or rear output rather than appearing at the bit.",
+        "Checkpoint facing, inventory, steam, target, and progress mid-block.",
+        "Run same-session/full restarts and verify helper-bit axis restoration.",
+        "Let each drill enter aligned track and retain position, energy, inventory, and facing.",
+        "Fill output slots and prove mining pauses without deleting blocks or drops."
+      ]
+    },
+    {
+      "id": "S-06",
+      "name": "Steam Pumping Station",
+      "district": "steam",
+      "origin": [
+        -32,
+        3,
+        64
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": true,
+      "enclosed": true,
+      "requiredMods": [
+        "poweradvantage",
+        "steamadvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            10,
+            5,
+            10
+          ],
+          "block": "steamadvantage:steam_pump",
+          "meta": 0
+        },
+        {
+          "pos": [
+            10,
+            4,
+            10
+          ],
+          "block": "steamadvantage:pump_pipe_steam",
+          "meta": 0
+        },
+        {
+          "pos": [
+            10,
+            3,
+            10
+          ],
+          "block": "steamadvantage:pump_pipe_steam",
+          "meta": 0
+        },
+        {
+          "pos": [
+            11,
+            5,
+            10
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            5,
+            10
+          ],
+          "block": "poweradvantage:fluid_metal_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            20,
+            5,
+            20
+          ],
+          "block": "steamadvantage:steam_pump",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            1,
+            8
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            9,
+            1,
+            8
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            10,
+            1,
+            8
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            1,
+            9
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            1,
+            10
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            1,
+            10
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            1,
+            11
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            1,
+            12
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            9,
+            1,
+            12
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            10,
+            1,
+            12
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            11,
+            1,
+            12
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            1,
+            12
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        }
+      ],
+      "setupActions": [
+        {
+          "type": "setFluid",
+          "pos": [
+            20,
+            5,
+            20
+          ],
+          "fluid": "water",
+          "value": 1000
+        }
+      ],
+      "startActions": [
+        {
+          "type": "setBlock",
+          "pos": [
+            9,
+            1,
+            9
+          ],
+          "block": "minecraft:water",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            10,
+            1,
+            9
+          ],
+          "block": "minecraft:water",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            11,
+            1,
+            9
+          ],
+          "block": "minecraft:water",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            9,
+            1,
+            10
+          ],
+          "block": "minecraft:water",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            10,
+            1,
+            10
+          ],
+          "block": "minecraft:water",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            11,
+            1,
+            10
+          ],
+          "block": "minecraft:water",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            9,
+            1,
+            11
+          ],
+          "block": "minecraft:water",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            10,
+            1,
+            11
+          ],
+          "block": "minecraft:water",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            11,
+            1,
+            11
+          ],
+          "block": "minecraft:water",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            10,
+            5,
+            11
+          ],
+          "block": "poweradvantage:infinite_steam",
+          "meta": 0
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            10,
+            5,
+            11
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "pump-tile",
+          "type": "tileExists",
+          "pos": [
+            10,
+            5,
+            10
+          ]
+        },
+        {
+          "id": "output-tank",
+          "type": "tileExists",
+          "pos": [
+            12,
+            5,
+            10
+          ]
+        },
+        {
+          "id": "managed-pipe",
+          "type": "block",
+          "pos": [
+            10,
+            4,
+            10
+          ],
+          "block": "steamadvantage:pump_pipe_steam"
+        },
+        {
+          "id": "pump-fluid-persisted",
+          "type": "nbtNumber",
+          "pos": [
+            20,
+            5,
+            20
+          ],
+          "nbtPath": "Tank.Amount",
+          "value": 1000
+        }
+      ],
+      "manualChecks": [
+        "Pump the bounded 3x3 pool and measure lift and pipe-section costs.",
+        "Checkpoint exact internal and output tank contents before a full restart.",
+        "Verify SA-110-001: fluid must remain and resume without replacing pump or pipe.",
+        "Test empty/full output, interrupted steam, chunk reload, and fluid conservation.",
+        "Reset twice and confirm the station removes only its bounded helper shaft."
+      ]
+    },
+    {
+      "id": "S-07",
+      "name": "Steam Elevator Works",
+      "district": "steam",
+      "origin": [
+        0,
+        3,
+        64
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": true,
+      "enclosed": true,
+      "requiredMods": [
+        "poweradvantage",
+        "steamadvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            12,
+            1,
+            12
+          ],
+          "block": "steamadvantage:steam_elevator",
+          "meta": 0
+        },
+        {
+          "pos": [
+            11,
+            1,
+            12
+          ],
+          "block": "steamadvantage:steam_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            13,
+            1,
+            12
+          ],
+          "block": "minecraft:redstone_block",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            8,
+            12
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            14,
+            12
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            11,
+            2,
+            11
+          ],
+          "block": "minecraft:glass",
+          "meta": 0
+        },
+        {
+          "pos": [
+            13,
+            2,
+            11
+          ],
+          "block": "minecraft:glass",
+          "meta": 0
+        },
+        {
+          "pos": [
+            11,
+            2,
+            13
+          ],
+          "block": "minecraft:glass",
+          "meta": 0
+        },
+        {
+          "pos": [
+            13,
+            2,
+            13
+          ],
+          "block": "minecraft:glass",
+          "meta": 0
+        }
+      ],
+      "setupActions": [],
+      "startActions": [
+        {
+          "type": "setBlock",
+          "pos": [
+            10,
+            1,
+            12
+          ],
+          "block": "poweradvantage:infinite_steam",
+          "meta": 0
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            10,
+            1,
+            12
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "elevator-tile",
+          "type": "tileExists",
+          "pos": [
+            12,
+            1,
+            12
+          ]
+        },
+        {
+          "id": "platform-helper",
+          "type": "block",
+          "pos": [
+            12,
+            2,
+            12
+          ],
+          "block": "steamadvantage:platform"
+        }
+      ],
+      "manualChecks": [
+        "Test GUI up/down selection and redstone pulse control.",
+        "Verify platform stops two blocks below each marked solid ceiling.",
+        "Measure 32 steam per move and the effective shaft range.",
+        "Restart and chunk-unload mid-travel; no duplicate or stranded platform may remain.",
+        "Reset after every recovery case and inspect the declared station bounds only."
+      ]
+    },
+    {
+      "id": "S-08",
+      "name": "Musket Proof Range",
+      "district": "steam",
+      "origin": [
+        32,
+        3,
+        64
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": true,
+      "enclosed": true,
+      "requiredMods": [
+        "poweradvantage",
+        "steamadvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            3,
+            1,
+            5
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            1,
+            20
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            1,
+            20
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            5,
+            1,
+            20
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            1,
+            20
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            7,
+            1,
+            20
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            1,
+            20
+          ],
+          "block": "minecraft:stonebrick",
+          "meta": 0
+        },
+        {
+          "pos": [
+            2,
+            1,
+            4
+          ],
+          "block": "minecraft:iron_bars",
+          "meta": 0
+        },
+        {
+          "pos": [
+            2,
+            2,
+            4
+          ],
+          "block": "minecraft:iron_bars",
+          "meta": 0
+        },
+        {
+          "pos": [
+            9,
+            1,
+            4
+          ],
+          "block": "minecraft:iron_bars",
+          "meta": 0
+        },
+        {
+          "pos": [
+            9,
+            2,
+            4
+          ],
+          "block": "minecraft:iron_bars",
+          "meta": 0
+        }
+      ],
+      "setupActions": [
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            5
+          ],
+          "slot": 0,
+          "item": "steamadvantage:musket",
+          "count": 1
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            5
+          ],
+          "slot": 1,
+          "item": "steamadvantage:musket",
+          "count": 1,
+          "nbt": {
+            "loaded": 1
+          }
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            5
+          ],
+          "slot": 2,
+          "item": "steamadvantage:blackpowder_cartridge",
+          "count": 64
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            5
+          ],
+          "slot": 3,
+          "item": "steamadvantage:steam_governor",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            5
+          ],
+          "slot": 4,
+          "item": "steamadvantage:steam_drill_bit",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 5],
+          "slot": 5,
+          "item": "steamadvantage:musket",
+          "count": 1,
+          "enchantment": "steamadvantage:rapid_reload",
+          "level": 1
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 5],
+          "slot": 6,
+          "item": "steamadvantage:musket",
+          "count": 1,
+          "enchantment": "steamadvantage:powderless",
+          "level": 1
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 5],
+          "slot": 7,
+          "item": "steamadvantage:musket",
+          "count": 1,
+          "enchantment": "steamadvantage:high_explosive",
+          "level": 1
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 5],
+          "slot": 8,
+          "item": "steamadvantage:musket",
+          "count": 1,
+          "enchantment": "steamadvantage:high_explosive",
+          "level": 5
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 5],
+          "slot": 9,
+          "item": "steamadvantage:musket",
+          "count": 1,
+          "enchantment": "steamadvantage:recoil",
+          "level": 1
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 5],
+          "slot": 10,
+          "item": "steamadvantage:musket",
+          "count": 1,
+          "enchantment": "steamadvantage:recoil",
+          "level": 5
+        }
+      ],
+      "startActions": [],
+      "stopActions": [],
+      "assertions": [
+        {
+          "id": "musket-item",
+          "type": "registryItem",
+          "pos": null,
+          "item": "steamadvantage:musket"
+        },
+        {
+          "id": "cartridge-item",
+          "type": "registryItem",
+          "pos": null,
+          "item": "steamadvantage:blackpowder_cartridge"
+        },
+        {
+          "id": "range-chest",
+          "type": "tileExists",
+          "pos": [
+            3,
+            1,
+            5
+          ]
+        },
+        {
+          "id": "stocked-muskets",
+          "type": "inventoryCount",
+          "pos": [3, 1, 5],
+          "item": "steamadvantage:musket",
+          "count": 8,
+          "operator": "min"
+        }
+      ],
+      "manualChecks": [
+        "Measure load interaction, cartridge use, durability, damage, and 64-block maximum trace.",
+        "Test configured block interactions only inside the protected copied range.",
+        "Repeat Rapid Reload I, Powderless I, High Explosive I/V, and Recoil I/V separately.",
+        "Checkpoint loaded item NBT across same-session and full restarts.",
+        "Keep explosive trials isolated and attended; reconcile cartridges and shots."
+      ]
+    },
+    {
+      "id": "E-01",
+      "name": "Electric Generating Hall",
+      "district": "electric",
+      "origin": [
+        64,
+        3,
+        64
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": true,
+      "enclosed": true,
+      "requiredMods": [
+        "poweradvantage",
+        "electricadvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            3,
+            1,
+            7
+          ],
+          "block": "electricadvantage:photovoltaic_generator",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_conduit",
+          "meta": 0
+        },
+        {
+          "pos": [
+            5,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_battery_array",
+          "meta": 0
+        },
+        {
+          "pos": [
+            0,
+            2,
+            12
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            1,
+            2,
+            12
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            2,
+            2,
+            12
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            2,
+            12
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            2,
+            12
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            5,
+            2,
+            12
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            0,
+            3,
+            11
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            1,
+            3,
+            11
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            2,
+            3,
+            11
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            3,
+            11
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            3,
+            11
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            5,
+            3,
+            11
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            0,
+            3,
+            13
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            1,
+            3,
+            13
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            2,
+            3,
+            13
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            3,
+            13
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            3,
+            13
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            5,
+            3,
+            13
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            0,
+            3,
+            12
+          ],
+          "block": "minecraft:stone",
+          "meta": 0
+        },
+        {
+          "pos": [
+            1,
+            3,
+            12
+          ],
+          "block": "minecraft:water",
+          "meta": 0
+        },
+        {
+          "pos": [
+            2,
+            3,
+            12
+          ],
+          "block": "minecraft:water",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            3,
+            12
+          ],
+          "block": "minecraft:water",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            3,
+            12
+          ],
+          "block": "minecraft:flowing_water",
+          "meta": 1
+        },
+        {
+          "pos": [
+            5,
+            3,
+            12
+          ],
+          "block": "minecraft:flowing_water",
+          "meta": 2
+        },
+        {
+          "pos": [
+            3,
+            4,
+            12
+          ],
+          "block": "electricadvantage:hydroelectric_generator",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            4,
+            12
+          ],
+          "block": "electricadvantage:electric_battery_array",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            1,
+            7
+          ],
+          "block": "electricadvantage:steam_powered_generator",
+          "meta": 0
+        },
+        {
+          "pos": [
+            13,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_conduit",
+          "meta": 0
+        },
+        {
+          "pos": [
+            14,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_battery_array",
+          "meta": 0
+        }
+      ],
+      "setupActions": [
+        {
+          "type": "setInventory",
+          "pos": [
+            5,
+            1,
+            7
+          ],
+          "item": "electricadvantage:lithium_battery",
+          "slot": 0,
+          "count": 1,
+          "nbt": {
+            "energy": 0.0
+          }
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            4,
+            4,
+            12
+          ],
+          "item": "electricadvantage:lithium_battery",
+          "slot": 0,
+          "count": 1,
+          "nbt": {
+            "energy": 0.0
+          }
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            14,
+            1,
+            7
+          ],
+          "item": "electricadvantage:lithium_battery",
+          "slot": 0,
+          "count": 1,
+          "nbt": {
+            "energy": 0.0
+          }
+        }
+      ],
+      "startActions": [
+        {
+          "type": "clearInventory",
+          "pos": [
+            4,
+            4,
+            12
+          ]
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            4,
+            4,
+            12
+          ],
+          "item": "electricadvantage:lithium_battery",
+          "slot": 0,
+          "count": 1,
+          "nbt": {
+            "energy": 0.0
+          }
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            11,
+            1,
+            7
+          ],
+          "block": "poweradvantage:infinite_steam",
+          "meta": 0
+        },
+        {
+          "type": "time",
+          "pos": [
+            0,
+            0,
+            0
+          ],
+          "value": 6000
+        },
+        {
+          "type": "weatherClear",
+          "pos": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            11,
+            1,
+            7
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "photovoltaic",
+          "type": "tileExists",
+          "pos": [
+            3,
+            1,
+            7
+          ]
+        },
+        {
+          "id": "hydroelectric",
+          "type": "tileExists",
+          "pos": [
+            3,
+            4,
+            12
+          ]
+        },
+        {
+          "id": "hydroelectric-active",
+          "type": "block",
+          "pos": [
+            3,
+            4,
+            12
+          ],
+          "block": "electricadvantage:hydroelectric_generator",
+          "meta": 10
+        },
+        {
+          "id": "hydroelectric-battery-charged",
+          "type": "inventoryNbtNumber",
+          "pos": [
+            4,
+            4,
+            12
+          ],
+          "slot": 0,
+          "nbtPath": "energy",
+          "operator": "greater",
+          "value": 0
+        },
+        {
+          "id": "steam-generator",
+          "type": "tileExists",
+          "pos": [
+            12,
+            1,
+            7
+          ]
+        }
+      ],
+      "manualChecks": [
+        "Photovoltaic: dawn, noon, dusk, rain, thunder, roofed darkness, and controlled block light.",
+        "Hydroelectric: flowing-water turbine creation/restoration, 4-per-tick output, and entity damage.",
+        "Hydroelectric: confirm the EA-110-003 repair opens its GUI and displays a normal-width active power bar.",
+        "Steam conversion: verify 31.25 electricity per steam and 32-steam network-update cap.",
+        "Run isolated into bounded arrays before rated load, restart, and endurance tests."
+      ]
+    },
+    {
+      "id": "E-02",
+      "name": "Battery and Distribution Room",
+      "district": "electric",
+      "origin": [
+        96,
+        3,
+        -64
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": false,
+      "requiredMods": [
+        "poweradvantage",
+        "electricadvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            3,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_battery_array",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_conduit",
+          "meta": 0
+        },
+        {
+          "pos": [
+            5,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_switch",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_conduit",
+          "meta": 0
+        },
+        {
+          "pos": [
+            7,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_crusher",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_furnace",
+          "meta": 0
+        },
+        {
+          "pos": [
+            9,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_fabricator",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        }
+      ],
+      "setupActions": [
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            7
+          ],
+          "slot": 0,
+          "item": "electricadvantage:lead_acid_battery",
+          "count": 1,
+          "nbt": {
+            "energy": 0
+          }
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            7
+          ],
+          "slot": 1,
+          "item": "electricadvantage:nickel_hydride_battery",
+          "count": 1,
+          "nbt": {
+            "energy": 250
+          }
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            7
+          ],
+          "slot": 2,
+          "item": "electricadvantage:alkaline_battery",
+          "count": 1
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            7
+          ],
+          "slot": 3,
+          "item": "electricadvantage:lithium_battery",
+          "count": 1
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "slot": 0,
+          "item": "electricadvantage:blank_circuit_board",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "slot": 1,
+          "item": "electricadvantage:control_circuit",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "slot": 2,
+          "item": "electricadvantage:integrated_circuit",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "slot": 3,
+          "item": "electricadvantage:psu",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "slot": 4,
+          "item": "electricadvantage:silicon_ingot",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "slot": 5,
+          "item": "electricadvantage:silicon_mix",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "slot": 6,
+          "item": "electricadvantage:solder_mix",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "slot": 7,
+          "item": "electricadvantage:solder",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "slot": 8,
+          "item": "electricadvantage:li_ingot",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "slot": 9,
+          "item": "electricadvantage:li_powder",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "slot": 10,
+          "item": "electricadvantage:li_nugget",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "slot": 11,
+          "item": "electricadvantage:sulfur_powder",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            12
+          ],
+          "slot": 12,
+          "item": "electricadvantage:petrolplastic_ingot",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 12],
+          "slot": 13,
+          "item": "electricadvantage:lead_acid_battery",
+          "count": 1,
+          "nbt": {"energy": 0}
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 12],
+          "slot": 14,
+          "item": "electricadvantage:lead_acid_battery",
+          "count": 1,
+          "nbt": {"energy": 500}
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 12],
+          "slot": 15,
+          "item": "electricadvantage:lead_acid_battery",
+          "count": 1
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 12],
+          "slot": 16,
+          "item": "electricadvantage:nickel_hydride_battery",
+          "count": 1,
+          "nbt": {"energy": 0}
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 12],
+          "slot": 17,
+          "item": "electricadvantage:nickel_hydride_battery",
+          "count": 1,
+          "nbt": {"energy": 1000}
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 12],
+          "slot": 18,
+          "item": "electricadvantage:nickel_hydride_battery",
+          "count": 1
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 12],
+          "slot": 19,
+          "item": "electricadvantage:alkaline_battery",
+          "count": 1,
+          "nbt": {"energy": 0}
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 12],
+          "slot": 20,
+          "item": "electricadvantage:alkaline_battery",
+          "count": 1,
+          "nbt": {"energy": 2000}
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 12],
+          "slot": 21,
+          "item": "electricadvantage:alkaline_battery",
+          "count": 1
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 12],
+          "slot": 22,
+          "item": "electricadvantage:lithium_battery",
+          "count": 1,
+          "nbt": {"energy": 0}
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 12],
+          "slot": 23,
+          "item": "electricadvantage:lithium_battery",
+          "count": 1,
+          "nbt": {"energy": 4000}
+        },
+        {
+          "type": "setInventory",
+          "pos": [3, 1, 12],
+          "slot": 24,
+          "item": "electricadvantage:lithium_battery",
+          "count": 1
+        }
+      ],
+      "startActions": [
+        {
+          "type": "setBlock",
+          "pos": [
+            2,
+            1,
+            7
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            2,
+            1,
+            7
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "battery-array",
+          "type": "tileExists",
+          "pos": [
+            3,
+            1,
+            7
+          ]
+        },
+        {
+          "id": "electric-switch",
+          "type": "block",
+          "pos": [
+            5,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_switch"
+        },
+        {
+          "id": "lithium-battery",
+          "type": "registryItem",
+          "pos": null,
+          "item": "electricadvantage:lithium_battery"
+        },
+        {
+          "id": "lead-empty-nbt",
+          "type": "inventoryNbtNumber",
+          "pos": [3, 1, 12],
+          "slot": 13,
+          "nbtPath": "energy",
+          "value": 0,
+          "operator": "equals"
+        },
+        {
+          "id": "nickel-half-nbt",
+          "type": "inventoryNbtNumber",
+          "pos": [3, 1, 12],
+          "slot": 17,
+          "nbtPath": "energy",
+          "value": 1000,
+          "operator": "equals"
+        },
+        {
+          "id": "alkaline-half-nbt",
+          "type": "inventoryNbtNumber",
+          "pos": [3, 1, 12],
+          "slot": 20,
+          "nbtPath": "energy",
+          "value": 2000,
+          "operator": "equals"
+        },
+        {
+          "id": "lithium-half-nbt",
+          "type": "inventoryNbtNumber",
+          "pos": [3, 1, 12],
+          "slot": 23,
+          "nbtPath": "energy",
+          "value": 4000,
+          "operator": "equals"
+        }
+      ],
+      "manualChecks": [
+        "Verify all four battery item capacities at empty, partial, and full charge.",
+        "Checkpoint battery item NBT, tooltip percentage, and mixed eight-slot array state.",
+        "Observe backup priority under scarcity and switch redstone isolation/recovery.",
+        "Compare touching machine-to-machine conduction with cable between each machine.",
+        "Restart the complete chain and reconcile stored energy and actual completed work."
+      ]
+    },
+    {
+      "id": "E-03",
+      "name": "Electric Processing Works",
+      "district": "electric",
+      "origin": [
+        128,
+        3,
+        -64
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": false,
+      "requiredMods": [
+        "poweradvantage",
+        "electricadvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            3,
+            1,
+            6
+          ],
+          "block": "electricadvantage:electric_crusher",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            1,
+            6
+          ],
+          "block": "electricadvantage:electric_furnace",
+          "meta": 0
+        },
+        {
+          "pos": [
+            9,
+            1,
+            6
+          ],
+          "block": "electricadvantage:electric_oven",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            1,
+            6
+          ],
+          "block": "electricadvantage:electric_fabricator",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            1,
+            10
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            1,
+            10
+          ],
+          "block": "poweradvantage:item_conveyor",
+          "meta": 5
+        },
+        {
+          "pos": [
+            5,
+            1,
+            10
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            1,
+            14
+          ],
+          "block": "electricadvantage:li_ore",
+          "meta": 0
+        },
+        {
+          "pos": [
+            4,
+            1,
+            14
+          ],
+          "block": "electricadvantage:sulfur_ore",
+          "meta": 0
+        }
+      ],
+      "setupActions": [],
+      "startActions": [
+        {
+          "type": "setBlock",
+          "pos": [
+            3,
+            1,
+            5
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            6,
+            1,
+            5
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            9,
+            1,
+            5
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            12,
+            1,
+            5
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            10
+          ],
+          "slot": 0,
+          "item": "minecraft:iron_ore",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            3,
+            1,
+            10
+          ],
+          "slot": 1,
+          "item": "minecraft:beef",
+          "count": 8
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            3,
+            1,
+            5
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            6,
+            1,
+            5
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            9,
+            1,
+            5
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            12,
+            1,
+            5
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "crusher",
+          "type": "tileExists",
+          "pos": [
+            3,
+            1,
+            6
+          ]
+        },
+        {
+          "id": "furnace",
+          "type": "tileExists",
+          "pos": [
+            6,
+            1,
+            6
+          ]
+        },
+        {
+          "id": "oven",
+          "type": "tileExists",
+          "pos": [
+            9,
+            1,
+            6
+          ]
+        },
+        {
+          "id": "fabricator",
+          "type": "tileExists",
+          "pos": [
+            12,
+            1,
+            6
+          ]
+        }
+      ],
+      "manualChecks": [
+        "For each processor test valid, invalid, blocked output, scarce energy, and redstone inhibition.",
+        "Checkpoint inventories, energy, and progress at mid-cycle for both reload types.",
+        "Verify input is retained whenever outputs are full.",
+        "Exercise automation faces, conveyors, and comparator levels.",
+        "Reconcile all bounded inputs and outputs after interruption and endurance."
+      ]
+    },
+    {
+      "id": "E-04",
+      "name": "Electric Fluid Plant",
+      "district": "electric",
+      "origin": [
+        96,
+        3,
+        -32
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": true,
+      "requiredMods": [
+        "poweradvantage",
+        "electricadvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            5,
+            5,
+            7
+          ],
+          "block": "electricadvantage:electric_pump",
+          "meta": 0
+        },
+        {
+          "pos": [
+            5,
+            4,
+            7
+          ],
+          "block": "electricadvantage:pump_pipe_electric",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            5,
+            7
+          ],
+          "block": "electricadvantage:electric_conduit",
+          "meta": 0
+        },
+        {
+          "pos": [
+            7,
+            5,
+            7
+          ],
+          "block": "poweradvantage:fluid_metal_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_still",
+          "meta": 0
+        },
+        {
+          "pos": [
+            15,
+            1,
+            7
+          ],
+          "block": "electricadvantage:plastic_refinery",
+          "meta": 0
+        },
+        {
+          "pos": [
+            11,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_storage_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            13,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_storage_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            14,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_storage_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            16,
+            1,
+            7
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        }
+      ],
+      "setupActions": [
+        {
+          "type": "setFluid",
+          "pos": [
+            11,
+            1,
+            7
+          ],
+          "fluid": "crude_oil",
+          "value": 2000
+        },
+        {
+          "type": "setFluid",
+          "pos": [
+            14,
+            1,
+            7
+          ],
+          "fluid": "refined_oil",
+          "value": 2000
+        }
+      ],
+      "startActions": [
+        {
+          "type": "setBlock",
+          "pos": [
+            5,
+            1,
+            7
+          ],
+          "block": "minecraft:water",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            5,
+            5,
+            6
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            12,
+            1,
+            6
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            15,
+            1,
+            6
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            5,
+            1,
+            7
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            5,
+            5,
+            6
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            12,
+            1,
+            6
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            15,
+            1,
+            6
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "pump",
+          "type": "tileExists",
+          "pos": [
+            5,
+            5,
+            7
+          ]
+        },
+        {
+          "id": "still",
+          "type": "tileExists",
+          "pos": [
+            12,
+            1,
+            7
+          ]
+        },
+        {
+          "id": "refinery",
+          "type": "tileExists",
+          "pos": [
+            15,
+            1,
+            7
+          ]
+        },
+        {
+          "id": "managed-pipe",
+          "type": "block",
+          "pos": [
+            5,
+            4,
+            7
+          ],
+          "block": "electricadvantage:pump_pipe_electric"
+        }
+      ],
+      "manualChecks": [
+        "Measure electric pump base, lift, and pipe costs against bounded water.",
+        "Checkpoint exact pump and tank fluid before full restart; require automatic resume.",
+        "Distil and refine exact crude/refined quantities with full-output protection.",
+        "Test alternate configured fluid registry names and nonmatching fluids.",
+        "Interrupt electricity and fluid paths separately; reconcile all millibuckets."
+      ]
+    },
+    {
+      "id": "E-05",
+      "name": "Electrified Glasshouse",
+      "district": "electric",
+      "origin": [
+        128,
+        3,
+        -32
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": false,
+      "requiredMods": [
+        "poweradvantage",
+        "electricadvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            8,
+            1,
+            8
+          ],
+          "block": "electricadvantage:growth_chamber_controller",
+          "meta": 0
+        },
+        {
+          "pos": [
+            9,
+            1,
+            8
+          ],
+          "block": "electricadvantage:growth_chamber",
+          "meta": 0
+        },
+        {
+          "pos": [
+            10,
+            1,
+            8
+          ],
+          "block": "electricadvantage:growth_chamber",
+          "meta": 0
+        },
+        {
+          "pos": [
+            11,
+            1,
+            8
+          ],
+          "block": "electricadvantage:growth_chamber",
+          "meta": 0
+        },
+        {
+          "pos": [
+            10,
+            1,
+            9
+          ],
+          "block": "electricadvantage:growth_chamber",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_conduit",
+          "meta": 0
+        },
+        {
+          "pos": [
+            7,
+            1,
+            8
+          ],
+          "block": "poweradvantage:fluid_storage_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            1,
+            8
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        }
+      ],
+      "setupActions": [
+        {
+          "type": "setFluid",
+          "pos": [
+            7,
+            1,
+            8
+          ],
+          "fluid": "water",
+          "value": 4000
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            8,
+            1,
+            8
+          ],
+          "slot": 0,
+          "item": "minecraft:dirt",
+          "count": 1
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            9,
+            1,
+            8
+          ],
+          "slot": 0,
+          "item": "minecraft:wheat_seeds",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            10,
+            1,
+            8
+          ],
+          "slot": 0,
+          "item": "minecraft:sapling",
+          "count": 4
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            11,
+            1,
+            8
+          ],
+          "slot": 0,
+          "item": "minecraft:potato",
+          "count": 8
+        }
+      ],
+      "startActions": [
+        {
+          "type": "setBlock",
+          "pos": [
+            7,
+            1,
+            7
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            7,
+            1,
+            7
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "controller",
+          "type": "tileExists",
+          "pos": [
+            8,
+            1,
+            8
+          ]
+        },
+        {
+          "id": "chamber-one",
+          "type": "tileExists",
+          "pos": [
+            9,
+            1,
+            8
+          ]
+        },
+        {
+          "id": "chamber-branch",
+          "type": "tileExists",
+          "pos": [
+            10,
+            1,
+            9
+          ]
+        }
+      ],
+      "manualChecks": [
+        "Supply exactly one dirt, 2,000 mB water, and measured electricity.",
+        "Run seed, crop, sapling, and other recognised plant inputs separately.",
+        "Retain closed case EA-110-002: leave a second dirt waiting at soil 1,000, then apply load and verify it is consumed after soil falls below 500.",
+        "Extend until one chamber starves and reconcile shared greenhouse power.",
+        "Checkpoint controller soil, water, electricity, chamber progress, and items through restart."
+      ]
+    },
+    {
+      "id": "E-06",
+      "name": "Electric Drill Proving Ground",
+      "district": "electric",
+      "origin": [
+        96,
+        3,
+        64
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": true,
+      "enclosed": true,
+      "requiredMods": [
+        "poweradvantage",
+        "electricadvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            4,
+            2,
+            6
+          ],
+          "block": "electricadvantage:electric_drill",
+          "property": "facing",
+          "expectedText": "down"
+        },
+        {
+          "pos": [
+            8,
+            2,
+            6
+          ],
+          "block": "electricadvantage:electric_drill",
+          "meta": 1
+        },
+        {
+          "pos": [
+            12,
+            2,
+            6
+          ],
+          "block": "electricadvantage:electric_drill",
+          "meta": 2
+        },
+        {
+          "pos": [
+            16,
+            2,
+            6
+          ],
+          "block": "electricadvantage:electric_drill",
+          "meta": 3
+        },
+        {
+          "pos": [
+            20,
+            2,
+            6
+          ],
+          "block": "electricadvantage:electric_drill",
+          "meta": 4
+        },
+        {
+          "pos": [
+            24,
+            2,
+            6
+          ],
+          "block": "electricadvantage:electric_drill",
+          "meta": 5
+        },
+        {
+          "pos": [
+            4,
+            3,
+            6
+          ],
+          "block": "electricadvantage:electric_track",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            1,
+            6
+          ],
+          "block": "electricadvantage:electric_track",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            2,
+            7
+          ],
+          "block": "electricadvantage:electric_track",
+          "meta": 0
+        },
+        {
+          "pos": [
+            16,
+            2,
+            5
+          ],
+          "block": "electricadvantage:electric_track",
+          "meta": 0
+        },
+        {
+          "pos": [
+            21,
+            2,
+            6
+          ],
+          "block": "electricadvantage:electric_track",
+          "meta": 0
+        },
+        {
+          "pos": [
+            23,
+            2,
+            6
+          ],
+          "block": "electricadvantage:electric_track",
+          "meta": 0
+        },
+        {
+          "pos": [
+            3,
+            2,
+            6
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            9,
+            2,
+            6
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            2,
+            8
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            16,
+            2,
+            4
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            22,
+            2,
+            6
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            26,
+            2,
+            6
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        }
+      ],
+      "setupActions": [],
+      "startActions": [
+        {
+          "type": "setBlock",
+          "pos": [
+            4,
+            2,
+            7
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            8,
+            2,
+            7
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            12,
+            2,
+            9
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            16,
+            2,
+            3
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            22,
+            2,
+            7
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            26,
+            2,
+            7
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            4,
+            2,
+            7
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            8,
+            2,
+            7
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            12,
+            2,
+            9
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            16,
+            2,
+            3
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            22,
+            2,
+            7
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            26,
+            2,
+            7
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "down-facing",
+          "type": "blockProperty",
+          "pos": [
+            4,
+            2,
+            6
+          ],
+          "block": "electricadvantage:electric_drill",
+          "property": "facing",
+          "expectedText": "down"
+        },
+        {
+          "id": "up-facing",
+          "type": "blockProperty",
+          "pos": [
+            8,
+            2,
+            6
+          ],
+          "block": "electricadvantage:electric_drill",
+          "property": "facing",
+          "expectedText": "up"
+        },
+        {
+          "id": "north-facing",
+          "type": "blockProperty",
+          "pos": [
+            12,
+            2,
+            6
+          ],
+          "block": "electricadvantage:electric_drill",
+          "property": "facing",
+          "expectedText": "north"
+        },
+        {
+          "id": "south-facing",
+          "type": "blockProperty",
+          "pos": [
+            16,
+            2,
+            6
+          ],
+          "block": "electricadvantage:electric_drill",
+          "property": "facing",
+          "expectedText": "south"
+        },
+        {
+          "id": "west-facing",
+          "type": "blockProperty",
+          "pos": [
+            20,
+            2,
+            6
+          ],
+          "block": "electricadvantage:electric_drill",
+          "property": "facing",
+          "expectedText": "west"
+        },
+        {
+          "id": "east-facing",
+          "type": "blockProperty",
+          "pos": [
+            24,
+            2,
+            6
+          ],
+          "block": "electricadvantage:electric_drill",
+          "property": "facing",
+          "expectedText": "east"
+        }
+      ],
+      "manualChecks": [
+        "Repeat the six-facing Steam drill procedure with bounded targets and rear outputs.",
+        "Measure 24 energy per progress and 250 per track move.",
+        "Checkpoint metadata, target, energy, progress, inventory, and position mid-block.",
+        "Run same-session/full restarts including old-world vertical-facing blocks.",
+        "Verify all track moves preserve orientation, inventory, energy, and output.",
+        "Block outputs and prove no block or drop disappears."
+      ]
+    },
+    {
+      "id": "E-07",
+      "name": "Lighting and Defence Range",
+      "district": "electric",
+      "origin": [
+        128,
+        3,
+        64
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": true,
+      "enclosed": true,
+      "requiredMods": [
+        "poweradvantage",
+        "electricadvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            4,
+            1,
+            7
+          ],
+          "block": "electricadvantage:led_bar",
+          "meta": 0
+        },
+        {
+          "pos": [
+            5,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_conduit",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_switch",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            1,
+            7
+          ],
+          "block": "electricadvantage:laser_turret",
+          "meta": 0
+        },
+        {
+          "pos": [
+            13,
+            1,
+            7
+          ],
+          "block": "electricadvantage:electric_conduit",
+          "meta": 0
+        },
+        {
+          "pos": [
+            20,
+            1,
+            20
+          ],
+          "block": "electricadvantage:laser_turret_evil",
+          "meta": 0
+        },
+        {
+          "pos": [
+            10,
+            1,
+            5
+          ],
+          "block": "minecraft:iron_bars",
+          "meta": 0
+        },
+        {
+          "pos": [
+            10,
+            2,
+            5
+          ],
+          "block": "minecraft:iron_bars",
+          "meta": 0
+        },
+        {
+          "pos": [
+            10,
+            1,
+            15
+          ],
+          "block": "minecraft:iron_bars",
+          "meta": 0
+        },
+        {
+          "pos": [
+            10,
+            2,
+            15
+          ],
+          "block": "minecraft:iron_bars",
+          "meta": 0
+        },
+        {
+          "pos": [
+            22,
+            1,
+            7
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        }
+      ],
+      "setupActions": [],
+      "startActions": [
+        {
+          "type": "setBlock",
+          "pos": [
+            7,
+            1,
+            7
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        },
+        {
+          "type": "setBlock",
+          "pos": [
+            14,
+            1,
+            7
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            7,
+            1,
+            7
+          ]
+        },
+        {
+          "type": "setAir",
+          "pos": [
+            14,
+            1,
+            7
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "led",
+          "type": "tileExists",
+          "pos": [
+            4,
+            1,
+            7
+          ]
+        },
+        {
+          "id": "turret",
+          "type": "tileExists",
+          "pos": [
+            12,
+            1,
+            7
+          ]
+        },
+        {
+          "id": "evil-helper",
+          "type": "tileExists",
+          "pos": [
+            20,
+            1,
+            20
+          ]
+        }
+      ],
+      "manualChecks": [
+        "LED: high-priority draw, light level, interruption, switch control, chunk reload, and restart.",
+        "Turret: owner and team persistence, 16-block acquisition, 32-block ray, and target reacquisition.",
+        "Measure idle, charging, and 1,000-per-shot energy; count real hits rather than animation.",
+        "Use hostile mobs and consenting test players only inside the sealed range.",
+        "The hidden evil turret is isolated here solely as part of turret lifecycle testing."
+      ]
+    },
+    {
+      "id": "E-08",
+      "name": "Assembler Diagnostic Cell",
+      "district": "electric",
+      "origin": [
+        96,
+        3,
+        0
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": true,
+      "requiredMods": [
+        "poweradvantage",
+        "electricadvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            10,
+            1,
+            10
+          ],
+          "block": "electricadvantage:electric_fabricator",
+          "meta": 0
+        },
+        {
+          "pos": [
+            9,
+            1,
+            10
+          ],
+          "block": "electricadvantage:electric_conduit",
+          "meta": 0
+        },
+        {
+          "pos": [
+            11,
+            1,
+            10
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            1,
+            10
+          ],
+          "block": "minecraft:chest",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            1,
+            6
+          ],
+          "block": "minecraft:obsidian",
+          "meta": 0
+        },
+        {
+          "pos": [
+            6,
+            2,
+            6
+          ],
+          "block": "minecraft:iron_bars",
+          "meta": 0
+        },
+        {
+          "pos": [
+            14,
+            1,
+            6
+          ],
+          "block": "minecraft:obsidian",
+          "meta": 0
+        },
+        {
+          "pos": [
+            14,
+            2,
+            6
+          ],
+          "block": "minecraft:iron_bars",
+          "meta": 0
+        }
+      ],
+      "setupActions": [
+        {
+          "type": "setInventory",
+          "pos": [
+            8,
+            1,
+            10
+          ],
+          "slot": 0,
+          "item": "minecraft:planks",
+          "count": 8
+        },
+        {
+          "type": "setInventory",
+          "pos": [
+            11,
+            1,
+            10
+          ],
+          "slot": 0,
+          "item": "minecraft:crafting_table",
+          "count": 1
+        }
+      ],
+      "startActions": [
+        {
+          "type": "setBlock",
+          "pos": [
+            9,
+            1,
+            9
+          ],
+          "block": "poweradvantage:infinite_electricity",
+          "meta": 0
+        }
+      ],
+      "stopActions": [
+        {
+          "type": "setAir",
+          "pos": [
+            9,
+            1,
+            9
+          ]
+        }
+      ],
+      "assertions": [
+        {
+          "id": "fabricator",
+          "type": "tileExists",
+          "pos": [
+            10,
+            1,
+            10
+          ]
+        },
+        {
+          "id": "input-chest",
+          "type": "tileExists",
+          "pos": [
+            8,
+            1,
+            10
+          ]
+        },
+        {
+          "id": "output-chest",
+          "type": "tileExists",
+          "pos": [
+            11,
+            1,
+            10
+          ]
+        }
+      ],
+      "manualChecks": [
+        "Copied worlds only: start with recursion 1 and one simple vanilla recipe.",
+        "Capture tick time and logs before inserting the reference recipe.",
+        "Raise recursion to 2 then 5 only while the server remains responsive.",
+        "Stop immediately on sustained tick stall; record EA-110-001 as the hypothesis.",
+        "Do not test reversible metal storage recipes in a valued world.",
+        "A pass for one material does not clear the wider recipe graph."
+      ]
+    },
+    {
+      "id": "P-API-01",
+      "name": "Public Fluid Network API",
+      "district": "power",
+      "origin": [
+        -64,
+        3,
+        0
+      ],
+      "boundsMin": [
+        0,
+        0,
+        0
+      ],
+      "boundsMax": [
+        27,
+        15,
+        27
+      ],
+      "exclusive": false,
+      "requiredMods": [
+        "poweradvantage"
+      ],
+      "placements": [
+        {
+          "pos": [
+            7,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_pipe",
+          "meta": 0
+        },
+        {
+          "pos": [
+            8,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_storage_tank",
+          "meta": 0
+        },
+        {
+          "pos": [
+            12,
+            1,
+            7
+          ],
+          "block": "minecraft:cobblestone",
+          "meta": 0
+        }
+      ],
+      "setupActions": [],
+      "startActions": [
+        {
+          "type": "offerFluid",
+          "pos": [
+            12,
+            1,
+            7
+          ],
+          "fluid": "water",
+          "value": 1000,
+          "transferLimit": 1000,
+          "expectedValue": 0
+        },
+        {
+          "type": "offerFluid",
+          "pos": [
+            7,
+            1,
+            7
+          ],
+          "fluid": "water",
+          "value": 6000,
+          "transferLimit": 1000,
+          "expectedValue": 1000
+        },
+        {
+          "type": "offerFluid",
+          "pos": [
+            7,
+            1,
+            7
+          ],
+          "fluid": "water",
+          "value": 5000,
+          "transferLimit": 5000,
+          "expectedValue": 3000
+        },
+        {
+          "type": "offerFluid",
+          "pos": [
+            7,
+            1,
+            7
+          ],
+          "fluid": "water",
+          "value": 1000,
+          "transferLimit": 1000,
+          "expectedValue": 0
+        }
+      ],
+      "stopActions": [],
+      "assertions": [
+        {
+          "id": "api-pipe",
+          "type": "block",
+          "pos": [
+            7,
+            1,
+            7
+          ],
+          "block": "poweradvantage:fluid_pipe"
+        },
+        {
+          "id": "api-tank-filled",
+          "type": "nbtNumber",
+          "pos": [
+            8,
+            1,
+            7
+          ],
+          "nbtPath": "Tank.Amount",
+          "operator": "equals",
+          "value": 4000
+        }
+      ],
+      "manualChecks": [
+        "After start, open the storage tank and confirm it contains exactly 4,000 mB of water.",
+        "Reset before starting this station again; its full-tank rejection is deliberately stateful."
+      ]
+    }
+  ]
+}

@@ -1,3 +1,16 @@
+Power Advantage 2.4.4.113021
+
+- Port Power Advantage to Minecraft 1.13.2 with ForgeGradle 7 and Java 8 support.
+- Keep existing block, item, fluid and saved-state names, the legacy public API and Iron Age Furniture compatibility facades.
+- Add direct 1.10 and 1.12 world migration, including inventories, fluids, entities, pets, enchantments and old configuration files. Back up worlds before upgrading.
+- Restore conduit connections after reloads without forcing unloaded chunks to load.
+- Fix models, translations, oil buckets, fluid gauges and transparent floor edges around containers.
+- Add ingredient-based recipe discoveries, separate unrelated recipe-book entries, and allow potatoes to be crafted into starch.
+- Restore processing, recycling and parts-loot paths while retaining recipe modes and configured material aliases.
+- Use Forge tags, Base Metals crushing and OreSpawn 4 deposits; retain old generation settings and user overrides.
+- Keep the RF and Tech Reborn converter names but use Forge Energy instead of obsolete external APIs.
+- Add separate Power-only and combined Eclipse launches, reproducible builds and repeatable migration and operating tests. See the qualification notes for remaining coverage gaps.
+
 Power Advantage 2.4.1.112021
 
 - Restore conduit networks and machine GUI state after a world reload.

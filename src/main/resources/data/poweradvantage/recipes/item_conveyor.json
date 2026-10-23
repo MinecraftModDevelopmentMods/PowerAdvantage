@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx",
+    "ghg",
+    "xxx"
+  ],
+  "key": {
+    "x": {
+      "tag": "forge:plates/steel"
+    },
+    "g": {
+      "tag": "forge:sprockets"
+    },
+    "h": {
+      "item": "minecraft:hopper"
+    }
+  },
+  "result": {
+    "item": "poweradvantage:item_conveyor",
+    "count": 5
+  },
+  "group": "poweradvantage:item_conveyor",
+  "conditions": [
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:plates/steel"
+    },
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:sprockets"
+    }
+  ]
+}
