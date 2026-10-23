@@ -20,17 +20,17 @@
     },
     {
       "id": "steamadvantage",
-      "version": "2.2.4.110021",
-      "file": "SteamAdvantage-2.2.4.110021-deobf.jar",
-      "path": "../../SteamAdvantage/SteamAdvantage/build/libs-dev/SteamAdvantage-2.2.4.110021-deobf.jar",
-      "sha256": "5CD8F115F929C0F408B3520A585A1B5E39DAEA1BE7BDB75E08A7825C8CC57E43"
+      "version": "2.2.5.110021",
+      "file": "SteamAdvantage-2.2.5.110021-deobf.jar",
+      "path": "../../SteamAdvantage/SteamAdvantage/build/libs-dev/SteamAdvantage-2.2.5.110021-deobf.jar",
+      "sha256": "B5247840473DE939234D83B61612B42B2398D79036101CD17ADA5AEA08B8A63F"
     },
     {
       "id": "electricadvantage",
-      "version": "2.2.4.110021",
-      "file": "ElectricAdvantage-2.2.4.110021-deobf.jar",
-      "path": "../../ElectricAdvantage/ElectricAdvantage/build/libs-dev/ElectricAdvantage-2.2.4.110021-deobf.jar",
-      "sha256": "DE4B48C6C939583CFA68BEB6D375AF841303897CDCB0F9B95E59BB97F660FF84"
+      "version": "2.2.5.110021",
+      "file": "ElectricAdvantage-2.2.5.110021-deobf.jar",
+      "path": "../../ElectricAdvantage/ElectricAdvantage/build/libs-dev/ElectricAdvantage-2.2.5.110021-deobf.jar",
+      "sha256": "2E1ED596049D891C3A41ECC9DFE8979E39DED56651B8DE6DB2A9A4709F5A1AF9"
     }
   ]
 }

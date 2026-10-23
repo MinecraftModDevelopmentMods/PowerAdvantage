@@ -32,17 +32,17 @@
     },
     {
       "id": "steamadvantage",
-      "version": "2.2.4.110021",
-      "file": "SteamAdvantage-2.2.4.110021.jar",
-      "path": "../../SteamAdvantage/SteamAdvantage/build/libs/SteamAdvantage-2.2.4.110021.jar",
-      "sha256": "F9A1081C1D6D80BA1C9BE0DEE9975148B16D4622300A0198F59C92E354A3F54C"
+      "version": "2.2.5.110021",
+      "file": "SteamAdvantage-2.2.5.110021.jar",
+      "path": "../../SteamAdvantage/SteamAdvantage/build/libs/SteamAdvantage-2.2.5.110021.jar",
+      "sha256": "1C9DE2F9EE29439B727D2087E18BAD5277115BCCF7162F0F9342F322F44F9E9E"
     },
     {
       "id": "electricadvantage",
-      "version": "2.2.4.110021",
-      "file": "ElectricAdvantage-2.2.4.110021.jar",
-      "path": "../../ElectricAdvantage/ElectricAdvantage/build/libs/ElectricAdvantage-2.2.4.110021.jar",
-      "sha256": "878613C35B91B123ACEDB8E3450E93E4CDB14CA5FEDE1964C2DAAA84568573E2"
+      "version": "2.2.5.110021",
+      "file": "ElectricAdvantage-2.2.5.110021.jar",
+      "path": "../../ElectricAdvantage/ElectricAdvantage/build/libs/ElectricAdvantage-2.2.5.110021.jar",
+      "sha256": "1854A854332FC02151C289BAEAF9DC3C6677ED6CDC1ED04EA8EDD0CB54A085F5"
     },
     {
       "id": "rf-api",

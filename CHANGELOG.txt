@@ -1,3 +1,8 @@
+Test rig updates (no Power Advantage version change)
+
+- Use the repaired Steam and Electric drill builds in the 1.10 test profiles.
+- Keep generated logs and local tooling files out of Git.
+
 Power Advantage 2.4.3.110021
 
 - Move the implementation namespace to zone.moddev.mc.poweradvantage while preserving runtime identities.
