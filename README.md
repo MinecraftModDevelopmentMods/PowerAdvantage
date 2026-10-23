@@ -28,6 +28,7 @@ Both the original Windows-input jar and a clean LF-checkout build have exact
 checksums in `gradle.properties`. Their class bytes and archive entries match;
 only text line endings differ. CI uses the LF build. Unknown hashes still fail.
 Advantage's own archives normalize text to LF.
+All Advantage archives also exclude empty directories left behind by older source layouts.
 
 Release jars are written to `build/libs`; `deobfJar` writes the sibling-development jar to `build/libs-dev`.
 
