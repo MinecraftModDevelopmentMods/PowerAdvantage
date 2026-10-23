@@ -27,6 +27,9 @@ jobs:
           repository: MinecraftModDevelopmentMods/OreSpawn
           ref: 6a7c2bb07b9a7771128812fcc07d185f7d9df58b
           path: .ci-dependencies/OreSpawn
+      - name: Use canonical LF dependency inputs
+        # Base Metals predates archive text normalization; its LF artifact is separately pinned.
+        run: git config --global core.autocrlf false
       - name: Check out pinned Base Metals
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:

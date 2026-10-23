@@ -23,6 +23,12 @@ gradlew.bat clean check build javadoc verifyReleaseDependencies verifyReleaseArt
 
 The default dependency paths follow the local MMD checkout layout. Other layouts can pass `-PbaseMetalsDeobfJar=<path>` and `-PoreSpawnDeobfJar=<path>`. Dependencies are present on development classpaths but are never embedded in PowerAdvantage artifacts.
 
+The pinned Base Metals development jar predates archive line-ending normalization.
+Both the original Windows-input jar and a clean LF-checkout build have exact
+checksums in `gradle.properties`. Their class bytes and archive entries match;
+only text line endings differ. CI uses the LF build. Unknown hashes still fail.
+Advantage's own archives normalize text to LF.
+
 Release jars are written to `build/libs`; `deobfJar` writes the sibling-development jar to `build/libs-dev`.
 
 For Eclipse, import this repository as an existing Gradle project and run:

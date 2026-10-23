@@ -428,8 +428,12 @@ tasks.register('verifyReleaseDependencies') {
             }
             String actualHash = MessageDigest.getInstance('SHA-256')
                     .digest(dependencyJar.bytes).encodeHex().toString().toUpperCase()
-            if (actualHash != expectedHash) {
-                throw new GradleException("${dependencyJar.name} SHA-256 is ${actualHash}, expected ${expectedHash}")
+            Set<String> acceptedHashes = [expectedHash] as Set<String>
+            if (dependencyJar == baseMetalsDeobfJar) {
+                acceptedHashes.add(project.basemetals_deobf_lf_sha256.toString())
+            }
+            if (!acceptedHashes.contains(actualHash)) {
+                throw new GradleException("${dependencyJar.name} SHA-256 is ${actualHash}, expected ${acceptedHashes}")
             }
         }
         Set<File> compileFiles = configurations.compileClasspath.files.collect { it.canonicalFile } as Set<File>
