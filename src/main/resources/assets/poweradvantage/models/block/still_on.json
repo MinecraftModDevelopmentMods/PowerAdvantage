@@ -1,9 +1,9 @@
 {
   "parent": "block/block",
   "textures": {
-        "top": "blocks/furnace_top",
-        "front": "blocks/furnace_front_on",
-        "side": "blocks/furnace_side",
+        "top": "minecraft:block/furnace_top",
+        "front": "minecraft:block/furnace_front_on",
+        "side": "minecraft:block/furnace_side",
         "tank": "poweradvantage:materials/steel",
         "particle": "poweradvantage:materials/steel"
     },

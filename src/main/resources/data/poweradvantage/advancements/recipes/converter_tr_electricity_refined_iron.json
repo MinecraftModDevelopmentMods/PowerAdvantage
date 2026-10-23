@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_ingredient_1": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "forge:ingots/refined_iron"
+          }
+        ]
+      }
+    },
+    "has_ingredient_2": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "forge:power_supply_units"
+          }
+        ]
+      }
+    },
+    "has_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "poweradvantage:converter_tr_electricity_refined_iron"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_ingredient_1",
+      "has_ingredient_2",
+      "has_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "poweradvantage:converter_tr_electricity_refined_iron"
+    ]
+  }
+}

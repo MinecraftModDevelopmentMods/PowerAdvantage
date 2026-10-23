@@ -1,17 +1,18 @@
 package cyano.poweradvantage.api.simple;
 
 import cyano.poweradvantage.api.*;
-import com.mcmoddev.poweradvantage.conduitnetwork.ConduitRegistry;
+import zone.moddev.mc.poweradvantage.conduitnetwork.ConduitRegistry;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.properties.PropertyDirection;
-import net.minecraft.block.state.BlockStateContainer;
+import net.minecraft.state.IProperty;
+import net.minecraft.state.DirectionProperty;
+import net.minecraft.state.StateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -20,6 +21,8 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.block.Block;
 
 import java.util.Random;
 
@@ -28,7 +31,7 @@ import java.util.Random;
  * block with an inventory and user interface that gives power to connected 
  * machines.<br>
  * Example usage:<br><pre>
-int guiID = com.mcmoddev.poweradvantage.registry.MachineGUIRegistry.addGUI(new MySimpleMachineGUI());
+int guiID = zone.moddev.mc.poweradvantage.registry.MachineGUIRegistry.addGUI(new MySimpleMachineGUI());
 Block myMachineBlock = new MyBlockSimplePowerSource(guiID,PowerAdvantage.getInstance());
 myMachineBlock.setTranslationKey(MODID+"."+"my_machine");
 myMachineBlock.setRegistryName(MODID, "my_machine");
@@ -43,7 +46,7 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
 	/**
 	 * Blockstate property indicating which direction the block is facing
 	 */
-    public static final PropertyDirection FACING = BlockHorizontal.FACING;
+    public static final DirectionProperty FACING = BlockHorizontal.HORIZONTAL_FACING;
     /**
      * Standard constructor for a machine block. Remember to set the GUI ID so that a GUI can pop-up 
      * when the player interacts with this block.
@@ -56,10 +59,19 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
      * power conduits to determine whether to connect to this block.
      */
 	public BlockSimplePowerMachine(Material blockMaterial, float hardness, ConduitType... energyType){
-		super(blockMaterial);
+		super(blockMaterial, hardness);
 		this.type = energyType;
-    	super.setHardness(hardness);
-		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
+		this.setDefaultState(this.getStateContainer().getBaseState().with(FACING, EnumFacing.NORTH));
+	}
+
+	/**
+	 * 1.13 constructor for machines which need non-default block properties such
+	 * as a different sound or blast resistance.
+	 */
+	protected BlockSimplePowerMachine(Block.Properties properties, ConduitType... energyType) {
+		super(properties);
+		this.type = energyType;
+		this.setDefaultState(this.getStateContainer().getBaseState().with(FACING, EnumFacing.NORTH));
 	}
 	
 	/**
@@ -69,23 +81,28 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
 	 * <b>TileEntitySimplePowerMachine</b>.
 	 */
 	@Override
-    public abstract PoweredEntity createNewTileEntity(final World world, final int metaDataValue);
+    public abstract PoweredEntity createNewTileEntity(final IBlockReader world);
 	
 	/**
 	 * Override of default block behavior
 	 */
 	@Override
-	public void onBlockAdded(final World world, final BlockPos coord, final IBlockState state) {
+	public void onBlockAdded(final IBlockState state, final World world, final BlockPos coord,
+			final IBlockState oldState) {
+		super.onBlockAdded(state, world, coord, oldState);
 		this.setDefaultFacing(world, coord, state);
-		ConduitRegistry.getInstance().conduitBlockPlacedEvent(world, world.provider.getDimension(), coord, getTypes());
+		ConduitRegistry.getInstance().conduitBlockPlacedEvent(world, world.dimension.getType().getId(), coord, getTypes());
 	}
 	/**
 	 * This method is called when the block is removed from the world by an entity.
 	 */
 	@Override
-	public void onPlayerDestroy(World w, BlockPos coord, IBlockState state){
-		super.onPlayerDestroy(w, coord, state);
-		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.provider.getDimension(), coord, getTypes());
+	public void onReplaced(IBlockState state, World w, BlockPos coord, IBlockState newState,
+			boolean isMoving) {
+		if (state.getBlock() != newState.getBlock()) {
+			ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.dimension.getType().getId(), coord, getTypes());
+		}
+		super.onReplaced(state, w, coord, newState, isMoving);
 	}
 	/**
 	 * This method is called when the block is destroyed by an explosion.
@@ -93,7 +110,7 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
 	@Override
 	public void onExplosionDestroy(World w, BlockPos coord, Explosion boom){
 		super.onExplosionDestroy(w, coord, boom);
-		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.provider.getDimension(), coord, getTypes());
+		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.dimension.getType().getId(), coord, getTypes());
 	}
 	
 	/**
@@ -123,20 +140,12 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
 	/**
 	 * Override of default block behavior
 	 */
-    @Override
-    public Item getItemDropped(final IBlockState state, final Random prng, final int i3) {
-        return Item.getItemFromBlock(this);
-    }
-    
-   
-    
-
 	/**
 	 * Creates the blockstate of this block when it is placed in the world
 	 */
     @Override
-    public IBlockState getStateForPlacement(final World p_onBlockPlaced_1_, final BlockPos p_onBlockPlaced_2_, final EnumFacing p_onBlockPlaced_3_, final float p_onBlockPlaced_4_, final float p_onBlockPlaced_5_, final float p_onBlockPlaced_6_, final int p_onBlockPlaced_7_, final EntityLivingBase p_onBlockPlaced_8_) {
-        return this.getDefaultState().withProperty( FACING, p_onBlockPlaced_8_.getHorizontalFacing().getOpposite());
+    public IBlockState getStateForPlacement(final BlockItemUseContext context) {
+        return this.getDefaultState().with(FACING, context.getPlacementHorizontalFacing().getOpposite());
     }
     
     /**
@@ -145,11 +154,11 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
     @Override
     public void onBlockPlacedBy(final World world, final BlockPos coord, final IBlockState bs, 
     		final EntityLivingBase placer, final ItemStack srcItemStack) {
-        world.setBlockState(coord, bs.withProperty((IProperty) FACING, (Comparable)placer.getHorizontalFacing().getOpposite()), 2);
+        world.setBlockState(coord, bs.with((IProperty) FACING, (Comparable)placer.getHorizontalFacing().getOpposite()), 2);
         if (srcItemStack.hasDisplayName()) {
         	final TileEntity tileEntity = world.getTileEntity(coord);
         	if (tileEntity instanceof PoweredEntity){
-        		((PoweredEntity)tileEntity).setCustomInventoryName(srcItemStack.getDisplayName());
+				((PoweredEntity)tileEntity).setCustomInventoryName(srcItemStack.getDisplayName().getString());
         	}
         }
     }
@@ -158,17 +167,6 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
      * Destroys the TileEntity associated with this block when this block 
      * breaks.
      */
-    @Override
-    public void breakBlock(final World world, final BlockPos coord, final IBlockState bs) {
-        final TileEntity tileEntity = world.getTileEntity(coord);
-        if (tileEntity instanceof TileEntitySimplePowerMachine) {
-            InventoryHelper.dropInventoryItems(world, coord, (IInventory)tileEntity);
-            world.updateComparatorOutputLevel(coord, this);
-        }
-        super.breakBlock(world, coord, bs);
-    }
-    
-    
     /**
      * Sets the default blockstate
      * @param w World instance
@@ -183,20 +181,20 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
         final IBlockState block2 = w.getBlockState(coord.south());
         final IBlockState block3 = w.getBlockState(coord.west());
         final IBlockState block4 = w.getBlockState(coord.east());
-        EnumFacing enumFacing = (EnumFacing)state.getValue(FACING);
-        if (enumFacing == EnumFacing.NORTH && block.isFullBlock() && !block2.isFullBlock()) {
+        EnumFacing enumFacing = (EnumFacing)state .get(FACING);
+        if (enumFacing == EnumFacing.NORTH && block.isFullCube() && !block2.isFullCube()) {
             enumFacing = EnumFacing.SOUTH;
         }
-        else if (enumFacing == EnumFacing.SOUTH && block2.isFullBlock() && !block.isFullBlock()) {
+        else if (enumFacing == EnumFacing.SOUTH && block2.isFullCube() && !block.isFullCube()) {
             enumFacing = EnumFacing.NORTH;
         }
-        else if (enumFacing == EnumFacing.WEST && block3.isFullBlock() && !block4.isFullBlock()) {
+        else if (enumFacing == EnumFacing.WEST && block3.isFullCube() && !block4.isFullCube()) {
             enumFacing = EnumFacing.EAST;
         }
-        else if (enumFacing == EnumFacing.EAST && block4.isFullBlock() && !block3.isFullBlock()) {
+        else if (enumFacing == EnumFacing.EAST && block4.isFullCube() && !block3.isFullCube()) {
             enumFacing = EnumFacing.WEST;
         }
-        w.setBlockState(coord, state.withProperty((IProperty) FACING, (Comparable)enumFacing), 2);
+        w.setBlockState(coord, state.with((IProperty) FACING, (Comparable)enumFacing), 2);
     }
     
     /**
@@ -242,39 +240,37 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
     /**
      * Converts metadata into blockstate
      */
-    @Override
     public IBlockState getStateFromMeta(final int metaValue) {
         EnumFacing enumFacing = EnumFacing.byIndex(metaValue);
         if (enumFacing.getAxis() == EnumFacing.Axis.Y) {
             enumFacing = EnumFacing.NORTH;
         }
-        return this.getDefaultState().withProperty( FACING, enumFacing);
+        return this.getDefaultState().with( FACING, enumFacing);
     }
     
     /**
      * Converts blockstate into metadata
      */
-    @Override
     public int getMetaFromState(final IBlockState bs) {
-        return ((EnumFacing)bs.getValue( FACING)).getIndex();
+        return ((EnumFacing)bs .get( FACING)).getIndex();
     }
     
     /**
      * Creates a blockstate
      */
     @Override
-    protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, new IProperty[] {  FACING });
+    protected void fillStateContainer(StateContainer.Builder<Block, IBlockState> builder) {
+		builder.add(FACING);
     }
 
 	@Override
-	public IBlockState withRotation(IBlockState state, Rotation rot) {
-		return state.withProperty(FACING, rot.rotate((EnumFacing)state.getValue(FACING)));
+	public IBlockState rotate(IBlockState state, Rotation rot) {
+		return state.with(FACING, rot.rotate((EnumFacing)state .get(FACING)));
 	}
 
 	@Override
-	public IBlockState withMirror(IBlockState state, Mirror mirrorIn) {
-		return state.withRotation(mirrorIn.toRotation((EnumFacing)state.getValue(FACING)));
+	public IBlockState mirror(IBlockState state, Mirror mirrorIn) {
+		return state.rotate(mirrorIn.toRotation((EnumFacing)state .get(FACING)));
 	}
 
 	/**

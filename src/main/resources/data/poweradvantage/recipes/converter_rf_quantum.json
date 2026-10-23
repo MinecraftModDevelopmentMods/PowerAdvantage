@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xyz"
+  ],
+  "key": {
+    "x": {
+      "item": "minecraft:ender_pearl"
+    },
+    "y": {
+      "tag": "forge:frames/steel"
+    },
+    "z": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "result": {
+    "item": "poweradvantage:converter_rf_quantum"
+  },
+  "conditions": [
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:frames/steel"
+    }
+  ],
+  "group": "poweradvantage:converter_rf_quantum"
+}

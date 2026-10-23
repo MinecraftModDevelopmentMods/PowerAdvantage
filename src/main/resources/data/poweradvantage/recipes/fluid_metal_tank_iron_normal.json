@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx",
+    "xpx",
+    "xxx"
+  ],
+  "key": {
+    "x": {
+      "tag": "forge:ingots/iron"
+    },
+    "p": {
+      "tag": "forge:pipes"
+    }
+  },
+  "result": {
+    "item": "poweradvantage:fluid_metal_tank"
+  },
+  "conditions": [
+    {
+      "type": "poweradvantage:recipe_mode",
+      "mode": "NORMAL"
+    },
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:ingots/iron"
+    },
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:pipes"
+    }
+  ],
+  "group": "poweradvantage:fluid_metal_tank"
+}

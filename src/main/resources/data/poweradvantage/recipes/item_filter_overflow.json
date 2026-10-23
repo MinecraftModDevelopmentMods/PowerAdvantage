@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "x",
+    "z"
+  ],
+  "key": {
+    "x": {
+      "item": "poweradvantage:item_conveyor"
+    },
+    "z": {
+      "item": "minecraft:oak_pressure_plate"
+    }
+  },
+  "result": {
+    "item": "poweradvantage:item_filter_overflow"
+  },
+  "group": "poweradvantage:item_filter_overflow"
+}

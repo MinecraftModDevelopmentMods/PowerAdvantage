@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx",
+    "   ",
+    "xxx"
+  ],
+  "key": {
+    "x": {
+      "tag": "forge:ingots/copper"
+    }
+  },
+  "result": {
+    "item": "poweradvantage:fluid_pipe",
+    "count": 3
+  },
+  "conditions": [
+    {
+      "type": "poweradvantage:recipe_mode",
+      "mode": "APOCALYPTIC"
+    },
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:ingots/copper"
+    }
+  ],
+  "group": "poweradvantage:fluid_pipe"
+}

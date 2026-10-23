@@ -5,6 +5,7 @@ import cyano.poweradvantage.api.PowerRequest;
 import cyano.poweradvantage.api.simple.TileEntitySimplePowerMachine;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntityType;
 
 import java.util.Arrays;
 
@@ -27,8 +28,8 @@ public abstract class TileEntityConverter extends TileEntitySimplePowerMachine {
 	final int INDEX_OTHER_ENERGY_UPPER = 2;
 	private final ConduitType type;
 
-	public TileEntityConverter(ConduitType type, float powerAdvantageEnergyBuffer, String unlocalizedName) {
-		super(type, powerAdvantageEnergyBuffer, unlocalizedName);
+	public TileEntityConverter(TileEntityType<?> tileType, ConduitType type, float powerAdvantageEnergyBuffer, String unlocalizedName) {
+		super(tileType, type, powerAdvantageEnergyBuffer, unlocalizedName);
 		halfFull = powerAdvantageEnergyBuffer * 0.5f;
 		this.type = type;
 	}
@@ -173,16 +174,16 @@ public abstract class TileEntityConverter extends TileEntitySimplePowerMachine {
 	}
 
 	@Override
-	public void readFromNBT(final NBTTagCompound tagRoot) {
-		super.readFromNBT(tagRoot);
-		if (tagRoot.hasKey("Other")) {
+	public void read(final NBTTagCompound tagRoot) {
+		super.read(tagRoot);
+		if (tagRoot.contains("Other", 99)) {
 			this.setOtherEnergy(tagRoot.getDouble("Other"));
 		}
 	}
 
 	@Override
-	public NBTTagCompound writeToNBT(final NBTTagCompound tagRoot) {
-		super.writeToNBT(tagRoot);
+	public NBTTagCompound write(final NBTTagCompound tagRoot) {
+		super .write(tagRoot);
 		tagRoot.setDouble("Other", this.getOtherEnergy());
 		return tagRoot;
 	}

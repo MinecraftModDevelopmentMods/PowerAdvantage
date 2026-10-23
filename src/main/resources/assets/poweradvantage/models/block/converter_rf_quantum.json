@@ -2,7 +2,7 @@
   "parent": "block/block",
   "textures": {
         "face": "poweradvantage:blocks/steel_frame",
-        "core": "minecraft:blocks/ice_packed",
+        "core": "minecraft:block/packed_ice",
         "plug": "poweradvantage:blocks/filter_bottom",
         "particle": "poweradvantage:materials/steel"
     },

@@ -1,0 +1,24 @@
+{
+  "type": "basemetals:crushing",
+  "ingredient": {
+    "item": "poweradvantage:item_filter_fuel"
+  },
+  "result": {
+    "item": "basemetals:steel_plate",
+    "count": 1
+  },
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "basemetals"
+    },
+    {
+      "type": "poweradvantage:recipe_mode",
+      "mode": "APOCALYPTIC"
+    },
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:plates/steel"
+    }
+  ]
+}

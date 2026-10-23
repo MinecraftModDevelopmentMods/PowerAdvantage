@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "x",
+    "y",
+    "z"
+  ],
+  "key": {
+    "x": {
+      "item": "poweradvantage:item_conveyor"
+    },
+    "y": {
+      "tag": "forge:ingots/gold"
+    },
+    "z": {
+      "item": "minecraft:oak_pressure_plate"
+    }
+  },
+  "result": {
+    "item": "poweradvantage:item_filter_ore"
+  },
+  "group": "poweradvantage:item_filter_ore",
+  "conditions": [
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:ingots/gold"
+    }
+  ]
+}

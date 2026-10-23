@@ -5,8 +5,8 @@ import cyano.poweradvantage.api.PowerConnectorContext;
 import cyano.poweradvantage.api.PowerRequest;
 import cyano.poweradvantage.api.fluid.FluidPoweredEntity;
 import cyano.poweradvantage.api.fluid.FluidRequest;
-import com.mcmoddev.poweradvantage.init.Fluids;
-import com.mcmoddev.poweradvantage.util.FluidIdHelper;
+import zone.moddev.mc.poweradvantage.init.Fluids;
+import zone.moddev.mc.poweradvantage.util.FluidIdHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
@@ -14,16 +14,14 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidTank;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraft.fluid.Fluid;
+import cyano.poweradvantage.api.fluid.FluidStack;
+import cyano.poweradvantage.api.fluid.FluidTank;
 
 import java.util.List;
 
@@ -61,7 +59,8 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
 	 * @param unlocalizedName The default name for this TileEntity, should the player interact with 
 	 * the TileEntity in a way that gets the TileEntity's name (if in doubt, use the class name).
 	 */
-	public TileEntitySimpleFluidMachine(int fluidTankCapacity, String unlocalizedName){
+	public TileEntitySimpleFluidMachine(TileEntityType<?> tileType, int fluidTankCapacity, String unlocalizedName){
+		super(tileType);
 		this.tank = new DirtyFluidTank(fluidTankCapacity);
 		this.unlocalizedName = unlocalizedName;
 	}
@@ -83,16 +82,6 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
 				TileEntitySimpleFluidMachine.this.markDirty();
 			}
 		}
-	}
-
-	@Override
-	public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
-		return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY || super.hasCapability(capability, facing);
-	}
-
-	@Override
-	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-		return (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)? (T)tank : super.getCapability(capability,facing);
 	}
 
 	/**
@@ -158,7 +147,7 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
 		int fluidID = dataFields[DATAFIELD_FLUID_ID];
 		int fluidVolume = dataFields[DATAFIELD_FLUID_VOLUME];
 		if(fluidVolume <= 0){
-			getTank().setFluid(new FluidStack(FluidRegistry.WATER,0));
+			getTank().setFluid(new FluidStack(net.minecraft.init.Fluids.WATER,0));
 		} else {
 			Fluid fluid = FluidIdHelper.getFluid(fluidID);
 			if (fluid != null) {
@@ -189,7 +178,7 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
      */
 	public void prepareDataFieldsForSync(){
 		if(getTank().getFluid() == null || getTank().getFluidAmount() <= 0){
-			dataFields[DATAFIELD_FLUID_ID] = FluidIdHelper.getFluidId(FluidRegistry.WATER);
+			dataFields[DATAFIELD_FLUID_ID] = FluidIdHelper.getFluidId(net.minecraft.init.Fluids.WATER);
 			dataFields[DATAFIELD_FLUID_VOLUME] = 0;
 		} else {
 			dataFields[DATAFIELD_FLUID_ID] = FluidIdHelper.getFluidId(getTank().getFluid().getFluid());
@@ -268,43 +257,43 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
     
     
     /**
-     * You must override this method and call super.readFromNBT(...).<br><br>
+     * You must override this method and call super.read(...).<br><br>
      * This method reads data from an NBT data tag (either from a data packet 
      * or loaded from the Chunk).
      * @param tagRoot The root of the NBT
      */
     @Override
-    public void readFromNBT(final NBTTagCompound tagRoot) {
-        super.readFromNBT(tagRoot);
+    public void read(final NBTTagCompound tagRoot) {
+        super.read(tagRoot);
         ItemStack[] inventory = this.getInventory();
         if(inventory != null ){
 			for(int i = 0; i < inventory.length; i++){
 				inventory[i] = null;
 			}
-	        final NBTTagList nbttaglist = tagRoot.getTagList("Items", 10);
-	        for (int i = 0; i < nbttaglist.tagCount() && i < inventory.length; ++i) {
-	            final NBTTagCompound nbttagcompound1 = nbttaglist.getCompoundTagAt(i);
+	        final NBTTagList nbttaglist = tagRoot.getList("Items", 10);
+	        for (int i = 0; i < nbttaglist.size() && i < inventory.length; ++i) {
+	            final NBTTagCompound nbttagcompound1 = nbttaglist .getCompound(i);
 	            final byte n = nbttagcompound1.getByte("Slot");
 	            if (n >= 0 && n < inventory.length) {
-	                ItemStack stack = new ItemStack(nbttagcompound1);
+	                ItemStack stack = ItemStack.read(nbttagcompound1);
 	                inventory[n] = stack.isEmpty() ? null : stack;
 	            }
 	        }
         }
-        if (tagRoot.hasKey("CustomName", 8)) {
+        if (tagRoot .contains("CustomName", 8)) {
             this.customName = tagRoot.getString("CustomName");
         }
     }
     
     /**
-     * You must override this method and call super.writeToNBT(...).<br><br>
+     * You must override this method and call super .write(...).<br><br>
      * This method writes data to an NBT data tag (either to a data packet 
      * or saved to the Chunk).
      * @param tagRoot The root of the NBT
      */
     @Override
-    public NBTTagCompound writeToNBT(final NBTTagCompound tagRoot) {
-        super.writeToNBT(tagRoot);
+    public NBTTagCompound write(final NBTTagCompound tagRoot) {
+        super .write(tagRoot);
         ItemStack[] inventory = this.getInventory();
         if(inventory != null ){
 	        final NBTTagList nbttaglist = new NBTTagList();
@@ -312,8 +301,8 @@ public abstract class TileEntitySimpleFluidMachine extends FluidPoweredEntity im
 	            if (inventory[i] != null && !inventory[i].isEmpty()) {
 	                final NBTTagCompound nbttagcompound1 = new NBTTagCompound();
 	                nbttagcompound1.setByte("Slot", (byte)i);
-	                inventory[i].writeToNBT(nbttagcompound1);
-	                nbttaglist.appendTag(nbttagcompound1);
+	                inventory[i] .write(nbttagcompound1);
+	                nbttaglist .add(nbttagcompound1);
 	            }
 	        }
 	        tagRoot.setTag("Items", nbttaglist);
@@ -423,13 +412,13 @@ private final ConduitType[] types = {Fluids.fluidConduit_general};
      * <code>getDataFieldArray()</code> array
      */
     public void readDataFieldUpdateTag(NBTTagCompound tag){
-		if (tag.hasKey("Tank", 10)) {
-			NBTTagCompound tankTag = tag.getCompoundTag("Tank");
+		if (tag .contains("Tank", 10)) {
+			NBTTagCompound tankTag = tag .getCompound("Tank");
 			getTank().readFromNBT(tankTag);
-			if (tankTag.hasKey("Empty")) {
+			if (tankTag.contains("Empty", 1)) {
 				getTank().setFluid(null);
 			}
-		} else if (tag.hasKey("[]", 11)) {
+		} else if (tag .contains("[]", 11)) {
 			int[] newData = tag.getIntArray("[]");
 			System.arraycopy(newData, 0, this.getDataFieldArray(), 0, Math.min(newData.length, this.getDataFieldArray().length));
 			this.onDataFieldUpdate();
@@ -448,12 +437,12 @@ private final ConduitType[] types = {Fluids.fluidConduit_general};
 
 	@Override
 	public NBTTagCompound getUpdateTag() {
-		return writeToNBT(new NBTTagCompound());
+		return write(new NBTTagCompound());
 	}
 
 	@Override
 	public void handleUpdateTag(NBTTagCompound tag) {
-		readFromNBT(tag);
+		read(tag);
 	}
 
     /**
@@ -518,7 +507,7 @@ private final ConduitType[] types = {Fluids.fluidConduit_general};
             this.getInventory()[slot] = null;
             return itemstack;
         }
-        final ItemStack itemstack = this.getInventory()[slot].splitStack(decrement);
+        final ItemStack itemstack = this.getInventory()[slot] .split(decrement);
         if (this.getInventory()[slot].isEmpty()) {
             this.getInventory()[slot] = null;
         }
@@ -666,10 +655,7 @@ private final ConduitType[] types = {Fluids.fluidConduit_general};
 	 */
 	@Override
     public ITextComponent getDisplayName() {
-        if (this.hasCustomName()) {
-            return new TextComponentString(this.getName());
-        }
-        return new TextComponentTranslation(this.getName(), new Object[0]);
+        return getName();
     }
 
 	/**
@@ -678,8 +664,14 @@ private final ConduitType[] types = {Fluids.fluidConduit_general};
 	 * given by the player (i.e. with an anvil)
 	 */
 	@Override
-	public String getName() {
-        return this.hasCustomName() ? this.customName : unlocalizedName;
+	public ITextComponent getName() {
+		return this.hasCustomName() ? new TextComponentString(this.customName)
+				: new TextComponentTranslation(unlocalizedName);
+	}
+
+	@Override
+	public ITextComponent getCustomName() {
+		return this.hasCustomName() ? new TextComponentString(this.customName) : null;
 	}
 
 	/**

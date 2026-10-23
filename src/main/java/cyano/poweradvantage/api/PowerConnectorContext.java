@@ -3,7 +3,7 @@ package cyano.poweradvantage.api;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 
 /**
  * This data structure class is used to reduce the parameter list of the ITypedConduit methods to a single pointer.
@@ -14,7 +14,7 @@ public class PowerConnectorContext {
 	/**
 	 * World instance
 	 */
-	public final IBlockAccess world;
+	public final IBlockReader world;
 	/**
 	 * Type of power
 	 */
@@ -58,7 +58,7 @@ public class PowerConnectorContext {
 	 */
 	public PowerConnectorContext(
 			final ConduitType powerType,
-			final IBlockAccess world,
+			final IBlockReader world,
 			final IBlockState connectorBlock,
 			final BlockPos connectorPosition,
 			final EnumFacing connectorSide,
@@ -78,7 +78,7 @@ public class PowerConnectorContext {
 
 	public PowerConnectorContext(
 			final ConduitType powerType,
-			final IBlockAccess world,
+			final IBlockReader world,
 			final IBlockState connectorBlock,
 			final BlockPos connectorPosition,
 			final EnumFacing connectorSide

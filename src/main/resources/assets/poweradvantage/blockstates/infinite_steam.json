@@ -1,8 +1,19 @@
 {
-    "variants": {
-        "facing=east": { "model": "poweradvantage:infinite_steam", "y": 90 },
-        "facing=north": { "model": "poweradvantage:infinite_steam" },
-        "facing=south": { "model": "poweradvantage:infinite_steam", "y": 180 },
-        "facing=west": { "model": "poweradvantage:infinite_steam", "y": 270 }
+  "variants": {
+    "facing=east": {
+      "model": "poweradvantage:block/infinite_steam",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "poweradvantage:block/infinite_steam"
+    },
+    "facing=south": {
+      "model": "poweradvantage:block/infinite_steam",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "poweradvantage:block/infinite_steam",
+      "y": 270
     }
+  }
 }

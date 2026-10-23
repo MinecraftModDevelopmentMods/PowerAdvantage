@@ -1,0 +1,54 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_ingredient_1": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:ender_pearl"
+          }
+        ]
+      }
+    },
+    "has_ingredient_2": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "forge:frames/steel"
+          }
+        ]
+      }
+    },
+    "has_ingredient_3": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:redstone_block"
+          }
+        ]
+      }
+    },
+    "has_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "poweradvantage:converter_rf_quantum"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_ingredient_1",
+      "has_ingredient_2",
+      "has_ingredient_3",
+      "has_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "poweradvantage:converter_rf_quantum"
+    ]
+  }
+}

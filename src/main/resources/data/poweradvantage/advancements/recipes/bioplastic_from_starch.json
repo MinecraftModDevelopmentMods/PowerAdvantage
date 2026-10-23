@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_ingredient_1": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "poweradvantage:starch"
+          }
+        ]
+      }
+    },
+    "has_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "poweradvantage:bioplastic_from_starch"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_ingredient_1",
+      "has_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "poweradvantage:bioplastic_from_starch"
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "poweradvantage_113_migration": "coremods/poweradvantage_113_migration.js",
+  "poweradvantage_oil_renderer": "coremods/poweradvantage_oil_renderer.js",
+  "poweradvantage_material_tags": "coremods/poweradvantage_material_tags.js",
+  "poweradvantage_parts_loot": "coremods/poweradvantage_parts_loot.js"
+}

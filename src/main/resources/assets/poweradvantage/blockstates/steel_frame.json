@@ -1,5 +1,7 @@
 {
-    "variants": {
-        "normal": { "model": "poweradvantage:steel_frame" }
+  "variants": {
+    "": {
+      "model": "poweradvantage:block/steel_frame"
     }
+  }
 }

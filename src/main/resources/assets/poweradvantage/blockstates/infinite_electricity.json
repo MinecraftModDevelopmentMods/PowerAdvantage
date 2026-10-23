@@ -1,8 +1,19 @@
 {
-    "variants": {
-        "facing=east": { "model": "poweradvantage:infinite_electricity", "y": 90 },
-        "facing=north": { "model": "poweradvantage:infinite_electricity" },
-        "facing=south": { "model": "poweradvantage:infinite_electricity", "y": 180 },
-        "facing=west": { "model": "poweradvantage:infinite_electricity", "y": 270 }
+  "variants": {
+    "facing=east": {
+      "model": "poweradvantage:block/infinite_electricity",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "poweradvantage:block/infinite_electricity"
+    },
+    "facing=south": {
+      "model": "poweradvantage:block/infinite_electricity",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "poweradvantage:block/infinite_electricity",
+      "y": 270
     }
+  }
 }

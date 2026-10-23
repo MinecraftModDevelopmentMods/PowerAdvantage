@@ -1,151 +1,96 @@
 package cyano.poweradvantage.api.modsupport.rf;
 
-import com.mcmoddev.poweradvantage.PowerAdvantage;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.modsupport.TileEntityConverter;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
+import zone.moddev.mc.poweradvantage.PowerAdvantage;
 
-public class TileEntityRFConverter extends TileEntityConverter implements cofh.api.energy.IEnergyProvider, cofh.api.energy.IEnergyReceiver {
+/** Forge Energy bridge retained behind the historical RF-labelled block IDs. */
+public class TileEntityRFConverter extends TileEntityConverter implements IEnergyStorage {
+    private final int forgeBufferSize;
+    private final int halfBuffer;
+    private final LazyOptional<IEnergyStorage> energyCapability = LazyOptional.of(() -> this);
+    private int forgeBuffer;
 
-	private final int rfBufferSize;
-	private final int halfBuffer;
-	private int rfBuffer = 0;
+    protected TileEntityRFConverter(TileEntityType<?> tileType, ConduitType type,
+            float advantageBuffer, int forgeBufferSize, String translationKey) {
+        super(tileType, type, advantageBuffer, translationKey);
+        this.forgeBufferSize = forgeBufferSize;
+        this.halfBuffer = forgeBufferSize / 2;
+    }
 
-	public TileEntityRFConverter(ConduitType type, float powerAdvantageEnergyBuffer, int rfBuffer, String unlocalizedName) {
-		super(type, powerAdvantageEnergyBuffer, unlocalizedName);
-		this.rfBufferSize = rfBuffer;
-		this.halfBuffer = rfBufferSize / 2;
-	}
+    @Override
+    public void tickUpdate(boolean server) {
+        if (!server) return;
+        int index = (int) (getWorld().getGameTime() % EnumFacing.values().length);
+        EnumFacing side = EnumFacing.values()[index];
+        TileEntity neighbor = getWorld().getTileEntity(getPos().offset(side));
+        if (neighbor == null) return;
+        neighbor.getCapability(CapabilityEnergy.ENERGY, side.getOpposite()).ifPresent(storage -> {
+            int delta = forgeBuffer - halfBuffer;
+            if (delta < 0 && storage.canExtract()) {
+                int extracted = storage.extractEnergy(-delta, true);
+                int accepted = receiveEnergy(extracted, true);
+                if (accepted > 0) receiveEnergy(storage.extractEnergy(accepted, false), false);
+            } else if (delta > 0 && storage.canReceive()) {
+                int accepted = storage.receiveEnergy(delta, true);
+                if (accepted > 0) storage.receiveEnergy(extractEnergy(accepted, false), false);
+            }
+        });
+    }
 
-	@Override
-	public void tickUpdate(boolean isServerWorld) {
-		if (isServerWorld) {
-			World w = getWorld();
-			int sub = ((int) (w.getTotalWorldTime() & 0x0FFFFFFF) % 11);
-			EnumFacing[] sides = EnumFacing.values();
+    @Override public int receiveEnergy(int maxReceive, boolean simulate) {
+        int accepted = Math.min(Math.max(0, maxReceive), forgeBufferSize - forgeBuffer);
+        if (!simulate && accepted > 0) { forgeBuffer += accepted; markDirty(); }
+        return accepted;
+    }
+    @Override public int extractEnergy(int maxExtract, boolean simulate) {
+        int extracted = Math.min(Math.max(0, maxExtract), forgeBuffer);
+        if (!simulate && extracted > 0) { forgeBuffer -= extracted; markDirty(); }
+        return extracted;
+    }
+    @Override public int getEnergyStored() { return forgeBuffer; }
+    @Override public int getMaxEnergyStored() { return forgeBufferSize; }
+    @Override public boolean canExtract() { return true; }
+    @Override public boolean canReceive() { return true; }
 
-			int delta = rfBuffer - halfBuffer;
-			if (delta < 0) {
-				if (sub < sides.length) {
-					EnumFacing dir = sides[sub];
-					TileEntity te = w.getTileEntity(getPos().offset(dir));
-					if (te instanceof cofh.api.energy.IEnergyProvider) {
-						cofh.api.energy.IEnergyProvider rfMachine = (cofh.api.energy.IEnergyProvider) te;
-						if (rfMachine.canConnectEnergy(dir.getOpposite()) && rfMachine.getEnergyStored(dir.getOpposite()) > 0) {
-							this.receiveEnergy(dir, rfMachine.extractEnergy(dir.getOpposite(), -1 * delta, false), false);
-						}
-					}
-				}
-			} else if (delta > 0) {
-				if (sub < sides.length) {
-					EnumFacing dir = sides[sub];
-					TileEntity te = w.getTileEntity(getPos().offset(dir));
-					if (te instanceof cofh.api.energy.IEnergyReceiver) {
-						cofh.api.energy.IEnergyReceiver rfMachine = (cofh.api.energy.IEnergyReceiver) te;
-						if (rfMachine.canConnectEnergy(dir.getOpposite()) && rfMachine.getEnergyStored(dir.getOpposite()) < rfMachine.getMaxEnergyStored(dir.getOpposite())) {
-							rfMachine.receiveEnergy(dir.getOpposite(), this.extractEnergy(dir, delta, false), false);
-						}
-					}
-				}
-			}
-		}
-	}
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing side) {
+        return capability == CapabilityEnergy.ENERGY ? energyCapability.cast() : super.getCapability(capability, side);
+    }
 
+    @Override public double getOtherEnergy() { return forgeBuffer; }
+    @Override public double getOtherEnergyCapacity() { return forgeBufferSize; }
+    @Override public void setOtherEnergy(double value) { forgeBuffer = Math.max(0, Math.min(forgeBufferSize, (int) value)); }
+    @Override public boolean canConvertEnergy(ConduitType type) { return PowerAdvantage.forgeEnergyConversionTable.containsKey(type); }
 
-	@Override
-	public int getEnergyStored(EnumFacing from) {
-		return rfBuffer;
-	}
+    @Override
+    public float addEnergyToOther(float amount, ConduitType type) {
+        if (!canConvertEnergy(type)) return 0;
+        int accepted = receiveEnergy((int) convertEnergyToOther(amount, type), false);
+        return convertOtherToEnergy(accepted, type);
+    }
 
-	@Override
-	public int getMaxEnergyStored(EnumFacing from) {
-		return rfBufferSize;
-	}
+    @Override
+    public float subtractEnergyFromOther(float amount, ConduitType type) {
+        if (!canConvertEnergy(type)) return 0;
+        int extracted = extractEnergy((int) convertEnergyToOther(amount, type), false);
+        return convertOtherToEnergy(extracted, type);
+    }
 
-	@Override
-	public boolean canConnectEnergy(EnumFacing from) {
-		return true;
-	}
-
-	@Override
-	public int receiveEnergy(EnumFacing from, int maxReceive, boolean simulate) {
-		int delta = Math.min(this.getMaxEnergyStored(from) - this.getEnergyStored(from),
-				maxReceive);
-		if (!simulate) {
-			rfBuffer += delta;
-		}
-		return delta;
-	}
-
-	@Override
-	public int extractEnergy(EnumFacing from, int maxExtract, boolean simulate) {
-		int delta = Math.min(this.getEnergyStored(from),
-				maxExtract);
-		if (!simulate) {
-			rfBuffer -= delta;
-		}
-		return delta;
-	}
-
-	@Override
-	public double getOtherEnergy() {
-		return rfBuffer;
-	}
-
-	@Override
-	public double getOtherEnergyCapacity() {
-		return rfBufferSize;
-	}
-
-	@Override
-	public void setOtherEnergy(double value) {
-		rfBuffer = (int) value;
-	}
-
-	@Override
-	public boolean canConvertEnergy(ConduitType type) {
-		return PowerAdvantage.rfConversionTable.containsKey(type);
-	}
-
-	@Override
-	public float addEnergyToOther(float amount, ConduitType type) {
-		if (canConvertEnergy(type)) {
-			int delta = (int) Math.min(this.getOtherEnergyCapacity() - getOtherEnergy(),
-					this.convertEnergyToOther(amount, type));
-			rfBuffer += delta;
-			return convertOtherToEnergy(delta, type);
-		} else {
-			return 0;
-		}
-	}
-
-	@Override
-	public float subtractEnergyFromOther(float amount, ConduitType type) {
-		if (canConvertEnergy(type)) {
-			int delta = -1 * (int) Math.min(getOtherEnergy(),
-					this.convertEnergyToOther(amount, type));
-			rfBuffer += delta;
-			return convertOtherToEnergy(delta, type);
-		} else {
-			return 0;
-		}
-	}
-
-	@Override
-	public float convertOtherToEnergy(double amountOfOther, ConduitType type) {
-		return (float) (amountOfOther / PowerAdvantage.rfConversionTable.get(type));
-	}
-
-	@Override
-	public double convertEnergyToOther(float amountOfEnergy, ConduitType type) {
-		return amountOfEnergy * PowerAdvantage.rfConversionTable.get(type);
-	}
-
-	@Override
-	public boolean isUsableByPlayer(EntityPlayer player) {
-		return true;
-	}
+    @Override public float convertOtherToEnergy(double amount, ConduitType type) {
+        return (float) (amount / PowerAdvantage.forgeEnergyConversionTable.get(type));
+    }
+    @Override public double convertEnergyToOther(float amount, ConduitType type) {
+        return amount * PowerAdvantage.forgeEnergyConversionTable.get(type);
+    }
 }

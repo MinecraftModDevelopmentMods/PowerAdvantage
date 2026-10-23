@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "poweradvantage:blocks/crude_oil_still"
+  }
+}

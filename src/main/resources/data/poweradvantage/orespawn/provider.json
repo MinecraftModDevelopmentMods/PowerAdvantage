@@ -1,0 +1,57 @@
+{
+  "schema_version": 4,
+  "provider_modid": "poweradvantage",
+  "provider_revision": 1,
+  "profile_defaults": {
+    "place_fluid_deposits": true
+  },
+  "fluid_deposits": {
+    "poweradvantage:fluid_deposit/desert_crude_oil": {
+      "enabled": true,
+      "block": "poweradvantage:crude_oil",
+      "dimensions": {
+        "minecraft:overworld": {
+          "enabled": true,
+          "min_y": 0,
+          "max_y": 48,
+          "frequency": 0.08,
+          "min_radius": 5,
+          "max_radius": 12,
+          "min_vertical_radius": 2,
+          "max_vertical_radius": 5,
+          "max_lobes": 4,
+          "min_solid_cover": 2,
+          "min_solid_shell": 1,
+          "host_families": [
+            "sedimentary",
+            "metamorphic",
+            "igneous_intrusive",
+            "igneous_volcanic"
+          ],
+          "host_blocks": [
+            "minecraft:stone"
+          ],
+          "host_tags": [
+            "forge:stone"
+          ],
+          "biome_ids": [],
+          "excluded_biome_ids": [],
+          "biome_dictionary": [
+            "SANDY"
+          ],
+          "excluded_biome_dictionary": [
+            "BEACH",
+            "MESA"
+          ],
+          "geomes": {}
+        }
+      }
+    }
+  },
+  "rocks": {},
+  "ores": {},
+  "geomes": {},
+  "biome_rules": {},
+  "terrain_dimensions": {},
+  "templates": {}
+}

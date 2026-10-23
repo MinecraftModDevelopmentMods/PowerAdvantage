@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    [
+      { "item": "minecraft:potato" },
+      { "item": "minecraft:poisonous_potato" }
+    ]
+  ],
+  "result": { "item": "poweradvantage:starch", "count": 1 },
+  "group": "poweradvantage:starch"
+}

@@ -76,7 +76,7 @@ tasks.withType(AbstractArchiveTask).configureEach {
 
 def archiveTextSuffixes = [
         '.cfg', '.css', '.html', '.info', '.java', '.js', '.json', '.lang',
-        '.mcmeta', '.md', '.properties', '.txt', '.xml'
+        '.mcmeta', '.md', '.properties', '.toml', '.txt', '.xml'
 ]
 def archiveTextPatterns = archiveTextSuffixes.collect { "**/*${it}".toString() }
 archiveTextPatterns.addAll(['**/element-list', '**/package-list'])
@@ -90,42 +90,53 @@ minecraft {
     mappings channel: project.mapping_channel, version: project.mapping_version
     String configuredRunDirectory = providers.gradleProperty('powerAdvantageRunDirectory')
             .getOrElse('run')
+    def forgeRunModClassesDirectory = layout.buildDirectory.dir('forge-run-mod-classes/main')
+    def forgeMainOutputPath = forgeRunModClassesDirectory.get().asFile.absolutePath
+    def mainModClasses = "${mod_id}%%${forgeMainOutputPath}${File.pathSeparator}${mod_id}%%${forgeMainOutputPath}"
+    def forge25RunTargets = [client: 'fmluserdevclient', server: 'fmluserdevserver', data: 'fmluserdevdata']
     runs {
         configureEach {
+            mainClass = 'net.minecraftforge.userdev.LaunchTesting'
             workingDir.convention layout.projectDirectory.dir(configuredRunDirectory)
-            systemProperty 'forge.logging.console.level', 'debug'
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            systemProperty 'forge.logging.console.level', 'info'
+            mods { poweradvantage { source sourceSets.main } }
+            environment 'target', forge25RunTargets[name]
+            environment 'MCP_MAPPINGS', "${mapping_channel}_${mapping_version}"
+            environment 'MCP_VERSION', mcp_version
+            environment 'FORGE_VERSION', forge_version
+            environment 'FORGE_GROUP', 'net.minecraftforge'
+            environment 'MC_VERSION', minecraft_version
+            environment 'MOD_CLASSES', mainModClasses
         }
         register('client')
         register('server') {
             args '--nogui'
         }
+        register('data') {
+            workingDir.convention layout.projectDirectory.dir('run-data')
+            args '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/'),
+                    '--existing', file('src/main/resources/')
+        }
     }
 }
 
-// Forge 1.12 expects each development mod to expose classes and resources from
-// one classpath root. ForgeGradle 7 splits those outputs, so merge only the
-// launch output without contaminating the canonical source-set directories.
-def forge12DevelopmentOutput = layout.buildDirectory.dir('forge12-development/main')
-def syncForge12DevelopmentResources = tasks.register('syncForge12DevelopmentResources', Sync) {
-    group = 'ide'
-    description = 'Merges classes and processed resources for Forge 1.12 Gradle launches.'
-    dependsOn tasks.named('classes')
-    from tasks.named('compileJava', JavaCompile).flatMap { it.destinationDirectory }
-    from sourceSets.main.output.resourcesDir
-    into forge12DevelopmentOutput
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+    exclude '.cache/**'
 }
-tasks.configureEach {
-    if (name == 'runClient' || name == 'runServer') {
-        dependsOn syncForge12DevelopmentResources
-        doFirst {
-            Set<File> splitMainOutputs = [
-                    tasks.named('compileJava', JavaCompile).get().destinationDirectory.get().asFile,
-                    sourceSets.main.output.resourcesDir
-            ] as Set<File>
-            classpath = files(forge12DevelopmentOutput, classpath.filter {
-                !splitMainOutputs.contains(it)
-            })
-        }
+
+def forgeRunModClassesDirectory = layout.buildDirectory.dir('forge-run-mod-classes/main')
+def prepareForgeRunModClasses = tasks.register('prepareForgeRunModClasses', Sync) {
+    group = 'ide'
+    description = 'Merges classes and processed resources for Forge 1.13 launches.'
+    dependsOn tasks.named('classes')
+    from sourceSets.main.output
+    into forgeRunModClassesDirectory
+}
+tasks.withType(JavaExec).configureEach {
+    if (name in ['runClient', 'runServer', 'runData']) {
+        dependsOn prepareForgeRunModClasses
     }
 }
 
@@ -134,14 +145,6 @@ repositories {
     maven fg.forgeMaven
     maven fg.minecraftLibsMaven
 
-    if (providers.gradleProperty('rebornCoreVerificationRepository').isPresent()) {
-        maven {
-            name = 'RebornCoreReleaseVerificationMirror'
-            url = uri(providers.gradleProperty('rebornCoreVerificationRepository').get())
-            metadataSources { artifact() }
-            content { includeGroup('curse.maven') }
-        }
-    }
     exclusiveContent {
         forRepository {
             maven {
@@ -156,39 +159,39 @@ repositories {
         name = 'MinecraftLibraries'
         url = 'https://libraries.minecraft.net/'
     }
-    if (!providers.gradleProperty('rebornCoreVerificationRepository').isPresent()) {
-        maven {
-            name = 'PinnedRebornCoreRelease'
-            url = 'https://maven.modmuss50.me/'
-            content { includeGroup('RebornCore') }
-        }
-    }
 }
 
-def rfApiJar = file('libs/RF-API.jar')
-def usingStagedRebornCore = providers.gradleProperty('rebornCoreVerificationRepository').isPresent()
-def rebornCoreCoordinate = usingStagedRebornCore
-        ? "curse.maven:reborncore-${project.reborncore_curse_project_id}:${project.reborncore_curse_file_id}"
-        : "RebornCore:RebornCore-1.12.2:${project.reborncore_version}:universal"
+// The default paths mirror the local MMD checkout layout without tying the
+// build to a drive letter. CI and other layouts can override either path.
+def baseMetalsDeobfJar = file(providers.gradleProperty('baseMetalsDeobfJar')
+        .getOrElse('../../../BaseMetals/BaseMetals 113/BaseMetals/build/libs-dev/'
+                + 'BaseMetals-3.0.1.113021-deobf.jar'))
+def oreSpawnDeobfJar = file(providers.gradleProperty('oreSpawnDeobfJar')
+        .getOrElse('../../../MinecraftMineralogy/OS113/OreSpawn/build/libs-dev/'
+                + 'OreSpawn-4.1.0.113021-deobf.jar'))
 
 dependencies {
     implementation minecraft.dependency(
             "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}")
-    // Mavenizer's legacy metadata omits this compile-time Minecraft library.
-    compileOnly 'org.lwjgl.lwjgl:lwjgl_util:2.9.4-nightly-20150209'
 
-    // These integrations are optional at runtime. Compile against their APIs,
-    // but do not package or launch PowerAdvantage with the provider mods.
-    compileOnly files(rfApiJar)
-    compileOnly rebornCoreCoordinate
+    compileOnly files(baseMetalsDeobfJar, oreSpawnDeobfJar)
+    runtimeOnly files(baseMetalsDeobfJar, oreSpawnDeobfJar)
+    testImplementation 'junit:junit:4.13.2'
 }
 
 tasks.named('processResources', ProcessResources) {
     filteringCharset = 'UTF-8'
-    inputs.property('version', project.version)
-    inputs.property('mcversion', project.minecraft_version)
-    filesMatching('mcmod.info') {
-        expand version: project.version, mcversion: project.minecraft_version
+    inputs.properties([
+            version: project.version,
+            minecraft_version_range: project.minecraft_version_range,
+            forge_version_range: project.forge_version_range,
+            loader_version_range: project.loader_version_range
+    ])
+    filesMatching('META-INF/mods.toml') {
+        expand version: project.version,
+                minecraft_version_range: project.minecraft_version_range,
+                forge_version_range: project.forge_version_range,
+                loader_version_range: project.loader_version_range
     }
     filesMatching(archiveTextPatterns, normalizeArchiveLineEndings)
 }
@@ -310,13 +313,13 @@ tasks.register('verifyReleaseConfiguration') {
     group = 'verification'
     description = 'Validates release identity, target metadata, and optional integration policy.'
     doLast {
-        if (project.mod_version != '2.4.1.112021') {
+        if (project.mod_version != '2.4.4.113021') {
             throw new GradleException("Unexpected PowerAdvantage release version: ${project.mod_version}")
         }
-        if (project.minecraft_version != '1.12.2'
-                || project.forge_version != '14.23.5.2859'
-                || project.mapping_channel != 'stable'
-                || project.mapping_version != '39-1.12') {
+        if (project.minecraft_version != '1.13.2'
+                || project.forge_version != '25.0.223'
+                || project.mapping_channel != 'snapshot'
+                || project.mapping_version != '20180921-1.13') {
             throw new GradleException('Unexpected Minecraft, Forge, or mappings target')
         }
         if (project.loader_name != 'forge' || project.loader_code != '1'
@@ -326,36 +329,34 @@ tasks.register('verifyReleaseConfiguration') {
             throw new GradleException('Unexpected release dispatcher target metadata')
         }
         if (project.mod_id != 'poweradvantage'
-                || project.group.toString() != 'com.mcmoddev.poweradvantage'
+                || project.group.toString() != 'zone.moddev.mc.poweradvantage'
                 || base.archivesName.get() != 'PowerAdvantage'
                 || project.curseforge_project_id != '240982') {
             throw new GradleException('Unexpected Forge, Maven, archive, or CurseForge identity')
         }
         if (project.cf_requirements != 'base-metals,mmd-orespawn'
                 || project.cf_optionals != 'additional-loot-tables'
-                || project.cf_versions != '1.12.2') {
+                || project.cf_versions != '1.13.2') {
             throw new GradleException('Unexpected CurseForge dependency or game-version metadata')
         }
-        if (project.reborncore_curse_project_id != '500866'
-                || project.reborncore_curse_file_id != '3386724'
-                || project.reborncore_version != '3.19.4.529'
-                || project.reborncore_download_url != 'https://maven.modmuss50.me/RebornCore/'
-                + 'RebornCore-1.12.2/3.19.4.529/RebornCore-1.12.2-3.19.4.529-universal.jar'
-                || project.reborncore_sha256 != 'B6D11200C5EC66B0031EF4E635AC0203A23CBA6B21F046D402D41E3375798667') {
-            throw new GradleException('Unexpected RebornCore compile API identity')
+        if (project.basemetals_version != '3.0.1.113021'
+                || project.orespawn_version != '4.1.0.113021'
+                || project.basemetals_source_commit != '1376a20d7d5ba22d3abc77dc34b49a2c88943697'
+                || project.orespawn_source_commit != '6a7c2bb07b9a7771128812fcc07d185f7d9df58b') {
+            throw new GradleException('Unexpected Base Metals or OreSpawn dependency identity')
         }
         String mainSource = file(
-                'src/main/java/com/mcmoddev/poweradvantage/PowerAdvantage.java').getText('UTF-8')
+                'src/main/java/zone/moddev/mc/poweradvantage/PowerAdvantage.java').getText('UTF-8')
         if (!mainSource.contains('MODID = "poweradvantage"')
-                || !mainSource.contains('VERSION = "2.4.1.112021"')
-                || !mainSource.contains('dependencies = "after:basemetals"')) {
-            throw new GradleException('PowerAdvantage source identity or optional BaseMetals policy changed')
+                || !mainSource.contains('VERSION = "2.4.4.113021"')
+                || !mainSource.contains('@Mod(PowerAdvantage.MODID)')) {
+            throw new GradleException('PowerAdvantage source identity changed')
         }
         if (!file('src/main/java/cyano/poweradvantage/api/PoweredEntity.java').isFile()) {
             throw new GradleException('Legacy cyano.poweradvantage.api compatibility surface is missing')
         }
         String entitySource = file(
-                'src/main/java/com/mcmoddev/poweradvantage/init/Entities.java').getText('UTF-8')
+                'src/main/java/zone/moddev/mc/poweradvantage/init/Entities.java').getText('UTF-8')
         [
                 'tileentity.pipe_terminal', 'tileentity.fluid_drain',
                 'tileentity.fluid_discharge', 'tileentity.fluid_storage_tank',
@@ -368,10 +369,49 @@ tasks.register('verifyReleaseConfiguration') {
                 throw new GradleException("Persistent tile entity id changed or disappeared: ${id}")
             }
         }
-        def metadata = new JsonSlurper().parse(file('src/main/resources/mcmod.info'))
-        def mod = metadata instanceof List ? metadata.first() : metadata
-        if (mod.modid != 'poweradvantage') {
-            throw new GradleException('Source mcmod.info does not use the stable poweradvantage mod id')
+        String modsToml = file('src/main/resources/META-INF/mods.toml').getText('UTF-8')
+        ['modId="poweradvantage"', 'modId="basemetals"', 'modId="orespawn"',
+         'mandatory=true'].each { required ->
+            if (!modsToml.contains(required)) {
+                throw new GradleException("Source mods.toml is missing ${required}")
+            }
+        }
+        if (!modsToml.contains('modId="basemetals"\nmandatory=false')) {
+            throw new GradleException('Base Metals must remain Forge-optional; CurseForge installs it for players')
+        }
+        String steelBarsTag = file(
+                'src/main/resources/data/forge/tags/items/bars/steel.json').getText('UTF-8')
+        if (!steelBarsTag.contains('"optional"') || !steelBarsTag.contains('"basemetals:steel_bars"')) {
+            throw new GradleException('Steel bars must use Forge optional tag entries when Base Metals is absent')
+        }
+        [
+                'dusts/coal', 'dusts/lead', 'dusts/redstone', 'dusts/silver', 'dusts/tin',
+                'gems/diamond', 'gems/emerald',
+                'ingots/brass', 'ingots/copper', 'ingots/gold', 'ingots/iron',
+                'ingots/lead', 'ingots/nickel', 'ingots/steel', 'ingots/zinc',
+                'nuggets/bronze', 'nuggets/copper', 'nuggets/gold', 'nuggets/iron',
+                'nuggets/lead', 'nuggets/tin',
+                'plates/copper', 'plates/iron', 'plates/steel',
+                'rods/copper', 'rods/wooden', 'stone',
+                'storage_blocks/diamond', 'storage_blocks/steel'
+        ].each { tagPath ->
+            if (!file("src/main/resources/data/forge/tags/items/${tagPath}.json").isFile()) {
+                throw new GradleException("Missing decoupled Forge item tag declaration: ${tagPath}")
+            }
+        }
+        Map provider = new JsonSlurper().parse(file(
+                'src/main/resources/data/poweradvantage/orespawn/provider.json')) as Map
+        Map desertOil = provider.fluid_deposits[
+                'poweradvantage:fluid_deposit/desert_crude_oil'].dimensions['minecraft:overworld'] as Map
+        if (desertOil.biome_dictionary != ['SANDY']
+                || (desertOil.excluded_biome_dictionary as Set) != (['BEACH', 'MESA'] as Set)) {
+            throw new GradleException(
+                    'Desert crude oil must use Forge SANDY biomes while excluding BEACH and MESA')
+        }
+        if ((desertOil.host_families as Set) != ([
+                'sedimentary', 'metamorphic', 'igneous_intrusive', 'igneous_volcanic'] as Set)) {
+            throw new GradleException(
+                    'Desert crude oil must remain compatible with OreSpawn geology-family hosts')
         }
     }
 }
@@ -381,69 +421,38 @@ tasks.register('verifyReleaseDependencies') {
     description = 'Resolves and audits Forge plus the exact optional compile APIs.'
     dependsOn tasks.named('verifyReleaseConfiguration')
     doLast {
-        if (!rfApiJar.isFile()) {
-            throw new GradleException("Missing tracked RF API jar: ${rfApiJar}")
-        }
-        String actualRfHash = MessageDigest.getInstance('SHA-256')
-                .digest(rfApiJar.bytes).encodeHex().toString().toUpperCase()
-        if (actualRfHash != project.rf_api_sha256) {
-            throw new GradleException("RF API SHA-256 is ${actualRfHash}, expected ${project.rf_api_sha256}")
-        }
-
-        def compileArtifacts = configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts
-        String expectedRebornCoreGroup = usingStagedRebornCore ? 'curse.maven' : 'RebornCore'
-        String expectedRebornCoreName = usingStagedRebornCore
-                ? "reborncore-${project.reborncore_curse_project_id}"
-                : 'RebornCore-1.12.2'
-        def rebornCoreArtifacts = compileArtifacts.findAll { artifact ->
-            def id = artifact.moduleVersion.id
-            id.group == expectedRebornCoreGroup && id.name == expectedRebornCoreName
-        }
-        String expectedRebornCoreVersion = usingStagedRebornCore
-                ? project.reborncore_curse_file_id
-                : project.reborncore_version
-        String expectedRebornCore = "${expectedRebornCoreGroup}:${expectedRebornCoreName}:" \
-                + expectedRebornCoreVersion
-        if (rebornCoreArtifacts.size() != 1
-                || "${rebornCoreArtifacts.first().moduleVersion.id.group}:"
-                + "${rebornCoreArtifacts.first().moduleVersion.id.name}:"
-                + "${rebornCoreArtifacts.first().moduleVersion.id.version}" != expectedRebornCore) {
-            throw new GradleException("Expected exactly ${expectedRebornCore}, found "
-                    + rebornCoreArtifacts.collect { it.moduleVersion.id })
-        }
-        File rebornCoreJar = rebornCoreArtifacts.first().file
-        String actualRebornCoreHash = MessageDigest.getInstance('SHA-256')
-                .digest(rebornCoreJar.bytes).encodeHex().toString().toUpperCase()
-        if (actualRebornCoreHash != project.reborncore_sha256) {
-            throw new GradleException("RebornCore SHA-256 is ${actualRebornCoreHash}, expected "
-                    + project.reborncore_sha256)
-        }
-        new ZipFile(rebornCoreJar).withCloseable { zip ->
-            ['reborncore/api/power/IEnergyInterfaceTile.class',
-             'reborncore/api/power/EnumPowerTier.class'].each { required ->
-                if (zip.getEntry(required) == null) {
-                    throw new GradleException("RebornCore compile API is missing ${required}")
-                }
+        [(baseMetalsDeobfJar): project.basemetals_deobf_sha256,
+         (oreSpawnDeobfJar): project.orespawn_deobf_sha256].each { File dependencyJar, String expectedHash ->
+            if (!dependencyJar.isFile()) {
+                throw new GradleException("Missing pinned dependency jar: ${dependencyJar}")
+            }
+            String actualHash = MessageDigest.getInstance('SHA-256')
+                    .digest(dependencyJar.bytes).encodeHex().toString().toUpperCase()
+            Set<String> acceptedHashes = [expectedHash] as Set<String>
+            if (dependencyJar == baseMetalsDeobfJar) {
+                acceptedHashes.add(project.basemetals_deobf_lf_sha256.toString())
+            }
+            if (!acceptedHashes.contains(actualHash)) {
+                throw new GradleException("${dependencyJar.name} SHA-256 is ${actualHash}, expected ${acceptedHashes}")
             }
         }
-
         Set<File> compileFiles = configurations.compileClasspath.files.collect { it.canonicalFile } as Set<File>
-        if (!compileFiles.contains(rfApiJar.canonicalFile)
-                || !compileFiles.contains(rebornCoreJar.canonicalFile)) {
-            throw new GradleException('Optional RF or RebornCore API is missing from compileClasspath')
+        if (!compileFiles.contains(baseMetalsDeobfJar.canonicalFile)
+                || !compileFiles.contains(oreSpawnDeobfJar.canonicalFile)) {
+            throw new GradleException('Pinned Base Metals or OreSpawn API is missing from compileClasspath')
         }
         Set<File> runtimeFiles = configurations.runtimeClasspath.files.collect { it.canonicalFile } as Set<File>
-        if (runtimeFiles.contains(rfApiJar.canonicalFile)
-                || runtimeFiles.contains(rebornCoreJar.canonicalFile)) {
-            throw new GradleException('Optional RF or RebornCore API leaked onto runtimeClasspath')
+        if (!runtimeFiles.contains(baseMetalsDeobfJar.canonicalFile)
+                || !runtimeFiles.contains(oreSpawnDeobfJar.canonicalFile)) {
+            throw new GradleException('Pinned Base Metals or OreSpawn is missing from development runtime')
         }
-        List<String> forbiddenRuntimeMods = runtimeFiles.collect { it.name.toLowerCase(Locale.ROOT) }
+        List<String> obsoleteRuntimeMods = runtimeFiles.collect { it.name.toLowerCase(Locale.ROOT) }
                 .findAll { name ->
-                    name.contains('basemetals') || name.contains('orespawn')
+                    name.contains('rf-api') || name.contains('redstoneflux')
                             || name.contains('tesla') || name.contains('reborncore')
                 }
-        if (!forbiddenRuntimeMods.isEmpty()) {
-            throw new GradleException("Optional mods leaked onto runtimeClasspath: ${forbiddenRuntimeMods}")
+        if (!obsoleteRuntimeMods.isEmpty()) {
+            throw new GradleException("Obsolete energy APIs leaked onto runtimeClasspath: ${obsoleteRuntimeMods}")
         }
     }
 }
@@ -486,27 +495,33 @@ tasks.register('verifyReleaseArtifacts') {
         File mainJar = new File(libs, expectedReleaseFiles.get()[0])
         new ZipFile(mainJar).withCloseable { zip ->
             List<String> names = zip.entries().collect { it.name }
-            ['mcmod.info', 'pack.mcmeta',
-             'com/mcmoddev/poweradvantage/PowerAdvantage.class',
+            ['META-INF/mods.toml', 'pack.mcmeta',
+             'zone/moddev/mc/poweradvantage/PowerAdvantage.class',
              'cyano/poweradvantage/api/PoweredEntity.class',
-             'assets/poweradvantage/lang/en_us.lang'].each { required ->
+             'cyano/poweradvantage/api/fluid/FluidNetworkApi.class',
+             'assets/poweradvantage/lang/en_us.json',
+             'data/poweradvantage/recipes/fluid_drain.json',
+             'data/poweradvantage/advancements/recipes/sprocket_rod_normal.json'].each { required ->
                 if (!names.contains(required)) {
                     throw new GradleException("Release jar is missing ${required}")
                 }
             }
             ['agent-notes/', '.codex/', 'src/test/', 'fernflower_abstract_parameter_names.txt',
              'cofh/api/', 'reborncore/api/', 'cyano/basemetals/', 'com/mcmoddev/lib/',
+             'zone/moddev/mc/basemetals/', 'zone/moddev/mc/orespawn/',
+             'zone/moddev/mc/advantageworks/', 'com/mojang/serialization/',
              'net/minecraft/', 'net/minecraftforge/'].each { forbidden ->
                 if (names.any { it.contains(forbidden) }) {
                     throw new GradleException("Release jar contains forbidden entry matching ${forbidden}")
                 }
             }
-            def metadata = new JsonSlurper().parseText(zip.getInputStream(zip.getEntry('mcmod.info'))
-                    .getText(StandardCharsets.UTF_8.name()))
-            def mod = metadata instanceof List ? metadata.first() : metadata
-            if (mod.modid != project.mod_id || mod.version != project.mod_version
-                    || mod.mcversion != project.minecraft_version) {
-                throw new GradleException('Packaged mcmod.info identity, version, or target is incorrect')
+            String modsToml = zip.getInputStream(zip.getEntry('META-INF/mods.toml'))
+                    .getText(StandardCharsets.UTF_8.name())
+            if (!modsToml.contains('modId="poweradvantage"')
+                    || !modsToml.contains("version=\"${project.mod_version}\"")
+                    || !modsToml.contains('modId="basemetals"')
+                    || !modsToml.contains('modId="orespawn"')) {
+                throw new GradleException('Packaged mods.toml identity, version, or dependencies are incorrect')
             }
             def manifest = new Manifest(zip.getInputStream(zip.getEntry('META-INF/MANIFEST.MF'))).mainAttributes
             if (manifest.getValue('Implementation-Version') != project.mod_version
@@ -530,7 +545,7 @@ tasks.register('verifyReleaseArtifacts') {
         }
 
         new ZipFile(new File(libs, expectedReleaseFiles.get()[1])).withCloseable { sourceZip ->
-            if (sourceZip.getEntry('com/mcmoddev/poweradvantage/PowerAdvantage.java') == null
+            if (sourceZip.getEntry('zone/moddev/mc/poweradvantage/PowerAdvantage.java') == null
                     || sourceZip.getEntry('cyano/poweradvantage/api/PoweredEntity.java') == null) {
                 throw new GradleException('Sources jar is missing implementation or legacy API sources')
             }
@@ -548,6 +563,7 @@ tasks.register('writeReleaseChecksums') {
     description = 'Writes SHA-256 checksums for the audited release jars.'
     dependsOn tasks.named('verifyReleaseArtifacts')
     def outputFile = layout.buildDirectory.file('release/SHA256SUMS')
+    inputs.files(provider { expectedReleaseFiles.get().collect { layout.buildDirectory.file("libs/${it}").get().asFile } })
     outputs.file(outputFile)
     doLast {
         File output = outputFile.get().asFile
@@ -698,9 +714,23 @@ eclipse {
     classpath {
         downloadSources = true
         downloadJavadoc = true
+        file.whenMerged { model ->
+            // Eclipse must not overwrite expanded metadata with src/main/resources templates.
+            def rawResources = sourceSets.main.resources.srcDirs.collect { relativePath(it).replace('\\', '/') }
+            model.entries.removeAll { entry ->
+                entry instanceof org.gradle.plugins.ide.eclipse.model.SourceFolder
+                        && (rawResources.contains(entry.path) || entry.path == 'build/resources/main')
+            }
+            def processed = new org.gradle.plugins.ide.eclipse.model.SourceFolder('build/resources/main', 'bin/main')
+            processed.entryAttributes['gradle_scope'] = 'main'
+            processed.entryAttributes['gradle_used_by_scope'] = 'main,test'
+            model.entries.add(processed)
+        }
     }
     synchronizationTasks 'isolateEclipseProductionRuns'
 }
+
+tasks.named('eclipseClasspath') { dependsOn tasks.named('processResources') }
 
 tasks.register('configureEclipseBuildship') {
     group = 'ide'
@@ -751,6 +781,21 @@ tasks.register('isolateEclipseProductionRuns') {
             contents = contents.replace(
                     'key="MC_VERSION" value="${MC_VERSION}"',
                     "key=\"MC_VERSION\" value=\"${project.minecraft_version}\"")
+            if (launch.name in ['runClient.launch', 'runServer.launch', 'runData.launch']) {
+                // Eclipse compiles into bin/main, not Gradle's merged run output.
+                def launchXml = new groovy.xml.XmlSlurper().parseText(contents)
+                def modClasses = launchXml.mapAttribute.find {
+                    it.@key.text() == 'org.eclipse.debug.core.environmentVariables'
+                }.mapEntry.findAll { it.@key.text() == 'MOD_CLASSES' }
+                if (modClasses.size() != 1) {
+                    throw new GradleException("${launch.name} must define one MOD_CLASSES entry")
+                }
+                String mainOutput = file('bin/main').absolutePath
+                String eclipseModClasses = "${project.mod_id}%%${mainOutput}" +
+                        "${File.pathSeparator}${project.mod_id}%%${mainOutput}"
+                modClasses[0].@value = eclipseModClasses
+                contents = groovy.xml.XmlUtil.serialize(launchXml)
+            }
             launch.setText(contents.replace('\r\n', '\n'), 'UTF-8')
         }
         ['runClient.launch', 'runServer.launch'].each { name ->
@@ -840,21 +885,52 @@ tasks.register('verifyEclipseProductionClasspath') {
                 || !projectMetadata.contains('org.eclipse.buildship.core.gradleprojectbuilder')) {
             throw new GradleException('Eclipse project metadata is missing its Buildship nature or builder')
         }
-        File eclipseModMetadata = file('bin/main/mcmod.info')
-        def eclipseMetadata = new JsonSlurper().parseText(eclipseModMetadata.getText('UTF-8'))
-        def eclipseMod = eclipseMetadata instanceof List ? eclipseMetadata.first() : eclipseMetadata
-        if (eclipseMod.modid != project.mod_id || eclipseMod.version != project.mod_version
-                || eclipseMod.mcversion != project.minecraft_version) {
+        File eclipseModMetadata = file('bin/main/META-INF/mods.toml')
+        String eclipseMetadata = eclipseModMetadata.getText('UTF-8')
+        if (!eclipseMetadata.contains("modId=\"${project.mod_id}\"")
+                || !eclipseMetadata.contains("version=\"${project.mod_version}\"")) {
             throw new GradleException('Eclipse output contains incorrect mod metadata')
         }
+        def eclipseClasspath = new groovy.xml.XmlSlurper().parse(file('.classpath'))
+        def processedResources = eclipseClasspath.classpathentry.findAll {
+            it.@kind.text() == 'src' && it.@path.text() == 'build/resources/main'
+        }
+        def rawResourcePaths = sourceSets.main.resources.srcDirs.collect { relativePath(it).replace('\\', '/') }
+        if (processedResources.size() != 1 || processedResources[0].@output.text() != 'bin/main'
+                || eclipseClasspath.classpathentry.any {
+                    it.@kind.text() == 'src' && rawResourcePaths.contains(it.@path.text())
+                }) {
+            throw new GradleException('Eclipse must copy processed resources, never raw mod metadata templates')
+        }
+        String mainOutput = eclipseClasspath.classpathentry.find {
+            it.@kind.text() == 'src' && it.@path.text() == 'src/main/java'
+        }.@output.text()
+        if (file(mainOutput).canonicalFile != file('bin/main').canonicalFile) {
+            throw new GradleException('Eclipse production classes must use bin/main')
+        }
+        String expectedModClasses = "${project.mod_id}%%${file(mainOutput).absolutePath}" +
+                "${File.pathSeparator}${project.mod_id}%%${file(mainOutput).absolutePath}"
+        ['runClient.launch', 'runServer.launch', 'runData.launch'].each { name ->
+            def launch = new groovy.xml.XmlSlurper().parse(file(name))
+            String modClasses = launch.mapAttribute.find {
+                it.@key.text() == 'org.eclipse.debug.core.environmentVariables'
+            }.mapEntry.find { it.@key.text() == 'MOD_CLASSES' }.@value.text()
+            if (modClasses != expectedModClasses) {
+                throw new GradleException("${name} does not discover the Eclipse production mod in bin/main")
+            }
+        }
         ['runClient.launch', 'runServer.launch'].each { name ->
+            def launch = new groovy.xml.XmlSlurper().parse(file(name))
             String contents = file(name).getText('UTF-8').replace('\\', '/')
-            if (!contents.contains('org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE')
-                    || !contents.contains('value="true"')
+            if (launch.booleanAttribute.find {
+                it.@key.text() == 'org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE'
+            }.@value.text() != 'true'
                     || contents.contains('src/test') || contents.contains('bin/test')) {
                 throw new GradleException("${name} does not isolate production code")
             }
-            if (!contents.contains('PROJECT_ATTR" value="PowerAdvantage"')) {
+            if (launch.stringAttribute.find {
+                it.@key.text() == 'org.eclipse.jdt.launching.PROJECT_ATTR'
+            }.@value.text() != 'PowerAdvantage') {
                 throw new GradleException("${name} targets the wrong Eclipse project")
             }
             if (contents.contains('org.eclipse.buildship.core.gradleclasspathcontainer')) {
@@ -882,9 +958,9 @@ tasks.register('verifyEclipseProductionClasspath') {
                 throw new GradleException(
                         "${name} does not preserve the Forge bootstrap classpath order")
             }
-            if (contents.contains('${MC_VERSION}')
-                    || !contents.contains(
-                    "key=\"MC_VERSION\" value=\"${project.minecraft_version}\"")) {
+            if (contents.contains('${MC_VERSION}') || launch.mapAttribute.find {
+                it.@key.text() == 'org.eclipse.debug.core.environmentVariables'
+            }.mapEntry.find { it.@key.text() == 'MC_VERSION' }.@value.text() != project.minecraft_version) {
                 throw new GradleException("${name} does not define a literal Minecraft version")
             }
         }
@@ -901,11 +977,27 @@ tasks.register('verifyModelAssets') {
     inputs.dir(blockstateRoot)
 
     doLast {
+        Set<String> vanillaAssets = [] as Set<String>
+        configurations.runtimeClasspath.files.findAll {
+            it.name.startsWith('client-extra-') && it.name.endsWith('.jar')
+        }.each { File archive ->
+            new ZipFile(archive).withCloseable { zip ->
+                zip.entries().each { entry -> vanillaAssets.add(entry.name) }
+            }
+        }
         def verifyReference = { String reference, String assetType, String sourcePath ->
             if (reference.startsWith('#')) return
             int separator = reference.indexOf(':')
             String namespace = separator >= 0 ? reference.substring(0, separator) : 'minecraft'
             String path = separator >= 0 ? reference.substring(separator + 1) : reference
+            if (namespace == 'minecraft') {
+                if (assetType == 'models' && path.startsWith('builtin/')) return
+                String suffix = assetType == 'textures' ? '.png' : '.json'
+                if (!vanillaAssets.contains("assets/minecraft/${assetType}/${path}${suffix}".toString())) {
+                    throw new GradleException("${sourcePath} references missing vanilla ${assetType} asset ${reference}")
+                }
+                return
+            }
             if (namespace != project.mod_id) return
 
             File target = new File(resourceRoot,
@@ -936,7 +1028,7 @@ tasks.register('verifyModelAssets') {
             if (node instanceof Map) {
                 node.each { key, value ->
                     if (key == 'model' && value instanceof String) {
-                        verifyReference(value, 'models/block', sourcePath)
+                        verifyReference(value, 'models', sourcePath)
                     } else {
                         verifyBlockstateModels(value, sourcePath)
                     }
@@ -946,7 +1038,57 @@ tasks.register('verifyModelAssets') {
             }
         }
         fileTree(blockstateRoot) { include '**/*.json' }.files.sort().each { File blockstateFile ->
-            verifyBlockstateModels(new JsonSlurper().parse(blockstateFile), blockstateFile.path)
+            def blockstate = new JsonSlurper().parse(blockstateFile)
+            if (blockstate.containsKey('forge_marker')
+                    || blockstate.variants?.containsKey('normal') || blockstate.variants?.containsKey('fluid')) {
+                throw new GradleException("${blockstateFile.path} uses a removed legacy blockstate format")
+            }
+            verifyBlockstateModels(blockstate, blockstateFile.path)
+        }
+    }
+}
+
+tasks.register('verifyRecipeTagGuards') {
+    group = 'verification'
+    description = 'Rejects recipes that can collapse when a Forge material tag is empty.'
+    File recipeRoot = file("src/main/resources/data/${project.mod_id}/recipes")
+    inputs.dir(recipeRoot)
+    doLast {
+        Closure collectTags
+        collectTags = { Object node, Set<String> tags ->
+            if (node instanceof Map) {
+                node.each { key, value ->
+                    if (key == 'conditions' || key == 'result') return
+                    if (key == 'tag' && value instanceof String && value.startsWith('forge:')) {
+                        tags.add(value)
+                    } else {
+                        collectTags(value, tags)
+                    }
+                }
+            } else if (node instanceof Collection) {
+                node.each { collectTags(it, tags) }
+            }
+        }
+        fileTree(recipeRoot) { include '**/*.json' }.files.sort().each { File recipeFile ->
+            Map recipe = new JsonSlurper().parse(recipeFile) as Map
+            Set<String> tags = [] as Set<String>
+            collectTags(recipe, tags)
+            Collection conditions = (recipe.conditions ?: []) as Collection
+            if (conditions.any { !(it instanceof Map) }) {
+                throw new GradleException("${recipeFile.path} contains a non-object recipe condition")
+            }
+            Set<String> guards = conditions
+                    .findAll { it instanceof Map && it.type == 'poweradvantage:tag_not_empty' }
+                    .collect { it.tag as String } as Set<String>
+            Set<String> emptyGuards = conditions.findAll { it.type == 'poweradvantage:tag_empty' }
+                    .collect { it.tag as String } as Set<String>
+            if (!(emptyGuards.intersect(guards)).isEmpty()) {
+                throw new GradleException("${recipeFile.path} requires the same tag to be empty and nonempty")
+            }
+            Set<String> missing = tags - guards
+            if (!missing.isEmpty()) {
+                throw new GradleException("${recipeFile.path} lacks tag_not_empty guards for ${missing.sort()}")
+            }
         }
     }
 }
@@ -954,4 +1096,72 @@ tasks.register('verifyModelAssets') {
 tasks.named('check') {
     dependsOn tasks.named('verifyReleaseConfiguration')
     dependsOn tasks.named('verifyModelAssets')
+    dependsOn tasks.named('verifyRecipeTagGuards')
+}
+
+def compileClientResourceProbe = tasks.register('compileClientResourceProbe', JavaCompile) {
+    group = 'verification'
+    description = 'Compiles the build-only client model and translation probe.'
+    dependsOn tasks.named('classes')
+    source fileTree('test-rig/client-resources/java')
+    classpath = files(sourceSets.main.output, sourceSets.main.compileClasspath)
+    destinationDirectory = layout.buildDirectory.dir('client-resource-probe/classes')
+}
+
+tasks.register('clientResourceProbeJar', Jar) {
+    group = 'verification'
+    description = 'Builds a test-only client probe; never part of a release or normal launch.'
+    dependsOn compileClientResourceProbe
+    archiveFileName = 'advantageclientresources-deobf.jar'
+    destinationDirectory = layout.buildDirectory.dir('client-resource-probe')
+    from compileClientResourceProbe.flatMap { it.destinationDirectory }
+    from 'test-rig/client-resources/resources'
+}
+
+// Optional coordinated play-test launch. The ordinary launch stays Power-only;
+// these deobf jars are runtime inputs, never release contents or compile dependencies.
+def advantageExtensionJars = [
+        steamadvantage: file(providers.gradleProperty('steamAdvantageDeobfJar').getOrElse(
+                '../SteamAdvantage/SteamAdvantage/build/libs-dev/SteamAdvantage-2.2.5.113021-deobf.jar')),
+        electricadvantage: file(providers.gradleProperty('electricAdvantageDeobfJar').getOrElse(
+                '../ElectricAdvantage/ElectricAdvantage/build/libs-dev/ElectricAdvantage-2.2.5.113021-deobf.jar'))
+]
+
+tasks.register('prepareCombinedEclipseLaunch') {
+    group = 'ide'
+    description = 'Creates an additional production-only Eclipse client launch with all three Advantage mods.'
+    dependsOn tasks.named('verifyEclipseProductionClasspath')
+    doLast {
+        def profile = new JsonSlurper().parse(file('test-rig/profiles/dev-core.json'))
+        advantageExtensionJars.each { String id, File jar ->
+            def pin = profile.mods.find { it.id == id }
+            if (!jar.isFile()) throw new GradleException("Build ${id} first, or override its *AdvantageDeobfJar property: ${jar}")
+            String hash = MessageDigest.getInstance('SHA-256').digest(jar.bytes).encodeHex().toString()
+            if (pin == null || !hash.equalsIgnoreCase(pin.sha256 as String)) {
+                throw new GradleException("${id} does not match the audited dev-core dependency pin: ${jar}")
+            }
+        }
+        def launch = new groovy.xml.XmlParser().parse(file('runClient.launch'))
+        def classpath = launch.listAttribute.find { it.@key == 'org.eclipse.jdt.launching.CLASSPATH' }
+        if (classpath == null) throw new GradleException('Base client launch has no explicit production classpath')
+        advantageExtensionJars.values().each { File jar ->
+            String entry = groovy.xml.XmlUtil.serialize(new Node(null, 'runtimeClasspathEntry',
+                    [externalArchive: jar.canonicalPath, type: '2', path: '5']))
+            classpath.appendNode('listEntry', [value: entry])
+        }
+        File combined = file('runClientAllAdvantage.launch')
+        combined.setText(groovy.xml.XmlUtil.serialize(launch), 'UTF-8')
+        def parsed = new groovy.xml.XmlSlurper().parse(combined)
+        def archivePaths = parsed.listAttribute.find {
+            it.@key.text() == 'org.eclipse.jdt.launching.CLASSPATH'
+        }.listEntry.collect { new groovy.xml.XmlSlurper().parseText(it.@value.text()).@externalArchive.text() }
+        advantageExtensionJars.values().each { File jar ->
+            if (archivePaths.count(jar.canonicalPath) != 1) throw new GradleException("Missing or repeated extension: ${jar}")
+        }
+        if (combined.text.contains('advantageworkstest') || combined.text.contains('client-resource-probe')
+                || combined.text.contains('bin/test') || combined.text.contains('buildship.core.gradleclasspathcontainer')) {
+            throw new GradleException('Combined launch leaked test code or an unfiltered classpath')
+        }
+        logger.lifecycle("Prepared ${combined.name}; uses the same run directory and saves as runClient.launch.")
+    }
 }

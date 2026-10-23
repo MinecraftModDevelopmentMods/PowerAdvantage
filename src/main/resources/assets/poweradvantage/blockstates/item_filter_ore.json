@@ -1,8 +1,19 @@
 {
-    "variants": {
-        "facing=north": { "model": "poweradvantage:item_filter_ore"           },
-        "facing=south": { "model": "poweradvantage:item_filter_ore", "y": 180 },
-        "facing=west":  { "model": "poweradvantage:item_filter_ore", "y": 270 },
-        "facing=east":  { "model": "poweradvantage:item_filter_ore", "y": 90  }
+  "variants": {
+    "facing=north": {
+      "model": "poweradvantage:block/item_filter_ore"
+    },
+    "facing=south": {
+      "model": "poweradvantage:block/item_filter_ore",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "poweradvantage:block/item_filter_ore",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "poweradvantage:block/item_filter_ore",
+      "y": 90
     }
+  }
 }

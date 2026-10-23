@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " x ",
+    "x/x",
+    " x "
+  ],
+  "key": {
+    "x": {
+      "tag": "forge:ingots/steel"
+    },
+    "/": {
+      "tag": "forge:rods"
+    }
+  },
+  "result": {
+    "item": "poweradvantage:sprocket",
+    "count": 4
+  },
+  "conditions": [
+    {
+      "type": "poweradvantage:recipe_mode",
+      "mode": "NORMAL"
+    },
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:ingots/steel"
+    },
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:rods"
+    }
+  ],
+  "group": "poweradvantage:sprocket"
+}

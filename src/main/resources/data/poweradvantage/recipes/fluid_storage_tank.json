@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx",
+    "xpx",
+    "xxx"
+  ],
+  "key": {
+    "x": {
+      "tag": "forge:ingots/plastic"
+    },
+    "p": {
+      "tag": "forge:pipes"
+    }
+  },
+  "result": {
+    "item": "poweradvantage:fluid_storage_tank"
+  },
+  "group": "poweradvantage:fluid_storage_tank",
+  "conditions": [
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:ingots/plastic"
+    },
+    {
+      "type": "poweradvantage:tag_not_empty",
+      "tag": "forge:pipes"
+    }
+  ]
+}
