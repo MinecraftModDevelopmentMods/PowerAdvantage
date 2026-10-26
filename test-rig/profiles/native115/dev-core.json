@@ -14,11 +14,11 @@
       "id": "advantageworkstest",
       "version": "1.1.0.115021",
       "file": "AdvantageWorksTestHarness-1.1.0.115021-deobf.jar",
-      "path": "build/native115-artifacts/B4CBB4A313B94D2E71739533EFCC0392683D0455F6D9E2FFB7C1BAA4F5C113B3/AdvantageWorksTestHarness-1.1.0.115021-deobf.jar",
+      "path": "build/native115-artifacts/C854AFC08344C9B5E53AC8B35F9AA0B3E3F60E8180BF1C5F40AC7B5DF594890B/AdvantageWorksTestHarness-1.1.0.115021-deobf.jar",
       "workspaceProduced": true,
       "originPath": "D:\\PowerAdvantage\\PA115\\PowerAdvantage\\test-rig\\build\\libs-dev\\AdvantageWorksTestHarness-1.1.0.115021-deobf.jar",
-      "sha256": "B4CBB4A313B94D2E71739533EFCC0392683D0455F6D9E2FFB7C1BAA4F5C113B3",
-      "sourceRef": "a6466ea032ca03c477677ed1ce6742f2c5f25732",
+      "sha256": "C854AFC08344C9B5E53AC8B35F9AA0B3E3F60E8180BF1C5F40AC7B5DF594890B",
+      "sourceRef": "3237cc41da51d17a851a32691a0fa1f19b9ad2b6",
       "pinStatus": "PINNED_WORKSPACE_ARTIFACT"
     },
     {

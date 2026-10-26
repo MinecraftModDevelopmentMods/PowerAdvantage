@@ -20,11 +20,11 @@
       "id": "advantageworkstest",
       "version": "1.1.0.115021",
       "file": "AdvantageWorksTestHarness-1.1.0.115021.jar",
-      "path": "build/native115-artifacts/B8F733F37B51A2EE8A0C11F21C1C84336FD8FCCDE998611DA334021C29CC34FA/AdvantageWorksTestHarness-1.1.0.115021.jar",
+      "path": "build/native115-artifacts/C854AFC08344C9B5E53AC8B35F9AA0B3E3F60E8180BF1C5F40AC7B5DF594890B/AdvantageWorksTestHarness-1.1.0.115021.jar",
       "workspaceProduced": true,
       "originPath": "D:\\PowerAdvantage\\PA115\\PowerAdvantage\\test-rig\\build\\libs\\AdvantageWorksTestHarness-1.1.0.115021.jar",
-      "sha256": "B8F733F37B51A2EE8A0C11F21C1C84336FD8FCCDE998611DA334021C29CC34FA",
-      "sourceRef": "a6466ea032ca03c477677ed1ce6742f2c5f25732",
+      "sha256": "C854AFC08344C9B5E53AC8B35F9AA0B3E3F60E8180BF1C5F40AC7B5DF594890B",
+      "sourceRef": "3237cc41da51d17a851a32691a0fa1f19b9ad2b6",
       "pinStatus": "PINNED_WORKSPACE_ARTIFACT"
     },
     {
@@ -62,13 +62,13 @@
     },
     {
       "id": "basemetals",
-      "version": "3.0.1.115021",
-      "file": "BaseMetals-3.0.1.115021.jar",
-      "path": "build/native115-artifacts/EE951E23DAE0B7D98C13D8AE8738AC69ADDB7C096C26E51D1E55E5083C07E4DD/BaseMetals-3.0.1.115021.jar",
+      "version": "3.0.2.115021",
+      "file": "BaseMetals-3.0.2.115021.jar",
+      "path": "build/native115-artifacts/3F50AFBEF17800ECADE42A69B81E541E9FA8C6C4C392ED4DD0FE5A66DC9EFF07/BaseMetals-3.0.2.115021.jar",
       "workspaceProduced": true,
-      "originPath": "D:\\BaseMetals\\BaseMetals 115\\BaseMetals\\build\\libs\\BaseMetals-3.0.1.115021.jar",
-      "sha256": "EE951E23DAE0B7D98C13D8AE8738AC69ADDB7C096C26E51D1E55E5083C07E4DD",
-      "sourceRef": "1d166d917663d4b4a5a88a86440adc0ae761e393",
+      "originPath": "D:\\BaseMetals\\BaseMetals 115\\BaseMetals\\build\\libs\\BaseMetals-3.0.2.115021.jar",
+      "sha256": "3F50AFBEF17800ECADE42A69B81E541E9FA8C6C4C392ED4DD0FE5A66DC9EFF07",
+      "sourceRef": "ac1781e7cade15045ffe0135077087b4d1722603",
       "pinStatus": "PINNED_WORKSPACE_ARTIFACT"
     },
     {
