@@ -314,6 +314,9 @@ tasks.register('verifyReleaseConfiguration') {
     group = 'verification'
     description = 'Validates release identity, target metadata, and optional integration policy.'
     doLast {
+        if (new JsonSlurper().parse(file('src/main/resources/pack.mcmeta')).pack.pack_format != 5) {
+            throw new GradleException('Minecraft 1.15.2 resources must use pack format 5')
+        }
         if (project.mod_version != '2.4.6.115021') {
             throw new GradleException("Unexpected PowerAdvantage release version: ${project.mod_version}")
         }
