@@ -19,6 +19,10 @@ public class BuildWorkflowContractTest {
             assertTrue(name, workflow.contains("ref: 1d166d917663d4b4a5a88a86440adc0ae761e393"));
             assertTrue(name, workflow.contains("ref: 5613baf876747ed071cb7ad7e2aff4e0ce4f0a03"));
             assertTrue(name, workflow.contains("master-1.15.2"));
+            assertTrue(name, workflow.contains("java-version: '25.0.3+9.0.LTS'"));
+            assertTrue(name, workflow.contains("java-version: '17.0.1+12'"));
+            assertTrue(name, workflow.contains("java-version: '8.0.502+7'"));
+            assertTrue(name, workflow.contains("org.gradle.java.installations.auto-download=false"));
         }
     }
 }
