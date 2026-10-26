@@ -2,7 +2,7 @@
 
 ## Status
 
-The final D candidate passed the actual combined graphical probe on 2026-10-26,
+The D candidate passed the actual combined graphical probe on 2026-10-26,
 using fresh D server recipe packets for all three modes. The primary resource,
 model, tank, fluid and recipe checks passed, along with all 25 available
 worldless renderer geometry cases. The existing captures and pixel thresholds
@@ -15,6 +15,12 @@ also passed: Power 66, Steam 68 and Electric 45. These are separate gates from
 the graphical results below. The accepted 1.14 behavior remains the reference,
 not a substitute for native 1.15 evidence.
 
+Candidate F uses Base Metals `3.0.2.115021`. Its actual combined resource/geometry
+run and fresh ECJ checks passed. F recipe rendering is still pending fresh F
+server exports; the no-fixture resource run is not a full F recipe qualification.
+The complete D recipe evidence below is retained separately and is not relabelled
+as F evidence.
+
 | Target | Required Value |
 | --- | --- |
 | Minecraft / Forge | `1.15.2` / `31.2.57` |
@@ -24,7 +30,89 @@ not a substitute for native 1.15 evidence.
 | Runtime / build | Java 8 client; repository Java 17 Gradle process and Java 8 compilation toolchain |
 | Probe resource pack | format `5` |
 
-## Final D Inputs
+## Candidate F
+
+The F packaged manifest is
+`test-rig/build/native115-inputs-20261026-final-f-archived.json`, SHA-256
+`A9BCD5A442F6332010F9D467BD00A685AA953339C39545812B32B825B96E64AA`.
+Base Metals `3.0.2.115021` is pinned to source
+`ac1781e7cade15045ffe0135077087b4d1722603`, packaged SHA-256
+`3F50AFBEF17800ECADE42A69B81E541E9FA8C6C4C392ED4DD0FE5A66DC9EFF07`
+and development SHA-256
+`426FE639C97E1DE4F6624957E3CBDE68A5FB7D415A1047903A29DCB35FD9ADA2`.
+
+The dependency-only Advantage commits are:
+
+| Project | Local Source | Full Release-Gate Tests |
+| --- | --- | --- |
+| Power | `6666099a734eba16561d98c86f3f4bb1b7c742f7` | 66 PASS |
+| Steam | `07f6a0503c57df0b51f7ac4370c0ff5eda0232f5` | 68 PASS |
+| Electric | `58bb1a78d7a218779cf92a866db575f72a577546` | 45 PASS |
+
+Each project completed one private-cache full release/dependency/artifact,
+Javadoc and Eclipse verification run, without `clean` or a server/client launch.
+All twelve Advantage release/development/source/Javadoc jars are byte-identical
+to their previous versions. The full hashes, comparisons, logs and retained test
+XML are under `build/base115-pin-propagation-20261026/`; its
+`release-results.json` records the combined result. Base and Power dependency
+commits are local-only and unpublished. Publish the exact dependency sources
+upstream before PR/hosted builds; local success does not establish hosted
+reproducibility or publication readiness.
+
+`clientResourceProbeJar verifyEclipseProductionClasspath prepareCombinedEclipseLaunch`
+then passed using only the private Gradle cache. The log is
+`build/client-resource-compile-runs/final-f-prepare-20261026-143241.log`.
+The unchanged probe and hash-addressed Steam/Electric jars were retained.
+All 38 native launcher, 95 primary-preservation and 40 geometry wiring checks
+passed again without changing thresholds or masks.
+
+| F Evidence | Location |
+| --- | --- |
+| Preflight, no Java started | `build/client-resource-runs/20261026-143623-7ee23754` |
+| Actual resource/geometry run, no recipe fixtures | `build/client-resource-runs/20261026-143712-f1377150` |
+| Runtime/input verification | `build/client-resource-compile-runs/final-f-base-client-provenance.json` |
+| Fresh ECJ main/test compilation and JUnit | `build/ecj-final-f/20261026-143452` |
+
+The F graphical run passed 94 item models/names, 905 block states, 87 creative
+entries, both tank-floor faces, tank simulation/10,000 mB updates, actual gauge
+pixel `1E386E`, all six fluid cases and all 25 worldless renderer geometry cases.
+All 537 selected Power production files matched its development jar exactly.
+Its report SHA-256 is
+`5B733F23CFFFBBD7CBA1B9F3412BB2C22C945B821DC4BF1ABFEC6CE25EAB2AB3`.
+The gauge and geometry report are byte-identical to D's retained outputs.
+
+`recipe_book_grouping_status=NOT_RUN_NO_NATIVE_FIXTURES` is an explicit gap:
+no F thirteen-cell capture or recipe pixel pass is claimed yet. No D packet or
+registry snapshot was reused. The hydroturbine remains
+`MANUAL_GAP_WORLD_REQUIRED`; all normal gameplay/manual acceptance limits still
+apply. No integrated server or existing save was opened. All 216 files in the D
+manual runtime, including its evidence, were fingerprinted unchanged.
+
+Fresh ECJ compilation used the actual Base 3.0.2 development jar for all three
+projects, separate main/test output trees and Java 8 bytecode. All six compiles
+had zero errors; main/test warning counts remain Power 97/1, Steam 40/0 and
+Electric 52/0. Java 8 JUnit execution from those fresh ECJ outputs also passed
+66/68/45 tests. `ecj-results.json` and `ecj-junit-results.json` retain source refs,
+source/dependency hashes, commands and results. These are compile/test checks,
+not an interactive Eclipse client launch.
+
+The separate private-cache harness gate also passed all 95 tests and
+`assemble verifyHarnessIsolation verifyWorksNative115Inputs` against the current
+F profile, without `clean` or a Minecraft launch. Its report is
+`build/client-resource-compile-runs/final-f-harness-online-20261026-144952/harness-results.json`.
+Harness E remains SHA-256
+`C854AFC08344C9B5E53AC8B35F9AA0B3E3F60E8180BF1C5F40AC7B5DF594890B`
+and its runner remains
+`21DF61B5501D3E5E0EB10394773C5D86C5AFCEB478AE09426AA8B980F267C361`.
+The first offline attempt stopped before compilation because Mixin 0.8.2 was
+not cached; that failure log is retained separately.
+
+The disposable F manual copy is prepared, not launched, from the stopped passed
+F `packaged-current` runtime. Its 29 restart guards and final `-CheckOnly` passed;
+the complete source and D manual fingerprints are unchanged. See
+[Manual Testing](MANUAL-TESTING.md) for its path, checksums and launch limits.
+
+## Retained D Inputs
 
 The immutable packaged target manifest is
 `test-rig/build/native115-inputs-20261026-final-d-archived.json`, SHA-256
