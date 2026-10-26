@@ -1,15 +1,15 @@
 package zone.moddev.mc.poweradvantage.machines.conveyors;
 
 import zone.moddev.mc.poweradvantage.util.InventoryWrapper;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityHopper;
+import net.minecraft.tileentity.HopperTileEntity;
 import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import zone.moddev.mc.poweradvantage.PowerAdvantage;
@@ -34,34 +34,34 @@ public abstract class TileEntityConveyorFilter extends TileEntityConveyor {
 		if (transferCooldown > 0) transferCooldown--;
 		if (transferCooldown == 0) {
 			// do tick update
-			EnumFacing dir = this.getFacing();
+			Direction dir = this.getFacing();
 			if (getInventory()[0] == null) {
 				// not holding item, get item
-				EnumFacing myDir = dir.getOpposite();
-				EnumFacing theirDir = dir;
+				Direction myDir = dir.getOpposite();
+				Direction theirDir = dir;
 				BlockPos targetPos = getPos().offset(myDir);
 				TileEntity target = w.getTileEntity(targetPos);
 				if (target != null) {
 					if (target instanceof IInventory) {
-						ISidedInventory them = InventoryWrapper.wrap(TileEntityHopper.getInventoryAtPosition(getWorld(), targetPos.getX(), targetPos.getY(), targetPos.getZ()));
+						ISidedInventory them = InventoryWrapper.wrap(HopperTileEntity.getInventoryAtPosition(getWorld(), targetPos.getX(), targetPos.getY(), targetPos.getZ()));
 						if (transferItem(them, theirDir, this, myDir)) {
 							this.markDirty();
 						}
 					}
 				}
 			} else {
-				EnumFacing myDir = dir;
-				EnumFacing theirDir = dir.getOpposite();
+				Direction myDir = dir;
+				Direction theirDir = dir.getOpposite();
 				BlockPos targetPos = getPos().offset(myDir);
 				TileEntity target = w.getTileEntity(targetPos);
-				TileEntity dropTarget = w.getTileEntity(getPos().offset(EnumFacing.DOWN));
+				TileEntity dropTarget = w.getTileEntity(getPos().offset(Direction.DOWN));
 				if (matchesFilter(this.getInventory()[0])) {
-					if (isValidItemFor(getInventory()[0], dropTarget, EnumFacing.UP)) {
+					if (isValidItemFor(getInventory()[0], dropTarget, Direction.UP)) {
 						dropItem(dropTarget);
 						return;
 					}
 				} else if (target instanceof IInventory) {
-					ISidedInventory them = InventoryWrapper.wrap(TileEntityHopper.getInventoryAtPosition(getWorld(), targetPos.getX(), targetPos.getY(), targetPos.getZ()));
+					ISidedInventory them = InventoryWrapper.wrap(HopperTileEntity.getInventoryAtPosition(getWorld(), targetPos.getX(), targetPos.getY(), targetPos.getZ()));
 					if (transferItem(this, myDir, them, theirDir)) {
 						this.markDirty();
 					}
@@ -72,11 +72,11 @@ public abstract class TileEntityConveyorFilter extends TileEntityConveyor {
 		}
 	}
 
-	protected boolean isValidItemFor(ItemStack item, TileEntity target, EnumFacing side) {
+	protected boolean isValidItemFor(ItemStack item, TileEntity target, Direction side) {
 		if (item == null) return false;
 		if (target instanceof IInventory) {
 			BlockPos targetPos = target.getPos();
-			ISidedInventory dt = InventoryWrapper.wrap(TileEntityHopper.getInventoryAtPosition(getWorld(), targetPos.getX(), targetPos.getY(), targetPos.getZ()));
+			ISidedInventory dt = InventoryWrapper.wrap(HopperTileEntity.getInventoryAtPosition(getWorld(), targetPos.getX(), targetPos.getY(), targetPos.getZ()));
 			int[] slots = dt.getSlotsForFace(side);
 			for (int i = 0; i < slots.length; i++) {
 				int slot = slots[i];
@@ -92,23 +92,21 @@ public abstract class TileEntityConveyorFilter extends TileEntityConveyor {
 
 	private void dropItem(TileEntity target) {
 		World w = getWorld();
-		IBlockState bs = w.getBlockState(getPos().down());
+		BlockState bs = w.getBlockState(getPos().down());
 		if (target == null && !(bs.getMaterial().blocksMovement())) {
 			// drop item in the air
-			EntityItem ie = new EntityItem(w, getPos().getX() + 0.5, getPos().getY() - 0.5, getPos().getZ() + 0.5, getInventory()[0]);
-			ie.motionX = 0;
-			ie.motionZ = 0;
-			ie.motionY = 0;
-			w.spawnEntity(ie);
+			ItemEntity ie = new ItemEntity(w, getPos().getX() + 0.5, getPos().getY() - 0.5, getPos().getZ() + 0.5, getInventory()[0]);
+			ie.setMotion(0, 0, 0);
+			w.addEntity(ie);
 			getInventory()[0] = null;
 			transferCooldown = transferInvterval;
 			this.markDirty();
 		} else if (target instanceof IInventory) {
 			// add item to inventory
-			EnumFacing myDir = EnumFacing.DOWN;
-			EnumFacing theirDir = EnumFacing.UP;
+			Direction myDir = Direction.DOWN;
+			Direction theirDir = Direction.UP;
 			BlockPos targetPos = target.getPos();
-			ISidedInventory targetInv = InventoryWrapper.wrap(TileEntityHopper.getInventoryAtPosition(getWorld(), targetPos.getX(), targetPos.getY(), targetPos.getZ()));
+			ISidedInventory targetInv = InventoryWrapper.wrap(HopperTileEntity.getInventoryAtPosition(getWorld(), targetPos.getX(), targetPos.getY(), targetPos.getZ()));
 			if (transferItem(this, myDir, targetInv, theirDir)) {
 				transferCooldown = transferInvterval;
 				this.markDirty();
@@ -122,13 +120,13 @@ public abstract class TileEntityConveyorFilter extends TileEntityConveyor {
 	 * @return an EnumfFacing
 	 */
 	@Override
-	public EnumFacing getFacing() {
-		IBlockState state = getWorld().getBlockState(getPos());
+	public Direction getFacing() {
+		BlockState state = getWorld().getBlockState(getPos());
 		if (state.has(BlockConveyorFilter.FACING)) {
 			return state.get(BlockConveyorFilter.FACING);
 		} else {
 			PowerAdvantage.LOGGER.warn("{}.getFacing(): blockstate at {} does not have BlockConveyorFilter.FACING", this.getClass().getName(), getPos());
-			return EnumFacing.NORTH;
+			return Direction.NORTH;
 		}
 	}
 
@@ -142,10 +140,10 @@ public abstract class TileEntityConveyorFilter extends TileEntityConveyor {
 	 * @return true if the item is allowed to be pulled, false otherwise
 	 */
 	@Override
-	public boolean canExtractItem(final int slot, final ItemStack targetItem, final EnumFacing side) {
+	public boolean canExtractItem(final int slot, final ItemStack targetItem, final Direction side) {
 		boolean filterMatch = matchesFilter(targetItem);
 		if (slot != 0) return false;
-		if (side == EnumFacing.DOWN) {
+		if (side == Direction.DOWN) {
 			return filterMatch;
 		} else {
 			return (!filterMatch) && super.canExtractItem(slot, targetItem, side);

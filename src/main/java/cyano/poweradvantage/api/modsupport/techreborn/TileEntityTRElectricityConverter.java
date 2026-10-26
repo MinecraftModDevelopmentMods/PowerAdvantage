@@ -1,7 +1,7 @@
 package cyano.poweradvantage.api.modsupport.techreborn;
 
 import cyano.poweradvantage.api.ConduitType;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import zone.moddev.mc.poweradvantage.init.Entities;
 
 /**
@@ -14,7 +14,7 @@ public class TileEntityTRElectricityConverter extends TileEntityTRConverter {
 	}
 	
 	@Override
-	public boolean isUsableByPlayer(EntityPlayer player) {
+	public boolean isUsableByPlayer(PlayerEntity player) {
 		return true;
 	}
 }

@@ -3,8 +3,8 @@ package zone.moddev.mc.poweradvantage.blocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -31,18 +31,16 @@ public class BlockFrame extends Block {
 		return BlockRenderLayer.CUTOUT;
 	}
 
-	@Override
-	public boolean isFullCube(IBlockState bs) {
+	public boolean isFullCube(BlockState bs) {
 		return false;
 	}
 
-	@Override
-	public boolean canSilkHarvest(IBlockState state, IWorldReader world, BlockPos pos, EntityPlayer player) {
+	public boolean canSilkHarvest(BlockState state, IWorldReader world, BlockPos pos, PlayerEntity player) {
 		return true;
 	}
 
 
-	public boolean isOpaqueCube(IBlockState bs) {
+	public boolean isOpaqueCube(BlockState bs) {
 		return false;
 	}
 

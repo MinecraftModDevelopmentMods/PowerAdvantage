@@ -4,7 +4,7 @@ import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.PoweredEntity;
 import cyano.poweradvantage.api.simple.BlockSimpleFluidMachine;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
@@ -23,12 +23,12 @@ public class FluidDrainBlock extends BlockSimpleFluidMachine {
 	}
 
 	@Override
-	public boolean hasComparatorInputOverride(IBlockState state) {
+	public boolean hasComparatorInputOverride(BlockState state) {
 		return true;
 	}
 
 	@Override
-	public int getComparatorInputOverride(IBlockState state, World world, BlockPos coord) {
+	public int getComparatorInputOverride(BlockState state, World world, BlockPos coord) {
 		TileEntity te = world.getTileEntity(coord);
 		if (te != null && te instanceof FluidDrainTileEntity) {
 			return ((FluidDrainTileEntity) te).getRedstoneOutput();

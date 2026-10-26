@@ -3,7 +3,7 @@ package zone.moddev.mc.poweradvantage.registry;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraftforge.event.ForgeEventFactory;
 
 import java.util.*;
@@ -142,7 +142,7 @@ public class FuelRegistry {
 		if(fuel == null || fuel.isEmpty()) return 0;
 		int custom = getInstance().getBurnTime(fuel);
 		if (custom > 0) return (short) Math.min(Short.MAX_VALUE, custom);
-		Integer vanilla = TileEntityFurnace.getBurnTimes().get(fuel.getItem());
+		Integer vanilla = AbstractFurnaceTileEntity.getBurnTimes().get(fuel.getItem());
 		int burnTime = ForgeEventFactory.getItemBurnTime(fuel, vanilla == null ? 0 : vanilla.intValue());
 		return (short) Math.min(Short.MAX_VALUE, Math.max(0, burnTime));
 	}

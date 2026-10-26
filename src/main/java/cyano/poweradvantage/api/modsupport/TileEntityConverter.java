@@ -4,7 +4,7 @@ import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.PowerRequest;
 import cyano.poweradvantage.api.simple.TileEntitySimplePowerMachine;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntityType;
 
 import java.util.Arrays;
@@ -50,7 +50,7 @@ public abstract class TileEntityConverter extends TileEntitySimplePowerMachine {
 			// convert from other mod energy
 			if (getOtherEnergy() > 0) {
 				this.addEnergy(
-						-1 * subtractEnergyFromOther(-1 * delta, type), type);
+						subtractEnergyFromOther(-1 * delta, type), type);
 			}
 		}
 		if (!Arrays.equals(dataArray, dataArrayOld)) {
@@ -174,7 +174,7 @@ public abstract class TileEntityConverter extends TileEntitySimplePowerMachine {
 	}
 
 	@Override
-	public void read(final NBTTagCompound tagRoot) {
+	public void read(final CompoundNBT tagRoot) {
 		super.read(tagRoot);
 		if (tagRoot.contains("Other", 99)) {
 			this.setOtherEnergy(tagRoot.getDouble("Other"));
@@ -182,9 +182,9 @@ public abstract class TileEntityConverter extends TileEntitySimplePowerMachine {
 	}
 
 	@Override
-	public NBTTagCompound write(final NBTTagCompound tagRoot) {
+	public CompoundNBT write(final CompoundNBT tagRoot) {
 		super .write(tagRoot);
-		tagRoot.setDouble("Other", this.getOtherEnergy());
+		tagRoot.putDouble("Other", this.getOtherEnergy());
 		return tagRoot;
 	}
 

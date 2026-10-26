@@ -64,7 +64,7 @@
 /test-rig/migration/.venv/
 /test-rig/migration/__pycache__/
 
-# Local dependency artifacts; 1.13 converters use Forge Energy instead.
+# Local dependency artifacts; converters use Forge Energy instead.
 /libs/*
 *.jar
 *.zip

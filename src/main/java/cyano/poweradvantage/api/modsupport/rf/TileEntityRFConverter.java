@@ -7,7 +7,7 @@ import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.modsupport.TileEntityConverter;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -18,7 +18,7 @@ import zone.moddev.mc.poweradvantage.PowerAdvantage;
 public class TileEntityRFConverter extends TileEntityConverter implements IEnergyStorage {
     private final int forgeBufferSize;
     private final int halfBuffer;
-    private final LazyOptional<IEnergyStorage> energyCapability = LazyOptional.of(() -> this);
+    private LazyOptional<IEnergyStorage> energyCapability = LazyOptional.of(() -> this);
     private int forgeBuffer;
 
     protected TileEntityRFConverter(TileEntityType<?> tileType, ConduitType type,
@@ -31,8 +31,8 @@ public class TileEntityRFConverter extends TileEntityConverter implements IEnerg
     @Override
     public void tickUpdate(boolean server) {
         if (!server) return;
-        int index = (int) (getWorld().getGameTime() % EnumFacing.values().length);
-        EnumFacing side = EnumFacing.values()[index];
+        int index = (int) (getWorld().getGameTime() % Direction.values().length);
+        Direction side = Direction.values()[index];
         TileEntity neighbor = getWorld().getTileEntity(getPos().offset(side));
         if (neighbor == null) return;
         neighbor.getCapability(CapabilityEnergy.ENERGY, side.getOpposite()).ifPresent(storage -> {
@@ -64,8 +64,18 @@ public class TileEntityRFConverter extends TileEntityConverter implements IEnerg
     @Override public boolean canReceive() { return true; }
 
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing side) {
-        return capability == CapabilityEnergy.ENERGY ? energyCapability.cast() : super.getCapability(capability, side);
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction side) {
+        return !isRemoved() && capability == CapabilityEnergy.ENERGY ? energyCapability.cast() : super.getCapability(capability, side);
+    }
+
+    @Override protected void invalidateCaps() {
+        super.invalidateCaps();
+        energyCapability.invalidate();
+    }
+
+    @Override public void validate() {
+        super.validate();
+        if (!energyCapability.isPresent()) energyCapability = LazyOptional.of(() -> this);
     }
 
     @Override public double getOtherEnergy() { return forgeBuffer; }

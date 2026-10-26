@@ -5,7 +5,7 @@ import cyano.poweradvantage.api.PoweredEntity;
 import cyano.poweradvantage.api.simple.BlockSimpleFluidMachine;
 import cyano.poweradvantage.api.simple.TileEntitySimplePowerMachine;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.tileentity.TileEntity;
@@ -29,7 +29,7 @@ public class FluidDischargeBlock extends BlockSimpleFluidMachine {
 	 * breaks.
 	 */
 	@Override
-	public void onReplaced(IBlockState state, World world, BlockPos coord, IBlockState newState, boolean isMoving) {
+	public void onReplaced(BlockState state, World world, BlockPos coord, BlockState newState, boolean isMoving) {
 		if (state.getBlock() != newState.getBlock()) {
 			final TileEntity tileEntity = world.getTileEntity(coord);
 			if (tileEntity instanceof TileEntitySimplePowerMachine) {
@@ -41,12 +41,12 @@ public class FluidDischargeBlock extends BlockSimpleFluidMachine {
 	}
 
 	@Override
-	public boolean hasComparatorInputOverride(IBlockState state) {
+	public boolean hasComparatorInputOverride(BlockState state) {
 		return true;
 	}
 
 	@Override
-	public int getComparatorInputOverride(IBlockState state, World world, BlockPos coord) {
+	public int getComparatorInputOverride(BlockState state, World world, BlockPos coord) {
 		TileEntity te = world.getTileEntity(coord);
 		if (te != null && te instanceof FluidDischargeTileEntity) {
 			return ((FluidDischargeTileEntity) te).getRedstoneOutput();

@@ -6,12 +6,13 @@ var LabelNode = Java.type('org.objectweb.asm.tree.LabelNode');
 var MethodInsnNode = Java.type('org.objectweb.asm.tree.MethodInsnNode');
 var VarInsnNode = Java.type('org.objectweb.asm.tree.VarInsnNode');
 
+// Only the pre-datafix migration needs bytecode integration on Forge 1.14.
 var hook = 'zone/moddev/mc/poweradvantage/migration/LegacyWorldDataHook';
 
 function initializeCoreMod() {
     return {
         'poweradvantage_legacy_world_info': {
-            'target': { 'type': 'CLASS', 'name': 'net.minecraft.world.storage.SaveFormatOld' },
+            'target': { 'type': 'CLASS', 'name': 'net.minecraft.world.storage.SaveFormat' },
             'transformer': function(classNode) {
                 var patched = false;
                 for (var i = 0; i < classNode.methods.size(); ++i) {
@@ -25,44 +26,39 @@ function initializeCoreMod() {
                     method.instructions.insert(prefix);
                     patched = true;
                 }
-                if (!patched) throw new Error('Power Advantage could not patch the Forge 25 legacy world reader');
+                if (!patched) throw new Error('Power Advantage could not attach its legacy world reader');
                 return classNode;
             }
         },
         'poweradvantage_legacy_chunk_status': {
-            'target': { 'type': 'CLASS', 'name': 'net.minecraft.world.chunk.storage.AnvilChunkLoader' },
+            'target': { 'type': 'CLASS', 'name': 'net.minecraft.world.chunk.storage.ChunkLoader' },
             'transformer': function(classNode) {
                 var descriptor = '(Lnet/minecraft/world/dimension/DimensionType;' +
-                        'Lnet/minecraft/world/storage/WorldSavedDataStorage;II)' +
-                        'Lnet/minecraft/nbt/NBTTagCompound;';
+                        'Ljava/util/function/Supplier;Lnet/minecraft/nbt/CompoundNBT;)' +
+                        'Lnet/minecraft/nbt/CompoundNBT;';
                 var patchedRead = false;
                 var patchedReturn = false;
                 for (var i = 0; i < classNode.methods.size(); ++i) {
                     var method = classNode.methods.get(i);
                     if (method.desc !== descriptor) continue;
+                    var prepare = new InsnList();
+                    prepare.add(new VarInsnNode(Opcodes.ALOAD, 3));
+                    prepare.add(new MethodInsnNode(Opcodes.INVOKESTATIC, hook,
+                            'prepareLegacyChunk', '(Lnet/minecraft/nbt/CompoundNBT;)V', false));
+                    method.instructions.insert(prepare);
+                    patchedRead = true;
                     for (var instruction = method.instructions.getFirst(); instruction !== null;
                             instruction = instruction.getNext()) {
-                        var previous = instruction.getPrevious();
-                        if (instruction.getOpcode() === Opcodes.ASTORE && previous !== null
-                                && previous.getOpcode() === Opcodes.INVOKESTATIC
-                                && previous.owner === 'net/minecraft/nbt/CompressedStreamTools'
-                                && previous.desc.endsWith(')Lnet/minecraft/nbt/NBTTagCompound;')) {
-                            var prepare = new InsnList();
-                            prepare.add(new VarInsnNode(Opcodes.ALOAD, instruction.var));
-                            prepare.add(new MethodInsnNode(Opcodes.INVOKESTATIC, hook,
-                                    'prepareLegacyChunk', '(Lnet/minecraft/nbt/NBTTagCompound;)V', false));
-                            method.instructions.insert(instruction, prepare);
-                            patchedRead = true;
-                        } else if (instruction.getOpcode() === Opcodes.ARETURN) {
+                        if (instruction.getOpcode() === Opcodes.ARETURN) {
                             method.instructions.insertBefore(instruction, new MethodInsnNode(Opcodes.INVOKESTATIC,
                                     hook, 'finalizeLegacyChunk',
-                                    '(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;', false));
+                                    '(Lnet/minecraft/nbt/CompoundNBT;)Lnet/minecraft/nbt/CompoundNBT;', false));
                             patchedReturn = true;
                         }
                     }
                 }
                 if (!patchedRead || !patchedReturn) {
-                    throw new Error('Power Advantage could not patch the Forge 25 legacy chunk loader');
+                    throw new Error('Power Advantage could not attach its legacy chunk converter');
                 }
                 return classNode;
             }
@@ -71,7 +67,7 @@ function initializeCoreMod() {
             'target': { 'type': 'CLASS', 'name': 'net.minecraft.world.gen.WorldGenRegion' },
             'transformer': function(classNode) {
                 var descriptor = '(Lnet/minecraft/util/math/BlockPos;' +
-                        'Lnet/minecraft/block/state/IBlockState;I)Z';
+                        'Lnet/minecraft/block/BlockState;I)Z';
                 var patched = false;
                 for (var i = 0; i < classNode.methods.size(); ++i) {
                     var method = classNode.methods.get(i);
@@ -88,7 +84,7 @@ function initializeCoreMod() {
                     method.instructions.insert(prefix);
                     patched = true;
                 }
-                if (!patched) throw new Error('Power Advantage could not patch the Forge 25 legacy-world write guard');
+                if (!patched) throw new Error('Power Advantage could not protect existing legacy terrain');
                 return classNode;
             }
         }

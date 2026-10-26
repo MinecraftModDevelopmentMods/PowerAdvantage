@@ -3,15 +3,15 @@ package cyano.poweradvantage.api;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.block.BlockRenderType;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.IBlockReader;
@@ -32,7 +32,7 @@ import zone.moddev.mc.poweradvantage.util.FluidContainerHelper;
  * @author DrCyano
  *
  */
-public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
+public abstract class GUIBlock extends net.minecraft.block.ContainerBlock{
 
 	/**
 	 * Constructor for GUI block
@@ -97,21 +97,20 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
 	/**
 	 * Boilerplate code
 	 */
-	@Override
-    public boolean isFullCube(IBlockState bs) {
+	public boolean isFullCube(BlockState bs) {
         return false;
     }
     
 	/**
 	 * Boilerplate code
 	 */
-    public boolean isOpaqueCube(IBlockState bs) {
+    public boolean isOpaqueCube(BlockState bs) {
         return false;
     }
 
     /** 1.13 uses this flag, not the legacy opacity overload, to cull neighbours. */
     @Override
-    public boolean isSolid(IBlockState state) {
+    public boolean isSolid(BlockState state) {
         return false;
     }
 	
@@ -120,8 +119,8 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
 	 * -1 = special renderer
 	 */
 	@Override
-    public EnumBlockRenderType getRenderType(IBlockState bs) {
-        return EnumBlockRenderType.MODEL;
+    public BlockRenderType getRenderType(BlockState bs) {
+        return BlockRenderType.MODEL;
     }
 	
 	/**
@@ -133,9 +132,9 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
      */
 	@SuppressWarnings("deprecation")
     @Override
-    public boolean onBlockActivated(IBlockState bs, World w, BlockPos coord,
-									EntityPlayer player, EnumHand hand, EnumFacing facing,
-									float hitX, float hitY, float hitZ) {
+    public boolean onBlockActivated(BlockState bs, World w, BlockPos coord,
+                                    PlayerEntity player, Hand hand, net.minecraft.util.math.BlockRayTraceResult hit) {
+        Direction facing = hit.getFace();
         if (w.isRemote) {
             return true;
         }
@@ -152,18 +151,18 @@ public abstract class GUIBlock extends net.minecraft.block.BlockContainer{
 
         // open GUI
         if(this.getGuiOwner() == null) return false;
-		if(tileEntity instanceof PoweredEntity && player instanceof EntityPlayerMP){
-			((PoweredEntity)tileEntity).syncPowerAdvantageDataTo((EntityPlayerMP)player);
+		if(tileEntity instanceof PoweredEntity && player instanceof ServerPlayerEntity){
+			((PoweredEntity)tileEntity).syncPowerAdvantageDataTo((ServerPlayerEntity)player);
 		}
-		if (!(player instanceof EntityPlayerMP)) return false;
-		MachineGUIRegistry.open((EntityPlayerMP) player, w, coord, this.getGuiID());
+		if (!(player instanceof ServerPlayerEntity)) return false;
+		MachineGUIRegistry.open((ServerPlayerEntity) player, w, coord, this.getGuiID());
         return true;
     }
 
     
    
 	@Override
-	public void onReplaced(IBlockState state, World world, BlockPos pos, IBlockState newState,
+	public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState,
 			boolean isMoving) {
 		if (state.getBlock() != newState.getBlock()) {
 			TileEntity te = world.getTileEntity(pos);

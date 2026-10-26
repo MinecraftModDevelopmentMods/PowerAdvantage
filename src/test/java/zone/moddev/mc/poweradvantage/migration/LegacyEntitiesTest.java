@@ -1,8 +1,8 @@
 package zone.moddev.mc.poweradvantage.migration;
 
-import com.mojang.datafixers.DataFixTypes;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.datafix.DefaultTypeReferences;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.datafix.DataFixesManager;
 import org.junit.Test;
@@ -19,24 +19,24 @@ public class LegacyEntitiesTest {
     }
 
     @Test public void fixesVanillaPassengersInsideUnknownModEntities() {
-        NBTTagCompound vehicle = entity("example:vehicle");
-        vehicle.setString("CustomState", "keep-verbatim");
-        NBTTagCompound wolf = entity("Wolf");
-        wolf.setString("OwnerUUID", "a614e658-6270-33c3-9297-7ce80908964f");
-        NBTTagCompound nested = entity("example:seat");
-        NBTTagList nestedPassengers = new NBTTagList();
+        CompoundNBT vehicle = entity("example:vehicle");
+        vehicle.putString("CustomState", "keep-verbatim");
+        CompoundNBT wolf = entity("Wolf");
+        wolf.putString("OwnerUUID", "a614e658-6270-33c3-9297-7ce80908964f");
+        CompoundNBT nested = entity("example:seat");
+        ListNBT nestedPassengers = new ListNBT();
         nestedPassengers.add(entity("Cow"));
-        nested.setTag("Passengers", nestedPassengers);
-        NBTTagList passengers = new NBTTagList();
+        nested.put("Passengers", nestedPassengers);
+        ListNBT passengers = new ListNBT();
         passengers.add(wolf);
         passengers.add(nested);
-        vehicle.setTag("Passengers", passengers);
-        NBTTagCompound root = chunk(vehicle, 512);
+        vehicle.put("Passengers", passengers);
+        CompoundNBT root = chunk(vehicle, 512);
         LegacyWorldDataHook.prepareLegacyChunk(root);
-        NBTTagCompound actual = root.getCompound("Level").getList("Entities", 10).getCompound(0);
+        CompoundNBT actual = root.getCompound("Level").getList("Entities", 10).getCompound(0);
         assertEquals("example:vehicle", actual.getString("id"));
         assertEquals("keep-verbatim", actual.getString("CustomState"));
-        NBTTagList fixed = actual.getList("Passengers", 10);
+        ListNBT fixed = actual.getList("Passengers", 10);
         assertEquals(2, fixed.size());
         assertEquals("minecraft:wolf", fixed.getCompound(0).getString("id"));
         assertEquals(wolf.getString("OwnerUUID"), fixed.getCompound(0).getString("OwnerUUID"));
@@ -45,73 +45,73 @@ public class LegacyEntitiesTest {
     }
 
     @Test public void usesVanillaSubtypeFixersRatherThanLowercasingOldIds() {
-        NBTTagCompound skeleton = entity("Skeleton");
-        skeleton.setByte("SkeletonType", (byte) 1);
-        NBTTagCompound root = chunk(skeleton, 512);
+        CompoundNBT skeleton = entity("Skeleton");
+        skeleton.putByte("SkeletonType", (byte) 1);
+        CompoundNBT root = chunk(skeleton, 512);
         LegacyWorldDataHook.prepareLegacyChunk(root);
         assertEquals("minecraft:wither_skeleton", root.getCompound("Level").getList("Entities", 10).getCompound(0).getString("id"));
     }
 
     @Test public void leavesModernEntityAndUnrelatedCustomNbtUnchangedOnRepeatedPreparation() {
-        NBTTagCompound wolf = entity("minecraft:wolf");
-        wolf.setString("OwnerUUID", "a614e658-6270-33c3-9297-7ce80908964f");
-        wolf.setTag("CustomData", entity("Wolf"));
-        NBTTagCompound root = chunk(wolf, 1343);
+        CompoundNBT wolf = entity("minecraft:wolf");
+        wolf.putString("OwnerUUID", "a614e658-6270-33c3-9297-7ce80908964f");
+        wolf.put("CustomData", entity("Wolf"));
+        CompoundNBT root = chunk(wolf, 1343);
         LegacyWorldDataHook.prepareLegacyChunk(root);
         LegacyWorldDataHook.prepareLegacyChunk(root);
         assertEquals(wolf, root.getCompound("Level").getList("Entities", 10).getCompound(0));
     }
 
     @Test public void repeatPreparationDoesNotLoseConvertedVanillaState() {
-        NBTTagCompound wolf = entity("Wolf");
-        wolf.setString("OwnerUUID", "a614e658-6270-33c3-9297-7ce80908964f");
-        NBTTagCompound root = chunk(wolf, 512);
+        CompoundNBT wolf = entity("Wolf");
+        wolf.putString("OwnerUUID", "a614e658-6270-33c3-9297-7ce80908964f");
+        CompoundNBT root = chunk(wolf, 512);
         LegacyWorldDataHook.prepareLegacyChunk(root);
-        NBTTagCompound once = root.copy();
+        CompoundNBT once = root.copy();
         LegacyWorldDataHook.prepareLegacyChunk(root);
         assertEquals(once, root);
     }
 
-    private static NBTTagCompound entity(String id) {
-        NBTTagCompound entity = new NBTTagCompound();
-        entity.setString("id", id);
+    private static CompoundNBT entity(String id) {
+        CompoundNBT entity = new CompoundNBT();
+        entity.putString("id", id);
         return entity;
     }
 
-    private static NBTTagCompound chunk(NBTTagCompound entity, int version) {
-        NBTTagCompound root = new NBTTagCompound();
-        root.setInt("DataVersion", version);
-        NBTTagCompound level = new NBTTagCompound();
-        NBTTagList entities = new NBTTagList();
+    private static CompoundNBT chunk(CompoundNBT entity, int version) {
+        CompoundNBT root = new CompoundNBT();
+        root.putInt("DataVersion", version);
+        CompoundNBT level = new CompoundNBT();
+        ListNBT entities = new ListNBT();
         entities.add(entity);
-        level.setTag("Entities", entities);
-        root.setTag("Level", level);
+        level.put("Entities", entities);
+        root.put("Level", level);
         return root;
     }
 
     private static void assertWolf(boolean customEntity) {
-        NBTTagCompound root = new NBTTagCompound();
-        root.setInt("DataVersion", 512);
-        NBTTagCompound level = new NBTTagCompound();
-        NBTTagList entities = new NBTTagList();
-        NBTTagCompound wolf = new NBTTagCompound();
-        wolf.setString("id", "Wolf");
-        wolf.setString("OwnerUUID", "a614e658-6270-33c3-9297-7ce80908964f");
-        wolf.setBoolean("Sitting", true);
-        wolf.setLong("UUIDMost", 123L);
-        wolf.setLong("UUIDLeast", 456L);
+        CompoundNBT root = new CompoundNBT();
+        root.putInt("DataVersion", 512);
+        CompoundNBT level = new CompoundNBT();
+        ListNBT entities = new ListNBT();
+        CompoundNBT wolf = new CompoundNBT();
+        wolf.putString("id", "Wolf");
+        wolf.putString("OwnerUUID", "a614e658-6270-33c3-9297-7ce80908964f");
+        wolf.putBoolean("Sitting", true);
+        wolf.putLong("UUIDMost", 123L);
+        wolf.putLong("UUIDLeast", 456L);
         entities.add(wolf);
         if (customEntity) {
-            NBTTagCompound turbine = new NBTTagCompound();
-            turbine.setString("id", "electricadvantage.electricadvantage.Hydroturbine");
-            turbine.setIntArray("parentPos", new int[] {164, 81, 8});
+            CompoundNBT turbine = new CompoundNBT();
+            turbine.putString("id", "electricadvantage.electricadvantage.Hydroturbine");
+            turbine.putIntArray("parentPos", new int[] {164, 81, 8});
             entities.add(turbine);
         }
-        level.setTag("Entities", entities);
-        root.setTag("Level", level);
+        level.put("Entities", entities);
+        root.put("Level", level);
         LegacyWorldDataHook.prepareLegacyChunk(root);
-        NBTTagCompound fixed = NBTUtil.update(DataFixesManager.getDataFixer(), DataFixTypes.CHUNK, root, 512, 1343);
-        NBTTagCompound actual = fixed.getCompound("Level").getList("Entities", 10).getCompound(0);
+        CompoundNBT fixed = NBTUtil.update(DataFixesManager.getDataFixer(), DefaultTypeReferences.CHUNK, root, 512, 1343);
+        CompoundNBT actual = fixed.getCompound("Level").getList("Entities", 10).getCompound(0);
         assertEquals("minecraft:wolf", actual.getString("id"));
         assertEquals(wolf.getString("OwnerUUID"), actual.getString("OwnerUUID"));
         assertTrue(actual.getBoolean("Sitting"));

@@ -2,7 +2,7 @@ package cyano.poweradvantage.api;
 
 import zone.moddev.mc.poweradvantage.conduitnetwork.ConduitRegistry;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
@@ -41,8 +41,8 @@ public abstract class ConduitBlock extends net.minecraft.block.Block implements 
 	 * This method is called whenever the block is placed into the world
 	 */
 	@Override
-	public void onBlockAdded(IBlockState state, World w, BlockPos coord, IBlockState oldState) {
-		super.onBlockAdded(state, w, coord, oldState);
+	public void onBlockAdded(BlockState state, World w, BlockPos coord, BlockState oldState, boolean isMoving) {
+		super.onBlockAdded(state, w, coord, oldState, isMoving);
 		ConduitRegistry.getInstance().conduitBlockPlacedEvent(w, w.dimension.getType().getId(), coord, getTypes());
 	}
 
@@ -50,7 +50,7 @@ public abstract class ConduitBlock extends net.minecraft.block.Block implements 
 	 * This method is called when the block is removed from the world by an entity.
 	 */
 	@Override
-	public void onReplaced(IBlockState state, World w, BlockPos coord, IBlockState newState, boolean isMoving) {
+	public void onReplaced(BlockState state, World w, BlockPos coord, BlockState newState, boolean isMoving) {
 		if (state.getBlock() != newState.getBlock()) {
 			ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.dimension.getType().getId(), coord, getTypes());
 		}

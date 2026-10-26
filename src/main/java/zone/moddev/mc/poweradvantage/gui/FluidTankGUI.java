@@ -3,11 +3,11 @@ package zone.moddev.mc.poweradvantage.gui;
 import cyano.poweradvantage.api.fluid.FluidPoweredEntity;
 import cyano.poweradvantage.api.simple.SimpleMachineGUI;
 import zone.moddev.mc.poweradvantage.math.Integer2D;
-import net.minecraft.client.renderer.GlStateManager;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.BiomeColors;
@@ -36,8 +36,8 @@ public class FluidTankGUI extends SimpleMachineGUI {
 			}
 		}
 		GlStateManager.color4f(1f, 1f, 1f, 1f); // reset tint
-		guiContainer.mc.getTextureManager().bindTexture(guiDisplayImage);
-		guiContainer.drawTexturedModalRect(x + 77, y + 6, 176, 0, 22, 66); // x, y, textureOffsetX, textureOffsetY, width, height)
+		guiContainer.getMinecraft().getTextureManager().bindTexture(guiDisplayImage);
+		guiContainer.blit(x + 77, y + 6, 176, 0, 22, 66); // x, y, textureOffsetX, textureOffsetY, width, height)
 	}
 
 
@@ -52,8 +52,8 @@ public class FluidTankGUI extends SimpleMachineGUI {
 		FluidTankGUI.drawFluidFilledRectangle(guiContainer, fs, x + xPos, y + yPos + barSlotHeight - h, w, h, zLevel);
 		//guiContainer.drawModalRectWithCustomSizedTexture(x+xPos, y+yPos+barSlotHeight-h, 0, 0, w, h, 16, h);//h * texPerPixel); // x, y, u, v, width, height, textureWidth, textureHeight
 
-		guiContainer.mc.getTextureManager().bindTexture(displayImage);
-		guiContainer.drawTexturedModalRect(x + xPos - 3, y + yPos - 3, 176, 0, 22, 66); // x, y, textureOffsetX, textureOffsetY, width, height)
+		guiContainer.getMinecraft().getTextureManager().bindTexture(displayImage);
+		guiContainer.blit(x + xPos - 3, y + yPos - 3, 176, 0, 22, 66); // x, y, textureOffsetX, textureOffsetY, width, height)
 	}
 
 
@@ -64,13 +64,13 @@ public class FluidTankGUI extends SimpleMachineGUI {
 	) {
 		if (fs == null || fs.getFluid() == null || width <= 0 || height <= 0) return;
 		// The atlas supplies the current animation frame; water's sprite is grayscale.
-		TextureAtlasSprite sprite = guiContainer.mc.getModelManager().getBlockModelShapes()
-				.getModel(fs.getFluid().getDefaultState().getBlockState()).getParticleTexture();
-		guiContainer.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-		int color = 0xFFFFFF;
-		if (fs.getFluid().isEquivalentTo(net.minecraft.init.Fluids.WATER)) {
-			color = guiContainer.mc.world != null && guiContainer.mc.player != null
-					? BiomeColors.getWaterColor(guiContainer.mc.world, guiContainer.mc.player.getPosition()) : 0x3F76E4;
+		TextureAtlasSprite sprite = guiContainer.getMinecraft().getTextureMap()
+				.getSprite(fs.getFluid().getAttributes().getStillTexture());
+		guiContainer.getMinecraft().getTextureManager().bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
+		int color = fs.getFluid().getAttributes().getColor(zone.moddev.mc.poweradvantage.util.ForgeFluidAdapter.toForge(fs));
+		if (fs.getFluid().isEquivalentTo(net.minecraft.fluid.Fluids.WATER)) {
+			color = guiContainer.getMinecraft().world != null && guiContainer.getMinecraft().player != null
+					? BiomeColors.getWaterColor(guiContainer.getMinecraft().world, guiContainer.getMinecraft().player.getPosition()) : 0x3F76E4;
 		}
 		float red = ((color >>> 16) & 255) / 255F;
 		float green = ((color >>> 8) & 255) / 255F;

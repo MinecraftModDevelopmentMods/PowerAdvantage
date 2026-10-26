@@ -4,7 +4,7 @@ import zone.moddev.mc.poweradvantage.PowerAdvantage;
 import cyano.poweradvantage.api.FluidCategoryRegistry;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.IRegistry;
+import net.minecraft.util.registry.Registry;
 import zone.moddev.mc.poweradvantage.registry.still.recipe.DistillationRecipeRegistry;
 
 
@@ -41,12 +41,12 @@ public abstract class Recipes {
 	private static void initCrudeOilAliasDistillationRecipes() {
 		Fluid refinedOil = Fluids.refined_oil;
 		if (refinedOil == null) return;
-		ResourceLocation outputId = IRegistry.field_212619_h.getKey(refinedOil);
+		ResourceLocation outputId = net.minecraftforge.registries.ForgeRegistries.FLUIDS.getKey(refinedOil);
 		if (outputId == null) return;
 
 		for (Fluid input : FluidCategoryRegistry.getRegisteredFluids(FluidCategoryRegistry.CRUDE_OIL)) {
 			if (DistillationRecipeRegistry.getInstance().getDistillationRecipeForFluid(input) != null) continue;
-			ResourceLocation inputId = IRegistry.field_212619_h.getKey(input);
+			ResourceLocation inputId = net.minecraftforge.registries.ForgeRegistries.FLUIDS.getKey(input);
 			if (inputId != null) {
 				DistillationRecipeRegistry.addDistillationRecipe(inputId.toString(), 2, outputId.toString(), 1);
 			}

@@ -27,7 +27,7 @@ import cyano.poweradvantage.api.modsupport.rf.TileEntityRFQuantumConverter;
 import cyano.poweradvantage.api.modsupport.rf.TileEntityRFSteamConverter;
 import cyano.poweradvantage.api.modsupport.techreborn.TileEntityTRElectricityConverter;
 
-/** Stable 1.13 tile entity type registrations. */
+/** Stable tile identities with the native 1.14 valid-block lists. */
 @Mod.EventBusSubscriber(modid = PowerAdvantage.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class Entities {
     public static TileEntityType<TerminalFluidPipeTileEntity> PIPE_TERMINAL;
@@ -55,32 +55,33 @@ public final class Entities {
 
     @SubscribeEvent
     public static void register(RegistryEvent.Register<TileEntityType<?>> event) {
-        PIPE_TERMINAL = register(event, "tileentity.pipe_terminal", TerminalFluidPipeTileEntity::new);
-        FLUID_DRAIN = register(event, "tileentity.fluid_drain", FluidDrainTileEntity::new);
-        FLUID_DISCHARGE = register(event, "tileentity.fluid_discharge", FluidDischargeTileEntity::new);
-        STORAGE_TANK = register(event, "tileentity.fluid_storage_tank", StorageTankTileEntity::new);
-        METAL_TANK = register(event, "tileentity.fluid_metal_tank", MetalTankTileEntity::new);
-        STILL = register(event, "tileentity.still", StillTileEntity::new);
-        CONVEYOR = register(event, "item_conveyor", TileEntityConveyor::new);
-        FILTER_BLOCK = register(event, "item_filter_block", TileEntityBlockFilter::new);
-        FILTER_FOOD = register(event, "item_filter_food", TileEntityFoodFilter::new);
-        FILTER_FUEL = register(event, "item_filter_fuel", TileEntityFuelFilter::new);
-        FILTER_INVENTORY = register(event, "item_filter_inventory", TileEntityInventoryFilter::new);
-        FILTER_ORE = register(event, "item_filter_ore", TileEntityOreFilter::new);
-        FILTER_PLANT = register(event, "item_filter_plant", TileEntityPlantFilter::new);
-        FILTER_SMELT = register(event, "item_filter_smelt", TileEntitySmeltableFilter::new);
-        FILTER_OVERFLOW = register(event, "item_filter_overflow", TileEntityOverflowFilter::new);
-        INFINITE_ENERGY = register(event, "infinite_energy_source", InfiniteEnergyTileEntity::new);
-        RF_STEAM_CONVERTER = register(event, "rf_steam_converter_tileentity", TileEntityRFSteamConverter::new);
-        RF_ELECTRICITY_CONVERTER = register(event, "rf_electricity_converter_tileentity", TileEntityRFElectricityConverter::new);
-        RF_QUANTUM_CONVERTER = register(event, "rf_quantum_converter_tileentity", TileEntityRFQuantumConverter::new);
-        TR_ELECTRICITY_CONVERTER = register(event, "tr_electricity_converter_tileentity", TileEntityTRElectricityConverter::new);
+        PIPE_TERMINAL = register(event, "tileentity.pipe_terminal", TerminalFluidPipeTileEntity::new, Blocks.fluid_pipe_terminal);
+        FLUID_DRAIN = register(event, "tileentity.fluid_drain", FluidDrainTileEntity::new, Blocks.fluid_drain);
+        FLUID_DISCHARGE = register(event, "tileentity.fluid_discharge", FluidDischargeTileEntity::new, Blocks.fluid_discharge);
+        STORAGE_TANK = register(event, "tileentity.fluid_storage_tank", StorageTankTileEntity::new, Blocks.storage_tank);
+        METAL_TANK = register(event, "tileentity.fluid_metal_tank", MetalTankTileEntity::new, Blocks.metal_storage_tank);
+        STILL = register(event, "tileentity.still", StillTileEntity::new, Blocks.still);
+        CONVEYOR = register(event, "item_conveyor", TileEntityConveyor::new, Blocks.item_conveyor);
+        FILTER_BLOCK = register(event, "item_filter_block", TileEntityBlockFilter::new, Blocks.item_filter_block);
+        FILTER_FOOD = register(event, "item_filter_food", TileEntityFoodFilter::new, Blocks.item_filter_food);
+        FILTER_FUEL = register(event, "item_filter_fuel", TileEntityFuelFilter::new, Blocks.item_filter_fuel);
+        FILTER_INVENTORY = register(event, "item_filter_inventory", TileEntityInventoryFilter::new, Blocks.item_filter_inventory);
+        FILTER_ORE = register(event, "item_filter_ore", TileEntityOreFilter::new, Blocks.item_filter_ore);
+        FILTER_PLANT = register(event, "item_filter_plant", TileEntityPlantFilter::new, Blocks.item_filter_plant);
+        FILTER_SMELT = register(event, "item_filter_smelt", TileEntitySmeltableFilter::new, Blocks.item_filter_smelt);
+        FILTER_OVERFLOW = register(event, "item_filter_overflow", TileEntityOverflowFilter::new, Blocks.item_filter_overflow);
+        INFINITE_ENERGY = register(event, "infinite_energy_source", InfiniteEnergyTileEntity::new,
+                Blocks.infinite_steam, Blocks.infinite_electricity, Blocks.infinite_quantum);
+        RF_STEAM_CONVERTER = register(event, "rf_steam_converter_tileentity", TileEntityRFSteamConverter::new, ModSupport.converter_rf_steam);
+        RF_ELECTRICITY_CONVERTER = register(event, "rf_electricity_converter_tileentity", TileEntityRFElectricityConverter::new, ModSupport.converter_rf_electricity);
+        RF_QUANTUM_CONVERTER = register(event, "rf_quantum_converter_tileentity", TileEntityRFQuantumConverter::new, ModSupport.converter_rf_quantum);
+        TR_ELECTRICITY_CONVERTER = register(event, "tr_electricity_converter_tileentity", TileEntityTRElectricityConverter::new, ModSupport.converter_tr_electricity);
     }
 
     private static <T extends TileEntity> TileEntityType<T> register(
             RegistryEvent.Register<TileEntityType<?>> event, String id,
-            java.util.function.Supplier<? extends T> factory) {
-        TileEntityType<T> type = TileEntityType.Builder.<T>create(factory).build(null);
+            java.util.function.Supplier<? extends T> factory, net.minecraft.block.Block... validBlocks) {
+        TileEntityType<T> type = TileEntityType.Builder.<T>create(factory, validBlocks).build(null);
         type.setRegistryName(PowerAdvantage.MODID, id);
         event.getRegistry().register(type);
         return type;

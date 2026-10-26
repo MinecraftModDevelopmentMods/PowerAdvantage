@@ -11,7 +11,7 @@ import cyano.poweradvantage.api.fluid.FluidStack;
 import cyano.poweradvantage.api.fluid.IAdvantageFluidHandler;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import zone.moddev.mc.poweradvantage.conduitnetwork.ConduitRegistry;
 import zone.moddev.mc.poweradvantage.init.Entities;
 import zone.moddev.mc.poweradvantage.init.Fluids;
@@ -19,7 +19,7 @@ import zone.moddev.mc.poweradvantage.util.FluidHandlerHelper;
 
 /** Bridges adjacent Advantage fluid handlers onto the conduit request network. */
 public class TerminalFluidPipeTileEntity extends PoweredEntity {
-    private final EnumFacing[] faces = EnumFacing.values();
+    private final Direction[] faces = Direction.values();
     private final IAdvantageFluidHandler[] neighbors = new IAdvantageFluidHandler[faces.length];
 
     public TerminalFluidPipeTileEntity() { super(Entities.PIPE_TERMINAL); }
@@ -56,7 +56,7 @@ public class TerminalFluidPipeTileEntity extends PoweredEntity {
         for (int index = 0; index < neighbors.length; index++) {
             IAdvantageFluidHandler neighbor = neighbors[index];
             if (neighbor == null) continue;
-            EnumFacing face = faces[index].getOpposite();
+            Direction face = faces[index].getOpposite();
             FluidStack available = neighbor.drain(face, Integer.MAX_VALUE, false);
             if (available == null || available.amount <= 0) continue;
             int moved = transmitFluidToConsumers(available, PowerRequest.LOW_PRIORITY);

@@ -6,7 +6,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -61,7 +61,7 @@ final class AdvantageWorksCommand {
                 case "checkpoint": message = controller.checkpoint(source.getServer(), target, name); break;
                 default: throw new IllegalArgumentException("Unknown Advantage Works operation " + operation);
             }
-            source.sendFeedback(new TextComponentString(message), false);
+            source.sendFeedback(new StringTextComponent(message), false);
             return 1;
         } catch (RuntimeException ex) {
             LOGGER.error("Advantage Works command failed: {} {}", operation, target, ex);
@@ -72,7 +72,7 @@ final class AdvantageWorksCommand {
     private static int sampleWorldgen(CommandSource source, int radius) {
         WorksController controller = WorksController.getInstance();
         controller.requireAuthorizedWorld(source.getServer());
-        source.sendFeedback(new TextComponentString(controller.sampleWorldgen(source.getServer(), radius)), false);
+        source.sendFeedback(new StringTextComponent(controller.sampleWorldgen(source.getServer(), radius)), false);
         return 1;
     }
 }

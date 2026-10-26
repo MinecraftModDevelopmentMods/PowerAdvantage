@@ -5,7 +5,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import zone.moddev.mc.poweradvantage.init.Entities;
 
 public class TileEntityOverflowFilter extends TileEntityConveyorFilter {
@@ -14,7 +14,7 @@ public class TileEntityOverflowFilter extends TileEntityConveyorFilter {
 	@Override
 	public boolean matchesFilter(ItemStack item) {
 		if (item == null || item.getItem() == null) return false;
-		boolean canDrop = canInsert(item, EnumFacing.DOWN);
+		boolean canDrop = canInsert(item, Direction.DOWN);
 		boolean canPass = canInsert(item, this.getFacing());
 		if (canPass) {
 			return canDrop;
@@ -23,10 +23,10 @@ public class TileEntityOverflowFilter extends TileEntityConveyorFilter {
 		}
 	}
 
-	private boolean canInsert(ItemStack item, EnumFacing f) {
+	private boolean canInsert(ItemStack item, Direction f) {
 		TileEntity target = getWorld().getTileEntity(getPos().offset(f));
 		if (target instanceof IInventory) {
-			EnumFacing side = f.getOpposite();
+			Direction side = f.getOpposite();
 			ISidedInventory dt = InventoryWrapper.wrap((IInventory) target);
 			int[] slots = dt.getSlotsForFace(side);
 			for (int i = 0; i < slots.length; i++) {
@@ -49,7 +49,7 @@ public class TileEntityOverflowFilter extends TileEntityConveyorFilter {
 	}
 
 	@Override
-	protected boolean isValidItemFor(ItemStack item, TileEntity target, EnumFacing side) {
+	protected boolean isValidItemFor(ItemStack item, TileEntity target, Direction side) {
 		// do all of the logic in the matchesFilter method
 		return true;
 	}

@@ -17,17 +17,19 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import net.minecraft.command.Commands;
-import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.block.Blocks;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.ChunkEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import zone.moddev.mc.poweradvantage.conduitnetwork.ConduitRegistry;
 
@@ -50,6 +52,7 @@ final class LifecycleProbe {
         int[] min, max, from, to, hold;
         String block, energyType;
         String bucket;
+        boolean nativeTicketNetwork;
         int[] source;
         float initialEnergy;
         List<int[]> witnesses;
@@ -58,21 +61,39 @@ final class LifecycleProbe {
     }
 
     static void validate(Fixture fixture) {
+        validate(fixture, () -> ModList.get().isLoaded("mineralogy"));
+    }
+
+    static void validate(Fixture fixture, BooleanSupplier mineralogyLoaded) {
         if (fixture.id == null || !fixture.id.matches("[A-Za-z0-9_-]+"))
             throw new IllegalArgumentException("Invalid fixture ID");
         if (fixture.min == null || fixture.max == null || fixture.min.length != 3 || fixture.max.length != 3)
             throw new IllegalArgumentException("Invalid bounds");
         if (fixture.min[0] < 1024 || fixture.min[2] < 1024 || fixture.min[1] < 8 || fixture.max[1] > 240)
             throw new IllegalArgumentException("Fixtures must be remote and bounded above terrain");
+        boolean nativeNetwork = fixture.nativeTicketNetwork;
+        if (nativeNetwork && (!Arrays.asList("C-STEAM", "C-ELECTRIC", "C-FLUID").contains(fixture.id)
+                || fixture.from != null || fixture.bucket != null || fixture.groups == null
+                || !(fixture.groups.containsKey("supply") && fixture.groups.containsKey("machine")
+                    || fixture.groups.containsKey("bridge") && fixture.groups.containsKey("endpoints"))))
+            throw new IllegalArgumentException("Native ticket bounds require a declared network fixture");
+        int width = fixture.max[0] - fixture.min[0], depth = fixture.max[2] - fixture.min[2];
+        if (nativeNetwork && !((width == 159 || width == 543) && depth == 31
+                || width == 31 && (depth == 159 || depth == 543)))
+            throw new IllegalArgumentException("Native ticket networks require a 160 or 544 by 32 block footprint");
         for (int axis = 0; axis < 3; axis++)
-            if (fixture.max[axis] < fixture.min[axis] || fixture.max[axis] - fixture.min[axis] > 31)
+            if (fixture.max[axis] < fixture.min[axis]
+                    || fixture.max[axis] - fixture.min[axis] > (nativeNetwork && axis != 1 ? 543 : 31))
                 throw new IllegalArgumentException("Oversized fixture");
         if (fixture.witnesses == null || fixture.witnesses.isEmpty())
             throw new IllegalArgumentException("Missing witnesses");
         for (int[] pos : fixture.witnesses) requireInside(fixture, pos);
         if (fixture.bucket != null) {
-            if (!fixture.bucket.matches("poweradvantage:(crude|refined)_oil_bucket"))
+            boolean mineralogy = "mineralogy:crude_oil_bucket".equals(fixture.bucket);
+            if (!fixture.bucket.matches("poweradvantage:(crude|refined)_oil_bucket") && !mineralogy)
                 throw new IllegalArgumentException("Unsupported oil bucket");
+            if (mineralogy && !mineralogyLoaded.getAsBoolean())
+                throw new IllegalArgumentException("Mineralogy oil bucket requires mineralogy");
             requireInside(fixture, fixture.source);
             if (fixture.source[1] >= fixture.max[1])
                 throw new IllegalArgumentException("Bucket needs headroom inside fixture bounds");
@@ -165,7 +186,7 @@ final class LifecycleProbe {
                         }))));
     }
 
-    private void execute(WorldServer world, String operation, String label) {
+    private void execute(ServerWorld world, String operation, String label) {
         if (operation.startsWith("release-") || operation.startsWith("load-")) {
             boolean acquire = operation.startsWith("load-");
             String group = operation.substring(acquire ? 5 : 8);
@@ -177,12 +198,10 @@ final class LifecycleProbe {
             if (selected.isEmpty()) throw new IllegalArgumentException("Unknown chunk group " + group);
             for (long key : selected) {
                 ChunkPos pos = new ChunkPos(key);
-                world.func_212414_b(pos.x, pos.z, acquire);
-                if (acquire) world.getChunkProvider().provideChunk(pos.x, pos.z, true, true);
-                else {
-                    Chunk chunk = world.getChunkProvider().loadedChunks.get(key);
-                    if (chunk != null) world.getChunkProvider().queueUnload(chunk);
-                }
+                world.forceChunk(pos.x, pos.z, acquire);
+                if (acquire) world.getChunk(pos.x, pos.z);
+                // Removing the forced ticket lets the native ticket manager unload naturally.
+                // The runner still requires actual ChunkEvent.Unload/Load witnesses.
             }
             snapshot(world, label);
             return;
@@ -195,13 +214,13 @@ final class LifecycleProbe {
                     if (!world.isAirBlock(source)) throw new IllegalStateException("Oil source is not empty: " + oil.id);
                     net.minecraft.item.Item item = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(
                             new net.minecraft.util.ResourceLocation(oil.bucket));
-                    if (!(item instanceof net.minecraft.item.ItemBucket)
-                            || !((net.minecraft.item.ItemBucket) item).tryPlaceContainedLiquid(null, world, source, null))
+                    if (!(item instanceof net.minecraft.item.BucketItem)
+                            || !((net.minecraft.item.BucketItem) item).tryPlaceContainedLiquid(null, world, source, null))
                         throw new IllegalStateException("Bucket placement failed: " + oil.id);
                     String expected = oil.bucket.substring(0, oil.bucket.length() - "_bucket".length());
                     net.minecraft.fluid.IFluidState state = world.getFluidState(source);
                     if (!state.isSource() || !expected.equals(
-                            net.minecraft.util.registry.IRegistry.field_212619_h.getKey(state.getFluid()).toString()))
+                            net.minecraft.util.registry.Registry.FLUID.getKey(state.getFluid()).toString()))
                         throw new IllegalStateException("Bucket placed the wrong fluid: " + oil.id);
                 }
                 break;
@@ -223,16 +242,14 @@ final class LifecycleProbe {
             case "release":
                 for (long key : chunks()) {
                     ChunkPos pos = new ChunkPos(key);
-                    world.func_212414_b(pos.x, pos.z, false);
-                    Chunk chunk = world.getChunkProvider().loadedChunks.get(key);
-                    if (chunk != null) world.getChunkProvider().queueUnload(chunk);
+                    world.forceChunk(pos.x, pos.z, false);
                 }
                 break;
             case "load":
                 for (long key : chunks()) {
                     ChunkPos pos = new ChunkPos(key);
-                    world.func_212414_b(pos.x, pos.z, true);
-                    world.getChunkProvider().provideChunk(pos.x, pos.z, true, true);
+                    world.forceChunk(pos.x, pos.z, true);
+                    world.getChunk(pos.x, pos.z);
                 }
                 break;
             case "offer":
@@ -240,7 +257,7 @@ final class LifecycleProbe {
                 Fixture fixture = fixtures.get("C-FLUID");
                 if (fixture == null) throw new IllegalStateException("Missing fluid fixture");
                 int accepted = FluidNetworkApi.offerFluid(world, position(fixture.witnesses.get(0)),
-                        new FluidStack(net.minecraft.init.Fluids.WATER, 1000), 1000);
+                        new FluidStack(net.minecraft.fluid.Fluids.WATER, 1000), 1000);
                 int expected = "offer-blocked".equals(operation) ? 0 : 1000;
                 if (accepted != expected) throw new IllegalStateException("Fluid network accepted " + accepted + " instead of " + expected);
                 break;
@@ -264,12 +281,12 @@ final class LifecycleProbe {
                     if (!(tile instanceof PoweredEntity)
                             || !drill.block.equals(world.getBlockState(position(drill.to)).getBlock().getRegistryName().toString()))
                         throw new IllegalStateException("Missing restored drill " + drill.id);
-                    NBTTagCompound saved = tile.write(new NBTTagCompound());
+                    CompoundNBT saved = tile.write(new CompoundNBT());
                     if (!saved.contains("targetX", 99) || saved.getShort("progress") <= 0)
                         throw new IllegalStateException("Drill must be mid-block " + drill.id);
                     if ("legacy-read".equals(operation)) {
-                        saved.removeTag("TargetState");
-                        saved.removeTag("TargetStates");
+                        saved.remove("TargetState");
+                        saved.remove("TargetStates");
                     } else {
                         int[] target = {saved.getInt("targetX"), saved.getInt("targetY"), saved.getInt("targetZ")};
                         requireInside(drill, target);
@@ -294,14 +311,14 @@ final class LifecycleProbe {
     }
 
     private void unload(ChunkEvent.Unload event) {
-        if (event.getWorld() instanceof WorldServer) {
+        if (event.getWorld() instanceof ServerWorld) {
             increment(unloads, event.getChunk().getPos().asLong());
             recordEvent(event, "unload");
         }
     }
 
     private void load(ChunkEvent.Load event) {
-        if (event.getWorld() instanceof WorldServer) {
+        if (event.getWorld() instanceof ServerWorld) {
             increment(loads, event.getChunk().getPos().asLong());
             recordEvent(event, "load");
         }
@@ -312,7 +329,7 @@ final class LifecycleProbe {
         Map<String, Object> record = new LinkedHashMap<>();
         record.put("operation", operation);
         record.put("pos", Arrays.asList(event.getChunk().getPos().x, event.getChunk().getPos().z));
-        record.put("worldTime", ((WorldServer) event.getWorld()).getGameTime());
+        record.put("worldTime", ((ServerWorld) event.getWorld()).getGameTime());
         if (tracingLoads && "load".equals(operation)) {
             List<String> stack = new ArrayList<>();
             for (StackTraceElement frame : Thread.currentThread().getStackTrace()) {
@@ -328,19 +345,19 @@ final class LifecycleProbe {
         if (chunks().contains(key)) counters.put(key, counters.getOrDefault(key, 0) + 1);
     }
 
-    private Map<String, Object> witness(WorldServer world, int[] coordinates) {
+    private Map<String, Object> witness(ServerWorld world, int[] coordinates) {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("pos", coordinates);
         BlockPos pos = position(coordinates);
         // No world.getChunk/getTileEntity call is permitted before this non-loading lookup.
-        Chunk chunk = world.getChunkProvider().loadedChunks.get(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4));
+        Chunk chunk = world.getChunkProvider().func_225313_a(pos.getX() >> 4, pos.getZ() >> 4);
         result.put("loaded", chunk != null);
         if (chunk == null) return result;
         result.put("block", chunk.getBlockState(pos).getBlock().getRegistryName().toString());
         result.put("state", chunk.getBlockState(pos).toString());
         TileEntity tile = chunk.getTileEntity(pos);
         if (tile != null) {
-            result.put("nbt", tile.write(new NBTTagCompound()).toString());
+            result.put("nbt", tile.write(new CompoundNBT()).toString());
             result.put("tileIdentity", System.identityHashCode(tile));
             if (tile instanceof PoweredEntity) {
                 PoweredEntity powered = (PoweredEntity) tile;
@@ -353,8 +370,8 @@ final class LifecycleProbe {
     }
 
     private void tick(TickEvent.WorldTickEvent event) {
-        if (!watching || !(event.world instanceof WorldServer)) return;
-        WorldServer world = (WorldServer) event.world;
+        if (!watching || !(event.world instanceof ServerWorld)) return;
+        ServerWorld world = (ServerWorld) event.world;
         for (Fixture fixture : fixtures.values()) {
             if (fixture.from == null || completed.contains(fixture.id)) continue;
             int step = routeSteps.getOrDefault(fixture.id, 0);
@@ -385,7 +402,7 @@ final class LifecycleProbe {
         }
     }
 
-    private void snapshot(WorldServer world, String label) {
+    private void snapshot(ServerWorld world, String label) {
         Map<String, Object> result = new LinkedHashMap<>();
         Map<String, Object> cases = new LinkedHashMap<>();
         for (Fixture fixture : fixtures.values()) {
@@ -398,7 +415,7 @@ final class LifecycleProbe {
             ChunkPos pos = new ChunkPos(key);
             Map<String, Object> entry = new LinkedHashMap<>();
             entry.put("pos", Arrays.asList(pos.x, pos.z));
-            entry.put("loaded", world.getChunkProvider().loadedChunks.containsKey(key));
+            entry.put("loaded", world.getChunkProvider().func_225313_a(pos.x, pos.z) != null);
             entry.put("unloads", unloads.getOrDefault(key, 0));
             entry.put("loads", loads.getOrDefault(key, 0));
             chunkStates.add(entry);

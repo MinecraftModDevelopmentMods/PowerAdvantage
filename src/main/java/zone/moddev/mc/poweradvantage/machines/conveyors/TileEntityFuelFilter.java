@@ -2,7 +2,7 @@ package zone.moddev.mc.poweradvantage.machines.conveyors;
 
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import zone.moddev.mc.poweradvantage.init.Entities;
 
 public class TileEntityFuelFilter extends TileEntityConveyorFilter {
@@ -11,7 +11,7 @@ public class TileEntityFuelFilter extends TileEntityConveyorFilter {
 	@Override
 	public boolean matchesFilter(ItemStack item) {
 		if (item == null) return false;
-		return TileEntityFurnace.isItemFuel(item);
+		return AbstractFurnaceTileEntity.isFuel(item);
 	}
 
 }

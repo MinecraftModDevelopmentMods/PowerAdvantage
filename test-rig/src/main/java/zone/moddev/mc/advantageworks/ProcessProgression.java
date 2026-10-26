@@ -10,22 +10,21 @@ import cyano.poweradvantage.api.simple.TileEntitySimplePowerMachine;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemBlock;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemUseContext;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.util.Direction;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.NonNullList;
+import net.minecraft.tileentity.FurnaceTileEntity;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
 import zone.moddev.mc.poweradvantage.init.Fluids;
 import zone.moddev.mc.poweradvantage.machines.fluidmachines.StillTileEntity;
@@ -39,8 +38,8 @@ final class ProcessProgression {
     static void reset() { evidence = new JsonArray(); crusherWitnesses.clear(); }
     static JsonArray witnesses() { return evidence; }
 
-    static void smelt(WorldServer world, JsonObject fixture, String recipe, ItemStack input, ItemStack expected) {
-        TileEntityFurnace furnace = (TileEntityFurnace) fresh(world, fixture,
+    static void smelt(ServerWorld world, JsonObject fixture, String recipe, ItemStack input, ItemStack expected) {
+        FurnaceTileEntity furnace = (FurnaceTileEntity) fresh(world, fixture,
                 new BlockPos(16394, 80, 16384), "minecraft:furnace");
         furnace.setInventorySlotContents(0, input.copy());
         furnace.setInventorySlotContents(1, stack("minecraft:coal"));
@@ -50,32 +49,34 @@ final class ProcessProgression {
                 && !output.isEmpty() && id(output).equals(id(expected)) && output.getCount() == expected.getCount(),
                 "Live furnace failed " + recipe + ": input=" + furnace.getStackInSlot(0)
                     + ", fuel=" + furnace.getStackInSlot(1) + ", output=" + output
-                    + ", expected=" + expected + ", cook=" + furnace.getField(2) + "/" + furnace.getField(3));
+                    + ", expected=" + expected + ", saved=" + furnace.write(new net.minecraft.nbt.CompoundNBT()));
         record("live_furnace:" + recipe, input.getCount(), output.getCount());
     }
 
-    static void hammer(WorldServer world, EntityPlayerMP player, Map<String, JsonObject> known,
+    static void hammer(ServerWorld world, ServerPlayerEntity player, Map<String, JsonObject> known,
             JsonObject fixture, String recipe, ItemStack input, ItemStack expected) {
         BlockPos pos = new BlockPos(16396, 80, 16384);
         fresh(world, fixture, pos, "minecraft:stone");
         AxisAlignedBB area = new AxisAlignedBB(pos.up());
-        for (EntityItem entity : world.getEntitiesWithinAABB(EntityItem.class, area)) {
+        for (ItemEntity entity : world.getEntitiesWithinAABB(ItemEntity.class, area)) {
             entity.setItem(ItemStack.EMPTY);
             entity.remove();
         }
         String hammer = known.keySet().stream().filter(key -> key.startsWith("basemetals:")
                 && key.endsWith("_crackhammer")).findFirst().orElseThrow(() -> new IllegalStateException("No craftable hammer"));
         player.inventory.clear();
-        player.setHeldItem(EnumHand.MAIN_HAND, stack(hammer));
+        player.setHeldItem(Hand.MAIN_HAND, stack(hammer));
         player.setSneaking(false);
-        EntityItem source = new EntityItem(world, pos.getX() + 0.5D, pos.getY() + 1.1D, pos.getZ() + 0.5D, input.copy());
-        world.spawnEntity(source);
-        EnumActionResult action = player.getHeldItemMainhand().getItem().onItemUse(
-                new ItemUseContext(player, player.getHeldItemMainhand(), pos, EnumFacing.UP, 0.5F, 1F, 0.5F));
-        require(action == EnumActionResult.SUCCESS && source.getItem().isEmpty()
+        ItemEntity source = new ItemEntity(world, pos.getX() + 0.5D, pos.getY() + 1.1D, pos.getZ() + 0.5D, input.copy());
+        world.addEntity(source);
+        ActionResultType action = player.getHeldItemMainhand().getItem().onItemUse(
+                new ItemUseContext(player, Hand.MAIN_HAND, new net.minecraft.util.math.BlockRayTraceResult(
+                        new net.minecraft.util.math.Vec3d(pos.getX() + 0.5D, pos.getY() + 1D, pos.getZ() + 0.5D),
+                        Direction.UP, pos, false)));
+        require(action == ActionResultType.SUCCESS && source.getItem().isEmpty()
                 && player.getHeldItemMainhand().getDamage() == 1, "Live hammer failed " + recipe);
         int produced = 0;
-        for (EntityItem entity : world.getEntitiesWithinAABB(EntityItem.class, area)) {
+        for (ItemEntity entity : world.getEntitiesWithinAABB(ItemEntity.class, area)) {
             if (entity == source || entity.getItem().isEmpty()) continue;
             require(id(entity.getItem()).equals(id(expected)), "Unexpected hammer output for " + recipe
                     + ": " + entity.getItem() + ", expected " + expected);
@@ -88,10 +89,10 @@ final class ProcessProgression {
     }
 
     static boolean canCrush(Map<String, JsonObject> known, ItemStack input) {
-        if (input.getItem() instanceof ItemBlock) {
+        if (input.getItem() instanceof BlockItem) {
             for (String id : known.keySet()) {
                 if (id.startsWith("basemetals:") && id.endsWith("_crackhammer")
-                        && stack(id).getItem().canHarvestBlock(((ItemBlock) input.getItem()).getBlock().getDefaultState())) return true;
+                        && stack(id).getItem().canHarvestBlock(((BlockItem) input.getItem()).getBlock().getDefaultState())) return true;
             }
             return (has(known, "steamadvantage:steam_crusher", "steamadvantage:steam_boiler_coal", "minecraft:water_bucket"))
                     || has(known, "electricadvantage:electric_crusher", "electricadvantage:hydroelectric_generator", "minecraft:water_bucket");
@@ -99,7 +100,7 @@ final class ProcessProgression {
         return true;
     }
 
-    static boolean advance(WorldServer world, EntityPlayerMP player, Map<String, JsonObject> known, JsonObject fixture) {
+    static boolean advance(ServerWorld world, ServerPlayerEntity player, Map<String, JsonObject> known, JsonObject fixture) {
         boolean changed = false;
         for (String machine : new String[] {"steamadvantage:steam_crusher", "electricadvantage:electric_crusher"}) {
             if (known.containsKey(machine) && crusherWitnesses.add(machine)) {
@@ -110,8 +111,8 @@ final class ProcessProgression {
         if (known.containsKey("electricadvantage:sulfur_ore") && !known.containsKey("electricadvantage:sulfur_powder")) {
             BlockPos pos = new BlockPos(16392, 80, 16384);
             fresh(world, fixture, pos, "electricadvantage:sulfur_ore");
-            NonNullList<ItemStack> drops = NonNullList.create();
-            world.getBlockState(pos).getBlock().getDrops(world.getBlockState(pos), drops, world, pos, 0);
+            java.util.List<ItemStack> drops = net.minecraft.block.Block.getDrops(
+                    world.getBlockState(pos), world, pos, world.getTileEntity(pos));
             require(drops.size() == 1 && id(drops.get(0)).equals("electricadvantage:sulfur_powder")
                     && drops.get(0).getCount() >= 1 && drops.get(0).getCount() <= 4, "Sulfur ore drops changed");
             changed |= acquire(known, player, drops.get(0), "mine_generated_sulfur_ore", Collections.singletonList("electricadvantage:sulfur_ore"));
@@ -124,8 +125,8 @@ final class ProcessProgression {
                 fresh(world, fixture, pos, fluid);
                 player.inventory.clear();
                 player.setPositionAndRotation(pos.getX() + 0.5D, pos.getY() + 2, pos.getZ() + 0.5D, 0, 90);
-                player.setHeldItem(EnumHand.MAIN_HAND, stack("minecraft:bucket"));
-                ItemStack output = player.getHeldItemMainhand().getItem().onItemRightClick(world, player, EnumHand.MAIN_HAND).getResult();
+                player.setHeldItem(Hand.MAIN_HAND, stack("minecraft:bucket"));
+                ItemStack output = player.getHeldItemMainhand().getItem().onItemRightClick(world, player, Hand.MAIN_HAND).getResult();
                 require(!output.isEmpty() && id(output).equals(bucket), "Native world-fluid pickup changed identity: " + fluid);
                 require(world.getFluidState(pos).isEmpty(), "Bucket pickup left its source behind");
                 changed |= acquire(known, player, output, "bucket_collect:" + fluid, Collections.singletonList("minecraft:bucket"));
@@ -144,8 +145,8 @@ final class ProcessProgression {
                         "Distillation did not conserve its 2:1 ratio");
             }
             player.inventory.clear();
-            player.setHeldItem(EnumHand.MAIN_HAND, stack("minecraft:bucket"));
-            require(FluidContainerHelper.interact(player, EnumHand.MAIN_HAND, still, null), "Cannot collect refined oil from still");
+            player.setHeldItem(Hand.MAIN_HAND, stack("minecraft:bucket"));
+            require(FluidContainerHelper.interact(player, Hand.MAIN_HAND, still, null), "Cannot collect refined oil from still");
             ItemStack output = player.getHeldItemMainhand().copy();
             require(id(output).equals("poweradvantage:refined_oil_bucket") && still.getTank().getFluidAmount() == 0,
                     "Refined-oil bucket changed identity or duplicated fluid");
@@ -182,7 +183,7 @@ final class ProcessProgression {
         return changed;
     }
 
-    private static void crushPotato(WorldServer world, JsonObject fixture, String id, String potato) {
+    private static void crushPotato(ServerWorld world, JsonObject fixture, String id, String potato) {
         boolean steam = id.startsWith("steamadvantage:");
         TileEntitySimplePowerMachine machine = (TileEntitySimplePowerMachine) fresh(world, fixture,
                 new BlockPos(steam ? 16400 : 16402, 80, 16384), id);
@@ -214,12 +215,12 @@ final class ProcessProgression {
         return true;
     }
 
-    private static TileEntity fresh(WorldServer world, JsonObject fixture, BlockPos pos, String block) {
+    private static TileEntity fresh(ServerWorld world, JsonObject fixture, BlockPos pos, String block) {
         JsonObject bounds = fixture.getAsJsonObject("machineBounds");
         int[] p = {pos.getX(), pos.getY(), pos.getZ()};
         for (int i = 0; i < 3; i++) require(p[i] >= bounds.getAsJsonArray("min").get(i).getAsInt()
                 && p[i] <= bounds.getAsJsonArray("max").get(i).getAsInt(), "Machine fixture escaped its bounds");
-        world.setBlockState(pos, net.minecraft.init.Blocks.AIR.getDefaultState());
+        world.setBlockState(pos, net.minecraft.block.Blocks.AIR.getDefaultState());
         world.removeTileEntity(pos);
         net.minecraft.block.Block material = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(block));
         require(material != null, "Missing machine/fluid " + block);

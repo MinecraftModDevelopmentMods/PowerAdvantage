@@ -1,7 +1,7 @@
 package cyano.poweradvantage.api;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
 
@@ -22,7 +22,7 @@ public class PowerConnectorContext {
 	/**
 	 * Block that is asking for the connection
 	 */
-	public final IBlockState thisBlock;
+	public final BlockState thisBlock;
 	/**
 	 * Position of the block that is asking for the connection
 	 */
@@ -30,11 +30,11 @@ public class PowerConnectorContext {
 	/**
 	 * Face on the block that is asking for the connection
 	 */
-	public final EnumFacing thisBlockSide;
+	public final Direction thisBlockSide;
 	/**
 	 * Block that is being asked for the connection
 	 */
-	public final IBlockState otherBlock;
+	public final BlockState otherBlock;
 	/**
 	 * Position of the block that is being asked for the connection
 	 */
@@ -42,7 +42,7 @@ public class PowerConnectorContext {
 	/**
 	 * Face on the block that is being asked for the connection
 	 */
-	public final EnumFacing otherBlockSide;
+	public final Direction otherBlockSide;
 
 	/**
 	 * Constructs a data structure instance
@@ -59,12 +59,12 @@ public class PowerConnectorContext {
 	public PowerConnectorContext(
 			final ConduitType powerType,
 			final IBlockReader world,
-			final IBlockState connectorBlock,
+			final BlockState connectorBlock,
 			final BlockPos connectorPosition,
-			final EnumFacing connectorSide,
-			final IBlockState connecteeBlock,
+			final Direction connectorSide,
+			final BlockState connecteeBlock,
 			final BlockPos connecteePosition,
-			final EnumFacing connecteeSide
+			final Direction connecteeSide
 	) {
 		this.world = world;
 		this.powerType = powerType;
@@ -79,9 +79,9 @@ public class PowerConnectorContext {
 	public PowerConnectorContext(
 			final ConduitType powerType,
 			final IBlockReader world,
-			final IBlockState connectorBlock,
+			final BlockState connectorBlock,
 			final BlockPos connectorPosition,
-			final EnumFacing connectorSide
+			final Direction connectorSide
 	) {
 		this.world = world;
 		this.powerType = powerType;

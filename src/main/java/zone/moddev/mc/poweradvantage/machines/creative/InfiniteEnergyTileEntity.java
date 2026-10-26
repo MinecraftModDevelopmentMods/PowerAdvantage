@@ -3,7 +3,7 @@ package zone.moddev.mc.poweradvantage.machines.creative;
 import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.simple.TileEntitySimplePowerMachine;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import zone.moddev.mc.poweradvantage.init.Entities;
 
 public class InfiniteEnergyTileEntity extends TileEntitySimplePowerMachine {
@@ -89,14 +89,14 @@ public class InfiniteEnergyTileEntity extends TileEntitySimplePowerMachine {
 	}
 
 	@Override
-	public NBTTagCompound write(final NBTTagCompound tagRoot) {
+	public CompoundNBT write(final CompoundNBT tagRoot) {
 		super .write(tagRoot);
-		tagRoot.setString("InfType", this.type[0].toString());
+		tagRoot.putString("InfType", this.type[0].toString());
 		return tagRoot;
 	}
 
 	@Override
-	public void read(final NBTTagCompound tagRoot) {
+	public void read(final CompoundNBT tagRoot) {
 		super.read(tagRoot);
 		if (tagRoot.contains("InfType", 8)) {
 			this.type[0] = new ConduitType(tagRoot.getString("InfType"));

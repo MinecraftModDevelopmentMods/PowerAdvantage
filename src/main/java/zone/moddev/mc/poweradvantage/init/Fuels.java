@@ -21,9 +21,9 @@ public abstract class Fuels {
 		FuelRegistry.getInstance().registerFuel(Items.refined_oil_bucket,
 				(short) Math.min(Short.MAX_VALUE, 1000 * REFINED_OIL_FUEL_PER_FLUID_UNIT));
 		FuelRegistry.getInstance().registerPostBurnItem(Items.crude_oil_bucket,
-				(ItemStack stack) -> new ItemStack(net.minecraft.init.Items.BUCKET));
+				(ItemStack stack) -> new ItemStack(net.minecraft.item.Items.BUCKET));
 		FuelRegistry.getInstance().registerPostBurnItem(Items.refined_oil_bucket,
-				(ItemStack stack) -> new ItemStack(net.minecraft.init.Items.BUCKET));
+				(ItemStack stack) -> new ItemStack(net.minecraft.item.Items.BUCKET));
 
 
 		initDone = true;

@@ -4,7 +4,7 @@ import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.PoweredEntity;
 import cyano.poweradvantage.api.simple.BlockSimpleFluidMachine;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -22,13 +22,13 @@ public class MetalTankBlock extends BlockSimpleFluidMachine {
 	}
 
 	@Override
-	public boolean hasComparatorInputOverride(IBlockState bs) {
+	public boolean hasComparatorInputOverride(BlockState bs) {
 		return true;
 	}
 
 
 	@Override
-	public int getComparatorInputOverride(IBlockState bs, World world, BlockPos coord) {
+	public int getComparatorInputOverride(BlockState bs, World world, BlockPos coord) {
 		TileEntity te = world.getTileEntity(coord);
 		if (te != null && te instanceof MetalTankTileEntity) {
 			return ((MetalTankTileEntity) te).getRedstoneOutput();

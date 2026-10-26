@@ -2,25 +2,29 @@ package zone.moddev.mc.advantageworks.client;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockFluidRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FlowingFluid;
 import net.minecraft.fluid.IFluidState;
-import net.minecraft.item.ItemBucket;
+import net.minecraft.item.BucketItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorldReader;
+import net.minecraft.world.IEnviromentBlockReader;
+import net.minecraft.world.LightType;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.tileentity.TileEntity;
 import zone.moddev.mc.poweradvantage.init.Fluids;
 import zone.moddev.mc.poweradvantage.init.Items;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Proxy;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /** Exercises the native fluid renderer, not just oil's particle-only block model. */
 final class OilRenderProbe {
@@ -28,13 +32,17 @@ final class OilRenderProbe {
 
     static void verify(Minecraft minecraft, JsonObject result) {
         // Before a world/server is opened, vanilla's fluid tags have not been synchronized.
-        net.minecraft.tags.TagCollection<Fluid> tags = new net.minecraft.tags.TagCollection<>(id -> true,
-                net.minecraft.util.registry.IRegistry.field_212619_h::func_212608_b, "tags/fluids", false, "fluid");
-        tags.register(net.minecraft.tags.Tag.Builder.<Fluid>create().add(net.minecraft.init.Fluids.WATER,
-                net.minecraft.init.Fluids.FLOWING_WATER).build(new ResourceLocation("minecraft", "water")));
-        tags.register(net.minecraft.tags.Tag.Builder.<Fluid>create().add(net.minecraft.init.Fluids.LAVA,
-                net.minecraft.init.Fluids.FLOWING_LAVA).build(new ResourceLocation("minecraft", "lava")));
+        net.minecraft.tags.TagCollection<Fluid> previousTags = net.minecraft.tags.FluidTags.getCollection();
+        net.minecraft.tags.TagCollection<Fluid> tags = new net.minecraft.tags.TagCollection<>(id ->
+                Optional.ofNullable(net.minecraftforge.registries.ForgeRegistries.FLUIDS.getValue(id)), "tags/fluids", false, "fluid");
+        Map<ResourceLocation, net.minecraft.tags.Tag.Builder<Fluid>> builders = new HashMap<>();
+        builders.put(new ResourceLocation("minecraft", "water"), net.minecraft.tags.Tag.Builder.<Fluid>create()
+                .add(net.minecraft.fluid.Fluids.WATER, net.minecraft.fluid.Fluids.FLOWING_WATER));
+        builders.put(new ResourceLocation("minecraft", "lava"), net.minecraft.tags.Tag.Builder.<Fluid>create()
+                .add(net.minecraft.fluid.Fluids.LAVA, net.minecraft.fluid.Fluids.FLOWING_LAVA));
+        tags.registerAll(builders);
         net.minecraft.tags.FluidTags.setCollection(tags);
+        try {
         requireBucket(Items.crude_oil_bucket, Fluids.crude_oil);
         requireBucket(Items.refined_oil_bucket, Fluids.refined_oil);
         result.addProperty("oil_bucket_identities", true);
@@ -46,40 +54,36 @@ final class OilRenderProbe {
         valid &= check(minecraft, Fluids.flowing_crude_oil.getFlowingFluidState(5, false), "poweradvantage:blocks/crude_oil_flow", true, cases);
         valid &= check(minecraft, Fluids.refined_oil.getDefaultState(), "poweradvantage:blocks/refined_oil_still", false, cases);
         valid &= check(minecraft, Fluids.flowing_refined_oil.getFlowingFluidState(5, false), "poweradvantage:blocks/refined_oil_flow", true, cases);
-        valid &= check(minecraft, net.minecraft.init.Fluids.WATER.getDefaultState(), "minecraft:block/water_still", false, cases);
-        valid &= check(minecraft, net.minecraft.init.Fluids.LAVA.getDefaultState(), "minecraft:block/lava_still", false, cases);
+        valid &= check(minecraft, net.minecraft.fluid.Fluids.WATER.getDefaultState(), "minecraft:block/water_still", false, cases);
+        valid &= check(minecraft, net.minecraft.fluid.Fluids.LAVA.getDefaultState(), "minecraft:block/lava_still", false, cases);
         if (!valid) throw new IllegalStateException("Native fluid renderer used the wrong sprite or tint: " + cases);
+        } finally { net.minecraft.tags.FluidTags.setCollection(previousTags); }
     }
 
     private static void requireBucket(net.minecraft.item.Item bucket, Fluid expected) {
-        try {
-            for (Field field : ItemBucket.class.getDeclaredFields()) {
-                if (field.getType() != Fluid.class) continue;
-                field.setAccessible(true);
-                if (field.get(bucket) == expected && expected.getFilledBucket() == bucket) return;
-            }
-        } catch (ReflectiveOperationException failure) {
-            throw new IllegalStateException("Cannot inspect native bucket fluid", failure);
+        net.minecraftforge.fluids.FluidStack contents = net.minecraftforge.fluids.FluidUtil.getFluidContained(new ItemStack(bucket))
+                .orElseThrow(() -> new IllegalStateException("Bucket has no native fluid capability: " + bucket.getRegistryName()));
+        if (!(bucket instanceof BucketItem) || ((BucketItem) bucket).getFluid() != expected
+                || expected.getFilledBucket() != bucket || contents.getFluid() != expected || contents.getAmount() != 1000) {
+            throw new IllegalStateException("Wrong bucket fluid: " + bucket.getRegistryName());
         }
-        throw new IllegalStateException("Wrong bucket fluid: " + bucket.getRegistryName());
     }
 
     private static boolean check(Minecraft minecraft, IFluidState state, String texture, boolean flowing, JsonArray cases) {
         // A tiny read-only neighbourhood supplies a slope for flowing sprites; no save is opened.
-        IWorldReader world = (IWorldReader) Proxy.newProxyInstance(OilRenderProbe.class.getClassLoader(),
-                new Class<?>[]{IWorldReader.class}, (proxy, method, args) -> {
-                    BlockPos pos = args != null && args.length > 0 && args[0] instanceof BlockPos ? (BlockPos) args[0] : null;
-                    if (method.getName().equals("getBlockState")) return blockAt(state, flowing, pos);
-                    if (method.getName().equals("getFluidState")) return blockAt(state, flowing, pos).getFluidState();
-                    if (method.getName().equals("getCombinedLight")) return 0x00F000F0;
-                    if (method.getName().equals("getBiome")) return net.minecraft.init.Biomes.PLAINS;
-                    throw new UnsupportedOperationException(method.toString());
-                });
+        IEnviromentBlockReader world = new IEnviromentBlockReader() {
+            @Override public TileEntity getTileEntity(BlockPos pos) { return null; }
+            @Override public BlockState getBlockState(BlockPos pos) { return blockAt(state, flowing, pos); }
+            @Override public IFluidState getFluidState(BlockPos pos) { return getBlockState(pos).getFluidState(); }
+            @Override public int getLightFor(LightType type, BlockPos pos) { return 15; }
+            @Override public Biome getBiome(BlockPos pos) { return net.minecraft.world.biome.Biomes.PLAINS; }
+        };
         BufferBuilder buffer = new BufferBuilder(4096);
-        buffer.begin(org.lwjgl.opengl.GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
-        boolean rendered = new BlockFluidRenderer().render(world, BlockPos.ORIGIN, buffer, state);
+        buffer.begin(7, DefaultVertexFormats.BLOCK);
+        boolean rendered = minecraft.getBlockRendererDispatcher().renderFluid(BlockPos.ZERO, world, buffer, state);
         buffer.finishDrawing();
         TextureAtlasSprite sprite = minecraft.getTextureMap().getSprite(new ResourceLocation(texture));
+        require(rendered && buffer.getVertexCount() >= 4, "Native fluid renderer emitted no top face for " + state);
         ByteBuffer data = buffer.getByteBuffer();
         float u = data.getFloat(DefaultVertexFormats.BLOCK.getUvOffsetById(0));
         float v = data.getFloat(DefaultVertexFormats.BLOCK.getUvOffsetById(0) + 4);
@@ -89,7 +93,7 @@ final class OilRenderProbe {
                 && u >= sprite.getMinU() && u <= sprite.getMaxU() && v >= sprite.getMinV() && v <= sprite.getMaxV();
         boolean correctTint = !(state.getFluid() instanceof Fluids.PowerFluid) || rgb == 0xFFFFFF;
         JsonObject entry = new JsonObject();
-        entry.addProperty("fluid", net.minecraft.util.registry.IRegistry.field_212619_h.getKey(state.getFluid()).toString());
+        entry.addProperty("fluid", state.getFluid().getRegistryName().toString());
         entry.addProperty("block", state.getBlockState().getBlock().getRegistryName().toString());
         entry.addProperty("expected_sprite", texture);
         entry.addProperty("correct_sprite", correctSprite);
@@ -99,11 +103,15 @@ final class OilRenderProbe {
         return rendered && buffer.getVertexCount() > 0 && correctSprite && correctTint;
     }
 
-    private static IBlockState blockAt(IFluidState state, boolean flowing, BlockPos pos) {
-        if (BlockPos.ORIGIN.equals(pos)) return state.getBlockState();
-        if (flowing && BlockPos.ORIGIN.east().equals(pos)) {
+    private static BlockState blockAt(IFluidState state, boolean flowing, BlockPos pos) {
+        if (BlockPos.ZERO.equals(pos)) return state.getBlockState();
+        if (flowing && BlockPos.ZERO.east().equals(pos)) {
             return ((FlowingFluid) state.getFluid()).getFlowingFluidState(3, false).getBlockState();
         }
-        return (pos.getY() < 0 ? net.minecraft.init.Blocks.STONE : net.minecraft.init.Blocks.AIR).getDefaultState();
+        return (pos.getY() < 0 ? net.minecraft.block.Blocks.STONE : net.minecraft.block.Blocks.AIR).getDefaultState();
+    }
+
+    private static void require(boolean condition, String message) {
+        if (!condition) throw new IllegalStateException(message);
     }
 }

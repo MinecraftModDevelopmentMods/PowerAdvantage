@@ -7,33 +7,33 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.SPacketUpdateRecipes;
+import net.minecraft.network.play.server.SUpdateRecipesPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.crafting.VanillaRecipeTypes;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraft.item.crafting.IRecipeType;
 import static zone.moddev.mc.advantageworks.ProgressionProbe.*;
 
 /** Native crafting and server-to-client recipe payload, not a source-JSON simulation. */
 final class RecipeBookProbe {
-    static void verify(MinecraftServer server, WorldServer world, String label, JsonObject report) throws Exception {
+    static void verify(MinecraftServer server, ServerWorld world, String label, JsonObject report) throws Exception {
         JsonArray entries = new JsonArray();
-        List<IRecipe> recipes = new ArrayList<>();
-        for (IRecipe recipe : server.getRecipeManager().getRecipes()) {
+        List<IRecipe<?>> recipes = new ArrayList<>();
+        for (IRecipe<?> recipe : server.getRecipeManager().getRecipes()) {
             String namespace = recipe.getId().getNamespace();
             if (!(namespace.equals("poweradvantage") || namespace.equals("steamadvantage") || namespace.equals("electricadvantage"))) continue;
-            if (recipe.getType() != VanillaRecipeTypes.CRAFTING && recipe.getType() != VanillaRecipeTypes.SMELTING) continue;
+            if (recipe.getType() != IRecipeType.CRAFTING && recipe.getType() != IRecipeType.SMELTING) continue;
             String output = id(recipe.getRecipeOutput());
             require(output.equals(recipe.getGroup()), "Mixed-output recipe group: " + recipe.getId() + " -> " + recipe.getGroup());
             JsonObject entry = new JsonObject();
             entry.addProperty("id", recipe.getId().toString());
             entry.addProperty("group", recipe.getGroup());
-            entry.addProperty("type", recipe.getType().getId().toString());
+            entry.addProperty("type", net.minecraft.util.registry.Registry.RECIPE_TYPE.getKey(recipe.getType()).toString());
             entry.addProperty("output", output);
             entry.addProperty("count", recipe.getRecipeOutput().getCount());
             entries.add(entry);
@@ -42,22 +42,22 @@ final class RecipeBookProbe {
         report.add("bookRecipes", entries);
         PacketBuffer buffer = new PacketBuffer(Unpooled.buffer());
         try {
-            new SPacketUpdateRecipes(recipes).writePacketData(buffer);
+            new SUpdateRecipesPacket(recipes).writePacketData(buffer);
             byte[] bytes = new byte[buffer.readableBytes()];
             buffer.readBytes(bytes);
             Files.write(Paths.get("recipes-" + label + ".bin"), bytes);
         } finally { buffer.release(); }
-        IRecipe starch = server.getRecipeManager().getRecipe(new ResourceLocation("poweradvantage:starch_from_potato"));
-        require(starch != null && starch.getType() == VanillaRecipeTypes.CRAFTING, "Missing native potato crafting recipe");
+        IRecipe starch = server.getRecipeManager().getRecipe(new ResourceLocation("poweradvantage:starch_from_potato")).orElse(null);
+        require(starch != null && starch.getType() == IRecipeType.CRAFTING, "Missing native potato crafting recipe");
         int cases = 0;
         for (int width : new int[] {2, 3}) for (String potato : new String[] {"minecraft:potato", "minecraft:poisonous_potato"}) {
             for (int slot = 0; slot < width * width; slot++) for (int count : new int[] {1, 64}) {
-                InventoryCrafting grid = grid(width);
+                CraftingInventory grid = grid(width);
                 ItemStack input = stack(potato);
                 input.setCount(count);
                 grid.setInventorySlotContents(slot, input);
                 require(starch.matches(grid, world), "Potato recipe rejected slot/stack " + slot + "/" + count);
-                IRecipe selected = world.getRecipeManager().getRecipe(grid, world, VanillaRecipeTypes.CRAFTING);
+                IRecipe<?> selected = world.getRecipeManager().getRecipe(IRecipeType.CRAFTING, grid, world).orElse(null);
                 require(selected != null && selected.getId().equals(starch.getId()), "Conflicting native potato crafting recipe");
                 ItemStack result = starch.getCraftingResult(grid);
                 require(id(result).equals("poweradvantage:starch") && result.getCount() == 1, "Starch output changed");
@@ -69,13 +69,13 @@ final class RecipeBookProbe {
             }
         }
         for (String item : new String[] {null, "minecraft:baked_potato", "minecraft:carrot", "minecraft:dirt"}) {
-            InventoryCrafting grid = grid(3);
+            CraftingInventory grid = grid(3);
             if (item != null) grid.setInventorySlotContents(0, stack(item));
             require(!starch.matches(grid, world), "Invalid starch input accepted: " + item);
             cases++;
         }
         for (String second : new String[] {"minecraft:potato", "minecraft:poisonous_potato", "minecraft:dirt"}) {
-            InventoryCrafting grid = grid(3);
+            CraftingInventory grid = grid(3);
             grid.setInventorySlotContents(0, stack("minecraft:potato"));
             grid.setInventorySlotContents(1, stack(second));
             require(!starch.matches(grid, world), "Extra occupied ingredient slot accepted");
@@ -84,9 +84,9 @@ final class RecipeBookProbe {
         report.addProperty("potatoCraftingCases", cases);
     }
 
-    private static InventoryCrafting grid(int width) {
-        return new InventoryCrafting(new Container() {
-            @Override public boolean canInteractWith(net.minecraft.entity.player.EntityPlayer player) { return true; }
+    private static CraftingInventory grid(int width) {
+        return new CraftingInventory(new Container(null, 0) {
+            @Override public boolean canInteractWith(net.minecraft.entity.player.PlayerEntity player) { return true; }
         }, width, width);
     }
 }

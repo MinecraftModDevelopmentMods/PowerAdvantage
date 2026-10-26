@@ -2,6 +2,7 @@ package zone.moddev.mc.advantageworks;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import net.minecraft.util.ResourceLocation;
 
 import java.io.InputStream;
@@ -14,7 +15,8 @@ import java.util.Map;
 import java.util.Set;
 
 final class WorksDefinitionLoader {
-    private static final String RESOURCE = "/assets/advantageworkstest/works/works-1.13.2.json";
+    private static final String RESOURCE = "/assets/advantageworkstest/works/works-1.14.4.json";
+    private static final String STATION_SOURCE = "/assets/advantageworkstest/works/works-1.13.2.json";
     private static final Gson GSON = new GsonBuilder().create();
     private static final Set<String> ACTION_TYPES = new HashSet<>(Arrays.asList(
             "setBlock", "setAir", "clearInventory", "setInventory", "fillInventory",
@@ -29,22 +31,32 @@ final class WorksDefinitionLoader {
     }
 
     static WorksDefinition load() {
-        InputStream stream = WorksDefinitionLoader.class.getResourceAsStream(RESOURCE);
-        if (stream == null) {
-            throw new IllegalStateException("Missing works definition " + RESOURCE);
-        }
-        WorksDefinition definition;
-        try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
-            definition = GSON.fromJson(reader, WorksDefinition.class);
-        } catch (Exception ex) {
-            throw new IllegalStateException("Cannot read works definition " + RESOURCE, ex);
-        }
+        JsonObject target = readResource(RESOURCE);
+        if (target.get("format").getAsInt() != 1 || !"1.14.4".equals(target.get("minecraft").getAsString())
+                || !STATION_SOURCE.equals(target.get("stationSource").getAsString()))
+            throw new IllegalArgumentException("Unsupported native works descriptor");
+        JsonObject stations = readResource(STATION_SOURCE);
+        // Only the target header changes. All station cards remain the immutable source specification.
+        stations.add("format", target.get("format"));
+        stations.add("minecraft", target.get("minecraft"));
+        stations.add("title", target.get("title"));
+        WorksDefinition definition = GSON.fromJson(stations, WorksDefinition.class);
         validate(definition);
         return definition;
     }
 
+    private static JsonObject readResource(String resource) {
+        InputStream stream = WorksDefinitionLoader.class.getResourceAsStream(resource);
+        if (stream == null) throw new IllegalStateException("Missing works definition " + resource);
+        try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+            return GSON.fromJson(reader, JsonObject.class);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Cannot read works definition " + resource, ex);
+        }
+    }
+
     private static void validate(WorksDefinition definition) {
-        if (definition == null || definition.format != 1 || !"1.13.2".equals(definition.minecraft)) {
+        if (definition == null || definition.format != 1 || !"1.14.4".equals(definition.minecraft)) {
             throw new IllegalArgumentException("Unsupported or missing works definition header");
         }
         Set<String> districtIds = new HashSet<>();

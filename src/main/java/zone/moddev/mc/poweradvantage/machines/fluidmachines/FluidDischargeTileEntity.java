@@ -8,10 +8,10 @@ import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.IFluidState;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import zone.moddev.mc.poweradvantage.init.Entities;
@@ -28,9 +28,9 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
     @Override
     public void powerUpdate() {
         BlockPos below = getPos().down();
-        IAdvantageFluidHandler other = FluidHandlerHelper.getHandler(getWorld().getTileEntity(below), EnumFacing.UP);
+        IAdvantageFluidHandler other = FluidHandlerHelper.getHandler(getWorld().getTileEntity(below), Direction.UP);
         if (getTank().getFluidAmount() > 0 && other != null) {
-            int accepted = other.fill(EnumFacing.UP, getTank().getFluid(), true);
+            int accepted = other.fill(Direction.UP, getTank().getFluid(), true);
             if (accepted > 0) getTank().drain(accepted, true);
         } else if (getTank().getFluidAmount() >= FluidTank.BUCKET_VOLUME) {
             Fluid fluid = getTank().getFluid().getFluid();
@@ -50,12 +50,12 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
     private static BlockPos findPlacement(World world, BlockPos initial, Fluid fluid, int range) {
         if (world.isAirBlock(initial)) return initial;
         BlockPos position = initial;
-        EnumFacing[] directions = { EnumFacing.DOWN, EnumFacing.NORTH, EnumFacing.WEST, EnumFacing.SOUTH, EnumFacing.EAST };
+        Direction[] directions = { Direction.DOWN, Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST };
         while (range-- > 0) {
             IFluidState state = world.getFluidState(position);
             if (state.isEmpty()) return position;
             java.util.List<BlockPos> candidates = new java.util.ArrayList<>();
-            for (EnumFacing direction : directions) {
+            for (Direction direction : directions) {
                 BlockPos candidate = position.offset(direction);
                 IFluidState candidateState = world.getFluidState(candidate);
                 if (world.isAirBlock(candidate) || (!candidateState.isEmpty()
@@ -80,16 +80,16 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
     @Override public boolean isFluidSource() { return false; }
     @Override public boolean isFluidSink() { return true; }
 
-    @Override public NBTTagCompound getUpdateTag() {
-        NBTTagCompound tag = new NBTTagCompound();
+    @Override public CompoundNBT getUpdateTag() {
+        CompoundNBT tag = new CompoundNBT();
         getTank().writeToNBT(tag);
         return tag;
     }
-    @Override public void handleUpdateTag(NBTTagCompound tag) { getTank().readFromNBT(tag); }
-    @Override public SPacketUpdateTileEntity getUpdatePacket() {
-        return new SPacketUpdateTileEntity(getPos(), 0, getUpdateTag());
+    @Override public void handleUpdateTag(CompoundNBT tag) { getTank().readFromNBT(tag); }
+    @Override public SUpdateTileEntityPacket getUpdatePacket() {
+        return new SUpdateTileEntityPacket(getPos(), 0, getUpdateTag());
     }
-    @Override public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity packet) {
+    @Override public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet) {
         handleUpdateTag(packet.getNbtCompound());
     }
 

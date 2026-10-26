@@ -8,21 +8,21 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.command.Commands;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.IProperty;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import zone.moddev.mc.advantageworks.connected.ConnectedSession;
 
 /** The target adapter has no construction, inventory, energy or network-reset operation. */
 final class ConnectedProbe implements ConnectedSession.Port {
-    private WorldServer world;
+    private ServerWorld world;
     private ConnectedSession session;
     private final List<TileEntity> held = new ArrayList<>();
 
@@ -33,7 +33,7 @@ final class ConnectedProbe implements ConnectedSession.Port {
         MinecraftForge.EVENT_BUS.addListener(probe::starting);
     }
 
-    private ConnectedSession get(WorldServer current) throws Exception {
+    private ConnectedSession get(ServerWorld current) throws Exception {
         if (!current.getWorldInfo().getWorldName().equals("AdvantageWorksMigration")) throw new IllegalStateException("Unexpected connected world");
         if (world != current) {
             world = current;
@@ -45,7 +45,7 @@ final class ConnectedProbe implements ConnectedSession.Port {
     private void tick(TickEvent.WorldTickEvent event) {
         if (event.world.isRemote || event.world.dimension.getType().getId() != 0) return;
         try {
-            ConnectedSession current = get((WorldServer) event.world);
+            ConnectedSession current = get((ServerWorld) event.world);
             if (event.phase == TickEvent.Phase.START) current.start(); else current.end();
         } catch (Exception ex) { throw new IllegalStateException("Connected probe failed", ex); }
     }
@@ -61,7 +61,7 @@ final class ConnectedProbe implements ConnectedSession.Port {
                         })))));
     }
 
-    private void execute(WorldServer current, String operation, String label, int ticks) {
+    private void execute(ServerWorld current, String operation, String label, int ticks) {
         try { get(current).execute(operation, label, ticks, false); }
         catch (Exception ex) { throw new IllegalStateException("Connected probe failed", ex); }
     }
@@ -70,13 +70,13 @@ final class ConnectedProbe implements ConnectedSession.Port {
         JsonArray b = definition.getAsJsonArray("bounds");
         for (int x = b.get(0).getAsInt() >> 4; x <= b.get(3).getAsInt() >> 4; x++) {
             for (int z = b.get(2).getAsInt() >> 4; z <= b.get(5).getAsInt() >> 4; z++) {
-                world.func_212414_b(x, z, true);
+                world.forceChunk(x, z, true);
                 world.getChunk(x, z);
             }
         }
         net.minecraftforge.common.util.FakePlayer sentinel = net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(world);
         sentinel.setPosition(0.5, 80, 0.5);
-        if (!world.playerEntities.contains(sentinel)) world.playerEntities.add(sentinel);
+        if (!world.getPlayers().contains(sentinel)) world.getPlayers().add(sentinel);
     }
 
     @Override public void build(JsonObject definition) { throw new UnsupportedOperationException("Target construction is forbidden"); }
@@ -91,14 +91,14 @@ final class ConnectedProbe implements ConnectedSession.Port {
             JsonObject entry = new com.google.gson.Gson().fromJson(e.toString(), JsonObject.class);
             entry.remove("seed");
             BlockPos pos = new BlockPos(e.get("x").getAsInt(), e.get("y").getAsInt(), e.get("z").getAsInt());
-            IBlockState state = world.getBlockState(pos);
+            BlockState state = world.getBlockState(pos);
             entry.addProperty("actualName", state.getBlock().getRegistryName().toString());
             JsonObject properties = new JsonObject();
             for (IProperty<?> p : state.getProperties()) properties.addProperty(p.getName(), state.get(p).toString().toLowerCase(java.util.Locale.ROOT));
             entry.add("properties", properties);
             TileEntity tile = world.getTileEntity(pos);
             if (tile != null) {
-                NBTTagCompound tag = tile.write(new NBTTagCompound());
+                CompoundNBT tag = tile.write(new CompoundNBT());
                 java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
                 net.minecraft.nbt.CompressedStreamTools.writeCompressed(tag, bytes);
                 entry.addProperty("nbt", tag.toString());

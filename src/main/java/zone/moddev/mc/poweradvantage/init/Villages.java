@@ -1,42 +1,23 @@
 package zone.moddev.mc.poweradvantage.init;
 
-import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.util.ResourceLocation;
-import zone.moddev.mc.poweradvantage.PowerAdvantage;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.fml.common.registry.VillagerRegistry;
+import net.minecraft.entity.merchant.villager.VillagerProfession;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.MerchantOffer;
+import net.minecraftforge.event.village.VillagerTradesEvent;
 
-public abstract class Villages {
-	// TODO: add machinist villager
-	private static final ResourceLocation[] PROFESSION_LIST = {
-			new ResourceLocation("minecraft:farmer"),
-			new ResourceLocation("minecraft:librarian"),
-			new ResourceLocation("minecraft:priest"),
-			new ResourceLocation("minecraft:smith"),
-			new ResourceLocation("minecraft:butcher")
-	};
+/** The old farmer and toolsmith careers now have their own vanilla professions. */
+public final class Villages {
+    private Villages() {}
 
-	private static boolean initDone = false;
-
-	public static void init() {
-		if (initDone) return;
-
-		try {
-			insertTrades(3, 3, 1, new EntityVillager.ListItemForEmeralds(Items.sprocket, new EntityVillager.PriceInfo(-4, -1)));
-			insertTrades(0, 1, 1, new EntityVillager.ListItemForEmeralds(Items.bioplastic_ingot, new EntityVillager.PriceInfo(-8, -4)));
-		} catch (RuntimeException e) {
-			PowerAdvantage.LOGGER.error("Failed to add trades to villagers", e);
-		}
-
-		initDone = true;
-	}
-
-	private static void insertTrades(int professionID, int careerID, int tradeLevel, EntityVillager.ITradeList... trades) {
-		VillagerRegistry.VillagerProfession profession = ForgeRegistries.VILLAGER_PROFESSIONS.getValue(PROFESSION_LIST[professionID]);
-		if (profession == null) {
-			throw new IllegalStateException("No villager profession registered for " + PROFESSION_LIST[professionID]);
-		}
-		VillagerRegistry.VillagerCareer career = profession.getCareer(careerID - 1);
-		career.addTrade(tradeLevel, trades);
-	}
+    public static void onTrades(VillagerTradesEvent event) {
+        if (event.getType() == VillagerProfession.TOOLSMITH) {
+            event.getTrades().get(1).add((villager, random) -> new MerchantOffer(
+                    new ItemStack(net.minecraft.item.Items.EMERALD),
+                    new ItemStack(Items.sprocket, 1 + random.nextInt(4)), 7, 1, 0.0F));
+        } else if (event.getType() == VillagerProfession.FARMER) {
+            event.getTrades().get(1).add((villager, random) -> new MerchantOffer(
+                    new ItemStack(net.minecraft.item.Items.EMERALD),
+                    new ItemStack(Items.bioplastic_ingot, 4 + random.nextInt(5)), 7, 1, 0.0F));
+        }
+    }
 }

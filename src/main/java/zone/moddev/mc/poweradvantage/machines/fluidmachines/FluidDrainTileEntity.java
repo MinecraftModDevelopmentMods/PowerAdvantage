@@ -8,10 +8,10 @@ import cyano.poweradvantage.api.fluid.IAdvantageFluidHandler;
 import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.IFluidState;
-import net.minecraft.init.Blocks;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import zone.moddev.mc.poweradvantage.init.Entities;
@@ -25,9 +25,9 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 
     @Override
     public void powerUpdate() {
-        if (getTank().getFluidAmount() > 0) tryPushFluid(getPos().down(), EnumFacing.UP);
+        if (getTank().getFluidAmount() > 0) tryPushFluid(getPos().down(), Direction.UP);
 
-        for (EnumFacing side : EnumFacing.values()) {
+        for (Direction side : Direction.values()) {
             BlockPos adjacent = getPos().offset(side);
             IAdvantageFluidHandler other = FluidHandlerHelper.getHandler(
                     getWorld().getTileEntity(adjacent), side.getOpposite());
@@ -59,7 +59,7 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
         super.powerUpdate();
     }
 
-    private void tryPushFluid(BlockPos position, EnumFacing face) {
+    private void tryPushFluid(BlockPos position, Direction face) {
         IAdvantageFluidHandler handler = FluidHandlerHelper.getHandler(getWorld().getTileEntity(position), face);
         if (handler == null || getTank().getFluid() == null) return;
         int accepted = handler.fill(face, getTank().getFluid(), true);
@@ -82,12 +82,12 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 
     public static BlockPos scanFluidSpaceForSourceBlock(World world, BlockPos initial, int range) {
         BlockPos position = initial;
-        EnumFacing[] directions = { EnumFacing.UP, EnumFacing.NORTH, EnumFacing.WEST, EnumFacing.SOUTH, EnumFacing.EAST };
+        Direction[] directions = { Direction.UP, Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST };
         while (range-- > 0) {
             IFluidState state = world.getFluidState(position);
             if (!state.isEmpty() && state.isSource()) return position;
             java.util.List<BlockPos> candidates = new java.util.ArrayList<>();
-            for (EnumFacing direction : directions) {
+            for (Direction direction : directions) {
                 BlockPos candidate = position.offset(direction);
                 IFluidState candidateState = world.getFluidState(candidate);
                 if (!candidateState.isEmpty() && (state.isEmpty()

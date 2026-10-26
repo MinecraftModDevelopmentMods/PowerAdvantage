@@ -57,8 +57,13 @@ public final class WorksRunner {
         Arguments arguments = Arguments.parse(args);
         Profile profile = readProfile(arguments.profile);
         if (arguments.serverPort != null) profile.serverPort = arguments.serverPort;
-        File testRig = arguments.profile.getParentFile().getParentFile().getCanonicalFile();
+        File testRig = findTestRig(arguments.profile);
         File powerRoot = testRig.getParentFile().getCanonicalFile();
+        if (arguments.validateOnly) {
+            List<Map<String, Object>> inputs = stageMods(testRig, null, profile.mods);
+            System.out.println("Native 1.14.4 profile preflight only (no world opened): " + GSON.toJson(inputs));
+            return;
+        }
         String stamp = timestamp();
         File runtimeBase = resolve(testRig, profile.runtimeBase);
         File runtime = new File(runtimeBase, profile.name + "-" + stamp).getCanonicalFile();
@@ -307,8 +312,8 @@ public final class WorksRunner {
                 throw new IllegalStateException("SHA-256 mismatch for " + input.id + ": " + hash);
             }
             if (input.verifyIdentity) verifyModIdentity(source, input.id, input.version);
-            File destination = new File(mods, source.getName());
-            Files.copy(source.toPath(), destination.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
+            File destination = mods == null ? source : new File(mods, source.getName());
+            if (mods != null) Files.copy(source.toPath(), destination.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
             Map<String, Object> record = new LinkedHashMap<>();
             record.put("id", input.id);
             record.put("version", input.version);
@@ -420,7 +425,7 @@ public final class WorksRunner {
         }
         File executable = javaExecutable(home);
         if (!executable.isFile()) {
-            throw new IllegalStateException("Java 8 is required for packaged Forge 1.13.2. Set "
+            throw new IllegalStateException("Java 8 is required for packaged Forge 1.14.4. Set "
                     + "ADVANTAGE_WORKS_JAVA8_HOME; checked " + home);
         }
         return home.getCanonicalFile();
@@ -484,8 +489,9 @@ public final class WorksRunner {
                 + "level-seed=" + profile.levelSeed + "\n"
                 + "level-type=" + profile.levelType + "\n"
                 + "max-players=8\n"
-                + "motd=Advantage Works 1.13.2 Commissioning Ground\n"
+                + "motd=Advantage Works 1.14.4 Commissioning Ground\n"
                 + "online-mode=false\n"
+                + "server-ip=127.0.0.1\n"
                 + "pvp=false\n"
                 + "server-port=" + profile.serverPort + "\n"
                 + "spawn-animals=false\n"
@@ -506,6 +512,9 @@ public final class WorksRunner {
         manifest.put("recipeMode", profile.recipeMode);
         manifest.put("sourceCommit", profile.sourceCommit);
         manifest.put("sourceVersion", profile.sourceVersion);
+        manifest.put("minecraftVersion", profile.minecraftVersion);
+        manifest.put("qualificationStatus", profile.qualificationStatus);
+        manifest.put("legacySourceProfile", profile.legacySourceProfile);
         manifest.put("levelName", profile.levelName);
         manifest.put("levelType", profile.levelType);
         manifest.put("buildWorks", profile.buildWorks);
@@ -522,18 +531,37 @@ public final class WorksRunner {
         }
     }
 
-    private static Profile readProfile(File file) throws Exception {
+    static Profile readProfile(File file) throws Exception {
         try (InputStreamReader reader = new InputStreamReader(
                 new FileInputStream(file), StandardCharsets.UTF_8)) {
             Profile profile = GSON.fromJson(reader, Profile.class);
             if (profile == null || profile.name == null || profile.mode == null) {
                 throw new IllegalArgumentException("Incomplete profile " + file);
             }
+            if (!"1.14.4".equals(profile.minecraftVersion)) {
+                throw new IllegalArgumentException("Historical source profile, not a native114 destination: " + file);
+            }
+            if (!"PORTED_UNQUALIFIED".equals(profile.portStatus)) {
+                throw new IllegalStateException("Native114 profile is not ported: " + profile.portBlocker);
+            }
+            if (profile.forge == null || !"1.14.4-28.2.26".equals(profile.forge.version)) {
+                throw new IllegalArgumentException("Native114 profile must select Forge 1.14.4-28.2.26");
+            }
             if (profile.levelName == null || !profile.levelName.startsWith("AdvantageWorks")) {
                 throw new IllegalArgumentException("Profile levelName must begin with AdvantageWorks: " + file);
             }
             return profile;
         }
+    }
+
+    static File findTestRig(File profile) throws Exception {
+        File current = profile.getCanonicalFile().getParentFile();
+        while (current != null) {
+            if (new File(current, "build.gradle").isFile() && new File(current, "profiles").isDirectory()
+                    && new File(current, "src/main/resources/assets/advantageworkstest").isDirectory()) return current;
+            current = current.getParentFile();
+        }
+        throw new IllegalArgumentException("Profile must be inside the Advantage Works test-rig: " + profile);
     }
 
     private static void stageConfigFixtures(File testRig, File runtime,
@@ -861,6 +889,7 @@ public final class WorksRunner {
     private static final class Arguments {
         File profile;
         boolean automated;
+        boolean validateOnly;
         List<String> lifecycleStations;
         Integer stationRunSeconds;
         Integer serverPort;
@@ -870,6 +899,7 @@ public final class WorksRunner {
             for (int i = 0; i < args.length; i++) {
                 if ("--profile".equals(args[i]) && i + 1 < args.length) result.profile = new File(args[++i]);
                 else if ("--automated".equals(args[i])) result.automated = true;
+                else if ("--validate-only".equals(args[i])) result.validateOnly = true;
                 else if ("--stations".equals(args[i]) && i + 1 < args.length) {
                     result.lifecycleStations = new ArrayList<>();
                     for (String station : args[++i].split(",")) {
@@ -898,18 +928,18 @@ public final class WorksRunner {
         }
     }
 
-    private static final class Profile {
+    static final class Profile {
         String name;
         String mode;
-        String runtimeBase = "../run-advantage-works";
+        String runtimeBase = "build/works-native114";
         int serverPort = 25565;
         int startupTimeoutSeconds = 120;
         int shutdownTimeoutSeconds = 60;
         int stationRunSeconds = 5;
         String levelName = "AdvantageWorks";
-        String levelSeed = "advantage-works-1.13.2-v1";
+        String levelSeed = "advantage-works-1.14.4-v1";
         String levelType = "FLAT";
-        String generatorSettings = "3;minecraft:bedrock,2*minecraft:dirt,minecraft:grass;1;";
+        String generatorSettings = "";
         boolean buildWorks = true;
         int worldgenSampleRadius;
         boolean requireStableWorldgenCounts = true;
@@ -919,6 +949,11 @@ public final class WorksRunner {
         String recipeMode = "NORMAL";
         String sourceCommit;
         String sourceVersion;
+        String minecraftVersion;
+        String portStatus;
+        String portBlocker;
+        String qualificationStatus;
+        String legacySourceProfile;
         ForgeInput forge;
         List<String> launchCommand = new ArrayList<>();
         List<ModInput> mods = new ArrayList<>();

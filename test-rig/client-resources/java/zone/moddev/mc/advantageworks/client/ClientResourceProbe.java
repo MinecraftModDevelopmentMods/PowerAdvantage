@@ -2,19 +2,19 @@ package zone.moddev.mc.advantageworks.client;
 
 import com.google.gson.JsonObject;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
@@ -39,10 +39,16 @@ public final class ClientResourceProbe {
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
         if (!Boolean.getBoolean("advantageworks.clientResources") || finished || event.phase != TickEvent.Phase.END) return;
         Minecraft minecraft = Minecraft.getInstance();
-        if (++ticks < 5 || (minecraft.getModelManager().getMissingModel() == null && ticks < 1200)) return;
+        if (++ticks < 5 || ((minecraft.getLoadingGui() != null || minecraft.getModelManager().getMissingModel() == null) && ticks < 1200)) return;
         finished = true;
         JsonObject result = new JsonObject();
         try {
+            result.addProperty("minecraft", net.minecraftforge.versions.mcp.MCPVersion.getMCVersion());
+            result.addProperty("forge", net.minecraftforge.versions.forge.ForgeVersion.getVersion());
+            require("1.14.4".equals(result.get("minecraft").getAsString())
+                    && "28.2.26".equals(result.get("forge").getAsString()), "Wrong native client target");
+            require(minecraft.world == null && minecraft.player == null && !minecraft.isIntegratedServerRunning(),
+                    "Resource probe must not open a world or connect to a server");
             com.google.gson.JsonArray mods = new com.google.gson.JsonArray();
             JsonObject versions = new JsonObject();
             for (String id : new String[]{"poweradvantage", "steamadvantage", "electricadvantage"}) {
@@ -59,6 +65,7 @@ public final class ClientResourceProbe {
             require(versions.has("poweradvantage") && zone.moddev.mc.poweradvantage.PowerAdvantage.VERSION
                     .equals(versions.get("poweradvantage").getAsString()), "Power metadata does not match the compiled version");
             require(minecraft.getModelManager().getMissingModel() != null, "Timed out before model baking");
+            require(minecraft.getLoadingGui() == null, "Timed out before native resource loading completed");
             int items = 0;
             int states = 0;
             IBakedModel missing = minecraft.getModelManager().getMissingModel();
@@ -75,9 +82,9 @@ public final class ClientResourceProbe {
             for (Block block : ForgeRegistries.BLOCKS) {
                 ResourceLocation id = block.getRegistryName();
                 if (id == null || !included(id.getNamespace())) continue;
-                for (IBlockState state : block.getStateContainer().getValidStates()) {
+                for (BlockState state : block.getStateContainer().getValidStates()) {
                     IBakedModel model = minecraft.getModelManager().getBlockModelShapes().getModel(state);
-                    verifyModel(model, missing, state, state.toString(), !(block instanceof net.minecraft.block.BlockFlowingFluid));
+                    verifyModel(model, missing, state, state.toString(), !(block instanceof net.minecraft.block.FlowingFluidBlock));
                     states++;
                 }
             }
@@ -97,7 +104,7 @@ public final class ClientResourceProbe {
             result.addProperty("creative_entries", contents.size());
             result.addProperty("screen", minecraft.currentScreen == null ? "none" : minecraft.currentScreen.getClass().getName());
             LogManager.getLogger(MODID).info("ADVANTAGE_CLIENT_RESOURCES PASS items={} block_states={} creative_entries={}", items, states, contents.size());
-        } catch (RuntimeException | AssertionError failure) {
+        } catch (RuntimeException | LinkageError | AssertionError failure) {
             result.addProperty("status", "FAIL");
             result.addProperty("error", failure.toString());
             LogManager.getLogger(MODID).error("ADVANTAGE_CLIENT_RESOURCES FAIL", failure);
@@ -113,12 +120,12 @@ public final class ClientResourceProbe {
                 && ("steamadvantage".equals(namespace) || "electricadvantage".equals(namespace)));
     }
 
-    private static void verifyModel(IBakedModel model, IBakedModel missing, IBlockState state, String id, boolean requireQuads) {
+    private static void verifyModel(IBakedModel model, IBakedModel missing, BlockState state, String id, boolean requireQuads) {
         require(model != missing, "Missing baked model: " + id);
         require(!"missingno".equals(model.getParticleTexture().getName().getPath()), "Missing particle texture: " + id);
         Random random = new Random(42L);
         List<BakedQuad> quads = new ArrayList<>(model.getQuads(state, null, random));
-        for (EnumFacing side : EnumFacing.values()) quads.addAll(model.getQuads(state, side, random));
+        for (Direction side : Direction.values()) quads.addAll(model.getQuads(state, side, random));
         require(!requireQuads || !quads.isEmpty(), "Empty baked model: " + id);
         for (BakedQuad quad : quads) require(!"missingno".equals(quad.getSprite().getName().getPath()), "Missing face texture: " + id);
     }

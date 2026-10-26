@@ -2,7 +2,7 @@ package cyano.poweradvantage.api.modsupport;
 
 import cyano.poweradvantage.api.ConduitType;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 
 /**
  * This interface is used in the LightWeightPowerRegistry to allow established mods to optionally 
@@ -21,7 +21,7 @@ public interface ILightWeightPowerAcceptor {
 	 * @param inputSide Side through which the power is coming
 	 * @return True if you accept this type, false if you reject it.
 	 */
-	public default boolean canAcceptEnergyType(ConduitType powerType, EnumFacing inputSide) {
+	public default boolean canAcceptEnergyType(ConduitType powerType, Direction inputSide) {
 		return canAcceptEnergyType(powerType);
 	}
 

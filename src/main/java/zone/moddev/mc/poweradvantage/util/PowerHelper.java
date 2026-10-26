@@ -5,7 +5,7 @@ import cyano.poweradvantage.api.ITypedConduit;
 import cyano.poweradvantage.api.PowerConnectorContext;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraftforge.energy.CapabilityEnergy;
 
 /**
@@ -31,7 +31,7 @@ public abstract class PowerHelper {
 					&& PowerAdvantage.forgeEnergyConversionTable.containsKey(connection.powerType)) {
 				TileEntity tile = connection.world.getTileEntity(connection.otherBlockPosition);
 				if (tile == null) return false;
-				for (EnumFacing side : EnumFacing.values()) {
+				for (Direction side : Direction.values()) {
 					if (tile.getCapability(CapabilityEnergy.ENERGY, side).isPresent()) return true;
 				}
 			}
