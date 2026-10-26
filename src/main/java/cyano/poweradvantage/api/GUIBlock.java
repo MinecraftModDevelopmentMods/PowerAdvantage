@@ -135,7 +135,7 @@ public abstract class GUIBlock extends net.minecraft.block.ContainerBlock{
         }
         final TileEntity tileEntity = w.getTileEntity(coord);
         if (tileEntity == null || player.isSneaking()) {
-        	return ActionResultType.PASS;
+            return ActionResultType.PASS;
         }
         // handle buckets and fluid containers
 		net.minecraft.item.ItemStack item = player.getHeldItem(hand);
