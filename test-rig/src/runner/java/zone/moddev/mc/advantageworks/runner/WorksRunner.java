@@ -59,9 +59,11 @@ public final class WorksRunner {
         if (arguments.serverPort != null) profile.serverPort = arguments.serverPort;
         File testRig = findTestRig(arguments.profile);
         File powerRoot = testRig.getParentFile().getCanonicalFile();
+        // Pin validation precedes directory creation, downloads, and world access.
+        requireInputPins(profile);
         if (arguments.validateOnly) {
             List<Map<String, Object>> inputs = stageMods(testRig, null, profile.mods);
-            System.out.println("Native 1.14.4 profile preflight only (no world opened): " + GSON.toJson(inputs));
+            System.out.println("Native 1.15.2 profile preflight only (no world opened): " + GSON.toJson(inputs));
             return;
         }
         String stamp = timestamp();
@@ -425,7 +427,7 @@ public final class WorksRunner {
         }
         File executable = javaExecutable(home);
         if (!executable.isFile()) {
-            throw new IllegalStateException("Java 8 is required for packaged Forge 1.14.4. Set "
+            throw new IllegalStateException("Java 8 is required for packaged Forge 1.15.2. Set "
                     + "ADVANTAGE_WORKS_JAVA8_HOME; checked " + home);
         }
         return home.getCanonicalFile();
@@ -489,7 +491,7 @@ public final class WorksRunner {
                 + "level-seed=" + profile.levelSeed + "\n"
                 + "level-type=" + profile.levelType + "\n"
                 + "max-players=8\n"
-                + "motd=Advantage Works 1.14.4 Commissioning Ground\n"
+                + "motd=Advantage Works 1.15.2 Commissioning Ground\n"
                 + "online-mode=false\n"
                 + "server-ip=127.0.0.1\n"
                 + "pvp=false\n"
@@ -532,25 +534,37 @@ public final class WorksRunner {
     }
 
     static Profile readProfile(File file) throws Exception {
+        return readProfile(file, "1.15.2", "1.15.2-31.2.57");
+    }
+
+    static Profile readProfile(File file, String minecraft, String forge) throws Exception {
         try (InputStreamReader reader = new InputStreamReader(
                 new FileInputStream(file), StandardCharsets.UTF_8)) {
             Profile profile = GSON.fromJson(reader, Profile.class);
             if (profile == null || profile.name == null || profile.mode == null) {
                 throw new IllegalArgumentException("Incomplete profile " + file);
             }
-            if (!"1.14.4".equals(profile.minecraftVersion)) {
-                throw new IllegalArgumentException("Historical source profile, not a native114 destination: " + file);
+            if (!minecraft.equals(profile.minecraftVersion)) {
+                throw new IllegalArgumentException("Historical source profile, not a native115 destination: " + file);
             }
             if (!"PORTED_UNQUALIFIED".equals(profile.portStatus)) {
-                throw new IllegalStateException("Native114 profile is not ported: " + profile.portBlocker);
+                throw new IllegalStateException("Native115 profile is not ported: " + profile.portBlocker);
             }
-            if (profile.forge == null || !"1.14.4-28.2.26".equals(profile.forge.version)) {
-                throw new IllegalArgumentException("Native114 profile must select Forge 1.14.4-28.2.26");
+            if (profile.forge == null || !forge.equals(profile.forge.version)) {
+                throw new IllegalArgumentException("Native115 profile must select Forge 1.15.2-31.2.57");
             }
             if (profile.levelName == null || !profile.levelName.startsWith("AdvantageWorks")) {
                 throw new IllegalArgumentException("Profile levelName must begin with AdvantageWorks: " + file);
             }
             return profile;
+        }
+    }
+
+    static void requireInputPins(Profile profile) {
+        for (ModInput input : profile.mods) {
+            if (input.sha256 == null || !input.sha256.matches("[A-Fa-f0-9]{64}")) {
+                throw new IllegalStateException("Pending native115 SHA-256 pin: " + input.id);
+            }
         }
     }
 
@@ -931,13 +945,13 @@ public final class WorksRunner {
     static final class Profile {
         String name;
         String mode;
-        String runtimeBase = "build/works-native114";
+        String runtimeBase = "build/works-native115";
         int serverPort = 25565;
         int startupTimeoutSeconds = 120;
         int shutdownTimeoutSeconds = 60;
         int stationRunSeconds = 5;
         String levelName = "AdvantageWorks";
-        String levelSeed = "advantage-works-1.14.4-v1";
+        String levelSeed = "advantage-works-1.15.2-v1";
         String levelType = "FLAT";
         String generatorSettings = "";
         boolean buildWorks = true;

@@ -13,7 +13,8 @@ public class Native114DefinitionTest {
         try (InputStreamReader reader = new InputStreamReader(getClass().getResourceAsStream(
                 "/assets/advantageworkstest/works/works-1.13.2.json"), StandardCharsets.UTF_8)) {
             WorksDefinition source = gson.fromJson(reader, WorksDefinition.class);
-            WorksDefinition target = WorksDefinitionLoader.load();
+            WorksDefinition target = WorksDefinitionLoader.load(
+                    "/assets/advantageworkstest/works/works-1.14.4.json", "1.14.4");
             assertEquals("1.13.2", source.minecraft);
             assertEquals("1.14.4", target.minecraft);
             assertEquals(21, target.stations.size());

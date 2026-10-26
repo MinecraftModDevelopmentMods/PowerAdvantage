@@ -244,7 +244,7 @@ final class WorksController {
             world.getChunk(chunkX, chunkZ);
         }
 
-        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        BlockPos.Mutable cursor = new BlockPos.Mutable();
         for (Long packed : chunks) {
             int chunkX = (int) (packed >> 32);
             int chunkZ = (int) (long) packed;

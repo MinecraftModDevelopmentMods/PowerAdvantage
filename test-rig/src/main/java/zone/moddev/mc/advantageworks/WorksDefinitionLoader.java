@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 final class WorksDefinitionLoader {
-    private static final String RESOURCE = "/assets/advantageworkstest/works/works-1.14.4.json";
+    private static final String RESOURCE = "/assets/advantageworkstest/works/works-1.15.2.json";
     private static final String STATION_SOURCE = "/assets/advantageworkstest/works/works-1.13.2.json";
     private static final Gson GSON = new GsonBuilder().create();
     private static final Set<String> ACTION_TYPES = new HashSet<>(Arrays.asList(
@@ -31,8 +31,12 @@ final class WorksDefinitionLoader {
     }
 
     static WorksDefinition load() {
-        JsonObject target = readResource(RESOURCE);
-        if (target.get("format").getAsInt() != 1 || !"1.14.4".equals(target.get("minecraft").getAsString())
+        return load(RESOURCE, "1.15.2");
+    }
+
+    static WorksDefinition load(String resource, String minecraft) {
+        JsonObject target = readResource(resource);
+        if (target.get("format").getAsInt() != 1 || !minecraft.equals(target.get("minecraft").getAsString())
                 || !STATION_SOURCE.equals(target.get("stationSource").getAsString()))
             throw new IllegalArgumentException("Unsupported native works descriptor");
         JsonObject stations = readResource(STATION_SOURCE);
@@ -41,7 +45,7 @@ final class WorksDefinitionLoader {
         stations.add("minecraft", target.get("minecraft"));
         stations.add("title", target.get("title"));
         WorksDefinition definition = GSON.fromJson(stations, WorksDefinition.class);
-        validate(definition);
+        validate(definition, minecraft);
         return definition;
     }
 
@@ -55,8 +59,8 @@ final class WorksDefinitionLoader {
         }
     }
 
-    private static void validate(WorksDefinition definition) {
-        if (definition == null || definition.format != 1 || !"1.14.4".equals(definition.minecraft)) {
+    private static void validate(WorksDefinition definition, String minecraft) {
+        if (definition == null || definition.format != 1 || !minecraft.equals(definition.minecraft)) {
             throw new IllegalArgumentException("Unsupported or missing works definition header");
         }
         Set<String> districtIds = new HashSet<>();

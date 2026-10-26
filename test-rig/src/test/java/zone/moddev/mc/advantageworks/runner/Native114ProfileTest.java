@@ -32,11 +32,11 @@ public class Native114ProfileTest {
             assertEquals(new File(".").getCanonicalFile(), WorksRunner.findTestRig(file));
             if (raw.get("portStatus").getAsString().equals("UNPORTED")) {
                 blocked++;
-                try { WorksRunner.readProfile(file); fail("Unported profile was accepted: " + file); }
+                try { WorksRunner.readProfile(file, "1.14.4", "1.14.4-28.2.26"); fail("Unported profile was accepted: " + file); }
                 catch (IllegalStateException expected) { assertTrue(expected.getMessage().contains("not ported")); }
             } else {
                 ported++;
-                WorksRunner.readProfile(file);
+                WorksRunner.readProfile(file, "1.14.4", "1.14.4-28.2.26");
                 int harness = 0;
                 for (JsonElement element : raw.getAsJsonArray("mods")) {
                     JsonObject mod = element.getAsJsonObject();
@@ -59,7 +59,7 @@ public class Native114ProfileTest {
             Files.write(file.toPath(), ("{\"name\":\"blocked\",\"mode\":\"packaged\","
                     + "\"minecraftVersion\":\"1.14.4\",\"portStatus\":\"UNPORTED\","
                     + "\"portBlocker\":\"missing genuine native dependency\"}").getBytes(StandardCharsets.UTF_8));
-            try { WorksRunner.readProfile(file); fail("Unported profile was accepted"); }
+            try { WorksRunner.readProfile(file, "1.14.4", "1.14.4-28.2.26"); fail("Unported profile was accepted"); }
             catch (IllegalStateException expected) { assertTrue(expected.getMessage().contains("not ported")); }
         } finally {
             Files.delete(file.toPath());
