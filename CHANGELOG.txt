@@ -12,6 +12,7 @@ Power Advantage 2.4.5.114041 (Minecraft 1.14.4)
 
 Power Advantage 2.4.4.113021
 
+- Exclude empty directories so development jars match between existing workspaces and fresh CI checkouts.
 - Port Power Advantage to Minecraft 1.13.2 with ForgeGradle 7 and Java 8 support.
 - Keep existing block, item, fluid and saved-state names, the legacy public API and Iron Age Furniture compatibility facades.
 - Add direct 1.10 and 1.12 world migration, including inventories, fluids, entities, pets, enchantments and old configuration files. Back up worlds before upgrading.

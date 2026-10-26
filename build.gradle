@@ -469,6 +469,17 @@ tasks.register('verifyReleaseArtifacts') {
         if (jars.collect { it.name } != expected) {
             throw new GradleException("Expected exactly ${expected}, found ${jars.collect { it.name }}")
         }
+        // Empty source directories survive branch changes but are absent in fresh clones.
+        (jars + [tasks.named('jar', Jar).get().archiveFile.get().asFile]).each { candidate ->
+            new ZipFile(candidate).withCloseable { zip ->
+                List entries = zip.entries().toList()
+                entries.findAll { it.isDirectory() }.each { directory ->
+                    if (!entries.any { !it.isDirectory() && it.name.startsWith(directory.name) }) {
+                        throw new GradleException("${candidate.name} contains empty directory ${directory.name}")
+                    }
+                }
+            }
+        }
         jars.each { candidate ->
             if (candidate.length() == 0L) {
                 throw new GradleException("Empty release artifact: ${candidate.name}")
