@@ -11,7 +11,6 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.IFluidState;
 import net.minecraft.item.Item;
 import net.minecraft.state.StateContainer;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -139,8 +138,7 @@ public final class Fluids {
                     .bucket(() -> kind == Kind.CRUDE ? Items.crude_oil_bucket : Items.refined_oil_bucket)
                     .block(() -> kind == Kind.CRUDE ? Blocks.crude_oil_block : Blocks.refined_oil_block)
                     .slopeFindDistance(4).levelDecreasePerBlock(1)
-                    .tickRate(kind == Kind.CRUDE ? 15 : 10).explosionResistance(100.0F)
-                    .renderLayer(BlockRenderLayer.TRANSLUCENT);
+                    .tickRate(kind == Kind.CRUDE ? 15 : 10).explosionResistance(100.0F);
         }
 
         public static final class Flowing extends PowerFluid {

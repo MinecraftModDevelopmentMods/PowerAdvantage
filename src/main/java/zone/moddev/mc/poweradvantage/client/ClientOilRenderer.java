@@ -1,6 +1,8 @@
 package zone.moddev.mc.poweradvantage.client;
 
 import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -17,8 +19,24 @@ public final class ClientOilRenderer {
         MinecraftForge.EVENT_BUS.addListener(ClientOilRenderer::stitch);
     }
 
+    public static void configureRenderLayers() {
+        RenderTypeLookup.setRenderLayer(zone.moddev.mc.poweradvantage.init.Blocks.steel_frame,
+                RenderType.getCutout());
+        for (net.minecraft.fluid.Fluid fluid : new net.minecraft.fluid.Fluid[] {
+                zone.moddev.mc.poweradvantage.init.Fluids.crude_oil,
+                zone.moddev.mc.poweradvantage.init.Fluids.flowing_crude_oil,
+                zone.moddev.mc.poweradvantage.init.Fluids.refined_oil,
+                zone.moddev.mc.poweradvantage.init.Fluids.flowing_refined_oil}) {
+            RenderTypeLookup.setRenderLayer(fluid, RenderType.getTranslucent());
+        }
+        RenderTypeLookup.setRenderLayer(zone.moddev.mc.poweradvantage.init.Blocks.crude_oil_block,
+                RenderType.getTranslucent());
+        RenderTypeLookup.setRenderLayer(zone.moddev.mc.poweradvantage.init.Blocks.refined_oil_block,
+                RenderType.getTranslucent());
+    }
+
     private static void stitch(TextureStitchEvent.Pre event) {
-        if (event.getMap() != net.minecraft.client.Minecraft.getInstance().getTextureMap()) return;
+        if (!AtlasTexture.LOCATION_BLOCKS_TEXTURE.equals(event.getMap().getTextureLocation())) return;
         for (String name : new String[] {"crude_oil_still", "crude_oil_flow", "refined_oil_still", "refined_oil_flow"}) {
             event.addSprite(new ResourceLocation(PowerAdvantage.MODID, "blocks/" + name));
         }

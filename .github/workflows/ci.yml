@@ -1,16 +1,16 @@
-name: Power Advantage 1.14 CI
+name: Power Advantage 1.15 CI
 
 on:
   push:
-    branches: [master-1.14.4, 'feature/**']
+    branches: [master-1.15.2, 'feature/**']
   pull_request:
-    branches: [master-1.14.4]
+    branches: [master-1.15.2]
 
 permissions:
   contents: read
 
 concurrency:
-  group: poweradvantage-1.14-${{ github.workflow }}-${{ github.ref }}
+  group: poweradvantage-1.15-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: MinecraftModDevelopmentMods/OreSpawn
-          ref: 9c2488cba02d317e3f31e24441dcc58273d8d0e6
+          ref: 5613baf876747ed071cb7ad7e2aff4e0ce4f0a03
           path: .ci-dependencies/OreSpawn
       - name: Use canonical LF dependency inputs
         # Use the same source bytes on hosted and local dependency builds.
@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: MinecraftModDevelopmentMods/BaseMetals
-          ref: 713802f93f2d1f650e1593fa35c487ea43add4a5
+          ref: 1d166d917663d4b4a5a88a86440adc0ae761e393
           path: .ci-dependencies/BaseMetals
       - name: Install Java 8 toolchain
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
@@ -58,8 +58,8 @@ jobs:
           chmod +x "$orespawn/gradlew" "$basemetals/gradlew"
           (cd "$orespawn" && ./gradlew jar --no-daemon --stacktrace)
           (cd "$basemetals" && ./gradlew jar --no-daemon --stacktrace)
-          osjar="$orespawn/build/libs-dev/OreSpawn-4.1.1.114041-deobf.jar"
-          bmjar="$basemetals/build/libs-dev/BaseMetals-3.0.1.114041-deobf.jar"
+          osjar="$orespawn/build/libs-dev/OreSpawn-4.1.1.115021-deobf.jar"
+          bmjar="$basemetals/build/libs-dev/BaseMetals-3.0.1.115021-deobf.jar"
           test -f "$osjar" && test -f "$bmjar"
           echo "orespawn=$osjar" >> "$GITHUB_OUTPUT"
           echo "basemetals=$bmjar" >> "$GITHUB_OUTPUT"
@@ -73,20 +73,20 @@ jobs:
       - name: Upload audited release candidate
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: PowerAdvantage-1.14.4-${{ github.sha }}
+          name: PowerAdvantage-1.15.2-${{ github.sha }}
           if-no-files-found: error
           retention-days: 30
           path: |
-            build/libs/PowerAdvantage-2.4.5.114041.jar
-            build/libs/PowerAdvantage-2.4.5.114041-sources.jar
-            build/libs/PowerAdvantage-2.4.5.114041-javadoc.jar
+            build/libs/PowerAdvantage-2.4.6.115021.jar
+            build/libs/PowerAdvantage-2.4.6.115021-sources.jar
+            build/libs/PowerAdvantage-2.4.6.115021-javadoc.jar
             build/release/SHA256SUMS
             CHANGELOG.txt
       - name: Upload diagnostics on failure
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: PowerAdvantage-1.14.4-diagnostics-${{ github.sha }}
+          name: PowerAdvantage-1.15.2-diagnostics-${{ github.sha }}
           if-no-files-found: ignore
           retention-days: 14
           path: |

@@ -37,12 +37,12 @@ import zone.moddev.mc.poweradvantage.recipe.RecipeDiscovery;
 import zone.moddev.mc.poweradvantage.migration.AdvantageLegacyMigrations;
 import zone.moddev.mc.poweradvantage.migration.LegacyWorldDataHook;
 
-/** Forge 1.14 entry point for Power Advantage. */
+/** Forge 1.15 entry point for Power Advantage. */
 @Mod(PowerAdvantage.MODID)
 public final class PowerAdvantage {
     public static final String MODID = "poweradvantage";
     public static final String NAME = "Power Advantage";
-    public static final String VERSION = "2.4.5.114041";
+    public static final String VERSION = "2.4.6.115021";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
     private static PowerAdvantage instance;
@@ -53,7 +53,7 @@ public final class PowerAdvantage {
     public static float chestLootFactor = 0.5F;
     public static boolean plasticIsAlsoRubber = true;
 
-    /** All historical RF- and Tech Reborn-labelled converters use Forge Energy in 1.14. */
+    /** All historical RF- and Tech Reborn-labelled converters use Forge Energy in 1.15. */
     public static final Map<ConduitType, Float> forgeEnergyConversionTable = new HashMap<>();
 
     /** Conversion table for the historical Tech Reborn-labelled Forge Energy converter. */
@@ -98,7 +98,10 @@ public final class PowerAdvantage {
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
             FMLJavaModLoadingContext.get().getModEventBus().addListener(
                     (net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent event) ->
-                            net.minecraftforge.fml.DeferredWorkQueue.runLater(MachineGUIRegistry::registerScreens));
+                            net.minecraftforge.fml.DeferredWorkQueue.runLater(() -> {
+                                MachineGUIRegistry.registerScreens();
+                                zone.moddev.mc.poweradvantage.client.ClientOilRenderer.configureRenderLayers();
+                            }));
             zone.moddev.mc.poweradvantage.client.ClientOilRenderer.register();
         });
     }

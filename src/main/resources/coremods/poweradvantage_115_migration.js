@@ -6,7 +6,7 @@ var LabelNode = Java.type('org.objectweb.asm.tree.LabelNode');
 var MethodInsnNode = Java.type('org.objectweb.asm.tree.MethodInsnNode');
 var VarInsnNode = Java.type('org.objectweb.asm.tree.VarInsnNode');
 
-// Only the pre-datafix migration needs bytecode integration on Forge 1.14.
+// Only the pre-datafix migration needs bytecode integration on Forge 1.15.
 var hook = 'zone/moddev/mc/poweradvantage/migration/LegacyWorldDataHook';
 
 function initializeCoreMod() {

@@ -16,9 +16,9 @@ public class BuildWorkflowContractTest {
             int policy = workflow.indexOf("run: git config --global core.autocrlf false");
             int checkout = workflow.indexOf("- name: Check out pinned Base Metals");
             assertTrue(name, policy >= 0 && checkout > policy);
-            assertTrue(name, workflow.contains("ref: 713802f93f2d1f650e1593fa35c487ea43add4a5"));
-            assertTrue(name, workflow.contains("ref: 9c2488cba02d317e3f31e24441dcc58273d8d0e6"));
-            assertTrue(name, workflow.contains("master-1.14.4"));
+            assertTrue(name, workflow.contains("ref: 1d166d917663d4b4a5a88a86440adc0ae761e393"));
+            assertTrue(name, workflow.contains("ref: 5613baf876747ed071cb7ad7e2aff4e0ce4f0a03"));
+            assertTrue(name, workflow.contains("master-1.15.2"));
         }
     }
 }
