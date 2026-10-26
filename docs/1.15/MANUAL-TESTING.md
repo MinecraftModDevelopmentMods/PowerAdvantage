@@ -145,11 +145,12 @@ grant must be requested separately and entered in the running server console.
 
 The F automated combined-client probe passed resource/model/locale checks,
 both tank-floor faces, actual gauge pixels, six native fluid cases and 25
-worldless child-renderer geometry cases. Fresh F recipe exports and the complete
-recipe-book/pixel rerun are pending; the earlier D three-mode pass remains
-separate evidence, not an F result. All original pixel thresholds and captures
-are retained. Fresh F ECJ production/test compilation and tests passed for all
-three projects. See [Client Resources](CLIENT-RESOURCES.md)
+worldless child-renderer geometry cases. All three recipe modes passed using
+fresh F exports; the thirteen-cell capture contains 8,585 qualifying pixels
+against the unchanged `> 1,000` assertion. The separate F native recipe campaign
+passed all five unlock boots and 18 progression checks. All original pixel
+thresholds and captures are retained. Fresh F ECJ production/test compilation
+and tests passed for all three projects. See [Client Resources](CLIENT-RESOURCES.md)
 for exact scope, pins and retained evidence.
 
 Those results do not close the remaining manual checks:

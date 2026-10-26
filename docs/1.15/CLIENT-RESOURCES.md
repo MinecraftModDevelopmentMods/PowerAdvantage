@@ -2,8 +2,8 @@
 
 ## Status
 
-The D candidate passed the actual combined graphical probe on 2026-10-26,
-using fresh D server recipe packets for all three modes. The primary resource,
+Candidate F passed the actual combined graphical probe on 2026-10-26,
+using fresh F server recipe packets for all three modes. The primary resource,
 model, tank, fluid and recipe checks passed, along with all 25 available
 worldless renderer geometry cases. The existing captures and pixel thresholds
 are unchanged. All 1.15 manual acceptance remains pending, including
@@ -15,11 +15,10 @@ also passed: Power 66, Steam 68 and Electric 45. These are separate gates from
 the graphical results below. The accepted 1.14 behavior remains the reference,
 not a substitute for native 1.15 evidence.
 
-Candidate F uses Base Metals `3.0.2.115021`. Its actual combined resource/geometry
-run and fresh ECJ checks passed. F recipe rendering is still pending fresh F
-server exports; the no-fixture resource run is not a full F recipe qualification.
-The complete D recipe evidence below is retained separately and is not relabelled
-as F evidence.
+Candidate F uses Base Metals `3.0.2.115021`. Its full native recipe campaign,
+combined graphical probe and fresh ECJ checks passed. The earlier no-fixture F
+run and complete D evidence remain retained separately; neither substitutes for
+the fresh F recipe exports used by the full run.
 
 | Target | Required Value |
 | --- | --- |
@@ -70,23 +69,56 @@ passed again without changing thresholds or masks.
 | --- | --- |
 | Preflight, no Java started | `build/client-resource-runs/20261026-143623-7ee23754` |
 | Actual resource/geometry run, no recipe fixtures | `build/client-resource-runs/20261026-143712-f1377150` |
-| Runtime/input verification | `build/client-resource-compile-runs/final-f-base-client-provenance.json` |
+| Earlier no-fixture input verification | `build/client-resource-compile-runs/final-f-base-client-provenance.json` |
+| Full-fixture preflight, no Java started | `build/client-resource-runs/20261026-145925-0c2bf4e9` |
+| Actual full recipe/resource/geometry run | `build/client-resource-runs/20261026-150022-5694d3ab` |
+| Full runtime/input verification | `build/client-resource-compile-runs/final-f-full-client-provenance.json` |
+| Fresh native recipe campaign | `test-rig/build/native115-recipes-20261026-f/native115-recipes-results.json` |
+| Final recipe fixture audit | `build/client-resource-compile-runs/final-f-recipe-fixtures-final-audit.json` |
 | Fresh ECJ main/test compilation and JUnit | `build/ecj-final-f/20261026-143452` |
 
-The F graphical run passed 94 item models/names, 905 block states, 87 creative
+Both F graphical runs passed 94 item models/names, 905 block states, 87 creative
 entries, both tank-floor faces, tank simulation/10,000 mB updates, actual gauge
 pixel `1E386E`, all six fluid cases and all 25 worldless renderer geometry cases.
 All 537 selected Power production files matched its development jar exactly.
-Its report SHA-256 is
-`5B733F23CFFFBBD7CBA1B9F3412BB2C22C945B821DC4BF1ABFEC6CE25EAB2AB3`.
-The gauge and geometry report are byte-identical to D's retained outputs.
+The full report SHA-256 is
+`18BE5F772EDBCDB17A1F33E68C7B2DB2F025D2EBEEAD625BA02695A84C1E87C8`.
+The gauge, recipe image and geometry report are byte-identical to D's retained
+outputs, despite using newly generated F packets and the F registry snapshot.
 
-`recipe_book_grouping_status=NOT_RUN_NO_NATIVE_FIXTURES` is an explicit gap:
-no F thirteen-cell capture or recipe pixel pass is claimed yet. No D packet or
-registry snapshot was reused. The hydroturbine remains
-`MANUAL_GAP_WORLD_REQUIRED`; all normal gameplay/manual acceptance limits still
-apply. No integrated server or existing save was opened. All 216 files in the D
-manual runtime, including its evidence, were fingerprinted unchanged.
+The fresh F native campaign completed five unlock boots and 18 progression
+checks across all three modes, both rubber-alias settings, reload and restart.
+All ten unlock operations passed 109 discovery cases and 59 potato-crafting
+checks each, with zero skips; the installed seed fingerprint was unchanged.
+The campaign report SHA-256 is
+`F18F848945B26A9633775855108B6E8E103D749D14A6F97B768FB9717F64CD59`.
+Before graphical use, all six sweep packet/report hashes and the registry
+snapshot were checked against this campaign's fixture manifest. The native saved
+mod versions and six packaged candidates matched F. The registry snapshot has
+SHA-256 `36A2357A5EB172689D6B4525D89DFD276C3FDF541A0F0E053A516EE9BC720708`.
+No D packet or registry snapshot was reused.
+
+| F Recipe Mode | Recipes | Native Cells | Result |
+| --- | --- | --- | --- |
+| Normal | 93 | 77 | PASS |
+| Tech | 87 | 77 | PASS |
+| Apocalyptic | 82 | 73 | PASS |
+
+The full run reports `recipe_book_grouping_status=PASS`. Its actual thirteen-cell
+image contains 8,585 qualifying pixels against the unchanged `> 1,000` assertion
+in the original `1000 x 180` capture. Both recipe and tank images were visually
+inspected. Their SHA-256 values are
+`C0868043B7C356BBFF80825662562F0AA2C0BB5C822DD36DEC2B1D71BFE3100D`
+and `7D3A9295A75EDC67442A06B300A3077E37EE4335AAA94D48F65E22E14CE5A1A6`.
+The earlier F `NOT_RUN_NO_NATIVE_FIXTURES` result remains explicitly partial,
+not relabelled as the full pass.
+
+The hydroturbine remains `MANUAL_GAP_WORLD_REQUIRED`; all normal gameplay/manual
+acceptance limits still apply. The graphical probe opened no integrated server
+or existing save. All 216 files in the D manual runtime and 175 retained D recipe
+inputs were fingerprinted unchanged. The separate F manual copy and its source
+also remain unchanged; only `-CheckOnly` was run on that copy. The recipe server
+was stopped after the campaign, with no listener remaining on port 25577.
 
 Fresh ECJ compilation used the actual Base 3.0.2 development jar for all three
 projects, separate main/test output trees and Java 8 bytecode. All six compiles
