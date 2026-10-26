@@ -41,7 +41,11 @@ public class Native115ProfileTest {
                 for (JsonElement element : raw.getAsJsonArray("mods")) {
                     JsonObject mod = element.getAsJsonObject();
                     assertTrue(file.toString(), mod.get("version").getAsString().endsWith(".115021"));
-                    assertFalse(file.toString(), mod.get("path").getAsString().contains("113"));
+                    String path = mod.get("path").getAsString();
+                    assertFalse(file.toString(), historicalWorkspacePath(path));
+                    String artifact = new File(path).getName();
+                    assertEquals(mod.get("file").getAsString(), artifact);
+                    assertTrue(artifact, artifact.contains("-" + mod.get("version").getAsString()));
                     assertTrue(mod.get("workspaceProduced").getAsBoolean());
                     if (mod.get("id").getAsString().equals("advantageworkstest")) harness++;
                 }
@@ -50,6 +54,19 @@ public class Native115ProfileTest {
         }
         assertEquals(10, ported);
         assertEquals(0, blocked);
+    }
+
+    @Test public void archiveHashDigitsDoNotIdentifyAHistoricalWorkspace() {
+        assertFalse(historicalWorkspacePath("build/native115-artifacts/B4CBB113B3/Native-1.0.0.115021.jar"));
+        for (String line : new String[] {"110", "112", "113", "114"}) {
+            assertTrue(historicalWorkspacePath("D:/PowerAdvantage/PA" + line + "/PowerAdvantage/build/mod.jar"));
+            assertTrue(historicalWorkspacePath("D:\\PowerAdvantage\\PA" + line + "\\PowerAdvantage\\build\\mod.jar"));
+        }
+    }
+
+    private static boolean historicalWorkspacePath(String path) {
+        return java.util.regex.Pattern.compile("(^|[/\\\\])PA(?:110|112|113|114)([/\\\\]|$)",
+                java.util.regex.Pattern.CASE_INSENSITIVE).matcher(path).find();
     }
 
     @Test

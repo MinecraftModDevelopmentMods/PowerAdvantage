@@ -6,7 +6,9 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FlowingFluid;
 import net.minecraft.fluid.IFluidState;
@@ -14,9 +16,10 @@ import net.minecraft.item.BucketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IEnviromentBlockReader;
+import net.minecraft.world.ILightReader;
 import net.minecraft.world.LightType;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.world.level.ColorResolver;
+import net.minecraft.world.lighting.WorldLightManager;
 import net.minecraft.tileentity.TileEntity;
 import zone.moddev.mc.poweradvantage.init.Fluids;
 import zone.moddev.mc.poweradvantage.init.Items;
@@ -71,23 +74,29 @@ final class OilRenderProbe {
 
     private static boolean check(Minecraft minecraft, IFluidState state, String texture, boolean flowing, JsonArray cases) {
         // A tiny read-only neighbourhood supplies a slope for flowing sprites; no save is opened.
-        IEnviromentBlockReader world = new IEnviromentBlockReader() {
+        ILightReader world = new ILightReader() {
             @Override public TileEntity getTileEntity(BlockPos pos) { return null; }
             @Override public BlockState getBlockState(BlockPos pos) { return blockAt(state, flowing, pos); }
             @Override public IFluidState getFluidState(BlockPos pos) { return getBlockState(pos).getFluidState(); }
             @Override public int getLightFor(LightType type, BlockPos pos) { return 15; }
-            @Override public Biome getBiome(BlockPos pos) { return net.minecraft.world.biome.Biomes.PLAINS; }
+            @Override public WorldLightManager getLightManager() { throw new UnsupportedOperationException("Synthetic light is supplied by getLightFor"); }
+            @Override public int getBlockColor(BlockPos pos, ColorResolver resolver) {
+                return resolver.getColor(net.minecraft.world.biome.Biomes.PLAINS, pos.getX(), pos.getZ());
+            }
         };
         BufferBuilder buffer = new BufferBuilder(4096);
         buffer.begin(7, DefaultVertexFormats.BLOCK);
         boolean rendered = minecraft.getBlockRendererDispatcher().renderFluid(BlockPos.ZERO, world, buffer, state);
         buffer.finishDrawing();
-        TextureAtlasSprite sprite = minecraft.getTextureMap().getSprite(new ResourceLocation(texture));
-        require(rendered && buffer.getVertexCount() >= 4, "Native fluid renderer emitted no top face for " + state);
-        ByteBuffer data = buffer.getByteBuffer();
-        float u = data.getFloat(DefaultVertexFormats.BLOCK.getUvOffsetById(0));
-        float v = data.getFloat(DefaultVertexFormats.BLOCK.getUvOffsetById(0) + 4);
-        int colorOffset = DefaultVertexFormats.BLOCK.getColorOffset();
+        com.mojang.datafixers.util.Pair<BufferBuilder.DrawState, ByteBuffer> built = buffer.getNextBuffer();
+        int vertices = built.getFirst().getVertexCount();
+        TextureAtlasSprite sprite = minecraft.getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(new ResourceLocation(texture));
+        require(rendered && vertices >= 4, "Native fluid renderer emitted no top face for " + state);
+        ByteBuffer data = built.getSecond();
+        int uvOffset = elementOffset(VertexFormatElement.Usage.UV, 0);
+        float u = data.getFloat(uvOffset);
+        float v = data.getFloat(uvOffset + 4);
+        int colorOffset = elementOffset(VertexFormatElement.Usage.COLOR, 0);
         int rgb = (data.get(colorOffset) & 255) << 16 | (data.get(colorOffset + 1) & 255) << 8 | data.get(colorOffset + 2) & 255;
         boolean correctSprite = !"missingno".equals(sprite.getName().getPath())
                 && u >= sprite.getMinU() && u <= sprite.getMaxU() && v >= sprite.getMinV() && v <= sprite.getMaxV();
@@ -98,9 +107,17 @@ final class OilRenderProbe {
         entry.addProperty("expected_sprite", texture);
         entry.addProperty("correct_sprite", correctSprite);
         entry.addProperty("vertex_rgb", String.format("%06X", rgb));
-        entry.addProperty("vertices", buffer.getVertexCount());
+        entry.addProperty("vertices", vertices);
         cases.add(entry);
-        return rendered && buffer.getVertexCount() > 0 && correctSprite && correctTint;
+        return rendered && vertices > 0 && correctSprite && correctTint;
+    }
+
+    private static int elementOffset(VertexFormatElement.Usage usage, int index) {
+        for (int i = 0; i < DefaultVertexFormats.BLOCK.getElements().size(); i++) {
+            VertexFormatElement element = DefaultVertexFormats.BLOCK.getElements().get(i);
+            if (element.getUsage() == usage && element.getIndex() == index) return DefaultVertexFormats.BLOCK.getOffset(i);
+        }
+        throw new IllegalStateException("Native block vertex format lacks " + usage + " " + index);
     }
 
     private static BlockState blockAt(IFluidState state, boolean flowing, BlockPos pos) {

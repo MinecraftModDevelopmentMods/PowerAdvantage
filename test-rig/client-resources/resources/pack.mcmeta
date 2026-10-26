@@ -1,6 +1,6 @@
 {
   "pack": {
     "description": "Build-only Advantage client resource checks",
-    "pack_format": 4
+    "pack_format": 5
   }
 }
