@@ -7,7 +7,7 @@ Power Advantage 2.4.6.115021 (Minecraft 1.15.2)
 - Update the still's light-query signature and retarget the shared legacy migration hook to 1.15 without renaming saved identities.
 - Register recipe conditions on Forge's loading thread so parallel mod loading cannot intermittently remove recipes.
 - Initialize the shared creative tab once when the three mods load together.
-- Local build/audit checks, 64 unit tests and Eclipse checks pass. Combined machine operation, GUI, migration and broader runtime tests remain pending.
+- Add 1.15-specific operating, migration, mining, recipe and client checks; the exact tested jars and remaining manual work are recorded in docs/1.15/CURRENT-QUALIFICATION.md.
 - Back up the entire world before upgrading and test only disposable copies. Earlier 1.14 acceptance does not qualify 1.15 upgrades.
 
 Power Advantage 2.4.5.114041 (Minecraft 1.14.4)

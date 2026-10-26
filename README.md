@@ -2,17 +2,16 @@
 
 **Minecraft 1.15.2**
 
-Power Advantage 2.4.6.115021 has passed its local build/audit suite, 64 unit tests
-and Eclipse checks. The initial candidate also passed a packaged startup smoke;
-the subsequent native-property repair still needs combined runtime validation.
-Machine operation, GUIs, migration and broader runtime checks are still pending.
-See the [1.15 port status](docs/1.15/PORT-STATUS.md) for tested jars and limits.
+Power Advantage 2.4.6.115021 is the local 1.15.2 port candidate. See the
+[current test record](docs/1.15/CURRENT-QUALIFICATION.md) for the exact jars,
+automated results and remaining manual checks. This version is not published.
 
 Power Advantage provides shared power, fluids, item transport and compatibility APIs for Steam Advantage and Electric Advantage.
 
 **Back up the entire world before upgrading. Test only disposable copies.**
-The port retains existing registry names and legacy migration code, but migration
-has not yet passed on 1.15. Check every other mod's target-version support too.
+The port retains existing registry names and legacy migration code. Upgrade tests
+use disposable original and maintained saves, including connected machines.
+Check every other mod's target-version support too.
 The accepted [1.14 results](docs/1.14/BROADER-QUALIFICATION.md) are historical
 evidence, not qualification of this port or a whole modpack.
 
@@ -24,10 +23,16 @@ The [manufacturing progression audit](docs/1.13/MANUFACTURING-PROGRESSION.md) tr
 
 The `master-1.15.2` build uses Forge 31.2.57, snapshot mappings
 `20200514-1.15.1`, MCP `20200515.085601`, ForgeGradle 7.0.34 and Gradle 9.6.1.
-Run Gradle with Java 17; Gradle resolves the Java 8 production toolchain.
+Run Gradle with Java 17 and compile production code with Java 8. Mavenizer also
+needs Java 25. CI pins all three JDKs; the [test commands](docs/1.15/TEST-HARNESS.md)
+show how to select local installations explicitly.
 
-Build the pinned Base Metals `3.0.1.115021` and OreSpawn `4.1.1.115021` deobf jars,
-then run from `D:\PowerAdvantage\PA115\PowerAdvantage`:
+Build the pinned Base Metals `3.0.2.115021` and OreSpawn `4.1.1.115021` deobf jars first.
+Base Metals source `ac1781e7cade15045ffe0135077087b4d1722603` is local-only and
+unpublished. Publish that exact source upstream before opening a PR or running
+hosted builds; hosted reproducibility and publication readiness are not established.
+
+Then run from `D:\PowerAdvantage\PA115\PowerAdvantage`:
 
 ```text
 gradlew.bat clean check build javadoc verifyReleaseDependencies verifyReleaseArtifacts writeReleaseChecksums verifyEclipseProductionClasspath
@@ -36,7 +41,7 @@ gradlew.bat clean check build javadoc verifyReleaseDependencies verifyReleaseArt
 The default dependency jars are:
 
 ```text
-D:\BaseMetals\BaseMetals 115\BaseMetals\build\libs-dev\BaseMetals-3.0.1.115021-deobf.jar
+D:\BaseMetals\BaseMetals 115\BaseMetals\build\libs-dev\BaseMetals-3.0.2.115021-deobf.jar
 D:\MinecraftMineralogy\OS115\OreSpawn\build\libs-dev\OreSpawn-4.1.1.115021-deobf.jar
 ```
 
@@ -67,15 +72,15 @@ run `gradlew.bat prepareCombinedEclipseLaunch`, refresh Eclipse, then launch
 The ordinary `runClient.launch` remains Power-only. Both use the `run` directory;
 preparing a launch does not copy, open or qualify a save.
 
-Client-resource, recipe-book and manual visual checks must pass again on 1.15.
-Their 1.14 results do not establish a pass here.
+Client-resource and recipe-book checks run against the 1.15 candidate. Manual
+visual and interaction acceptance remains separate; see the current test record.
 
 ## Compatibility
 
 The implementation namespace remains `zone.moddev.mc.poweradvantage`, with the
 historical `cyano.poweradvantage.api` package retained. The port keeps registry,
-fluid, tile, NBT and provider identities; that intent still needs runtime and
-migration verification on 1.15.
+fluid, tile, NBT and provider identities. The current test record distinguishes
+machine preservation, actual operation and vanilla migration differences.
 
 The 1.15 changes use native activation results, non-solid block properties,
 texture-atlas access and client render-layer registration. The shared migration
@@ -83,6 +88,6 @@ hook is retargeted to 1.15; its presence is not proof that an upgrade is safe.
 
 The [legacy migration guide](docs/1.13/MIGRATION.md) and
 [Advantage Works rig](test-rig/README.md) describe the earlier protocols.
-Only the [1.15 status](docs/1.15/PORT-STATUS.md) records current qualification.
+The [1.15 status](docs/1.15/PORT-STATUS.md) links the current qualification.
 
 The historical 1.10 handbook remains on the [1.10.2 branch](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.10.2/docs/1.10/README.md).

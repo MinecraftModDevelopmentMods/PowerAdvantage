@@ -1,15 +1,17 @@
-# Advantage Works 1.14.4 Native Test Rig
+# Advantage Works 1.15.2 Native Test Rig
 
-The native target is Minecraft 1.14.4 / Forge 28.2.26, snapshot mappings
-20190719-1.14.3, MCP 20190829.143755, Java 8 bytecode and harness
-`1.1.0.114041`. Read [the native114 runner and qualification limits](NATIVE114.md)
+The native target is Minecraft 1.15.2 / Forge 31.2.57, snapshot mappings
+20200514-1.15.1, MCP 20200515.085601, Java 8 bytecode and harness
+`1.1.0.115021`. Read [the native115 runner and qualification limits](NATIVE115.md)
 before using this checkout. Build success is not runtime or migration acceptance.
 
-Native destination profiles live only in `profiles/native114/`. The original
+Default destination profiles live only in `profiles/native115/`. The original
 profiles, station specification and legacy migration source adapters remain
 unchanged. New profiles explicitly reference the historical PA113 source root;
-the native runner refuses to launch an old profile as a native114 destination.
-Both Mineralogy profiles are fail-closed pending a verified native candidate.
+the native runner refuses to launch an old profile as a native115 destination.
+The native114 scripts/profiles and [their qualification record](NATIVE114.md)
+remain historical evidence. Missing 115 artifact pins fail before runtime
+creation. No 114 pass is a 115 runtime qualification.
 
 ## Retained 1.13.2 Protocol Reference
 
