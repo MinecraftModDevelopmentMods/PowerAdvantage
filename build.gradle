@@ -166,7 +166,7 @@ repositories {
 // build to a drive letter. CI and other layouts can override either path.
 def baseMetalsDeobfJar = file(providers.gradleProperty('baseMetalsDeobfJar')
         .getOrElse('../../../BaseMetals/BaseMetals 115/BaseMetals/build/libs-dev/'
-                + 'BaseMetals-3.0.1.115021-deobf.jar'))
+                + 'BaseMetals-3.0.2.115021-deobf.jar'))
 def oreSpawnDeobfJar = file(providers.gradleProperty('oreSpawnDeobfJar')
         .getOrElse('../../../MinecraftMineralogy/OS115/OreSpawn/build/libs-dev/'
                 + 'OreSpawn-4.1.1.115021-deobf.jar'))
@@ -344,9 +344,9 @@ tasks.register('verifyReleaseConfiguration') {
                 || project.cf_versions != '1.15.2') {
             throw new GradleException('Unexpected CurseForge dependency or game-version metadata')
         }
-        if (project.basemetals_version != '3.0.1.115021'
+        if (project.basemetals_version != '3.0.2.115021'
                 || project.orespawn_version != '4.1.1.115021'
-                || project.basemetals_source_commit != '1d166d917663d4b4a5a88a86440adc0ae761e393'
+                || project.basemetals_source_commit != 'ac1781e7cade15045ffe0135077087b4d1722603'
                 || project.orespawn_source_commit != '5613baf876747ed071cb7ad7e2aff4e0ce4f0a03') {
             throw new GradleException('Unexpected Base Metals or OreSpawn dependency identity')
         }
