@@ -45,11 +45,11 @@ public abstract class GUIBlock extends net.minecraft.block.ContainerBlock{
 	}
 
 	public GUIBlock(Material m, float hardness) {
-		this(Block.Properties.create(m).hardnessAndResistance(hardness).variableOpacity());
+		this(Block.Properties.create(m).hardnessAndResistance(hardness).notSolid().variableOpacity());
 	}
 
 	protected GUIBlock(Block.Properties properties) {
-		super(properties.notSolid());
+		super(properties);
 	}
 
 	@Deprecated

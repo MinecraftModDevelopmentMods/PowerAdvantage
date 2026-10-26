@@ -2,8 +2,9 @@
 
 **Minecraft 1.15.2**
 
-Power Advantage 2.4.6.115021 has passed its local build/audit suite, 60 unit tests,
-Eclipse checks and a packaged new-world startup/save/shutdown smoke test.
+Power Advantage 2.4.6.115021 has passed its local build/audit suite, 64 unit tests
+and Eclipse checks. The initial candidate also passed a packaged startup smoke;
+the subsequent native-property repair still needs combined runtime validation.
 Machine operation, GUIs, migration and broader runtime checks are still pending.
 See the [1.15 port status](docs/1.15/PORT-STATUS.md) for tested jars and limits.
 

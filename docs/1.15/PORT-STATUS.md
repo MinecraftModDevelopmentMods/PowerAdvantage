@@ -2,11 +2,14 @@
 
 ## Current Status
 
-Power Advantage 2.4.6.115021 passes its local build/audit suite, 60 unit tests,
-Eclipse checks and a packaged new-world smoke test. The smoke test loaded Power,
+Power Advantage 2.4.6.115021 passes its local build/audit suite, 64 unit tests
+and Eclipse checks. The initial candidate's packaged smoke test loaded Power,
 Base Metals and OreSpawn on Forge 31.2.57, started cleanly, saved and shut down
 without errors. It does not establish machine operation, GUI behavior, migration
-or combined Steam/Electric functionality. Those checks remain pending.
+or combined Steam/Electric functionality. A later regression test found that the
+shared constructor made solar panels non-solid. Native properties now preserve
+that distinction, with red/green tests; the current jars still need combined
+runtime validation. Those checks remain pending.
 
 **Back up the entire world before upgrading. Test only disposable copies.**
 No 1.15 migration or whole-modpack acceptance is claimed.
@@ -14,7 +17,7 @@ No 1.15 migration or whole-modpack acceptance is claimed.
 ## Source and Target
 
 The local checkout is `D:\PowerAdvantage\PA115\PowerAdvantage`, on
-`master-1.15.2`, starting from merged MMD Power commit
+`feature/poweradvantage-1.15.2-port`, starting from merged MMD Power commit
 `ef08e5cd134dc75bd73518bf4c90a6711e67280f` (1.14 PR 43).
 The accepted 1.14 visuals, recipe unlocks and automated results remain historical
 evidence. They must not be counted as 1.15 passes. The child 1.14 PR checks are
@@ -41,15 +44,19 @@ These hashes identify that candidate, not a published release or a later build.
 
 | Artifact | SHA-256 |
 | --- | --- |
-| Release | `9C53B15C37FF6F5B7B5D4DEC23C798B12E7FC9C9AFAAC5B2816BE9FCC0626448` |
-| Deobf | `E39A0D03A903186E93C2D3D32268E3B7EB5FEA75C53492C05D2B680B5EBF17B8` |
+| Release | `464D31FE37440694909DD44FB1DA031297BBA8FA4454BEF944303AAC6795611C` |
+| Deobf | `2C3ADBCA79859DFA2C14EF8DC9068BF9F202D72FDB1D37B51ED4DE1B5B7E866A` |
+
+These are the property-repaired build artifacts. The initial smoke used release
+`9C53B15C37FF6F5B7B5D4DEC23C798B12E7FC9C9AFAAC5B2816BE9FCC0626448`;
+that result is retained separately, not attributed to these newer jars.
 
 ## Qualification Matrix
 
 | Check | Status | Scope or remaining work |
 | --- | --- | --- |
 | Power production build and full local audit suite | PASS | Build, release/dependency/artifact checks and checksums; not gameplay evidence |
-| Power unit tests | PASS | 60 tests; not operating-machine or migration tests |
+| Power unit tests | PASS | 64 tests; not operating-machine or migration tests |
 | Eclipse checks | PASS | Build setup checks; no claim of interactive client operation |
 | Packaged fresh-world smoke | PASS | Power + Base Metals + OreSpawn; clean startup, save and shutdown without errors |
 | Combined Steam/Electric operation | PENDING | No combined runtime pass recorded here |

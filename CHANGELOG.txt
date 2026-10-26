@@ -1,10 +1,11 @@
 Power Advantage 2.4.6.115021 (Minecraft 1.15.2)
 
 - Move to Forge 31.2.57, snapshot mappings 20200514-1.15.1 and MCP 20200515.085601; retain ForgeGradle 7, Gradle 9.6.1 and Java 8 production bytecode.
-- Use native ActionResultType results for machine activation and notSolid block properties for machine containers and frames.
+- Use native interaction results and block properties, keeping solar panels solid and thin machinery non-solid.
+- Allow conduit subclasses to supply native block properties without duplicating connection and lifecycle code.
 - Use the native texture-atlas getters for GUI fluids and oil sprites; register frame cutout and oil translucent render layers during client setup.
 - Update the still's light-query signature and retarget the shared legacy migration hook to 1.15 without renaming saved identities.
-- Local build/audit checks, 60 unit tests, Eclipse checks and a packaged new-world startup/save/shutdown smoke test pass. Machine operation, GUI, migration and broader runtime tests remain pending.
+- Local build/audit checks, 64 unit tests and Eclipse checks pass. Combined machine operation, GUI, migration and broader runtime tests remain pending.
 - Back up the entire world before upgrading and test only disposable copies. Earlier 1.14 acceptance does not qualify 1.15 upgrades.
 
 Power Advantage 2.4.5.114041 (Minecraft 1.14.4)

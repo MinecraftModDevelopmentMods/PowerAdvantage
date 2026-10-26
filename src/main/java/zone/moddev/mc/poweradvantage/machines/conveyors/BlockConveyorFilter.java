@@ -26,7 +26,7 @@ public class BlockConveyorFilter extends GUIBlock {
     public BlockConveyorFilter(Material material, float hardness,
             Class<? extends TileEntityConveyor> tileEntityClass) {
         super(Block.Properties.create(material).hardnessAndResistance(hardness)
-                .sound(SoundType.METAL).variableOpacity());
+                .sound(SoundType.METAL).notSolid().variableOpacity());
         this.tileEntityClass = tileEntityClass;
         setDefaultState(getStateContainer().getBaseState().with(FACING, Direction.NORTH));
     }
