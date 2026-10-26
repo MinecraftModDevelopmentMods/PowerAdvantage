@@ -52,11 +52,12 @@ jobs:
           distribution: temurin
           java-version: '17.0.1+12'
       - name: Use pinned build toolchains
+        # These are Gradle project properties, not JVM system properties.
         shell: bash
         run: >-
-          echo "GRADLE_OPTS=-Dorg.gradle.java.installations.paths=$JAVA_HOME,$JAVA_HOME_8_X64,$JAVA_HOME_25_X64
-          -Dorg.gradle.java.installations.auto-detect=false
-          -Dorg.gradle.java.installations.auto-download=false" >> "$GITHUB_ENV"
+          echo "MMD_GRADLE_TOOLCHAINS=-Porg.gradle.java.installations.paths=$JAVA_HOME,$JAVA_HOME_8_X64,$JAVA_HOME_25_X64
+          -Porg.gradle.java.installations.auto-detect=false
+          -Porg.gradle.java.installations.auto-download=false" >> "$GITHUB_ENV"
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
       - name: Build pinned development dependencies
@@ -67,8 +68,8 @@ jobs:
           orespawn="$GITHUB_WORKSPACE/.ci-dependencies/OreSpawn"
           basemetals="$GITHUB_WORKSPACE/.ci-dependencies/BaseMetals"
           chmod +x "$orespawn/gradlew" "$basemetals/gradlew"
-          (cd "$orespawn" && ./gradlew jar --no-daemon --stacktrace)
-          (cd "$basemetals" && ./gradlew jar --no-daemon --stacktrace)
+          (cd "$orespawn" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)
+          (cd "$basemetals" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)
           echo "orespawn=$orespawn/build/libs-dev/OreSpawn-4.1.1.115021-deobf.jar" >> "$GITHUB_OUTPUT"
           echo "basemetals=$basemetals/build/libs-dev/BaseMetals-3.0.1.115021-deobf.jar" >> "$GITHUB_OUTPUT"
       - name: Initialize CodeQL
@@ -78,7 +79,7 @@ jobs:
       - name: Compile production code
         run: |
           chmod +x ./gradlew
-          ./gradlew clean classes --rerun-tasks --no-build-cache --no-daemon --stacktrace \
+          ./gradlew $MMD_GRADLE_TOOLCHAINS clean classes --rerun-tasks --no-build-cache --no-daemon --stacktrace \
             -PbaseMetalsDeobfJar=${{ steps.dependencies.outputs.basemetals }} \
             -PoreSpawnDeobfJar=${{ steps.dependencies.outputs.orespawn }}
       - name: Analyze
