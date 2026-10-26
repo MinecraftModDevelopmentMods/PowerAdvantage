@@ -91,7 +91,6 @@ public final class PowerAdvantage {
         migrateLegacyOreSpawnConfiguration();
         migrateLegacyConfiguration();
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, PowerAdvantageConfig.SPEC);
-        RecipeConditions.register();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(PowerAdvantageConfig::onConfigLoading);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonSetup);
 
@@ -140,6 +139,8 @@ public final class PowerAdvantage {
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
+        // CraftingHelper's shared condition map is not safe during parallel loading.
+        net.minecraftforge.fml.DeferredWorkQueue.runLater(RecipeConditions::register);
         // Forge's shared hook list is not safe to mutate during parallel mod construction.
         net.minecraftforge.fml.DeferredWorkQueue.runLater(LegacyWorldDataHook::register);
         PowerAdvantageConfig.apply();
