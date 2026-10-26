@@ -14,7 +14,7 @@ public class ItemGroups {
 
 	private static boolean initDone = false;
 
-	public static void init() {
+	public static synchronized void init() {
 		if (initDone) return;
 
 //		tab_powerAdvantage = FunctionalCreativeTab.create(PowerAdvantage.MODID)
