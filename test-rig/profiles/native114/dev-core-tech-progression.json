@@ -1,0 +1,50 @@
+{
+  "name": "dev-core-tech-progression",
+  "mode": "development",
+  "runtimeBase": "build/works-native114",
+  "serverPort": 25565,
+  "startupTimeoutSeconds": 180,
+  "shutdownTimeoutSeconds": 60,
+  "stationRunSeconds": 5,
+  "recipeMode": "TECH_PROGRESSION",
+  "sourceCommit": "working-tree-unqualified",
+  "sourceVersion": "2.4.5.114041",
+  "lifecycleStations": [],
+  "mods": [
+    {
+      "id": "advantageworkstest",
+      "version": "1.1.0.114041",
+      "file": "AdvantageWorksTestHarness-1.1.0.114041-deobf.jar",
+      "path": "build/libs-dev/AdvantageWorksTestHarness-1.1.0.114041-deobf.jar",
+      "workspaceProduced": true,
+      "sha256": "690C49EAA9706AF2376789B44FE86C9756DBB101A94B7D0652EF800DAA766769"
+    },
+    {
+      "id": "steamadvantage",
+      "version": "2.2.6.114041",
+      "file": "SteamAdvantage-2.2.6.114041-deobf.jar",
+      "path": "../../SteamAdvantage/SteamAdvantage/build/libs-dev/SteamAdvantage-2.2.6.114041-deobf.jar",
+      "workspaceProduced": true,
+      "sha256": "7CD599946DE35B189D9363693C67AAC7897D7EB763AEF8C383F9E6CFCA3D8C7C"
+    },
+    {
+      "id": "electricadvantage",
+      "version": "2.2.6.114041",
+      "file": "ElectricAdvantage-2.2.6.114041-deobf.jar",
+      "path": "../../ElectricAdvantage/ElectricAdvantage/build/libs-dev/ElectricAdvantage-2.2.6.114041-deobf.jar",
+      "workspaceProduced": true,
+      "sha256": "2B32B667092D3BFBC4CF905AE0C630C2767B3C6E191B62035FF2ED0CDEEBF05E"
+    }
+  ],
+  "minecraftVersion": "1.14.4",
+  "portStatus": "PORTED_UNQUALIFIED",
+  "qualificationStatus": "UNQUALIFIED",
+  "legacySourceProfile": "../../../PA113/PowerAdvantage/test-rig/profiles/dev-core-tech-progression.json",
+  "forge": {
+    "version": "1.14.4-28.2.26",
+    "installerPath": ".cache/forge-1.14.4-28.2.26-installer.jar",
+    "url": "https://maven.minecraftforge.net/net/minecraftforge/forge/1.14.4-28.2.26/forge-1.14.4-28.2.26-installer.jar",
+    "sha256": "E68A0E2D589B2954C5D109A04B80747AC8C061ACABE074DB1607F9C2FD7D2CE1"
+  },
+  "generatorSettings": ""
+}

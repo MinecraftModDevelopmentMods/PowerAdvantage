@@ -14,29 +14,46 @@ import zone.moddev.mc.poweradvantage.init.Items;
 public final class MaterialTags {
     private MaterialTags() {}
 
+    public static void onTagsUpdated(net.minecraftforge.event.TagsUpdatedEvent event) {
+        net.minecraft.server.MinecraftServer server = net.minecraftforge.fml.server.ServerLifecycleHooks.getCurrentServer();
+        // A remote client's local config must never change tags supplied by its server.
+        if (server != null && server.getNetworkTagManager() == event.getTagManager()) finishReload();
+    }
+
     public static void finishReload() {
         // DedicatedServer constructs an initial vanilla resource manager before FML loads mods.
         if (ModList.get() == null || Items.bioplastic_ingot == null) return;
         TagCollection<Item> tags = ItemTags.getCollection();
-        if (PowerAdvantage.plasticIsAlsoRubber) {
-            append(tags, "forge:rubber", java.util.Collections.singleton(Items.bioplastic_ingot));
-            append(tags, "forge:ingots/rubber", java.util.Collections.singleton(Items.bioplastic_ingot));
-        }
-        if (PowerAdvantage.recipeMode == RecipeMode.NORMAL && ModList.get().isLoaded("electricadvantage")) {
-            for (String metal : new String[] {"lead", "tin", "silver"}) {
-                append(tags, "forge:solder", tags.getOrCreate(new ResourceLocation("forge", "ingots/" + metal)).getAllElements());
-            }
-        }
-        // Refresh wrappers after replacing immutable tags. The same collection is
-        // also serialized by NetworkTagManager, so clients receive the server policy.
+        applyPolicy(tags, Items.bioplastic_ingot, PowerAdvantage.plasticIsAlsoRubber,
+                PowerAdvantage.recipeMode == RecipeMode.NORMAL && ModList.get().isLoaded("electricadvantage"));
         ItemTags.setCollection(tags);
     }
 
-    private static void append(TagCollection<Item> tags, String id, java.util.Collection<Item> additions) {
+    static void applyPolicy(TagCollection<Item> tags, Item plastic, boolean rubber, boolean solder) {
+        if (!rubber && !solder) return;
+        // Resolved 1.14 collections are immutable. Rebuild through their native registration API.
+        java.util.Map<ResourceLocation, Tag.Builder<Item>> builders = new java.util.LinkedHashMap<>();
+        tags.getTagMap().forEach((id, tag) -> {
+            Tag.Builder<Item> builder = Tag.Builder.create();
+            tag.getAllElements().forEach(builder::add);
+            builders.put(id, builder);
+        });
+        if (rubber) {
+            append(builders, "forge:rubber", java.util.Collections.singleton(plastic));
+            append(builders, "forge:ingots/rubber", java.util.Collections.singleton(plastic));
+        }
+        if (solder) {
+            for (String metal : new String[] {"lead", "tin", "silver"}) {
+                append(builders, "forge:solder", tags.getOrCreate(new ResourceLocation("forge", "ingots/" + metal)).getAllElements());
+            }
+        }
+        tags.registerAll(builders);
+    }
+
+    private static void append(java.util.Map<ResourceLocation, Tag.Builder<Item>> builders,
+            String id, java.util.Collection<Item> additions) {
         ResourceLocation name = new ResourceLocation(id);
-        Tag.Builder<Item> builder = Tag.Builder.create();
-        for (Item item : tags.getOrCreate(name).getAllElements()) builder.add(item);
+        Tag.Builder<Item> builder = builders.computeIfAbsent(name, key -> Tag.Builder.create());
         for (Item item : additions) if (item != null) builder.add(item);
-        tags.getTagMap().put(name, builder.build(name));
     }
 }

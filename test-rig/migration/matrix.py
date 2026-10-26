@@ -257,7 +257,7 @@ def differences(expected, actual, path=""):
     return result
 
 
-def compare(source, target):
+def compare(source, target, normalize_nbt=normalized):
     before = json.loads(source.read_text())
     after = json.loads(target.read_text())
     findings = []
@@ -276,10 +276,10 @@ def compare(source, target):
         findings.extend(differences(old["properties"], new["properties"], pos + ".state"))
         if "nbt" in old:
             counts["tiles"] += 1
-            old_nbt = normalized(plain(parse_nbt(old)), old_enchantments)
+            old_nbt = normalize_nbt(plain(parse_nbt(old)), old_enchantments)
             counts["items"] += sum(int(v.get("Count", 0)) for v in old_nbt.get("Items", []))
             if "nbt" not in new: findings.append({"path": pos + ".tile", "expected": "tile", "actual": "<missing>"})
-            else: findings.extend(differences(old_nbt, normalized(plain(parse_nbt(new)), new_enchantments), pos + ".nbt"))
+            else: findings.extend(differences(old_nbt, normalize_nbt(plain(parse_nbt(new)), new_enchantments), pos + ".nbt"))
     return {"status": "FAIL" if findings else "PASS", "witnesses": counts, "differences": findings}
 
 

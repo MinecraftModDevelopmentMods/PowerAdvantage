@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.block.BlockState;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 
 /**
@@ -20,12 +20,12 @@ import net.minecraft.util.ResourceLocation;
 public final class LegacyMigrationApi {
     @FunctionalInterface
     public interface BlockStateCodec {
-        IBlockState decode(Block currentBlock, int legacyMetadata);
+        BlockState decode(Block currentBlock, int legacyMetadata);
     }
 
     @FunctionalInterface
     public interface NbtMigration {
-        boolean migrate(NBTTagCompound compound);
+        boolean migrate(CompoundNBT compound);
     }
 
     private static final Set<String> NAMESPACES = new LinkedHashSet<>();
@@ -100,7 +100,7 @@ public final class LegacyMigrationApi {
         return target == null ? legacyId : target;
     }
 
-    public static synchronized IBlockState decodeBlockState(ResourceLocation legacyId, Block block, int metadata) {
+    public static synchronized BlockState decodeBlockState(ResourceLocation legacyId, Block block, int metadata) {
         BlockStateCodec codec = BLOCK_CODECS.get(legacyId);
         return codec == null ? block.getDefaultState() : codec.decode(block, metadata & 15);
     }
@@ -129,7 +129,7 @@ public final class LegacyMigrationApi {
         return DURABLE_ITEMS.contains(id) || DURABLE_ITEMS.contains(itemTarget(id));
     }
 
-    public static synchronized boolean migrateRegisteredNbt(NBTTagCompound compound) {
+    public static synchronized boolean migrateRegisteredNbt(CompoundNBT compound) {
         boolean changed = false;
         for (NbtMigration migration : NBT_MIGRATIONS.values()) changed |= migration.migrate(compound);
         return changed;

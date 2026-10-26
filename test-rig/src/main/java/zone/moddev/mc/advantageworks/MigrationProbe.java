@@ -12,14 +12,14 @@ import java.nio.file.Files;
 import java.util.Locale;
 import java.util.Map;
 import net.minecraft.state.IProperty;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.command.Commands;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 
@@ -70,7 +70,7 @@ final class MigrationProbe {
         for (JsonElement element : definition) {
             JsonObject entry = JSON.fromJson(JSON.toJson(element), JsonObject.class);
             BlockPos pos = new BlockPos(entry.get("x").getAsInt(), entry.get("y").getAsInt(), entry.get("z").getAsInt());
-            IBlockState state = world.getBlockState(pos);
+            BlockState state = world.getBlockState(pos);
             entry.addProperty("actualName", state.getBlock().getRegistryName().toString());
             JsonObject properties = new JsonObject();
             for (IProperty<?> property : state.getProperties()) {
@@ -80,7 +80,7 @@ final class MigrationProbe {
             TileEntity tile = world.getTileEntity(pos);
             if (tile != null) {
                 tile.markDirty();
-                NBTTagCompound nbt = tile.write(new NBTTagCompound());
+                CompoundNBT nbt = tile.write(new CompoundNBT());
                 entry.addProperty("nbt", nbt.toString());
                 java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
                 net.minecraft.nbt.CompressedStreamTools.writeCompressed(nbt, bytes);

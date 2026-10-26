@@ -7,7 +7,7 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 @Mod(AdvantageWorksMod.MODID)
 public final class AdvantageWorksMod {
     public static final String MODID = "advantageworkstest";
-    public static final String VERSION = "1.1.0.113021";
+    public static final String VERSION = "1.1.0.114041";
 
     public AdvantageWorksMod() {
         MigrationProbe.register();
@@ -17,6 +17,7 @@ public final class AdvantageWorksMod {
         LifecycleProbe.register();
         RecipeUnlockProbe.register();
         ProgressionProbe.register();
+        NativeInteropProbe.register();
         WorksController.getInstance().loadDefinition();
         MinecraftForge.EVENT_BUS.addListener(this::serverStarting);
     }

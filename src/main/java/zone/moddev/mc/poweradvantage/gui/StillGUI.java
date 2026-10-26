@@ -21,8 +21,8 @@ public class StillGUI extends SimpleMachineGUI {
 			if (((StillTileEntity) srcEntity).isBurning()) {
 				int h = (int) (14 * ((StillTileEntity) srcEntity).getBurnFraction());
 				int d = 14 - h;
-				guiContainer.drawTexturedModalRect(x + 80, y + 49 - h, 198, d, 14, h); // x, y, u, v, width, height
-				guiContainer.drawTexturedModalRect(x + 77, y + 16, 198, 14, 24, 16); // x, y, u, v, width, height
+				guiContainer.blit(x + 80, y + 49 - h, 198, d, 14, h); // x, y, u, v, width, height
+				guiContainer.blit(x + 77, y + 16, 198, 14, 24, 16); // x, y, u, v, width, height
 			}
 			FluidStack fs1 = ((StillTileEntity) srcEntity).getInputTank().getFluid();
 			if (fs1 != null && ((StillTileEntity) srcEntity).getInputTank().getFluidAmount() > 0) {

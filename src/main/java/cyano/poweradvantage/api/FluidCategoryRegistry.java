@@ -9,7 +9,7 @@ import java.util.Set;
 
 import net.minecraft.fluid.Fluid;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.IRegistry;
+import net.minecraft.util.registry.Registry;
 
 /**
  * Registry of semantic fluid categories shared by Advantage mods.
@@ -45,7 +45,7 @@ public final class FluidCategoryRegistry {
     /** Returns true when the fluid's registry name belongs to the category. */
     public static synchronized boolean matches(String category, Fluid fluid) {
         if (fluid == null) return false;
-        ResourceLocation id = IRegistry.field_212619_h.getKey(fluid);
+        ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.FLUIDS.getKey(fluid);
         return id != null && matches(category, id.toString());
     }
 
@@ -70,7 +70,7 @@ public final class FluidCategoryRegistry {
     /** Returns the currently registered fluids represented by a category. */
     public static synchronized Set<Fluid> getRegisteredFluids(String category) {
         LinkedHashSet<Fluid> fluids = new LinkedHashSet<>();
-        for (Fluid fluid : IRegistry.field_212619_h) {
+        for (Fluid fluid : net.minecraftforge.registries.ForgeRegistries.FLUIDS) {
             if (matches(category, fluid)) fluids.add(fluid);
         }
         return Collections.unmodifiableSet(fluids);

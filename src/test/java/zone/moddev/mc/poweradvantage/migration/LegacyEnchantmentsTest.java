@@ -2,8 +2,8 @@ package zone.moddev.mc.poweradvantage.migration;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -14,15 +14,15 @@ public class LegacyEnchantmentsTest {
         saved.put(11, "steamadvantage:powderless");
         saved.put(12, "steamadvantage:rapid_reload");
         saved.put(13, "steamadvantage:recoil");
-        NBTTagCompound tag = new NBTTagCompound();
-        NBTTagList list = new NBTTagList();
+        CompoundNBT tag = new CompoundNBT();
+        ListNBT list = new ListNBT();
         for (Integer id : saved.keySet()) {
-            NBTTagCompound entry = new NBTTagCompound();
-            entry.setShort("id", id.shortValue());
-            entry.setShort("lvl", (short) 3);
+            CompoundNBT entry = new CompoundNBT();
+            entry.putShort("id", id.shortValue());
+            entry.putShort("lvl", (short) 3);
             list.add(entry);
         }
-        tag.setTag("ench", list);
+        tag.put("ench", list);
         assertTrue(LegacyWorldDataHook.migrateLegacyEnchantments(tag, saved));
         assertFalse(tag.contains("ench", 9));
         for (int i = 0; i < 4; i++) {
@@ -35,13 +35,13 @@ public class LegacyEnchantmentsTest {
     @Test public void honorsWorldSpecificIdsAndPreservesStoredEnchantments() {
         Map<Integer, String> saved = new LinkedHashMap<>();
         saved.put(173, "steamadvantage:rapid_reload");
-        NBTTagCompound book = new NBTTagCompound();
-        NBTTagList list = new NBTTagList();
-        NBTTagCompound entry = new NBTTagCompound();
-        entry.setShort("id", (short) 173);
-        entry.setShort("lvl", (short) 2);
+        CompoundNBT book = new CompoundNBT();
+        ListNBT list = new ListNBT();
+        CompoundNBT entry = new CompoundNBT();
+        entry.putShort("id", (short) 173);
+        entry.putShort("lvl", (short) 2);
         list.add(entry);
-        book.setTag("StoredEnchantments", list);
+        book.put("StoredEnchantments", list);
         assertTrue(LegacyWorldDataHook.migrateLegacyEnchantments(book, saved));
         assertEquals("steamadvantage:rapid_reload", book.getList("StoredEnchantments", 10).getCompound(0).getString("id"));
         assertEquals(2, book.getList("StoredEnchantments", 10).getCompound(0).getShort("lvl"));
@@ -51,12 +51,12 @@ public class LegacyEnchantmentsTest {
     public void refusesIncompleteOldListInsteadOfSilentlyDroppingAnEnchantment() {
         Map<Integer, String> saved = new LinkedHashMap<>();
         saved.put(10, "steamadvantage:high_explosive");
-        NBTTagCompound tag = new NBTTagCompound();
-        NBTTagList list = new NBTTagList();
-        NBTTagCompound entry = new NBTTagCompound();
-        entry.setShort("id", (short) 99);
+        CompoundNBT tag = new CompoundNBT();
+        ListNBT list = new ListNBT();
+        CompoundNBT entry = new CompoundNBT();
+        entry.putShort("id", (short) 99);
         list.add(entry);
-        tag.setTag("ench", list);
+        tag.put("ench", list);
         LegacyWorldDataHook.migrateLegacyEnchantments(tag, saved);
     }
 }

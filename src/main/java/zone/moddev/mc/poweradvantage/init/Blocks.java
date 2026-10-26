@@ -8,12 +8,12 @@ import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.GUIBlock;
 import cyano.poweradvantage.api.fluid.InteractiveFluidBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockFlowingFluid;
+import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.block.material.Material;
-import net.minecraft.init.MobEffects;
+import net.minecraft.potion.Effects;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.potion.PotionEffect;
+import net.minecraft.item.BlockItem;
+import net.minecraft.potion.EffectInstance;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -66,8 +66,8 @@ public final class Blocks {
     public static GUIBlock infinite_steam;
     public static GUIBlock infinite_electricity;
     public static GUIBlock infinite_quantum;
-    public static BlockFlowingFluid crude_oil_block;
-    public static BlockFlowingFluid refined_oil_block;
+    public static FlowingFluidBlock crude_oil_block;
+    public static FlowingFluidBlock refined_oil_block;
 
     private static boolean initialized;
 
@@ -105,11 +105,11 @@ public final class Blocks {
 
         Block.Properties oilProperties = Block.Properties.create(Material.WATER).doesNotBlockMovement()
                 .hardnessAndResistance(100.0F).variableOpacity();
-        refined_oil_block = (BlockFlowingFluid) add(new InteractiveFluidBlock(Fluids.refined_oil,
-                oilProperties, true, (world, entity) -> entity.addPotionEffect(new PotionEffect(MobEffects.NAUSEA, 200))),
+        refined_oil_block = (FlowingFluidBlock) add(new InteractiveFluidBlock(Fluids.refined_oil,
+                oilProperties, true, (world, entity) -> entity.addPotionEffect(new EffectInstance(Effects.NAUSEA, 200))),
                 "refined_oil");
-        crude_oil_block = (BlockFlowingFluid) add(new InteractiveFluidBlock(Fluids.crude_oil,
-                oilProperties, true, (world, entity) -> entity.addPotionEffect(new PotionEffect(MobEffects.SLOWNESS, 200, 2))),
+        crude_oil_block = (FlowingFluidBlock) add(new InteractiveFluidBlock(Fluids.crude_oil,
+                oilProperties, true, (world, entity) -> entity.addPotionEffect(new EffectInstance(Effects.SLOWNESS, 200, 2))),
                 "crude_oil");
 
         ModSupport.initBlocks();
@@ -139,10 +139,10 @@ public final class Blocks {
         for (Map.Entry<String, Block> entry : ALL_BLOCKS.entrySet()) {
             Item.Properties properties = new Item.Properties();
             if (!"fluid_pipe_terminal".equals(entry.getKey())
-                    && !(entry.getValue() instanceof BlockFlowingFluid)) {
+                    && !(entry.getValue() instanceof FlowingFluidBlock)) {
                 properties.group(ItemGroups.tab_powerAdvantage);
             }
-            ItemBlock item = new ItemBlock(entry.getValue(), properties);
+            BlockItem item = new BlockItem(entry.getValue(), properties);
             item.setRegistryName(PowerAdvantage.MODID, entry.getKey());
             event.getRegistry().register(item);
         }

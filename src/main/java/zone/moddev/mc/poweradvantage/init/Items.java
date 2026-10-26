@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBucket;
+import net.minecraft.item.BucketItem;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -34,10 +34,10 @@ public final class Items {
         bioplastic_ingot = add("bioplastic_ingot", new Item(properties()));
         sprocket = add("sprocket", new Item(properties()));
         rotator_tool = add("rotator_tool", new RotationTool(properties().maxStackSize(1)));
-        crude_oil_bucket = add("crude_oil_bucket", new ItemBucket(Fluids.crude_oil,
-                new Item.Properties().group(ItemGroups.tab_powerAdvantage).maxStackSize(1)));
-        refined_oil_bucket = add("refined_oil_bucket", new ItemBucket(Fluids.refined_oil,
-                new Item.Properties().group(ItemGroups.tab_powerAdvantage).maxStackSize(1)));
+        crude_oil_bucket = add("crude_oil_bucket", new BucketItem(Fluids.crude_oil,
+                new Item.Properties().group(ItemGroups.tab_powerAdvantage).maxStackSize(1).containerItem(net.minecraft.item.Items.BUCKET)));
+        refined_oil_bucket = add("refined_oil_bucket", new BucketItem(Fluids.refined_oil,
+                new Item.Properties().group(ItemGroups.tab_powerAdvantage).maxStackSize(1).containerItem(net.minecraft.item.Items.BUCKET)));
         initialized = true;
     }
 

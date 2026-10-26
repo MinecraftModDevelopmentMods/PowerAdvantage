@@ -1,13 +1,13 @@
 package cyano.poweradvantage.api;
 
 import zone.moddev.mc.poweradvantage.conduitnetwork.ConduitRegistry;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.Packet;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.ITickable;
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -25,10 +25,29 @@ import java.util.List;
  * @author DrCyano
  *
  */
-public abstract class PoweredEntity extends TileEntity implements ITickable, IPowerMachine {
+public abstract class PoweredEntity extends TileEntity implements ITickableTileEntity, IPowerMachine {
 
 	private final int powerUpdateInterval = 8;
 	private int conduitRefreshDelay = 2;
+    private final zone.moddev.mc.poweradvantage.util.MachineCapabilities machineCapabilities =
+            new zone.moddev.mc.poweradvantage.util.MachineCapabilities(this);
+
+    @Override
+    public <T> net.minecraftforge.common.util.LazyOptional<T> getCapability(
+            net.minecraftforge.common.capabilities.Capability<T> capability, net.minecraft.util.Direction face) {
+        net.minecraftforge.common.util.LazyOptional<T> local = machineCapabilities.get(capability, face);
+        return local.isPresent() ? local : super.getCapability(capability, face);
+    }
+
+    @Override protected void invalidateCaps() {
+        super.invalidateCaps();
+        machineCapabilities.invalidate();
+    }
+
+    @Override public void validate() {
+        super.validate();
+        reviveCaps();
+    }
 
 	protected PoweredEntity(TileEntityType<?> type) {
 		super(type);
@@ -109,14 +128,10 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 	 * Tells Minecraft to synchronize this tile entity
 	 */
 	protected final void sync() {
+		if (this.world == null || this.world.isRemote) return;
 		this.markDirty();
-		//this.getWorld().markBlockForUpdate(getPos());
-		Packet<?> packet = this.getUpdatePacket();
-		if (packet == null) return;
-		List<EntityPlayerMP> players = this.getWorld().getPlayers(EntityPlayerMP.class, (EntityPlayerMP p) -> p.getPosition().distanceSq(getPos()) < 256);
-		for (EntityPlayerMP player : players) {
-			player.connection.sendPacket(packet);
-		}
+        BlockState state = this.world.getBlockState(getPos());
+        this.world.notifyBlockUpdate(getPos(), state, state, 2);
 	}
 
 	/**
@@ -128,7 +143,7 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 	 * @param newSate  State after change
 	 * @return true if this TileEntity should be invalidated (deleted and recreated), false otherwise
 	 */
-	public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) {
+	public boolean shouldRefresh(World world, BlockPos pos, BlockState oldState, BlockState newSate) {
 		return oldState.getBlock() != newSate.getBlock();
 	}
 
@@ -156,9 +171,9 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 	 *
 	 * @param player player receiving the current machine state
 	 */
-	public final void syncPowerAdvantageDataTo(EntityPlayerMP player) {
+	public final void syncPowerAdvantageDataTo(ServerPlayerEntity player) {
 		this.markDirty();
-		Packet<?> packet = this.getUpdatePacket();
+		IPacket<?> packet = this.getUpdatePacket();
 		if (packet != null) {
 			player.connection.sendPacket(packet);
 		}
@@ -241,7 +256,7 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 	 * packet.
 	 */
 	@Override
-	public void read(final NBTTagCompound tagRoot) {
+	public void read(final CompoundNBT tagRoot) {
 		super.read(tagRoot);
 		this.conduitRefreshDelay = 2;
 		if (tagRoot.contains("Energy", 11)) {
@@ -258,13 +273,13 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 	 * the network.
 	 */
 	@Override
-	public NBTTagCompound write(final NBTTagCompound tagRoot) {
+	public CompoundNBT write(final CompoundNBT tagRoot) {
 		super.write(tagRoot);
 		int[] data = new int[this.getTypes().length];
 		for (int i = 0; i < data.length; i++) {
 			data[i] = Float.floatToIntBits(this.getEnergy(this.getTypes()[i]));
 		}
-		tagRoot.setIntArray("Energy", data);
+		tagRoot.putIntArray("Energy", data);
 		return tagRoot;
 	}
 

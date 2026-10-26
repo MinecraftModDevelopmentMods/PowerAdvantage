@@ -1,3 +1,15 @@
+Power Advantage 2.4.5.114041 (Minecraft 1.14.4)
+
+- Move to Minecraft 1.14.4 and Forge 28.2.26, retaining existing registry names, saved-state keys and public API packages.
+- Use native Forge fluid rendering and sided capabilities, registered machine menus, tag updates and parts-loot events.
+- Keep the pre-flattening world migration hook and handle the retired vanilla villager profession index without discarding custom entries.
+- Add native block loot, including portable tank contents, and invalidate machine capabilities when their tiles are removed.
+- Keep water in tanks when reading saves that use its old unqualified fluid name.
+- Keep incoming Forge Energy when converting it to steam, electricity or quantum power; the RF- and Tech Reborn-labelled converters no longer discard it.
+- Register the world-save hook after parallel mod loading to avoid intermittent autosave failures when Base Metals also registers a hook.
+- Carry forward the restart and moving-drill fixes. The 1.14 validation status is tracked separately from the earlier 1.13 results.
+- Manual visuals and recipe unlocks are accepted. Machine functionality is covered by automated tests, not personal play-testing; the 1.14 qualification notes retain the exact tested jars and remaining coverage limits.
+
 Power Advantage 2.4.4.113021
 
 - Port Power Advantage to Minecraft 1.13.2 with ForgeGradle 7 and Java 8 support.

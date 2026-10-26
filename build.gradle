@@ -72,6 +72,7 @@ tasks.withType(Javadoc).configureEach {
 tasks.withType(AbstractArchiveTask).configureEach {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
+    includeEmptyDirs = false
 }
 
 def archiveTextSuffixes = [
@@ -93,7 +94,7 @@ minecraft {
     def forgeRunModClassesDirectory = layout.buildDirectory.dir('forge-run-mod-classes/main')
     def forgeMainOutputPath = forgeRunModClassesDirectory.get().asFile.absolutePath
     def mainModClasses = "${mod_id}%%${forgeMainOutputPath}${File.pathSeparator}${mod_id}%%${forgeMainOutputPath}"
-    def forge25RunTargets = [client: 'fmluserdevclient', server: 'fmluserdevserver', data: 'fmluserdevdata']
+    def forge28RunTargets = [client: 'fmluserdevclient', server: 'fmluserdevserver', data: 'fmluserdevdata']
     runs {
         configureEach {
             mainClass = 'net.minecraftforge.userdev.LaunchTesting'
@@ -101,7 +102,7 @@ minecraft {
             systemProperty 'forge.logging.markers', 'REGISTRIES'
             systemProperty 'forge.logging.console.level', 'info'
             mods { poweradvantage { source sourceSets.main } }
-            environment 'target', forge25RunTargets[name]
+            environment 'target', forge28RunTargets[name]
             environment 'MCP_MAPPINGS', "${mapping_channel}_${mapping_version}"
             environment 'MCP_VERSION', mcp_version
             environment 'FORGE_VERSION', forge_version
@@ -129,7 +130,7 @@ sourceSets.main.resources {
 def forgeRunModClassesDirectory = layout.buildDirectory.dir('forge-run-mod-classes/main')
 def prepareForgeRunModClasses = tasks.register('prepareForgeRunModClasses', Sync) {
     group = 'ide'
-    description = 'Merges classes and processed resources for Forge 1.13 launches.'
+    description = 'Merges classes and processed resources for Forge 1.14 launches.'
     dependsOn tasks.named('classes')
     from sourceSets.main.output
     into forgeRunModClassesDirectory
@@ -164,11 +165,11 @@ repositories {
 // The default paths mirror the local MMD checkout layout without tying the
 // build to a drive letter. CI and other layouts can override either path.
 def baseMetalsDeobfJar = file(providers.gradleProperty('baseMetalsDeobfJar')
-        .getOrElse('../../../BaseMetals/BaseMetals 113/BaseMetals/build/libs-dev/'
-                + 'BaseMetals-3.0.1.113021-deobf.jar'))
+        .getOrElse('../../../BaseMetals/BaseMetals 114/BaseMetals/build/libs-dev/'
+                + 'BaseMetals-3.0.1.114041-deobf.jar'))
 def oreSpawnDeobfJar = file(providers.gradleProperty('oreSpawnDeobfJar')
-        .getOrElse('../../../MinecraftMineralogy/OS113/OreSpawn/build/libs-dev/'
-                + 'OreSpawn-4.1.0.113021-deobf.jar'))
+        .getOrElse('../../../MinecraftMineralogy/OS114/OreSpawn/build/libs-dev/'
+                + 'OreSpawn-4.1.1.114041-deobf.jar'))
 
 dependencies {
     implementation minecraft.dependency(
@@ -313,13 +314,14 @@ tasks.register('verifyReleaseConfiguration') {
     group = 'verification'
     description = 'Validates release identity, target metadata, and optional integration policy.'
     doLast {
-        if (project.mod_version != '2.4.4.113021') {
+        if (project.mod_version != '2.4.5.114041') {
             throw new GradleException("Unexpected PowerAdvantage release version: ${project.mod_version}")
         }
-        if (project.minecraft_version != '1.13.2'
-                || project.forge_version != '25.0.223'
+        if (project.minecraft_version != '1.14.4'
+                || project.forge_version != '28.2.26'
                 || project.mapping_channel != 'snapshot'
-                || project.mapping_version != '20180921-1.13') {
+                || project.mapping_version != '20190719-1.14.3'
+                || project.mcp_version != '20190829.143755') {
             throw new GradleException('Unexpected Minecraft, Forge, or mappings target')
         }
         if (project.loader_name != 'forge' || project.loader_code != '1'
@@ -336,19 +338,19 @@ tasks.register('verifyReleaseConfiguration') {
         }
         if (project.cf_requirements != 'base-metals,mmd-orespawn'
                 || project.cf_optionals != 'additional-loot-tables'
-                || project.cf_versions != '1.13.2') {
+                || project.cf_versions != '1.14.4') {
             throw new GradleException('Unexpected CurseForge dependency or game-version metadata')
         }
-        if (project.basemetals_version != '3.0.1.113021'
-                || project.orespawn_version != '4.1.0.113021'
-                || project.basemetals_source_commit != '1376a20d7d5ba22d3abc77dc34b49a2c88943697'
-                || project.orespawn_source_commit != '6a7c2bb07b9a7771128812fcc07d185f7d9df58b') {
+        if (project.basemetals_version != '3.0.1.114041'
+                || project.orespawn_version != '4.1.1.114041'
+                || project.basemetals_source_commit != '713802f93f2d1f650e1593fa35c487ea43add4a5'
+                || project.orespawn_source_commit != '9c2488cba02d317e3f31e24441dcc58273d8d0e6') {
             throw new GradleException('Unexpected Base Metals or OreSpawn dependency identity')
         }
         String mainSource = file(
                 'src/main/java/zone/moddev/mc/poweradvantage/PowerAdvantage.java').getText('UTF-8')
         if (!mainSource.contains('MODID = "poweradvantage"')
-                || !mainSource.contains('VERSION = "2.4.4.113021"')
+                || !mainSource.contains('VERSION = "2.4.5.114041"')
                 || !mainSource.contains('@Mod(PowerAdvantage.MODID)')) {
             throw new GradleException('PowerAdvantage source identity changed')
         }
@@ -369,7 +371,7 @@ tasks.register('verifyReleaseConfiguration') {
                 throw new GradleException("Persistent tile entity id changed or disappeared: ${id}")
             }
         }
-        String modsToml = file('src/main/resources/META-INF/mods.toml').getText('UTF-8')
+        String modsToml = file('src/main/resources/META-INF/mods.toml').getText('UTF-8').replace('\r\n', '\n')
         ['modId="poweradvantage"', 'modId="basemetals"', 'modId="orespawn"',
          'mandatory=true'].each { required ->
             if (!modsToml.contains(required)) {
@@ -429,9 +431,6 @@ tasks.register('verifyReleaseDependencies') {
             String actualHash = MessageDigest.getInstance('SHA-256')
                     .digest(dependencyJar.bytes).encodeHex().toString().toUpperCase()
             Set<String> acceptedHashes = [expectedHash] as Set<String>
-            if (dependencyJar == baseMetalsDeobfJar) {
-                acceptedHashes.add(project.basemetals_deobf_lf_sha256.toString())
-            }
             if (!acceptedHashes.contains(actualHash)) {
                 throw new GradleException("${dependencyJar.name} SHA-256 is ${actualHash}, expected ${acceptedHashes}")
             }
@@ -1122,9 +1121,9 @@ tasks.register('clientResourceProbeJar', Jar) {
 // these deobf jars are runtime inputs, never release contents or compile dependencies.
 def advantageExtensionJars = [
         steamadvantage: file(providers.gradleProperty('steamAdvantageDeobfJar').getOrElse(
-                '../SteamAdvantage/SteamAdvantage/build/libs-dev/SteamAdvantage-2.2.5.113021-deobf.jar')),
+                '../SteamAdvantage/SteamAdvantage/build/libs-dev/SteamAdvantage-2.2.6.114041-deobf.jar')),
         electricadvantage: file(providers.gradleProperty('electricAdvantageDeobfJar').getOrElse(
-                '../ElectricAdvantage/ElectricAdvantage/build/libs-dev/ElectricAdvantage-2.2.5.113021-deobf.jar'))
+                '../ElectricAdvantage/ElectricAdvantage/build/libs-dev/ElectricAdvantage-2.2.6.114041-deobf.jar'))
 ]
 
 tasks.register('prepareCombinedEclipseLaunch') {
@@ -1132,7 +1131,7 @@ tasks.register('prepareCombinedEclipseLaunch') {
     description = 'Creates an additional production-only Eclipse client launch with all three Advantage mods.'
     dependsOn tasks.named('verifyEclipseProductionClasspath')
     doLast {
-        def profile = new JsonSlurper().parse(file('test-rig/profiles/dev-core.json'))
+        def profile = new JsonSlurper().parse(file('test-rig/profiles/native114/dev-core.json'))
         advantageExtensionJars.each { String id, File jar ->
             def pin = profile.mods.find { it.id == id }
             if (!jar.isFile()) throw new GradleException("Build ${id} first, or override its *AdvantageDeobfJar property: ${jar}")

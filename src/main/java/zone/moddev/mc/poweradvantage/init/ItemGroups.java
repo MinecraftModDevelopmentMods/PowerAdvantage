@@ -4,7 +4,7 @@ import zone.moddev.mc.poweradvantage.PowerAdvantage;
 import zone.moddev.mc.poweradvantage.gui.FunctionalCreativeTab;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -41,8 +41,8 @@ public class ItemGroups {
 		StringBuilder sb = new StringBuilder();
 		Item item = i.getItem();
 		sb.append(ForgeRegistries.ITEMS.getKey(item).getNamespace());
-		if (item instanceof ItemBlock) {
-			if (((ItemBlock) item).getBlock().hasTileEntity(((ItemBlock) item).getBlock().getDefaultState())) {
+		if (item instanceof BlockItem) {
+			if (((BlockItem) item).getBlock().hasTileEntity(((BlockItem) item).getBlock().getDefaultState())) {
 				sb.append("A");
 			} else {
 				sb.append("B");

@@ -8,7 +8,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockReader;
@@ -55,14 +55,14 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	 * Creates a blockstate
 	 */
 	@Override
-	protected void fillStateContainer(StateContainer.Builder<Block, IBlockState> builder) {
+	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
 		builder.add(ACTIVE);
 	}
 
 	/**
 	 * Converts metadata into blockstate
 	 */
-	public IBlockState getStateFromMeta(final int metaValue) {
+	public BlockState getStateFromMeta(final int metaValue) {
 		return this.getDefaultState()
 				.with(ACTIVE, metaValue > 0);
 	}
@@ -70,7 +70,7 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	/**
 	 * Converts blockstate into metadata
 	 */
-	public int getMetaFromState(final IBlockState bs) {
+	public int getMetaFromState(final BlockState bs) {
 		if ((Boolean) (bs .get(ACTIVE))) {
 			return 1;
 		} else {
@@ -107,12 +107,11 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	/**
 	 * Used to determine ambient occlusion and culling when rebuilding chunks for render
 	 */
-	public boolean isOpaqueCube(IBlockState bs) {
+	public boolean isOpaqueCube(BlockState bs) {
 		return true;
 	}
 
-	@Override
-	public boolean isFullCube(IBlockState bs) {
+	public boolean isFullCube(BlockState bs) {
 		return true;
 	}
 
@@ -120,8 +119,8 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	 * Override of default block behavior
 	 */
 	@Override
-	public void onBlockAdded(final IBlockState state, final World world, final BlockPos coord, final IBlockState oldState) {
-		super.onBlockAdded(state, world, coord, oldState);
+	public void onBlockAdded(final BlockState state, final World world, final BlockPos coord, final BlockState oldState, final boolean isMoving) {
+		super.onBlockAdded(state, world, coord, oldState, isMoving);
 		ConduitRegistry.getInstance().conduitBlockPlacedEvent(world, world.dimension.getType().getId(), coord, getTypes());
 	}
 
@@ -129,7 +128,7 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	 * This method is called when the block is removed from the world by an entity.
 	 */
 	@Override
-	public void onReplaced(IBlockState state, World w, BlockPos coord, IBlockState newState, boolean isMoving) {
+	public void onReplaced(BlockState state, World w, BlockPos coord, BlockState newState, boolean isMoving) {
 		if (state.getBlock() != newState.getBlock()) {
 			ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.dimension.getType().getId(), coord, getTypes());
 		}
@@ -151,7 +150,7 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	public void onNeighborChange(IBlockReader w, BlockPos pos, BlockPos neighbor) {
 		if (w instanceof World) {
 			World world = (World) w;
-			IBlockState state = world.getBlockState(pos);
+			BlockState state = world.getBlockState(pos);
 			// redstone power given or taken
 			boolean activated = !world.isBlockPowered(pos);
 			world.setBlockState(pos, state.with(ACTIVE, activated), 2);
@@ -164,7 +163,7 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	}
 
 	@Override
-	public void neighborChanged(IBlockState state, World world, BlockPos pos, Block block, BlockPos fromPos) {
+	public void neighborChanged(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
 		onNeighborChange(world, pos, pos);
 	}
 

@@ -54,11 +54,11 @@ repositories {
 dependencies {
     implementation minecraft.dependency(
             "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}")
-    compileOnly 'org.lwjgl.lwjgl:lwjgl_util:2.9.4-nightly-20150209'
     runnerImplementation 'com.google.code.gson:gson:2.8.0'
+    testImplementation sourceSets.runner.output
     testImplementation 'junit:junit:4.13.2'
     compileOnly files(project.findProperty('powerAdvantageDeobfJar')
-            ?: '../build/libs-dev/PowerAdvantage-2.4.4.113021-deobf.jar')
+            ?: '../build/libs-dev/PowerAdvantage-2.4.5.114041-deobf.jar')
 }
 
 tasks.named('processResources', ProcessResources) {
@@ -114,7 +114,7 @@ def registerWorksRunner = { String taskName, String profileName, boolean automat
         classpath = sourceSets.runner.runtimeClasspath
         mainClass = 'zone.moddev.mc.advantageworks.runner.WorksRunner'
         if (!automated) standardInput = System.in
-        args '--profile', file("profiles/${profileName}.json").absolutePath
+        args '--profile', file("profiles/native114/${profileName}.json").absolutePath
         if (automated) args '--automated'
         if (project.hasProperty('worksStations')) {
             args '--stations', project.property('worksStations').toString()
@@ -129,7 +129,7 @@ def registerWorksRunner = { String taskName, String profileName, boolean automat
 }
 
 registerWorksRunner('runWorksDev', 'dev-core', false,
-        'Builds and launches a disposable interactive 1.13.2 Advantage Works development server.')
+        'Builds and launches a disposable interactive 1.14.4 Advantage Works development server.')
 registerWorksRunner('verifyWorksDev', 'dev-core', true,
         'Generates, checks, restarts, and rechecks the disposable development works.')
 registerWorksRunner('verifyWorksTechProgression', 'dev-core-tech-progression', true,
@@ -153,11 +153,22 @@ registerWorksRunner('verifyWorksWorldgenLegacyImport', 'worldgen-legacy-import',
 registerWorksRunner('runWorksPackagedCurrent', 'packaged-current', false,
         'Launches the complete packaged works on localhost for manual inspection.')
 
+tasks.register('verifyWorksNative114Inputs', JavaExec) {
+    group = 'verification'
+    description = 'Checks native114 candidate identities and hashes without creating or opening a world.'
+    dependsOn tasks.named('runnerClasses'), tasks.named('jar'), releaseJar
+    classpath = sourceSets.runner.runtimeClasspath
+    mainClass = 'zone.moddev.mc.advantageworks.runner.WorksRunner'
+    args '--profile', file("profiles/native114/${project.findProperty('worksProfile') ?: 'packaged-current'}.json").absolutePath,
+            '--validate-only'
+}
+
 tasks.register('verifyHarnessIsolation') {
     group = 'verification'
     description = 'Confirms the PowerAdvantage release contains no test-harness content.'
     doLast {
-        File powerJar = file('../build/libs/PowerAdvantage-2.4.4.113021.jar')
+        File powerJar = file(project.findProperty('powerAdvantageReleaseJar')
+                ?: '../build/libs/PowerAdvantage-2.4.5.114041.jar')
         if (!powerJar.isFile()) {
             throw new GradleException("Build PowerAdvantage first: ${powerJar}")
         }

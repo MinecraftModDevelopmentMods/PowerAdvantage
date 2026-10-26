@@ -4,25 +4,31 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 import cyano.poweradvantage.api.ConduitType;
-import net.minecraft.block.BlockFlowingFluid;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.FlowingFluidBlock;
+import net.minecraft.block.BlockState;
 import net.minecraft.fluid.FlowingFluid;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.IFluidState;
 import net.minecraft.item.Item;
 import net.minecraft.state.StateContainer;
 import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.IRegistry;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReaderBase;
+import net.minecraft.world.IWorldReader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fluids.FluidAttributes;
+import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.minecraftforge.fml.common.Mod;
 import zone.moddev.mc.poweradvantage.PowerAdvantage;
 
-/** Native 1.13 fluids and their PowerAdvantage conduit identities. */
+/** Native Forge fluids and their persistent PowerAdvantage conduit identities. */
+@Mod.EventBusSubscriber(modid = PowerAdvantage.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class Fluids {
     public static final ConduitType fluidConduit_general = new ConduitType("fluid");
     private static final Map<Fluid, ConduitType> FLUID_TYPES = new IdentityHashMap<>();
@@ -40,8 +46,8 @@ public final class Fluids {
 
     public static synchronized void init() {
         if (initialized) return;
-        fluidConduit_water = registerNewFluid(net.minecraft.init.Fluids.WATER);
-        fluidConduit_lava = registerNewFluid(net.minecraft.init.Fluids.LAVA);
+        fluidConduit_water = registerNewFluid(net.minecraft.fluid.Fluids.WATER);
+        fluidConduit_lava = registerNewFluid(net.minecraft.fluid.Fluids.LAVA);
 
         flowing_crude_oil = new PowerFluid.Flowing(Kind.CRUDE);
         crude_oil = new PowerFluid.Source(Kind.CRUDE);
@@ -60,14 +66,16 @@ public final class Fluids {
     }
 
     private static void register(String name, Fluid fluid) {
-        IRegistry.field_212619_h.put(new ResourceLocation(PowerAdvantage.MODID, name), fluid);
-        for (IFluidState state : fluid.getStateContainer().getValidStates()) {
-            Fluid.STATE_REGISTRY.add(state);
-        }
+        fluid.setRegistryName(PowerAdvantage.MODID, name);
+    }
+
+    @SubscribeEvent
+    public static void registerFluids(RegistryEvent.Register<Fluid> event) {
+        event.getRegistry().registerAll(crude_oil, flowing_crude_oil, refined_oil, flowing_refined_oil);
     }
 
     public static ConduitType registerNewFluid(Fluid fluid) {
-        ResourceLocation id = IRegistry.field_212619_h.getKey(fluid);
+        ResourceLocation id = fluid.getRegistryName();
         ConduitType type = new ConduitType(id == null ? "unknown_fluid" : id.toString());
         FLUID_TYPES.put(fluid, type);
         return type;
@@ -93,59 +101,55 @@ public final class Fluids {
         if (name == null || name.trim().isEmpty()) return null;
         ResourceLocation id = name.indexOf(':') >= 0 ? new ResourceLocation(name)
                 : new ResourceLocation(PowerAdvantage.MODID, name);
-        Fluid fluid = IRegistry.field_212619_h.func_212608_b(id);
+        Fluid fluid = registeredFluid(id);
         if (fluid == null && name.indexOf(':') < 0) {
-            fluid = IRegistry.field_212619_h.func_212608_b(new ResourceLocation("minecraft", name));
+            fluid = registeredFluid(new ResourceLocation("minecraft", name));
         }
         return fluid;
     }
 
+    private static Fluid registeredFluid(ResourceLocation id) {
+        // Forge's defaulted fluid registry returns EMPTY, not null, for unknown names.
+        // Do not let a missing poweradvantage:water hide the legacy vanilla fallback.
+        return net.minecraftforge.registries.ForgeRegistries.FLUIDS.containsKey(id)
+                ? net.minecraftforge.registries.ForgeRegistries.FLUIDS.getValue(id) : null;
+    }
+
     public enum Kind { CRUDE, REFINED }
 
-    public abstract static class PowerFluid extends FlowingFluid {
+    public abstract static class PowerFluid extends ForgeFlowingFluid {
         private final Kind kind;
 
-        protected PowerFluid(Kind kind) { this.kind = kind; }
+        protected PowerFluid(Kind kind) {
+            super(properties(kind));
+            this.kind = kind;
+        }
         public Kind getKind() { return kind; }
 
-        @Override public Fluid getFlowingFluid() {
-            return kind == Kind.CRUDE ? flowing_crude_oil : flowing_refined_oil;
-        }
-        @Override public Fluid getStillFluid() {
-            return kind == Kind.CRUDE ? crude_oil : refined_oil;
-        }
-        @Override public Item getFilledBucket() {
-            return kind == Kind.CRUDE ? Items.crude_oil_bucket : Items.refined_oil_bucket;
-        }
-        @Override @OnlyIn(Dist.CLIENT) public BlockRenderLayer getRenderLayer() {
-            return BlockRenderLayer.TRANSLUCENT;
-        }
-        @Override protected boolean canSourcesMultiply() { return false; }
-        @Override protected void beforeReplacingBlock(IWorld world, BlockPos pos, IBlockState state) {
-            state.dropBlockAsItem(world.getWorld(), pos, 0);
-        }
-        @Override public int getSlopeFindDistance(IWorldReaderBase world) { return 4; }
-        @Override public int getLevelDecreasePerBlock(IWorldReaderBase world) { return 1; }
-        @Override public int getTickRate(IWorldReaderBase world) { return kind == Kind.CRUDE ? 15 : 10; }
-        @Override protected float getExplosionResistance() { return 100.0F; }
-        @Override public boolean isEquivalentTo(Fluid fluid) {
-            return fluid == getStillFluid() || fluid == getFlowingFluid();
-        }
-        @Override protected boolean canOtherFlowInto(IFluidState state, Fluid fluid, EnumFacing direction) {
-            return direction == EnumFacing.DOWN && !fluid.isEquivalentTo(this);
-        }
-        @Override public IBlockState getBlockState(IFluidState state) {
-            BlockFlowingFluid block = kind == Kind.CRUDE ? Blocks.crude_oil_block : Blocks.refined_oil_block;
-            return block.getDefaultState().with(BlockFlowingFluid.LEVEL, Integer.valueOf(getLevelFromState(state)));
+        private static ForgeFlowingFluid.Properties properties(Kind kind) {
+            String name = kind == Kind.CRUDE ? "crude_oil" : "refined_oil";
+            return new ForgeFlowingFluid.Properties(
+                    () -> kind == Kind.CRUDE ? crude_oil : refined_oil,
+                    () -> kind == Kind.CRUDE ? flowing_crude_oil : flowing_refined_oil,
+                    FluidAttributes.builder(new ResourceLocation(PowerAdvantage.MODID, "blocks/" + name + "_still"),
+                            new ResourceLocation(PowerAdvantage.MODID, "blocks/" + name + "_flow"))
+                            .translationKey("fluid.poweradvantage." + name).color(0xFFFFFFFF)
+                            .density(kind == Kind.CRUDE ? 850 : 720)
+                            .viscosity(kind == Kind.CRUDE ? 6000 : 1000).temperature(300))
+                    .bucket(() -> kind == Kind.CRUDE ? Items.crude_oil_bucket : Items.refined_oil_bucket)
+                    .block(() -> kind == Kind.CRUDE ? Blocks.crude_oil_block : Blocks.refined_oil_block)
+                    .slopeFindDistance(4).levelDecreasePerBlock(1)
+                    .tickRate(kind == Kind.CRUDE ? 15 : 10).explosionResistance(100.0F)
+                    .renderLayer(BlockRenderLayer.TRANSLUCENT);
         }
 
         public static final class Flowing extends PowerFluid {
             public Flowing(Kind kind) { super(kind); }
             @Override protected void fillStateContainer(StateContainer.Builder<Fluid, IFluidState> builder) {
                 super.fillStateContainer(builder);
-                builder.add(LEVEL_1_TO_8);
+                builder.add(LEVEL_1_8);
             }
-            @Override public int getLevel(IFluidState state) { return state.get(LEVEL_1_TO_8); }
+            @Override public int getLevel(IFluidState state) { return state.get(LEVEL_1_8); }
             @Override public boolean isSource(IFluidState state) { return false; }
         }
 

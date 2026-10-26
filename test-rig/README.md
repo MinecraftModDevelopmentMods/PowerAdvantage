@@ -1,4 +1,23 @@
-# Advantage Works 1.13.2 Test Rig
+# Advantage Works 1.14.4 Native Test Rig
+
+The native target is Minecraft 1.14.4 / Forge 28.2.26, snapshot mappings
+20190719-1.14.3, MCP 20190829.143755, Java 8 bytecode and harness
+`1.1.0.114041`. Read [the native114 runner and qualification limits](NATIVE114.md)
+before using this checkout. Build success is not runtime or migration acceptance.
+
+Native destination profiles live only in `profiles/native114/`. The original
+profiles, station specification and legacy migration source adapters remain
+unchanged. New profiles explicitly reference the historical PA113 source root;
+the native runner refuses to launch an old profile as a native114 destination.
+Both Mineralogy profiles are fail-closed pending a verified native candidate.
+
+## Retained 1.13.2 Protocol Reference
+
+The remaining text describes the retained **1.13.2 source qualification**, not
+1.14.4 results. Its paths and old artifact versions are historical. Use the
+original source checkout at `D:/PowerAdvantage/PA113/PowerAdvantage` for that
+qualification and its documentation. Do not execute copied Python defaults
+from PA114 or alias `target114` to `target113`.
 
 > **Commissioning notice:** This harness builds disposable works. It is not a gameplay mod, registers no content, and must never be shipped inside a PowerAdvantage jar.
 

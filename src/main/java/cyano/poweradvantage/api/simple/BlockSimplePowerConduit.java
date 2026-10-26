@@ -6,12 +6,12 @@ import cyano.poweradvantage.api.PowerConnectorContext;
 import zone.moddev.mc.poweradvantage.util.PowerHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.pathfinding.PathType;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
@@ -53,31 +53,31 @@ public abstract class BlockSimplePowerConduit extends ConduitBlock {
     @Override public boolean isPowerSource(ConduitType conduitType) { return false; }
 
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, IBlockState> builder) {
+    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(WEST, DOWN, SOUTH, EAST, UP, NORTH);
     }
 
     @Override
-    public IBlockState getStateForPlacement(BlockItemUseContext context) {
+    public BlockState getStateForPlacement(BlockItemUseContext context) {
         return connectedState(getDefaultState(), context.getWorld(), context.getPos());
     }
 
     @Override
-    public IBlockState updatePostPlacement(IBlockState state, EnumFacing facing, IBlockState facingState,
+    public BlockState updatePostPlacement(BlockState state, Direction facing, BlockState facingState,
             IWorld world, BlockPos currentPos, BlockPos facingPos) {
         return state.with(property(facing), canConnectTo(world, currentPos, state, facing, facingPos));
     }
 
-    private IBlockState connectedState(IBlockState state, IBlockReader world, BlockPos pos) {
-        return state.with(WEST, canConnectTo(world, pos, state, EnumFacing.WEST, pos.west()))
-                .with(DOWN, canConnectTo(world, pos, state, EnumFacing.DOWN, pos.down()))
-                .with(SOUTH, canConnectTo(world, pos, state, EnumFacing.SOUTH, pos.south()))
-                .with(EAST, canConnectTo(world, pos, state, EnumFacing.EAST, pos.east()))
-                .with(UP, canConnectTo(world, pos, state, EnumFacing.UP, pos.up()))
-                .with(NORTH, canConnectTo(world, pos, state, EnumFacing.NORTH, pos.north()));
+    private BlockState connectedState(BlockState state, IBlockReader world, BlockPos pos) {
+        return state.with(WEST, canConnectTo(world, pos, state, Direction.WEST, pos.west()))
+                .with(DOWN, canConnectTo(world, pos, state, Direction.DOWN, pos.down()))
+                .with(SOUTH, canConnectTo(world, pos, state, Direction.SOUTH, pos.south()))
+                .with(EAST, canConnectTo(world, pos, state, Direction.EAST, pos.east()))
+                .with(UP, canConnectTo(world, pos, state, Direction.UP, pos.up()))
+                .with(NORTH, canConnectTo(world, pos, state, Direction.NORTH, pos.north()));
     }
 
-    private static BooleanProperty property(EnumFacing facing) {
+    private static BooleanProperty property(Direction facing) {
         switch (facing) {
             case DOWN: return DOWN;
             case UP: return UP;
@@ -89,8 +89,8 @@ public abstract class BlockSimplePowerConduit extends ConduitBlock {
         }
     }
 
-    protected boolean canConnectTo(IBlockReader world, BlockPos thisBlock, IBlockState state,
-            EnumFacing face, BlockPos otherBlock) {
+    protected boolean canConnectTo(IBlockReader world, BlockPos thisBlock, BlockState state,
+            Direction face, BlockPos otherBlock) {
         for (ConduitType type : types) {
             if (PowerHelper.areConnectable(new PowerConnectorContext(type, world, state, thisBlock, face))) {
                 return true;
@@ -100,12 +100,12 @@ public abstract class BlockSimplePowerConduit extends ConduitBlock {
     }
 
     @Override
-    public VoxelShape getShape(IBlockState state, IBlockReader world, BlockPos pos) {
+    public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, net.minecraft.util.math.shapes.ISelectionContext context) {
         double min = 8.0D - pipeRadius * 16.0D;
         double max = 8.0D + pipeRadius * 16.0D;
         VoxelShape shape = Block.makeCuboidShape(min, min, min, max, max, max);
         boolean connected = false;
-        for (EnumFacing facing : EnumFacing.values()) {
+        for (Direction facing : Direction.values()) {
             if (!state.get(property(facing))) continue;
             connected = true;
             switch (facing) {
@@ -124,9 +124,9 @@ public abstract class BlockSimplePowerConduit extends ConduitBlock {
         return shape;
     }
 
-    @Override public boolean isFullCube(IBlockState state) { return false; }
-    @Override public boolean allowsMovement(IBlockState state, IBlockReader world, BlockPos pos, PathType type) { return false; }
+    public boolean isFullCube(BlockState state) { return false; }
+    @Override public boolean allowsMovement(BlockState state, IBlockReader world, BlockPos pos, PathType type) { return false; }
 
     /** Legacy metadata bridge retained for migration tests. */
-    public int getMetaFromState(IBlockState state) { return 0; }
+    public int getMetaFromState(BlockState state) { return 0; }
 }

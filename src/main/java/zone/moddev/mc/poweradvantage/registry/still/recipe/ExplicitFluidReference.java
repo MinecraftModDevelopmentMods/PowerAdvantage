@@ -2,7 +2,7 @@ package zone.moddev.mc.poweradvantage.registry.still.recipe;
 
 import net.minecraft.fluid.Fluid;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.IRegistry;
+import net.minecraft.util.registry.Registry;
 
 /**
  * Implementation of FluidReference that compares specific fluids (fluids of same name but different 
@@ -44,7 +44,7 @@ public class ExplicitFluidReference extends FluidReference {
 	 */
 	@Override
 	public boolean matches(String fluidName) {
-		ResourceLocation id = IRegistry.field_212619_h.getKey(reference);
+		ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.FLUIDS.getKey(reference);
 		return id != null && (id.toString().equals(fluidName) || id.getPath().equals(fluidName));
 	}
 
@@ -65,7 +65,7 @@ public class ExplicitFluidReference extends FluidReference {
 	 */
 	@Override
 	public int hashCode() {
-		ResourceLocation id = IRegistry.field_212619_h.getKey(reference);
+		ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.FLUIDS.getKey(reference);
 		return id == null ? System.identityHashCode(reference) : id.hashCode();
 	}
 }

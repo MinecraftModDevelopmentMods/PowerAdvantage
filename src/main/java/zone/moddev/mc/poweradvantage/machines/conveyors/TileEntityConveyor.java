@@ -1,26 +1,26 @@
 package zone.moddev.mc.poweradvantage.machines.conveyors;
 
 import zone.moddev.mc.poweradvantage.util.InventoryWrapper;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityHopper;
+import net.minecraft.tileentity.HopperTileEntity;
 import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
+import net.minecraft.util.Direction;
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentBase;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.ILockableContainer;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.world.World;
 import zone.moddev.mc.poweradvantage.PowerAdvantage;
 
@@ -29,7 +29,25 @@ import java.util.List;
 import java.util.Random;
 import zone.moddev.mc.poweradvantage.init.Entities;
 
-public class TileEntityConveyor extends TileEntity implements ITickable, ISidedInventory {
+public class TileEntityConveyor extends TileEntity implements ITickableTileEntity, ISidedInventory, net.minecraft.util.INameable {
+    private final zone.moddev.mc.poweradvantage.util.MachineCapabilities machineCapabilities =
+            new zone.moddev.mc.poweradvantage.util.MachineCapabilities(this);
+
+    @Override public <T> net.minecraftforge.common.util.LazyOptional<T> getCapability(
+            net.minecraftforge.common.capabilities.Capability<T> capability, Direction face) {
+        net.minecraftforge.common.util.LazyOptional<T> local = machineCapabilities.get(capability, face);
+        return local.isPresent() ? local : super.getCapability(capability, face);
+    }
+
+    @Override protected void invalidateCaps() {
+        super.invalidateCaps();
+        machineCapabilities.invalidate();
+    }
+
+    @Override public void validate() {
+        super.validate();
+        reviveCaps();
+    }
 	
 	public static String unlocalizedName = TileEntityConveyorFilter.class.getName();
 	
@@ -58,16 +76,16 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 		if(transferCooldown > 0) transferCooldown--;
 		if(transferCooldown == 0){
 			// do tick update
-			EnumFacing dir =this.getFacing();
+			Direction dir =this.getFacing();
 			
 			// deposit item
-			EnumFacing myDir = dir;
-			EnumFacing theirDir = dir.getOpposite();
+			Direction myDir = dir;
+			Direction theirDir = dir.getOpposite();
 			BlockPos targetPos = getPos().offset(myDir);
 			TileEntity target = w.getTileEntity(targetPos);
 			if(target != null) {
 				if( target instanceof IInventory){
-					ISidedInventory them = InventoryWrapper.wrap(TileEntityHopper.getInventoryAtPosition(getWorld(),targetPos.getX(), targetPos.getY(), targetPos.getZ()));
+					ISidedInventory them = InventoryWrapper.wrap(HopperTileEntity.getInventoryAtPosition(getWorld(),targetPos.getX(), targetPos.getY(), targetPos.getZ()));
 
 					if(transferItem(this,myDir,them,theirDir)){
 						transferCooldown = transferInvterval;
@@ -82,11 +100,11 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 			BlockPos upstreamBlock = getPos().offset(myDir);
 			if(w.isAirBlock(upstreamBlock)){
 				// grab items sitting on the ground behind the conveyor
-				List<EntityItem> list = w.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(
+				List<ItemEntity> list = w.getEntitiesWithinAABB(ItemEntity.class, new AxisAlignedBB(
 						upstreamBlock.getX(), upstreamBlock.getY(), upstreamBlock.getZ(), 
 						upstreamBlock.getX()+1, upstreamBlock.getY()+1, upstreamBlock.getZ()+1));
 				if(!list.isEmpty()){
-					EntityItem e = list.get(0);
+					ItemEntity e = list.get(0);
 					if(!e.isAirBorne){
 						ItemStack entityStack = e.getItem();
 						if(canInsertItemInto(entityStack,this,myDir)){
@@ -111,7 +129,7 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 				target = w.getTileEntity(upstreamBlock);
 				if(target != null){
 					if( target instanceof IInventory){
-						ISidedInventory them = InventoryWrapper.wrap(TileEntityHopper.getInventoryAtPosition(getWorld(),upstreamBlock.getX(), upstreamBlock.getY(), upstreamBlock.getZ()));
+						ISidedInventory them = InventoryWrapper.wrap(HopperTileEntity.getInventoryAtPosition(getWorld(),upstreamBlock.getX(), upstreamBlock.getY(), upstreamBlock.getZ()));
 						if(transferItem(them,theirDir,this,myDir)){
 							this.markDirty();
 						}
@@ -123,11 +141,11 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 	}
 	
 	protected static boolean isLocked(Object o){
-		return o instanceof ILockableContainer && ((ILockableContainer)o).isLocked();
+		return zone.moddev.mc.poweradvantage.util.InventoryLocks.isLocked(o);
 	}
 
 	
-	protected static boolean canInsertItemInto(ItemStack item, ISidedInventory dest, EnumFacing destFace){
+	protected static boolean canInsertItemInto(ItemStack item, ISidedInventory dest, Direction destFace){
 		if(item == null || item.isEmpty() || item.getItem() == null || isLocked(dest)){
 			return false;
 		}
@@ -146,7 +164,7 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 		return false;
 	}
 	
-	protected static boolean transferItem(ISidedInventory src, EnumFacing srcFace, ISidedInventory dest, EnumFacing destFace){
+	protected static boolean transferItem(ISidedInventory src, Direction srcFace, ISidedInventory dest, Direction destFace){
 		if(isLocked(src) || isLocked(dest)){
 			return false;
 		}
@@ -191,13 +209,13 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 	 * Gets the direction that the blockstate is facing
 	 * @return an EnumfFacing
 	 */
-	public EnumFacing getFacing(){
-		IBlockState state = getWorld().getBlockState(getPos());
+	public Direction getFacing(){
+		BlockState state = getWorld().getBlockState(getPos());
 		if(state.has(BlockConveyor.FACING)){
 			return state.get(BlockConveyor.FACING);
 		}else{
 			PowerAdvantage.LOGGER.warn("{}.getFacing(): blockstate at {} does not have BlockConveyor.FACING", this.getClass().getName(), getPos());
-			return EnumFacing.NORTH;
+			return Direction.NORTH;
 		}
 	}
 	
@@ -213,14 +231,14 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 	 * @param tagRoot The root of the NBT
 	 */
 	@Override
-	public void read(final NBTTagCompound tagRoot) {
+	public void read(final CompoundNBT tagRoot) {
 		super.read(tagRoot);
 		ItemStack[] inventory = this.getInventory();
 		if(inventory != null ){
 			Arrays.fill(inventory, null);
-			final NBTTagList nbttaglist = tagRoot.getList("Items", 10);
+			final ListNBT nbttaglist = tagRoot.getList("Items", 10);
 			for (int i = 0; i < nbttaglist.size() && i < inventory.length; ++i) {
-				final NBTTagCompound nbttagcompound1 = nbttaglist .getCompound(i);
+				final CompoundNBT nbttagcompound1 = nbttaglist .getCompound(i);
 				final byte n = nbttagcompound1.getByte("Slot");
 				if (n >= 0 && n < inventory.length) {
 					ItemStack stack = ItemStack.read(nbttagcompound1);
@@ -240,23 +258,23 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 	 * @param tagRoot The root of the NBT
 	 */
 	@Override
-	public NBTTagCompound write(final NBTTagCompound tagRoot) {
+	public CompoundNBT write(final CompoundNBT tagRoot) {
 		super .write(tagRoot);
 		ItemStack[] inventory = this.getInventory();
 		if(inventory != null ){
-			final NBTTagList nbttaglist = new NBTTagList();
+			final ListNBT nbttaglist = new ListNBT();
 			for (int i = 0; i < inventory.length; ++i) {
 				if (inventory[i] != null && !inventory[i].isEmpty()) {
-					final NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-					nbttagcompound1.setByte("Slot", (byte)i);
+					final CompoundNBT nbttagcompound1 = new CompoundNBT();
+					nbttagcompound1.putByte("Slot", (byte)i);
 					inventory[i] .write(nbttagcompound1);
 					nbttaglist .add(nbttagcompound1);
 				}
 			}
-			tagRoot.setTag("Items", nbttaglist);
+			tagRoot.put("Items", nbttaglist);
 		}
 		if (this.hasCustomName()) {
-			tagRoot.setString("CustomName", this.customName);
+			tagRoot.putString("CustomName", this.customName);
 		}
 		return tagRoot;
 	}
@@ -269,7 +287,7 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 	 * @param newSate State after change
 	 * @return true if this TileEntity should be invalidated (deleted and recreated), false otherwise
 	 */
-	public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) {
+	public boolean shouldRefresh(World world, BlockPos pos, BlockState oldState, BlockState newSate) {
 		return oldState.getBlock() != newSate.getBlock();
 	}
 	
@@ -288,7 +306,7 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 	}
 
 	@Override
-	public void closeInventory(EntityPlayer p) {
+	public void closeInventory(PlayerEntity p) {
 		// do nothing
 	}
 
@@ -309,12 +327,10 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 		return itemstack;
 	}
 
-	@Override
 	public int getField(int n) {
 		return 0;
 	}
 
-	@Override
 	public int getFieldCount() {
 		return 0;
 	}
@@ -350,7 +366,7 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 	}
 
 	@Override
-	public boolean isUsableByPlayer(final EntityPlayer p_isUseableByPlayer_1_) {
+	public boolean isUsableByPlayer(final PlayerEntity p_isUseableByPlayer_1_) {
 		return this.world.getTileEntity(this.pos) 
 				== this && p_isUseableByPlayer_1_.getDistanceSq(
 						(double)this.pos.getX() + 0.5, 
@@ -359,11 +375,10 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 	}
 
 	@Override
-	public void openInventory(EntityPlayer arg0) {
+	public void openInventory(PlayerEntity arg0) {
 		// do nothing
 	}
 
-	@Override
 	public void setField(int arg0, int arg1) {
 		// do nothing
 	}
@@ -383,8 +398,8 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 	}
 
 	@Override
-	public TextComponentBase getDisplayName() {
-		return (TextComponentBase) getName();
+	public TextComponent getDisplayName() {
+		return (TextComponent) getName();
 	}
 
 	private String customName = null;
@@ -395,13 +410,13 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 	 */
 	@Override
 	public ITextComponent getName() {
-		return this.hasCustomName() ? new TextComponentString(this.customName)
-				: new TextComponentTranslation(this.getUnlocalizedName());
+		return this.hasCustomName() ? new StringTextComponent(this.customName)
+				: new TranslationTextComponent(this.getUnlocalizedName());
 	}
 
 	@Override
 	public ITextComponent getCustomName() {
-		return this.hasCustomName() ? new TextComponentString(this.customName) : null;
+		return this.hasCustomName() ? new StringTextComponent(this.customName) : null;
 	}
 	
 	/**
@@ -431,7 +446,7 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 	 * @return true if the item is allowed to be pulled, false otherwise
 	 */
 	@Override
-	public boolean canExtractItem(final int slot, final ItemStack targetItem, final EnumFacing side) {
+	public boolean canExtractItem(final int slot, final ItemStack targetItem, final Direction side) {
 		return slot == 0;
 	}
 	/**
@@ -443,7 +458,7 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 	 * @return true if the item is allowed to be inserted, false otherwise
 	 */
 	@Override
-	public boolean canInsertItem(final int slot, final ItemStack srcItem, final EnumFacing side) {
+	public boolean canInsertItem(final int slot, final ItemStack srcItem, final Direction side) {
 		return slot == 0 && this.isItemValidForSlot(slot, srcItem);
 	}
 
@@ -463,7 +478,7 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 	 * through the given side of this block
 	 */
 	@Override
-	public int[] getSlotsForFace(EnumFacing side) {
+	public int[] getSlotsForFace(Direction side) {
 		return slotAccessCache;
 	}
 	//////////  //////////

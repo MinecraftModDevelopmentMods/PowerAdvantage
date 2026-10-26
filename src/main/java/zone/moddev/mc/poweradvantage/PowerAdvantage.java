@@ -37,12 +37,12 @@ import zone.moddev.mc.poweradvantage.recipe.RecipeDiscovery;
 import zone.moddev.mc.poweradvantage.migration.AdvantageLegacyMigrations;
 import zone.moddev.mc.poweradvantage.migration.LegacyWorldDataHook;
 
-/** Forge 1.13 entry point for Power Advantage. */
+/** Forge 1.14 entry point for Power Advantage. */
 @Mod(PowerAdvantage.MODID)
 public final class PowerAdvantage {
     public static final String MODID = "poweradvantage";
     public static final String NAME = "Power Advantage";
-    public static final String VERSION = "2.4.4.113021";
+    public static final String VERSION = "2.4.5.114041";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
     private static PowerAdvantage instance;
@@ -53,7 +53,7 @@ public final class PowerAdvantage {
     public static float chestLootFactor = 0.5F;
     public static boolean plasticIsAlsoRubber = true;
 
-    /** All historical RF- and Tech Reborn-labelled converters use Forge Energy in 1.13. */
+    /** All historical RF- and Tech Reborn-labelled converters use Forge Energy in 1.14. */
     public static final Map<ConduitType, Float> forgeEnergyConversionTable = new HashMap<>();
 
     /** Conversion table for the historical Tech Reborn-labelled Forge Energy converter. */
@@ -75,10 +75,12 @@ public final class PowerAdvantage {
         instance = this;
 
         AdvantageLegacyMigrations.registerPowerAdvantage();
-        LegacyWorldDataHook.register();
         MinecraftForge.EVENT_BUS.addListener(ConduitRegistry.getInstance()::onChunkLoad);
         MinecraftForge.EVENT_BUS.addListener(ConduitRegistry.getInstance()::onChunkUnload);
         MinecraftForge.EVENT_BUS.addListener(RecipeDiscovery::onPlayerLogin);
+        MinecraftForge.EVENT_BUS.addListener(zone.moddev.mc.poweradvantage.recipe.PartsLoot::onLoad);
+        MinecraftForge.EVENT_BUS.addListener(zone.moddev.mc.poweradvantage.init.Villages::onTrades);
+        MinecraftForge.EVENT_BUS.addListener(zone.moddev.mc.poweradvantage.recipe.MaterialTags::onTagsUpdated);
 
         Fluids.init();
         Blocks.init();
@@ -94,8 +96,9 @@ public final class PowerAdvantage {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonSetup);
 
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
-            ModLoadingContext.get().registerExtensionPoint(
-                    ExtensionPoint.GUIFACTORY, () -> MachineGUIRegistry::createClientGui);
+            FMLJavaModLoadingContext.get().getModEventBus().addListener(
+                    (net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent event) ->
+                            net.minecraftforge.fml.DeferredWorkQueue.runLater(MachineGUIRegistry::registerScreens));
             zone.moddev.mc.poweradvantage.client.ClientOilRenderer.register();
         });
     }
@@ -134,6 +137,8 @@ public final class PowerAdvantage {
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
+        // Forge's shared hook list is not safe to mutate during parallel mod construction.
+        net.minecraftforge.fml.DeferredWorkQueue.runLater(LegacyWorldDataHook::register);
         PowerAdvantageConfig.apply();
         ModSupport.configureForgeEnergyConversions();
         Recipes.initDistillationRecipes(PowerAdvantageConfig.distillationRecipes());

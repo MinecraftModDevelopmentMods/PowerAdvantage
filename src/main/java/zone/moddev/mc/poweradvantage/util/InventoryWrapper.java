@@ -1,293 +1,60 @@
 package zone.moddev.mc.poweradvantage.util;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
+import net.minecraft.util.INameable;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentBase;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.world.ILockableContainer;
+import net.minecraft.util.text.StringTextComponent;
 
-/**
- * This class allows you to treat an instance of IInventory as if it were an instance of 
- * ISidedInventory. 
- * @author DrCyano
- *
- */
-public class InventoryWrapper implements ISidedInventory {
+/** Gives ordinary inventories the sided interface used by conveyors. */
+public class InventoryWrapper implements ISidedInventory, INameable {
+    private static final int[] NO_SLOTS = new int[0];
+    private static final InventoryWrapper NULL_INVENTORY = new InventoryWrapper();
+    private final IInventory inventory;
+    private final int[] slots;
 
-	private final IInventory inventory;
-	private final int[] slots;
-	private static final int[] NO_SLOTS = new int[0];
-	private static final InventoryWrapper NULL_INVENTORY = new InventoryWrapper();
+    protected InventoryWrapper() { this(new Inventory(0)); }
 
-	/**
-	 * Constructs an ISidedInventory wrapper for the given IInventory instance
-	 *
-	 * @param inv An net.minecraft.inventory.IInventory that you want to treat as a
-	 *            net.minecraft.inventory.ISidedInventory
-	 */
-	protected InventoryWrapper(IInventory inv) {
-		this.inventory = inv;
-		slots = new int[inventory.getSizeInventory()];
-		for (int i = 0; i < slots.length; i++) {
-			slots[i] = i;
-		}
-	}
+    protected InventoryWrapper(IInventory inventory) {
+        this.inventory = inventory;
+        slots = new int[inventory.getSizeInventory()];
+        for (int i = 0; i < slots.length; i++) slots[i] = i;
+    }
 
-	/**
-	 * Creates an ISidedInventory instance that has no inventory
-	 */
-	protected InventoryWrapper() {
-		slots = NO_SLOTS;
-		inventory = new IInventory() {
-			@Override
-			public int getSizeInventory() {
-				return 0;
-			}
+    public static ISidedInventory wrap(IInventory inventory) {
+        if (inventory == null) return NULL_INVENTORY;
+        return inventory instanceof ISidedInventory ? (ISidedInventory) inventory : new InventoryWrapper(inventory);
+    }
 
-			@Override
-			public boolean isEmpty() {
-				return true;
-			}
-
-			@Override
-			public ItemStack getStackInSlot(int i) {
-				return null;
-			}
-
-			@Override
-			public ItemStack decrStackSize(int i, int i1) {
-				return null;
-			}
-
-			@Override
-			public ItemStack removeStackFromSlot(int i) {
-				return null;
-			}
-
-			@Override
-			public void setInventorySlotContents(int i, ItemStack itemStack) {
-
-			}
-
-			@Override
-			public int getInventoryStackLimit() {
-				return 0;
-			}
-
-			@Override
-			public void markDirty() {
-
-			}
-
-			@Override
-			public boolean isUsableByPlayer(EntityPlayer entityPlayer) {
-				return false;
-			}
-
-			@Override
-			public void openInventory(EntityPlayer entityPlayer) {
-
-			}
-
-			@Override
-			public void closeInventory(EntityPlayer entityPlayer) {
-
-			}
-
-			@Override
-			public boolean isItemValidForSlot(int i, ItemStack itemStack) {
-				return false;
-			}
-
-			@Override
-			public int getField(int i) {
-				return 0;
-			}
-
-			@Override
-			public void setField(int i, int i1) {
-
-			}
-
-			@Override
-			public int getFieldCount() {
-				return 0;
-			}
-
-			@Override
-			public void clear() {
-
-			}
-
-			@Override
-			public ITextComponent getName() {
-				return new TextComponentString("Inventory");
-			}
-
-			@Override
-			public boolean hasCustomName() {
-				return false;
-			}
-
-			@Override
-			public ITextComponent getCustomName() {
-				return null;
-			}
-
-			@Override
-			public TextComponentBase getDisplayName() {
-				return new TextComponentString("Inventory");
-			}
-		};
-	}
-
-	/**
-	 * Gets whether this is a locked container
-	 *
-	 * @return true if the wrapped inventory is an instance of ILockableContainer and is locked
-	 */
-	public boolean isLocked() {
-		if (inventory instanceof ILockableContainer) {
-			return ((ILockableContainer) inventory).isLocked();
-		}
-		return false;
-	}
-
-	/**
-	 * Constructs an ISidedInventory wrapper for the given IInventory instance. If the provided
-	 * instance is already an ISidedInventory, then that instance is simply returned instead of
-	 * making a wrapper.
-	 *
-	 * @param inv An net.minecraft.inventory.IInventory that you want to treat as a
-	 *            net.minecraft.inventory.ISidedInventory
-	 * @return An instance of ISidedInventory that forwards all methods to the given IInventory
-	 */
-	public static ISidedInventory wrap(IInventory inv) {
-		if (inv == null) return NULL_INVENTORY;
-		if (inv instanceof ISidedInventory) return (ISidedInventory) inv;
-		return new InventoryWrapper(inv);
-	}
-
-	@Override
-	public ITextComponent getDisplayName() {
-		return inventory.getDisplayName();
-	}
-
-	@Override
-	public ITextComponent getName() {
-		return inventory.getName();
-	}
-
-	@Override
-	public ITextComponent getCustomName() {
-		return inventory.getCustomName();
-	}
-
-	@Override
-	public boolean hasCustomName() {
-		return inventory.hasCustomName();
-	}
-
-	@Override
-	public void clear() {
-		inventory.clear();
-	}
-
-	@Override
-	public boolean isEmpty() {
-		return inventory.isEmpty();
-	}
-
-	@Override
-	public void closeInventory(EntityPlayer arg0) {
-		inventory.closeInventory(arg0);
-	}
-
-	@Override
-	public ItemStack decrStackSize(int arg0, int arg1) {
-		return inventory.decrStackSize(arg0, arg1);
-	}
-
-	@Override
-	public int getField(int arg0) {
-		return inventory.getField(arg0);
-	}
-
-	@Override
-	public int getFieldCount() {
-		return inventory.getFieldCount();
-	}
-
-	@Override
-	public int getInventoryStackLimit() {
-		return inventory.getInventoryStackLimit();
-	}
-
-	@Override
-	public int getSizeInventory() {
-		return inventory.getSizeInventory();
-	}
-
-	@Override
-	public ItemStack getStackInSlot(int arg0) {
-		return inventory.getStackInSlot(arg0);
-	}
-
-	@Override
-	public ItemStack removeStackFromSlot(int index) {
-		return inventory.removeStackFromSlot(index);
-	}
-
-	@Override
-	public boolean isItemValidForSlot(int arg0, ItemStack arg1) {
-		return inventory.isItemValidForSlot(arg0, arg1);
-	}
-
-	@Override
-	public boolean isUsableByPlayer(EntityPlayer arg0) {
-		return inventory.isUsableByPlayer(arg0);
-	}
-
-	@Override
-	public void markDirty() {
-		inventory.markDirty();
-	}
-
-	@Override
-	public void openInventory(EntityPlayer arg0) {
-		inventory.openInventory(arg0);
-	}
-
-	@Override
-	public void setField(int arg0, int arg1) {
-		inventory.setField(arg0, arg1);
-	}
-
-	@Override
-	public void setInventorySlotContents(int arg0, ItemStack arg1) {
-		inventory.setInventorySlotContents(arg0, arg1);
-	}
-
-	@Override
-	public boolean canExtractItem(int arg0, ItemStack arg1, EnumFacing arg2) {
-		if (isLocked()) return false;
-		return true;
-	}
-
-	@Override
-	public boolean canInsertItem(int arg0, ItemStack arg1, EnumFacing arg2) {
-		if (isLocked()) return false;
-		return true;
-	}
-
-
-	@Override
-	public int[] getSlotsForFace(EnumFacing arg0) {
-		if (isLocked()) return NO_SLOTS;
-		return slots;
-	}
+    public boolean isLocked() { return InventoryLocks.isLocked(inventory); }
+    @Override public ITextComponent getName() {
+        return inventory instanceof INameable ? ((INameable) inventory).getName() : new StringTextComponent("Inventory");
+    }
+    @Override public ITextComponent getCustomName() {
+        return inventory instanceof INameable ? ((INameable) inventory).getCustomName() : null;
+    }
+    @Override public void clear() { inventory.clear(); }
+    @Override public boolean isEmpty() { return inventory.isEmpty(); }
+    @Override public int getSizeInventory() { return inventory.getSizeInventory(); }
+    @Override public int getInventoryStackLimit() { return inventory.getInventoryStackLimit(); }
+    @Override public ItemStack getStackInSlot(int slot) { return inventory.getStackInSlot(slot); }
+    @Override public ItemStack decrStackSize(int slot, int amount) { return inventory.decrStackSize(slot, amount); }
+    @Override public ItemStack removeStackFromSlot(int slot) { return inventory.removeStackFromSlot(slot); }
+    @Override public void setInventorySlotContents(int slot, ItemStack stack) { inventory.setInventorySlotContents(slot, stack); }
+    @Override public boolean isItemValidForSlot(int slot, ItemStack stack) { return inventory.isItemValidForSlot(slot, stack); }
+    @Override public boolean isUsableByPlayer(PlayerEntity player) {
+        return slots.length != 0 && inventory.isUsableByPlayer(player);
+    }
+    @Override public void openInventory(PlayerEntity player) { inventory.openInventory(player); }
+    @Override public void closeInventory(PlayerEntity player) { inventory.closeInventory(player); }
+    @Override public void markDirty() { inventory.markDirty(); }
+    @Override public int[] getSlotsForFace(Direction face) { return isLocked() ? NO_SLOTS : slots; }
+    @Override public boolean canInsertItem(int slot, ItemStack stack, Direction face) {
+        return !isLocked() && inventory.isItemValidForSlot(slot, stack);
+    }
+    @Override public boolean canExtractItem(int slot, ItemStack stack, Direction face) { return !isLocked(); }
 }

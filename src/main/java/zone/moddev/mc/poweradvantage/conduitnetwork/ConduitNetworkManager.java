@@ -11,8 +11,8 @@ import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.PowerConnectorContext;
 import zone.moddev.mc.poweradvantage.math.BlockPos4D;
 import zone.moddev.mc.poweradvantage.util.PowerHelper;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
@@ -193,14 +193,14 @@ public class ConduitNetworkManager {
 	 * @param src   The block from which we are scanning
 	 * @param type  The type of energy that will flow throught the scanned network
 	 */
-	protected void recursiveScan(World w, BlockPos4D coord, IBlockState src, ConduitType type) {
-		for (int i = 0; i < EnumFacing.values().length; i++) {
-			EnumFacing face = EnumFacing.values()[i];
+	protected void recursiveScan(World w, BlockPos4D coord, BlockState src, ConduitType type) {
+		for (int i = 0; i < Direction.values().length; i++) {
+			Direction face = Direction.values()[i];
 			BlockPos4D n = coord.offset(face);
 			if (!w.isBlockLoaded(n.pos) || areInSameNetwork(coord, n)) {
 				continue;
 			}
-			IBlockState blockstate = w.getBlockState(n.pos);
+			BlockState blockstate = w.getBlockState(n.pos);
 			PowerConnectorContext connection = new PowerConnectorContext(type, w, src, coord.pos, face, blockstate, n.pos, face.getOpposite());
 			if (PowerHelper.areConnectable(connection)) {
 				addBlockToNetwork(coord, n);

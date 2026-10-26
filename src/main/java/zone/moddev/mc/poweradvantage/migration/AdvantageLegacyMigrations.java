@@ -3,8 +3,8 @@ package zone.moddev.mc.poweradvantage.migration;
 import cyano.poweradvantage.api.migration.LegacyMigrationApi;
 import cyano.poweradvantage.api.simple.BlockSimplePowerMachine;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockFlowingFluid;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.FlowingFluidBlock;
+import net.minecraft.block.BlockState;
 import net.minecraft.util.ResourceLocation;
 import zone.moddev.mc.poweradvantage.PowerAdvantage;
 import zone.moddev.mc.poweradvantage.blocks.BlockPowerSwitch;
@@ -72,7 +72,7 @@ public final class AdvantageLegacyMigrations {
         LegacyMigrationApi.registerTileEntityAlias("minecraft:" + PowerAdvantage.MODID + "." + path, current);
     }
 
-    private static IBlockState decodeState(Block block, int metadata) {
+    private static BlockState decodeState(Block block, int metadata) {
         if (block instanceof StillBlock) return ((StillBlock) block).getStateFromMeta(metadata);
         if (block instanceof BlockConveyor) return ((BlockConveyor) block).getStateFromMeta(metadata);
         if (block instanceof BlockConveyorFilter) return ((BlockConveyorFilter) block).getStateFromMeta(metadata);
@@ -80,8 +80,8 @@ public final class AdvantageLegacyMigrations {
         if (block instanceof BlockSimplePowerMachine) {
             return ((BlockSimplePowerMachine) block).getStateFromMeta(metadata);
         }
-        if (block instanceof BlockFlowingFluid) {
-            return block.getDefaultState().with(BlockFlowingFluid.LEVEL, Integer.valueOf(metadata & 15));
+        if (block instanceof FlowingFluidBlock) {
+            return block.getDefaultState().with(FlowingFluidBlock.LEVEL, Integer.valueOf(metadata & 15));
         }
         return block.getDefaultState();
     }

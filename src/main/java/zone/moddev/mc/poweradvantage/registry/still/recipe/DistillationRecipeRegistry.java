@@ -11,7 +11,7 @@ import zone.moddev.mc.poweradvantage.PowerAdvantage;
 import net.minecraft.fluid.Fluid;
 import cyano.poweradvantage.api.fluid.FluidStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.IRegistry;
+import net.minecraft.util.registry.Registry;
 import zone.moddev.mc.poweradvantage.init.Fluids;
 
 /**
@@ -137,7 +137,7 @@ public class DistillationRecipeRegistry {
 	}
 
 	private static String id(Fluid fluid) {
-		ResourceLocation id = IRegistry.field_212619_h.getKey(fluid);
+		ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.FLUIDS.getKey(fluid);
 		return id == null ? "unknown" : id.toString();
 	}
 	

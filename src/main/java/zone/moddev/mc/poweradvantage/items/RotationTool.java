@@ -1,10 +1,10 @@
 package zone.moddev.mc.poweradvantage.items;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -18,12 +18,12 @@ public class RotationTool extends net.minecraft.item.Item {
 	}
 
 	@Override
-	public EnumActionResult onItemUse(ItemUseContext context) {
-		final EntityPlayer player = context.getPlayer();
+	public ActionResultType onItemUse(ItemUseContext context) {
+		final PlayerEntity player = context.getPlayer();
 		final World w = context.getWorld();
 		final BlockPos coord = context.getPos();
-		final EnumFacing facing = context.getFace();
-		IBlockState bs = w.getBlockState(coord);
+		final Direction facing = context.getFace();
+		BlockState bs = w.getBlockState(coord);
 		/*  // comment this line to turn the wrench into a hacker tool
 		try { // hacker info
 			FMLLog.info("%s",new StringBuilder()
@@ -38,13 +38,13 @@ public class RotationTool extends net.minecraft.item.Item {
 		}
 		//*/
 
-		IBlockState rotated = bs.rotate(w, coord, Rotation.COUNTERCLOCKWISE_90);
+		BlockState rotated = bs.rotate(w, coord, Rotation.COUNTERCLOCKWISE_90);
 		if (rotated != bs) {
 			w.setBlockState(coord, rotated);
-			return EnumActionResult.SUCCESS;
+			return ActionResultType.SUCCESS;
 		}
 
 
-		return EnumActionResult.PASS;
+		return ActionResultType.PASS;
 	}
 }

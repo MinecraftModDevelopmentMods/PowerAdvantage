@@ -4,7 +4,7 @@ import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.simple.BlockSimplePowerMachine;
 import net.minecraft.block.material.Material;
 import net.minecraft.world.IBlockReader;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -29,6 +29,6 @@ public class BlockRFConverter extends BlockSimplePowerMachine {
 
     @Override public boolean isPowerSink(ConduitType powerType) { return true; }
     @Override public boolean isPowerSource(ConduitType powerType) { return true; }
-    @Override public boolean hasComparatorInputOverride(IBlockState state) { return false; }
-    @Override public int getComparatorInputOverride(IBlockState state, World world, BlockPos pos) { return 0; }
+    @Override public boolean hasComparatorInputOverride(BlockState state) { return false; }
+    @Override public int getComparatorInputOverride(BlockState state, World world, BlockPos pos) { return 0; }
 }

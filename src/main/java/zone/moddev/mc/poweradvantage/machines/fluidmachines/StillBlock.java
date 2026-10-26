@@ -6,9 +6,9 @@ import cyano.poweradvantage.api.simple.BlockSimpleFluidMachine;
 import net.minecraft.block.material.Material;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
@@ -31,7 +31,7 @@ public class StillBlock extends BlockSimpleFluidMachine {
 	 * Creates a blockstate
 	 */
 	@Override
-	protected void fillStateContainer(StateContainer.Builder<net.minecraft.block.Block, IBlockState> builder) {
+	protected void fillStateContainer(StateContainer.Builder<net.minecraft.block.Block, BlockState> builder) {
 		super.fillStateContainer(builder);
 		builder.add(ACTIVE);
 	}
@@ -40,10 +40,10 @@ public class StillBlock extends BlockSimpleFluidMachine {
 	 * Converts metadata into blockstate
 	 */
 	@Override
-	public IBlockState getStateFromMeta(final int metaValue) {
-		EnumFacing enumFacing = metaToFacing(metaValue);
-		if (enumFacing.getAxis() == EnumFacing.Axis.Y) {
-			enumFacing = EnumFacing.NORTH;
+	public BlockState getStateFromMeta(final int metaValue) {
+		Direction enumFacing = metaToFacing(metaValue);
+		if (enumFacing.getAxis() == Direction.Axis.Y) {
+			enumFacing = Direction.NORTH;
 		}
 		return this.getDefaultState().with(FACING, enumFacing)
 				.with(ACTIVE, (metaValue & 0x4) != 0);
@@ -53,17 +53,17 @@ public class StillBlock extends BlockSimpleFluidMachine {
 	 * Converts blockstate into metadata
 	 */
 	@Override
-	public int getMetaFromState(final IBlockState bs) {
+	public int getMetaFromState(final BlockState bs) {
 		int extraBit;
 		if ((Boolean) (bs .get(ACTIVE))) {
 			extraBit = 0x4;
 		} else {
 			extraBit = 0;
 		}
-		return facingToMeta((EnumFacing) bs .get(FACING)) | extraBit;
+		return facingToMeta((Direction) bs .get(FACING)) | extraBit;
 	}
 
-	private int facingToMeta(EnumFacing f) {
+	private int facingToMeta(Direction f) {
 		switch (f) {
 			case NORTH:
 				return 0;
@@ -78,24 +78,24 @@ public class StillBlock extends BlockSimpleFluidMachine {
 		}
 	}
 
-	private EnumFacing metaToFacing(int i) {
+	private Direction metaToFacing(int i) {
 		int f = i & 0x03;
 		switch (f) {
 			case 0:
-				return EnumFacing.NORTH;
+				return Direction.NORTH;
 			case 1:
-				return EnumFacing.WEST;
+				return Direction.WEST;
 			case 2:
-				return EnumFacing.SOUTH;
+				return Direction.SOUTH;
 			case 3:
-				return EnumFacing.EAST;
+				return Direction.EAST;
 			default:
-				return EnumFacing.NORTH;
+				return Direction.NORTH;
 		}
 	}
 
 	@Override
-	public int getLightValue(IBlockState bs, IWorldReader world, BlockPos coord) {
+	public int getLightValue(BlockState bs, net.minecraft.world.IEnviromentBlockReader world, BlockPos coord) {
 		return bs.get(ACTIVE) ? 12 : 0;
 	}
 
@@ -105,12 +105,12 @@ public class StillBlock extends BlockSimpleFluidMachine {
 	}
 
 	@Override
-	public boolean hasComparatorInputOverride(IBlockState bs) {
+	public boolean hasComparatorInputOverride(BlockState bs) {
 		return true;
 	}
 
 	@Override
-	public int getComparatorInputOverride(IBlockState bs, World world, BlockPos coord) {
+	public int getComparatorInputOverride(BlockState bs, World world, BlockPos coord) {
 		TileEntity te = world.getTileEntity(coord);
 		if (te instanceof StillTileEntity) {
 			return ((StillTileEntity) te).getRedstoneOutput();

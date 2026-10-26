@@ -4,14 +4,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import net.minecraft.nbt.INBTBase;
-import net.minecraft.nbt.NBTTagByte;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagDouble;
-import net.minecraft.nbt.NBTTagInt;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagLong;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ByteNBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.DoubleNBT;
+import net.minecraft.nbt.IntNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.LongNBT;
+import net.minecraft.nbt.StringNBT;
 
 import java.util.Map;
 
@@ -19,34 +19,34 @@ final class JsonNbtConverter {
     private JsonNbtConverter() {
     }
 
-    static NBTTagCompound toCompound(JsonObject object) {
-        NBTTagCompound result = new NBTTagCompound();
+    static CompoundNBT toCompound(JsonObject object) {
+        CompoundNBT result = new CompoundNBT();
         for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
-            result.setTag(entry.getKey(), toTag(entry.getValue()));
+            result.put(entry.getKey(), toTag(entry.getValue()));
         }
         return result;
     }
 
-    private static INBTBase toTag(JsonElement element) {
+    private static INBT toTag(JsonElement element) {
         if (element == null || element.isJsonNull()) {
             throw new IllegalArgumentException("NBT values may not be null");
         }
         if (element.isJsonObject()) return toCompound(element.getAsJsonObject());
         if (element.isJsonArray()) {
-            NBTTagList result = new NBTTagList();
+            ListNBT result = new ListNBT();
             JsonArray array = element.getAsJsonArray();
             for (JsonElement child : array) result.add(toTag(child));
             return result;
         }
         JsonPrimitive primitive = element.getAsJsonPrimitive();
-        if (primitive.isBoolean()) return new NBTTagByte((byte) (primitive.getAsBoolean() ? 1 : 0));
-        if (primitive.isString()) return new NBTTagString(primitive.getAsString());
+        if (primitive.isBoolean()) return new ByteNBT((byte) (primitive.getAsBoolean() ? 1 : 0));
+        if (primitive.isString()) return new StringNBT(primitive.getAsString());
         String number = primitive.getAsString();
         if (number.contains(".") || number.contains("e") || number.contains("E")) {
-            return new NBTTagDouble(primitive.getAsDouble());
+            return new DoubleNBT(primitive.getAsDouble());
         }
         long value = primitive.getAsLong();
         return value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE
-                ? new NBTTagInt((int) value) : new NBTTagLong(value);
+                ? new IntNBT((int) value) : new LongNBT(value);
     }
 }

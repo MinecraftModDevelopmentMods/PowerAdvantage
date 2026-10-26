@@ -3,19 +3,19 @@ package cyano.poweradvantage.api.fluid;
 import javax.annotation.Nullable;
 
 import net.minecraft.fluid.Fluid;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.IRegistry;
+import net.minecraft.util.registry.Registry;
 import zone.moddev.mc.poweradvantage.init.Fluids;
 
 /**
- * Forge 25's transitional fluid stack is unfinished, so Advantage keeps its
- * millibucket state in this native-fluid-backed value object.
+ * Stable Advantage millibucket value object. Native Forge fluid capabilities
+ * are bridged without changing this API or its saved NBT representation.
  */
 public final class FluidStack {
     private final Fluid fluid;
     public int amount;
-    @Nullable public NBTTagCompound tag;
+    @Nullable public CompoundNBT tag;
 
     public FluidStack(Fluid fluid, int amount) {
         if (fluid == null) throw new IllegalArgumentException("fluid");
@@ -36,16 +36,16 @@ public final class FluidStack {
                 && (tag == null ? other.tag == null : tag.equals(other.tag));
     }
 
-    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-        ResourceLocation id = IRegistry.field_212619_h.getKey(fluid);
-        if (id != null) nbt.setString("FluidName", id.toString());
-        nbt.setInt("Amount", amount);
-        if (tag != null) nbt.setTag("Tag", tag.copy());
+    public CompoundNBT writeToNBT(CompoundNBT nbt) {
+        ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.FLUIDS.getKey(fluid);
+        if (id != null) nbt.putString("FluidName", id.toString());
+        nbt.putInt("Amount", amount);
+        if (tag != null) nbt.put("Tag", tag.copy());
         return nbt;
     }
 
     @Nullable
-    public static FluidStack loadFluidStackFromNBT(NBTTagCompound nbt) {
+    public static FluidStack loadFluidStackFromNBT(CompoundNBT nbt) {
         if (nbt == null || !nbt.contains("FluidName", 8)) return null;
         Fluid fluid = Fluids.byName(nbt.getString("FluidName"));
         if (fluid == null) return null;

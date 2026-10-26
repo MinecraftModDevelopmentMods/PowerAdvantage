@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+
 public class LifecycleProbeTest {
     private LifecycleProbe.Fixture fixture() {
         LifecycleProbe.Fixture fixture = new LifecycleProbe.Fixture();
@@ -24,6 +27,66 @@ public class LifecycleProbeTest {
     @Test public void boundedOilBucketAccepted() {
         LifecycleProbe.Fixture f = fixture(); f.bucket = "poweradvantage:crude_oil_bucket";
         f.source = new int[] {2060, 80, 2060}; LifecycleProbe.validate(f);
+    }
+    @Test public void fourPowerOilLanesRemainAcceptedWithoutMineralogy() {
+        for (String oil : Arrays.asList("crude_oil", "refined_oil")) {
+            for (String tank : Arrays.asList("fluid_storage_tank", "fluid_metal_tank")) {
+                LifecycleProbe.Fixture f = fixture();
+                f.id = "OIL-" + oil + "-" + tank;
+                f.bucket = "poweradvantage:" + oil + "_bucket";
+                f.source = new int[] {2060, 80, 2060};
+                LifecycleProbe.validate(f, () -> {
+                    throw new AssertionError("Power oil must not require or query Mineralogy");
+                });
+                LifecycleProbe.validate(f);
+            }
+        }
+    }
+    @Test public void nativeMineralogyOilBucketAcceptedWhenLoaded() {
+        LifecycleProbe.Fixture f = fixture(); f.bucket = "mineralogy:crude_oil_bucket";
+        f.source = new int[] {2060, 80, 2060};
+        LifecycleProbe.validate(f, () -> true);
+    }
+    @Test public void nativeMineralogyOilRequiresItsMod() {
+        LifecycleProbe.Fixture f = fixture(); f.bucket = "mineralogy:crude_oil_bucket";
+        f.source = new int[] {2060, 80, 2060};
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
+                () -> LifecycleProbe.validate(f, () -> false));
+        assertEquals("Mineralogy oil bucket requires mineralogy", error.getMessage());
+    }
+    @Test public void waterAndLookalikeOilBucketsRemainRejectedWithMineralogyLoaded() {
+        for (String bucket : Arrays.asList("minecraft:water_bucket", "mineralogy:refined_oil_bucket",
+                "other:crude_oil_bucket", "mineralogy:crude_oil_bucket_extra",
+                "poweradvantage:crude_oil_bucket_extra", "poweradvantage:other_oil_bucket")) {
+            LifecycleProbe.Fixture f = fixture(); f.bucket = bucket;
+            f.source = new int[] {2060, 80, 2060};
+            IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
+                    () -> LifecycleProbe.validate(f, () -> true));
+            assertEquals("Unsupported oil bucket", error.getMessage());
+        }
+    }
+    @Test(expected = IllegalArgumentException.class) public void mineralogyOilSourceOutsideBoundsRejected() {
+        LifecycleProbe.Fixture f = fixture(); f.bucket = "mineralogy:crude_oil_bucket";
+        f.source = new int[] {2080, 80, 2060}; LifecycleProbe.validate(f, () -> true);
+    }
+    @Test(expected = IllegalArgumentException.class) public void mineralogyOilBucketNeedsHeadroom() {
+        LifecycleProbe.Fixture f = fixture(); f.bucket = "mineralogy:crude_oil_bucket";
+        f.source = new int[] {2060, 90, 2060}; LifecycleProbe.validate(f, () -> true);
+    }
+    @Test(expected = IllegalArgumentException.class) public void mineralogyDoesNotAllowUnsafeFixtureId() {
+        LifecycleProbe.Fixture f = fixture(); f.bucket = "mineralogy:crude_oil_bucket";
+        f.source = new int[] {2060, 80, 2060}; f.id = "../OIL-mineralogy";
+        LifecycleProbe.validate(f, () -> true);
+    }
+    @Test(expected = IllegalArgumentException.class) public void mineralogyDoesNotAllowSpawnArea() {
+        LifecycleProbe.Fixture f = fixture(); f.bucket = "mineralogy:crude_oil_bucket";
+        f.source = new int[] {2060, 80, 2060}; f.min[0] = 0;
+        LifecycleProbe.validate(f, () -> true);
+    }
+    @Test(expected = IllegalArgumentException.class) public void mineralogyDoesNotAllowOversizedBounds() {
+        LifecycleProbe.Fixture f = fixture(); f.bucket = "mineralogy:crude_oil_bucket";
+        f.source = new int[] {2060, 80, 2060}; f.max[0] = f.min[0] + 32;
+        LifecycleProbe.validate(f, () -> true);
     }
     @Test(expected = IllegalArgumentException.class) public void oilBucketOutsideBoundsRejected() {
         LifecycleProbe.Fixture f = fixture(); f.bucket = "poweradvantage:crude_oil_bucket";

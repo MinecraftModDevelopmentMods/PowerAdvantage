@@ -2,9 +2,9 @@ name: CodeQL
 
 on:
   push:
-    branches: [master-1.13.2, 'feature/**']
+    branches: [master-1.14.4, 'feature/**']
   pull_request:
-    branches: [master-1.13.2]
+    branches: [master-1.14.4]
   schedule:
     - cron: '47 7 * * 4'
 
@@ -25,16 +25,16 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: MinecraftModDevelopmentMods/OreSpawn
-          ref: 6a7c2bb07b9a7771128812fcc07d185f7d9df58b
+          ref: 9c2488cba02d317e3f31e24441dcc58273d8d0e6
           path: .ci-dependencies/OreSpawn
       - name: Use canonical LF dependency inputs
-        # Base Metals predates archive text normalization; its LF artifact is separately pinned.
+        # Use the same source bytes on hosted and local dependency builds.
         run: git config --global core.autocrlf false
       - name: Check out pinned Base Metals
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: MinecraftModDevelopmentMods/BaseMetals
-          ref: 1376a20d7d5ba22d3abc77dc34b49a2c88943697
+          ref: 713802f93f2d1f650e1593fa35c487ea43add4a5
           path: .ci-dependencies/BaseMetals
       - name: Install Java 8 toolchain
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
@@ -58,8 +58,8 @@ jobs:
           chmod +x "$orespawn/gradlew" "$basemetals/gradlew"
           (cd "$orespawn" && ./gradlew jar --no-daemon --stacktrace)
           (cd "$basemetals" && ./gradlew jar --no-daemon --stacktrace)
-          echo "orespawn=$orespawn/build/libs-dev/OreSpawn-4.1.0.113021-deobf.jar" >> "$GITHUB_OUTPUT"
-          echo "basemetals=$basemetals/build/libs-dev/BaseMetals-3.0.1.113021-deobf.jar" >> "$GITHUB_OUTPUT"
+          echo "orespawn=$orespawn/build/libs-dev/OreSpawn-4.1.1.114041-deobf.jar" >> "$GITHUB_OUTPUT"
+          echo "basemetals=$basemetals/build/libs-dev/BaseMetals-3.0.1.114041-deobf.jar" >> "$GITHUB_OUTPUT"
       - name: Initialize CodeQL
         uses: github/codeql-action/init@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4
         with:

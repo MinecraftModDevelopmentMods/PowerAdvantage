@@ -1,8 +1,8 @@
 package zone.moddev.mc.poweradvantage.math;
 
-import net.minecraft.nbt.INBTBase;
-import net.minecraft.nbt.NBTTagIntArray;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.IntArrayNBT;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
 /**
@@ -110,7 +110,7 @@ public class BlockPos4D {
 	 * @param distance  The direction to move the coordinate
 	 * @return A new BlockPos4D representing the new position
 	 */
-	public BlockPos4D offset(final EnumFacing direction, final int distance) {
+	public BlockPos4D offset(final Direction direction, final int distance) {
 		return new BlockPos4D(this.dimension,
 				this.getX() + direction.getXOffset() * distance,
 				this.getY() + direction.getYOffset() * distance,
@@ -123,7 +123,7 @@ public class BlockPos4D {
 	 * @param direction The direction to move the coordinate
 	 * @return A new BlockPos4D representing the new position
 	 */
-	public BlockPos4D offset(final EnumFacing direction) {
+	public BlockPos4D offset(final Direction direction) {
 		return offset(direction, 1);
 	}
 
@@ -264,24 +264,24 @@ public class BlockPos4D {
 	}
 
 	public BlockPos4D[] getNeighbors() {
-		BlockPos4D[] n = new BlockPos4D[EnumFacing.values().length];
+		BlockPos4D[] n = new BlockPos4D[Direction.values().length];
 		for (int i = 0; i < n.length; i++) {
-			n[i] = this.offset(EnumFacing.values()[i]);
+			n[i] = this.offset(Direction.values()[i]);
 		}
 		return n;
 	}
 
-	public INBTBase toNBT() {
+	public INBT toNBT() {
 		int[] data = new int[4];
 		data[0] = dimension;
 		data[1] = pos.getX();
 		data[2] = pos.getY();
 		data[3] = pos.getZ();
-		return new NBTTagIntArray(data);
+		return new IntArrayNBT(data);
 	}
 
-	public static BlockPos4D fromNBT(INBTBase tag) {
-		int[] data = ((NBTTagIntArray) tag).getIntArray();
+	public static BlockPos4D fromNBT(INBT tag) {
+		int[] data = ((IntArrayNBT) tag).getIntArray();
 		return new BlockPos4D(data[0], data[1], data[2], data[3]);
 	}
 

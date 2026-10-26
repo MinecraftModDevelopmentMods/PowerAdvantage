@@ -1,6 +1,5 @@
 package zone.moddev.mc.poweradvantage.machines.conveyors;
 
-import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import zone.moddev.mc.poweradvantage.init.Entities;
 
@@ -10,7 +9,7 @@ public class TileEntityFoodFilter extends TileEntityConveyorFilter {
 	@Override
 	public boolean matchesFilter(ItemStack item) {
 		if (item == null) return false;
-		return item.getItem() instanceof ItemFood;
+		return !item.isEmpty() && item.getItem().isFood();
 	}
 
 }

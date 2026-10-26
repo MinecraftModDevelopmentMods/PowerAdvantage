@@ -12,7 +12,7 @@ import zone.moddev.mc.poweradvantage.math.BlockPos4D;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.LazyOptional;
@@ -129,7 +129,7 @@ public class ConduitRegistry {
 							}
 						}
 					} else if (e != null && PowerAdvantage.forgeEnergyConversionTable.containsKey(conduitType)) {
-						for (EnumFacing side : EnumFacing.values()) {
+						for (Direction side : Direction.values()) {
 							LazyOptional<IEnergyStorage> capability = e.getCapability(CapabilityEnergy.ENERGY, side);
 							if (!capability.isPresent()) continue;
 							capability.ifPresent(storage -> requests.add(Wrappers.wrapForgeEnergyRequest(storage,
@@ -223,8 +223,8 @@ public class ConduitRegistry {
 		BlockPos4D coord = new BlockPos4D(dimension, location);
 		ConduitNetworkManager manager = getConduitNetworkManager(type);
 		manager.invalidate(coord);
-		for (int i = 0; i < EnumFacing.values().length; i++) {
-			EnumFacing face = EnumFacing.values()[i];
+		for (int i = 0; i < Direction.values().length; i++) {
+			Direction face = Direction.values()[i];
 			BlockPos4D n = coord.offset(face);
 			manager.invalidate(n);
 		}
@@ -296,8 +296,8 @@ public class ConduitRegistry {
 		BlockPos4D coord = new BlockPos4D(dimension, location);
 		ConduitNetworkManager manager = getConduitNetworkManager(type);
 		manager.invalidate(coord);
-		for (int i = 0; i < EnumFacing.values().length; i++) {
-			EnumFacing face = EnumFacing.values()[i];
+		for (int i = 0; i < Direction.values().length; i++) {
+			Direction face = Direction.values()[i];
 			BlockPos4D n = coord.offset(face);
 			manager.invalidate(n);
 		}
