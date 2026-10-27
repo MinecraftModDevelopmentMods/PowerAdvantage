@@ -1,11 +1,13 @@
 """Bind exact 1.16 UUID/dimension representations to unchanged historical oracles."""
 
 import types
+import json
 
 import actors
 import dimensions
 from matrix import normalized, parse_nbt, plain
 from native116_format import actor_nbt
+from native116_dimension_io import parse_dimension_nbt, validate_record
 
 
 def semantic(value, keys, registry):
@@ -22,7 +24,16 @@ def bind(function, **bindings):
 
 
 capture_actors = bind(actors.capture, semantic=semantic)
-capture_dimensions = bind(dimensions.capture, semantic=semantic, normalized=native_normalized)
+
+
+class DimensionJson:
+    @staticmethod
+    def loads(text):
+        return validate_record(json.loads(text))
+
+
+capture_dimensions = bind(dimensions.capture, semantic=semantic, normalized=native_normalized,
+                          parse_nbt=parse_dimension_nbt, json=DimensionJson)
 
 
 def parsed_actor(entry):

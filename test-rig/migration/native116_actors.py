@@ -15,6 +15,8 @@ from native116_code import Server
 from native116 import output_path, pinned_profile, require_clean_log, require_disjoint
 from native116 import boot
 from native116_actor_io import capture_actors, capture_dimensions
+from native116_dimension_assessment import assess, load_native_proof, summarize_checks
+import native116_dimension_assessment
 
 
 HISTORICAL = ("original110", "early110", "maintained110", "legacy112", "maintained112")
@@ -132,7 +134,14 @@ def run_route(source, runtime, target, args):
     })
     verdict = dimensions.verdict if args.kind == "dimensions" else actors.compare
     tick = dimensions.tick_result if args.kind == "dimensions" else actors.tick_result
-    checks = {}
+    checks, assessments = {}, {}
+
+    def compare(key, before, after, survival=False, adapter=True):
+        strict = verdict(before, after)
+        if args.kind == "dimensions":
+            assessments[key] = assess(before, after, strict, getattr(args, "native_wolf_proof", None),
+                                      "survival" if survival else "strict", adapter)
+        return strict
     try:
         server = Server(runtime, args.java8, launcher, "conversion")
         try:
@@ -141,11 +150,11 @@ def run_route(source, runtime, target, args):
                 time.sleep(4)
             converted = command(server, runtime, args.kind, "snapshot", "converted")
             live = args.kind == "dimensions"
-            checks["conversion"] = verdict(expected_state(expected, args.kind, survival=live, adapter=False), converted)
+            checks["conversion"] = compare("conversion", expected_state(expected, args.kind, survival=live, adapter=False), converted, live, False)
             checks["conversion-ticks" if live else "conversion-frozen"] = (tick(raw(runtime, args.kind, "conversion-release"), raw(runtime, args.kind, "converted"))
                     if live else actors.freeze_result(raw(runtime, args.kind, "converted")))
             adapter = command(server, runtime, args.kind, "read", "adapter")
-            checks["adapter"] = verdict(expected_state(expected, args.kind, survival=live), adapter)
+            checks["adapter"] = compare("adapter", expected_state(expected, args.kind, survival=live), adapter, live)
             if not live:
                 checks["adapter-frozen"] = actors.freeze_result(raw(runtime, args.kind, "adapter"))
             backups = actors.backup_state(runtime)
@@ -158,14 +167,14 @@ def run_route(source, runtime, target, args):
                 release(server, runtime, args.kind, "restart-load-release")
                 time.sleep(4)
             restarted = command(server, runtime, args.kind, "read", "restarted")
-            checks["restart"] = verdict(expected_state(expected, args.kind, survival=live), restarted)
+            checks["restart"] = compare("restart", expected_state(expected, args.kind, survival=live), restarted, live)
             if not live:
                 checks["restart-frozen"] = actors.freeze_result(raw(runtime, args.kind, "restarted"))
-            checks["idempotence"] = verdict(expected_state(adapter, args.kind, survival=live), restarted)
+            checks["idempotence"] = compare("idempotence", expected_state(adapter, args.kind, survival=live), restarted, live)
             release(server, runtime, args.kind, "released")
             time.sleep(4)
             operated = command(server, runtime, args.kind, "read", "runtime")
-            checks["runtime"] = verdict(expected_state(expected, args.kind, survival=True), operated)
+            checks["runtime"] = compare("runtime", expected_state(expected, args.kind, survival=True), operated, True)
             checks["runtime-ticks"] = tick(raw(runtime, args.kind, "released"), raw(runtime, args.kind, "runtime"))
         finally:
             server.close()
@@ -175,7 +184,7 @@ def run_route(source, runtime, target, args):
             release(server, runtime, args.kind, "restart-released")
             time.sleep(4)
             operated_again = command(server, runtime, args.kind, "read", "runtime-restart")
-            checks["runtime-restart"] = verdict(expected_state(expected, args.kind, survival=True), operated_again)
+            checks["runtime-restart"] = compare("runtime-restart", expected_state(expected, args.kind, survival=True), operated_again, True)
             checks["restart-ticks"] = tick(raw(runtime, args.kind, "restart-released"), raw(runtime, args.kind, "runtime-restart"))
         finally:
             server.close()
@@ -184,6 +193,13 @@ def run_route(source, runtime, target, args):
         return checks
     finally:
         write_json(runtime / "native116-comparison.json", checks)
+        if args.kind == "dimensions":
+            proof = getattr(args, "native_wolf_proof", None)
+            write_json(runtime / "native116-platform-assessment.json", {
+                "assessment": summarize_checks(checks, assessments), "semanticAssessments": assessments,
+                "proofPath": str(Path(proof).resolve()) if proof else None,
+                "assessorSha256": digest(Path(native116_dimension_assessment.__file__)),
+            })
         unchanged = fingerprint(source) == before
         write_json(runtime / "native116-source-integrity.json", {"status": "PASS" if unchanged else "FAIL", "unchanged": unchanged})
         if not unchanged:
@@ -191,6 +207,8 @@ def run_route(source, runtime, target, args):
 
 
 def run(args):
+    if args.kind == "dimensions" and getattr(args, "native_wolf_proof", None):
+        load_native_proof(args.native_wolf_proof)
     root = output_path(args.output)
     require_disjoint(root, args.fixtures)
     target = pinned_profile(args.target_manifest.resolve(), "target116")
@@ -225,5 +243,7 @@ if __name__ == "__main__":
     parser.add_argument("--java8", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--port", type=int, choices=(25574, *range(25584, 25588)), required=True)
+    parser.add_argument("--native-wolf-proof", type=Path,
+                        help="Pinned no-Power control log; separate assessment never changes raw strict exit status")
     parser.add_argument("--routes", nargs="+", default=list(ROUTES))
     raise SystemExit(run(parser.parse_args()))

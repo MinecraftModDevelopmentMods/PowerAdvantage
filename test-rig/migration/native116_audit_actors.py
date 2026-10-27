@@ -10,6 +10,8 @@ import dimensions
 from matrix import WORLD, digest, fingerprint, write_json
 from native116 import pinned_profile, require_clean_log
 from native116_actors import baseline, expected_state, native_dimension_state, raw
+from native116_dimension_assessment import assess, summarize_checks
+import native116_dimension_assessment
 
 
 def inherited_sources(proofs):
@@ -69,7 +71,7 @@ def persistence_controls(runtime, kind):
 
 def replay(run, kind, persistence=False):
     recorded = json.loads((run / "results.json").read_text())
-    findings, routes = [], {}
+    findings, routes, native_only_findings = [], {}, set()
     capture = capture_dimensions if kind == "dimensions" else capture_actors
     verdict = dimensions.verdict if kind == "dimensions" else actors.compare
     tick = dimensions.tick_result if kind == "dimensions" else actors.tick_result
@@ -129,6 +131,33 @@ def replay(run, kind, persistence=False):
         else:
             for key, label in (("conversion-frozen", "converted"), ("adapter-frozen", "adapter"), ("restart-frozen", "restarted")):
                 fresh[key] = actors.freeze_result(raw(runtime, kind, label))
+        backups = actors.backup_state(runtime)
+        fresh["backup-stability"] = {"status": "PASS" if backups == checks["backup-stability"]["backups"] else "FAIL",
+                                     "backups": backups}
+        platform, semantic_assessments = None, {}
+        if live:
+            sidecar = runtime / "native116-platform-assessment.json"
+            if not sidecar.is_file():
+                findings.append(route + ": missing separate native platform assessment")
+            else:
+                recorded_platform = json.loads(sidecar.read_text())
+                proof = recorded_platform.get("proofPath")
+                pairs = {
+                    "conversion": (expected_state(expected, kind, survival=True, adapter=False), states["converted"], False),
+                    "adapter": (expected_state(expected, kind, survival=True), states["adapter"], True),
+                    "restart": (expected_state(expected, kind, survival=True), states["restarted"], True),
+                    "idempotence": (expected_state(states["adapter"], kind, survival=True), states["restarted"], True),
+                    "runtime": (expected_state(expected, kind, survival=True), states["runtime"], True),
+                    "runtime-restart": (expected_state(expected, kind, survival=True), states["runtime-restart"], True),
+                }
+                semantic_assessments = {key: assess(before, after, fresh[key], proof, "survival", adapter)
+                                        for key, (before, after, adapter) in pairs.items()}
+                platform = {"assessment": summarize_checks(fresh, semantic_assessments),
+                            "semanticAssessments": semantic_assessments, "proofPath": proof,
+                            "assessorSha256": digest(Path(native116_dimension_assessment.__file__))}
+                if platform != recorded_platform:
+                    findings.append(route + ": separate native assessment differs from independent replay")
+                    platform["assessment"]["status"] = "FAIL"
         strict_items = {}
         for label in ("converted", "adapter", "restarted", "runtime", "runtime-restart"):
             strict = expected_state(expected, kind, survival=live or label.startswith("runtime"), adapter=label != "converted")
@@ -140,9 +169,9 @@ def replay(run, kind, persistence=False):
             if value != checks[key]:
                 findings.append(route + "/" + key + ": recomputed oracle differs from recorded result")
             if value["status"] != "PASS":
+                if semantic_assessments.get(key, {}).get("status") == "PASS_WITH_NATIVE_DIFFERENCE":
+                    native_only_findings.add(len(findings))
                 findings.append(route + "/" + key + ": behavioral assertion fails")
-        if actors.backup_state(runtime) != checks["backup-stability"]["backups"]:
-            findings.append(route + ": migrated backup bytes changed")
         for label in ("conversion", "restart", "runtime-restart"):
             require_clean_log(runtime / ("console-" + label + ".log"))
         routes[route] = {"oracles": fresh, "exactItems": strict_items,
@@ -150,7 +179,25 @@ def replay(run, kind, persistence=False):
                          "enderItems": sum(item["Count"] for item in expected["file"].get("EnderItems", []))}
         if persistence:
             routes[route]["persistenceControls"] = controls
-    return {"status": "FAIL" if findings else "PASS", "kind": kind, "routes": routes, "findings": findings}
+        if live and platform:
+            routes[route]["nativePlatformAssessment"] = platform
+    result = {"status": "FAIL" if findings else "PASS", "kind": kind, "routes": routes, "findings": findings}
+    if kind == "dimensions":
+        summary_file = run / "summary.json"
+        summary = json.loads(summary_file.read_text()) if summary_file.is_file() else {}
+        complete = (bool(recorded) and summary.get("kind") == kind
+                    and len(summary.get("routes", [])) == len(recorded)
+                    and set(summary.get("routes", [])) == set(recorded))
+        integrity = [finding for index, finding in enumerate(findings) if index not in native_only_findings]
+        statuses = [value.get("nativePlatformAssessment", {}).get("assessment", {}).get("status")
+                    for value in routes.values()]
+        status = "FAIL"
+        if complete and not integrity and all(value in ("PASS", "PASS_WITH_NATIVE_DIFFERENCE") for value in statuses):
+            status = "PASS_WITH_NATIVE_DIFFERENCE" if "PASS_WITH_NATIVE_DIFFERENCE" in statuses else "PASS"
+        result["nativePlatformAssessment"] = {"status": status, "rawStrictStatus": result["status"],
+                                              "completeCampaign": complete, "otherFindings": integrity,
+                                              "rawNativeDifferenceFindingIndexes": sorted(native_only_findings)}
+    return result
 
 
 if __name__ == "__main__":
