@@ -41,7 +41,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.loot.LootContext;
+import net.minecraft.loot.LootContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
@@ -59,10 +59,10 @@ final class ProgressionProbe {
     }
 
     private void starting(FMLServerStartingEvent event) {
-        event.getCommandDispatcher().register(Commands.literal("advprogression").requires(source -> source.hasPermissionLevel(4))
+        event.getServer().getCommands().getDispatcher().register(Commands.literal("advprogression").requires(source -> source.hasPermission(4))
                 .then(Commands.argument("label", StringArgumentType.word()).executes(context -> {
                     String label = StringArgumentType.getString(context, "label");
-                    try { audit(context.getSource().getServer(), context.getSource().getWorld(), label); }
+                    try { audit(context.getSource().getServer(), context.getSource().getLevel(), label); }
                     catch (Throwable error) {
                         System.err.println("ADVPROGRESSION FAIL " + error);
                         error.printStackTrace();
@@ -74,18 +74,18 @@ final class ProgressionProbe {
     }
 
     private void audit(MinecraftServer server, ServerWorld world, String label) throws Exception {
-        require(MARKER.isFile() && world.getWorldInfo().getWorldName().equals("AdvantageWorksMigration")
+        require(MARKER.isFile() && world.getServer().getWorldData().getLevelName().equals("AdvantageWorksMigration")
                 && label.matches("[A-Za-z0-9_-]+"), "Unmarked world or unsafe label");
         JsonObject fixture = JSON.fromJson(new String(Files.readAllBytes(new File("progression-fixture.json").toPath()),
                 StandardCharsets.UTF_8), JsonObject.class);
         ServerPlayerEntity player = new ServerPlayerEntity(server, world, new GameProfile(
                 UUID.fromString("3ea512a5-4c41-42ac-901f-7fabd2b1cbde"), "ProgressionProbe"), new PlayerInteractionManager(world));
         player.connection = new ServerPlayNetHandler(server, new NetworkManager(PacketDirection.SERVERBOUND), player) {
-            @Override public void sendPacket(IPacket<?> packet) {}
+            @Override public void send(IPacket<?> packet) {}
         };
-        for (Advancement advancement : server.getAdvancementManager().getAllAdvancements()) {
+        for (Advancement advancement : server.getAdvancements().getAllAdvancements()) {
             if (owned(advancement.getId())) for (String criterion : advancement.getCriteria().keySet())
-                player.getAdvancements().revokeCriterion(advancement, criterion);
+                player.getAdvancements().revoke(advancement, criterion);
         }
         List<IRecipe<?>> oldBook = new ArrayList<>();
         for (IRecipe<?> recipe : server.getRecipeManager().getRecipes()) if (owned(recipe.getId())) oldBook.add(recipe);
@@ -100,15 +100,15 @@ final class ProgressionProbe {
         }
         JsonArray loot = new JsonArray();
         for (int seed = 0; seed < 8; seed++) {
-            List<ItemStack> overridden = server.getLootTableManager().getLootTableFromLocation(
-                    new ResourceLocation("minecraft:chests/simple_dungeon")).generate(chestContext(world, seed));
+            List<ItemStack> overridden = server.getLootTables().get(
+                    new ResourceLocation("minecraft:chests/simple_dungeon")).getRandomItems(chestContext(world, seed));
             require(overridden.size() == 1 && id(overridden.get(0)).equals("minecraft:dirt")
                     && overridden.get(0).getCount() == 1, "Player loot data-pack override was changed");
         }
         if (PowerAdvantage.recipeMode == RecipeMode.APOCALYPTIC) {
             for (int i = 0; i < 4096; i++) {
-                for (ItemStack stack : server.getLootTableManager().getLootTableFromLocation(
-                        new ResourceLocation("minecraft:chests/abandoned_mineshaft")).generate(chestContext(world, i))) {
+                for (ItemStack stack : server.getLootTables().get(
+                        new ResourceLocation("minecraft:chests/abandoned_mineshaft")).getRandomItems(chestContext(world, i))) {
                     if (advantage(stack)) {
                         if (acquire(known, player, stack, "vanilla_chest_loot", Collections.emptyList())) loot.add(id(stack));
                     }
@@ -136,7 +136,7 @@ final class ProgressionProbe {
                 for (Ingredient ingredient : recipe.getIngredients()) {
                     if (ingredient == Ingredient.EMPTY) { ingredients.add(ItemStack.EMPTY); continue; }
                     ItemStack chosen = ItemStack.EMPTY;
-                    for (ItemStack candidate : ingredient.getMatchingStacks()) {
+                    for (ItemStack candidate : ingredient.getItems()) {
                         if (!candidate.isEmpty() && known.containsKey(id(candidate))) { chosen = candidate.copy(); chosen.setCount(1); break; }
                     }
                     if (chosen.isEmpty()) { possible = false; break; }
@@ -147,25 +147,25 @@ final class ProgressionProbe {
                 ItemStack result = ItemStack.EMPTY;
                 if (crafting) {
                     Container container = new Container(null, 0) {
-                        @Override public boolean canInteractWith(net.minecraft.entity.player.PlayerEntity p) { return true; }
+                        @Override public boolean stillValid(net.minecraft.entity.player.PlayerEntity p) { return true; }
                     };
                     for (int width = 1; width <= 3 && result.isEmpty(); width++) {
                         if (ingredients.size() > width * 3) continue;
                         CraftingInventory grid = new CraftingInventory(container, 3, 3);
-                        for (int i = 0; i < ingredients.size(); i++) grid.setInventorySlotContents((i / width) * 3 + i % width, ingredients.get(i));
+                        for (int i = 0; i < ingredients.size(); i++) grid.setItem((i / width) * 3 + i % width, ingredients.get(i));
                         result = matchedResult(recipe, grid, world);
                     }
                 } else {
                     Inventory grid = new Inventory(1);
-                    grid.setInventorySlotContents(0, ingredients.get(0));
+                    grid.setItem(0, ingredients.get(0));
                     result = matchedResult(recipe, grid, world);
                 }
                 if (result.isEmpty()) continue;
                 if (owned(recipe.getId()) && !crushing) {
-                    Advancement unlock = server.getAdvancementManager().getAdvancement(new ResourceLocation(
+                    Advancement unlock = server.getAdvancements().getAdvancement(new ResourceLocation(
                             recipe.getId().getNamespace(), "recipes/" + recipe.getId().getPath()));
-                    require(unlock != null && player.getAdvancements().getProgress(unlock).isDone()
-                            && player.getRecipeBook().isUnlocked(recipe), "Manufacture lacks ingredient discovery: " + recipe.getId());
+                    require(unlock != null && player.getAdvancements().getOrStartProgress(unlock).isDone()
+                            && player.getRecipeBook().contains(recipe), "Manufacture lacks ingredient discovery: " + recipe.getId());
                 }
                 if (owned(recipe.getId()) && smelting)
                     ProcessProgression.smelt(world, fixture, recipe.getId().toString(), ingredients.get(0), result);
@@ -221,7 +221,7 @@ final class ProgressionProbe {
         JsonObject tags = new JsonObject();
         for (String name : new String[] {"wires", "dusts/carbon", "rubber", "plastic", "circuit_boards", "solder"}) {
             List<String> members = new ArrayList<>();
-            for (Item item : ItemTags.getCollection().getOrCreate(new ResourceLocation("forge", name)).getAllElements())
+            for (Item item : ItemTags.getAllTags().getTagOrEmpty(new ResourceLocation("forge", name)).getValues())
                 members.add(item.getRegistryName().toString());
             Collections.sort(members);
             tags.add(name, JSON.toJsonTree(members));
@@ -237,9 +237,9 @@ final class ProgressionProbe {
         node.addProperty("outputCount", output.getCount());
         node.add("inputs", JSON.toJsonTree(inputs));
         known.put(id(output), node);
-        player.inventory.clear();
-        player.inventory.setInventorySlotContents(0, output.copy());
-        CriteriaTriggers.INVENTORY_CHANGED.trigger(player, player.inventory);
+        player.inventory.clearContent();
+        player.inventory.setItem(0, output.copy());
+        CriteriaTriggers.INVENTORY_CHANGED.trigger(player, player.inventory, player.inventory.getItem(0));
         return true;
     }
 
@@ -250,14 +250,14 @@ final class ProgressionProbe {
 
     private static LootContext chestContext(ServerWorld world, int seed) {
         return new LootContext.Builder(world).withRandom(new Random(seed))
-                .withParameter(net.minecraft.world.storage.loot.LootParameters.POSITION, new BlockPos(0, 80, 0))
-                .build(net.minecraft.world.storage.loot.LootParameterSets.CHEST);
+                .withParameter(net.minecraft.loot.LootParameters.ORIGIN, new net.minecraft.util.math.vector.Vector3d(0, 80, 0))
+                .create(net.minecraft.loot.LootParameterSets.CHEST);
     }
 
     @SuppressWarnings("unchecked")
     private static ItemStack matchedResult(IRecipe<?> recipe, net.minecraft.inventory.IInventory inventory, ServerWorld world) {
         IRecipe<net.minecraft.inventory.IInventory> typed = (IRecipe<net.minecraft.inventory.IInventory>) recipe;
-        return typed.matches(inventory, world) ? typed.getCraftingResult(inventory) : ItemStack.EMPTY;
+        return typed.matches(inventory, world) ? typed.assemble(inventory) : ItemStack.EMPTY;
     }
 
     private static boolean advantage(ItemStack stack) { return !stack.isEmpty() && owned(stack.getItem().getRegistryName()); }

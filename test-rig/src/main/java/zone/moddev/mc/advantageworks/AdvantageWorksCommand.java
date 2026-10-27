@@ -18,7 +18,7 @@ final class AdvantageWorksCommand {
 
     static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(Commands.literal("advworks")
-                .requires(source -> source.hasPermissionLevel(2))
+                .requires(source -> source.hasPermission(2))
                 .then(targetCommand("build"))
                 .then(targetCommand("reset"))
                 .then(targetCommand("start"))
@@ -61,7 +61,7 @@ final class AdvantageWorksCommand {
                 case "checkpoint": message = controller.checkpoint(source.getServer(), target, name); break;
                 default: throw new IllegalArgumentException("Unknown Advantage Works operation " + operation);
             }
-            source.sendFeedback(new StringTextComponent(message), false);
+            source.sendSuccess(new StringTextComponent(message), false);
             return 1;
         } catch (RuntimeException ex) {
             LOGGER.error("Advantage Works command failed: {} {}", operation, target, ex);
@@ -72,7 +72,7 @@ final class AdvantageWorksCommand {
     private static int sampleWorldgen(CommandSource source, int radius) {
         WorksController controller = WorksController.getInstance();
         controller.requireAuthorizedWorld(source.getServer());
-        source.sendFeedback(new StringTextComponent(controller.sampleWorldgen(source.getServer(), radius)), false);
+        source.sendSuccess(new StringTextComponent(controller.sampleWorldgen(source.getServer(), radius)), false);
         return 1;
     }
 }

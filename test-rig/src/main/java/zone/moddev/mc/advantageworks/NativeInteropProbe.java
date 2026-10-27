@@ -48,11 +48,11 @@ final class NativeInteropProbe {
     }
 
     private void starting(FMLServerStartingEvent event) {
-        event.getCommandDispatcher().register(Commands.literal("advinterop")
-                .requires(source -> source.hasPermissionLevel(4))
+        event.getServer().getCommands().getDispatcher().register(Commands.literal("advinterop")
+                .requires(source -> source.hasPermission(4))
                 .then(Commands.argument("phase", StringArgumentType.word()).executes(context -> {
                     String phase = StringArgumentType.getString(context, "phase");
-                    try { run(context.getSource().getWorld(), phase); }
+                    try { run(context.getSource().getLevel(), phase); }
                     catch (Throwable error) { throw new IllegalStateException("Native interop probe failed", error); }
                     System.out.println("ADVINTEROP COMPLETE " + phase);
                     return 1;
@@ -86,8 +86,8 @@ final class NativeInteropProbe {
     private static void place(ServerWorld world, BlockPos pos, BlockState state) {
         require(pos.getX() >= 1023 && pos.getX() <= 1100 && pos.getY() == 8
                 && pos.getZ() >= 1023 && pos.getZ() <= 1030, "Outside interop fixture bounds");
-        world.setBlockState(pos, net.minecraft.block.Blocks.AIR.getDefaultState(), 3);
-        world.setBlockState(pos, state, 3);
+        world.setBlock(pos, net.minecraft.block.Blocks.AIR.defaultBlockState(), 3);
+        world.setBlock(pos, state, 3);
     }
 
     private static IFluidHandler fluid(TileEntity tile) {
@@ -102,8 +102,8 @@ final class NativeInteropProbe {
             final String id = ids[index];
             final ConduitType type = new ConduitType(types[index]);
             final BlockPos pos = new BlockPos(1060 + index * 8, 8, 1024);
-            place(world, pos, block("poweradvantage:" + id).getDefaultState());
-            TileEntityRFConverter tile = (TileEntityRFConverter) world.getTileEntity(pos);
+            place(world, pos, block("poweradvantage:" + id).defaultBlockState());
+            TileEntityRFConverter tile = (TileEntityRFConverter) world.getBlockEntity(pos);
             check(checks, id + "/capability", () -> {
                 IEnergyStorage storage = tile.getCapability(CapabilityEnergy.ENERGY, Direction.NORTH)
                         .orElseThrow(() -> new AssertionError("Missing Forge Energy capability"));
@@ -145,10 +145,10 @@ final class NativeInteropProbe {
             check(checks, id + "/invalidation", () -> {
                 LazyOptional<IEnergyStorage> old = tile.getCapability(CapabilityEnergy.ENERGY, Direction.NORTH);
                 require(old.isPresent(), "Missing original capability");
-                world.setBlockState(pos, net.minecraft.block.Blocks.AIR.getDefaultState(), 3);
+                world.setBlock(pos, net.minecraft.block.Blocks.AIR.defaultBlockState(), 3);
                 require(!old.isPresent(), "Removed converter still exposes its stale capability");
-                world.setBlockState(pos, block("poweradvantage:" + id).getDefaultState(), 3);
-                LazyOptional<IEnergyStorage> replacement = world.getTileEntity(pos).getCapability(CapabilityEnergy.ENERGY, Direction.NORTH);
+                world.setBlock(pos, block("poweradvantage:" + id).defaultBlockState(), 3);
+                LazyOptional<IEnergyStorage> replacement = world.getBlockEntity(pos).getCapability(CapabilityEnergy.ENERGY, Direction.NORTH);
                 require(replacement.isPresent() && replacement != old, "Replacement did not expose a fresh capability");
             });
         }
@@ -156,8 +156,8 @@ final class NativeInteropProbe {
 
     private static void tank(ServerWorld world, JsonArray checks) {
         Block block = block("poweradvantage:fluid_storage_tank");
-        place(world, TANK, block.getDefaultState());
-        TileEntity tile = world.getTileEntity(TANK);
+        place(world, TANK, block.defaultBlockState());
+        TileEntity tile = world.getBlockEntity(TANK);
         check(checks, "fluid/simulation-conservation-and-identity", () -> {
             IFluidHandler tank = fluid(tile);
             FluidStack offered = new FluidStack(net.minecraft.fluid.Fluids.WATER, 1000);
@@ -177,52 +177,52 @@ final class NativeInteropProbe {
             LazyOptional<IFluidHandler> old = tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.UP);
             require(world.destroyBlock(TANK, true), "Native block destruction failed");
             require(!old.isPresent(), "Removed tank still exposes a stale capability");
-            List<ItemEntity> drops = world.getEntitiesWithinAABB(ItemEntity.class, new AxisAlignedBB(TANK).grow(2));
+            List<ItemEntity> drops = world.getEntitiesOfClass(ItemEntity.class, new AxisAlignedBB(TANK).inflate(2));
             require(drops.size() == 1, "Expected exactly one portable tank drop; got " + drops.size());
             ItemStack item = drops.get(0).getItem().copy();
             require(item.getItem() == block.asItem() && item.getCount() == 1 && item.hasTag()
                     && item.getTag().getString("FluidID").equals("minecraft:water")
                     && item.getTag().getInt("Volume") == 500, "Native loot lost portable fluid NBT: " + item);
             drops.get(0).remove();
-            world.setBlockState(TANK, block.getDefaultState(), 3);
-            block.onBlockPlacedBy(world, TANK, block.getDefaultState(),
+            world.setBlock(TANK, block.defaultBlockState(), 3);
+            block.setPlacedBy(world, TANK, block.defaultBlockState(),
                     net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(world), item);
-            require(fluid(world.getTileEntity(TANK)).getFluidInTank(0).getAmount() == 500,
+            require(fluid(world.getBlockEntity(TANK)).getFluidInTank(0).getAmount() == 500,
                     "Replacing native drop did not restore exactly 500 mB");
         });
     }
 
     private static void locks(ServerWorld world, JsonArray checks) {
-        place(world, BELT.west(), net.minecraft.block.Blocks.CHEST.getDefaultState());
-        place(world, BELT, block("poweradvantage:item_conveyor").getDefaultState().with(BlockConveyor.FACING, Direction.EAST));
-        place(world, BELT.east(), net.minecraft.block.Blocks.CHEST.getDefaultState());
-        IInventory input = (IInventory) world.getTileEntity(BELT.west());
-        IInventory output = (IInventory) world.getTileEntity(BELT.east());
-        input.setInventorySlotContents(0, new ItemStack(net.minecraft.item.Items.DIRT, 16));
-        TileEntityConveyor belt = (TileEntityConveyor) world.getTileEntity(BELT);
-        TileEntity chest = world.getTileEntity(BELT.west());
-        CompoundNBT state = chest.write(new CompoundNBT());
+        place(world, BELT.west(), net.minecraft.block.Blocks.CHEST.defaultBlockState());
+        place(world, BELT, block("poweradvantage:item_conveyor").defaultBlockState().setValue(BlockConveyor.FACING, Direction.EAST));
+        place(world, BELT.east(), net.minecraft.block.Blocks.CHEST.defaultBlockState());
+        IInventory input = (IInventory) world.getBlockEntity(BELT.west());
+        IInventory output = (IInventory) world.getBlockEntity(BELT.east());
+        input.setItem(0, new ItemStack(net.minecraft.item.Items.DIRT, 16));
+        TileEntityConveyor belt = (TileEntityConveyor) world.getBlockEntity(BELT);
+        TileEntity chest = world.getBlockEntity(BELT.west());
+        CompoundNBT state = chest.save(new CompoundNBT());
         state.putString("Lock", "AdvantageInteropKey");
-        chest.read(state);
+        chest.load(chest.getBlockState(), state);
         check(checks, "locked-chest/conveyor-refuses-extraction", () -> {
             require(InventoryLocks.isLocked(input), "Native nonempty chest lock was not detected");
             for (int i = 0; i < 160; i++) belt.tick();
-            require(input.getStackInSlot(0).getCount() == 16 && output.isEmpty() && belt.isEmpty(),
+            require(input.getItem(0).getCount() == 16 && output.isEmpty() && belt.isEmpty(),
                     "Conveyor bypassed locked source");
         });
         state.remove("Lock");
-        chest.read(state);
+        chest.load(chest.getBlockState(), state);
         check(checks, "unlocked-chest/conveyor-transfers-exactly", () -> {
             require(!InventoryLocks.isLocked(input), "Cleared lock still blocks extraction");
             for (int i = 0; i < 160; i++) belt.tick();
-            require(input.isEmpty() && belt.isEmpty() && output.getStackInSlot(0).getCount() == 16
-                    && output.getStackInSlot(0).getItem() == net.minecraft.item.Items.DIRT,
+            require(input.isEmpty() && belt.isEmpty() && output.getItem(0).getCount() == 16
+                    && output.getItem(0).getItem() == net.minecraft.item.Items.DIRT,
                     "Unlocked native chest did not deliver exactly sixteen dirt");
         });
     }
 
     private static void run(ServerWorld world, String phase) throws Exception {
-        require(MARKER.isFile() && world.getWorldInfo().getWorldName().equals("AdvantageWorksMigration"), "Unmarked world");
+        require(MARKER.isFile() && world.getServer().getWorldData().getLevelName().equals("AdvantageWorksMigration"), "Unmarked world");
         require(phase.equals("exercise") || phase.equals("restored"), "Unknown interop phase");
         JsonArray checks = new JsonArray();
         if (phase.equals("exercise")) {
@@ -231,14 +231,14 @@ final class NativeInteropProbe {
             locks(world, checks);
         } else {
             check(checks, "portable-tank/full-process-restart", () -> {
-                FluidStack stack = fluid(world.getTileEntity(TANK)).getFluidInTank(0);
+                FluidStack stack = fluid(world.getBlockEntity(TANK)).getFluidInTank(0);
                 require(stack.getFluid() == net.minecraft.fluid.Fluids.WATER && stack.getAmount() == 500,
                         "Restart lost portable tank contents");
             });
             check(checks, "conveyor/full-process-restart", () -> {
-                IInventory output = (IInventory) world.getTileEntity(BELT.east());
-                require(output.getStackInSlot(0).getItem() == net.minecraft.item.Items.DIRT
-                        && output.getStackInSlot(0).getCount() == 16, "Restart changed exact conveyor output");
+                IInventory output = (IInventory) world.getBlockEntity(BELT.east());
+                require(output.getItem(0).getItem() == net.minecraft.item.Items.DIRT
+                        && output.getItem(0).getCount() == 16, "Restart changed exact conveyor output");
             });
         }
         JsonObject report = new JsonObject();

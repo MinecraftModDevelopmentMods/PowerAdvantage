@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Locale;
 import java.util.Map;
-import net.minecraft.state.IProperty;
+import net.minecraft.state.Property;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.Commands;
 import net.minecraft.nbt.CompoundNBT;
@@ -43,16 +43,16 @@ final class MigrationProbe {
         if (event.phase == TickEvent.Phase.START) freeze(event.world);
     }
     private void freeze(World world) {
-        if (!world.isRemote && !new File("migration-operate.allow").isFile()) world.tickableTileEntities.clear();
+        if (!world.isClientSide && !new File("migration-operate.allow").isFile()) world.tickableBlockEntities.clear();
     }
 
     private void starting(FMLServerStartingEvent event) {
-        event.getCommandDispatcher().register(Commands.literal("advprobe")
-                .requires(source -> source.hasPermissionLevel(4))
+        event.getServer().getCommands().getDispatcher().register(Commands.literal("advprobe")
+                .requires(source -> source.hasPermission(4))
                 .then(Commands.literal("snapshot")
                         .then(Commands.argument("label", StringArgumentType.word()).executes(context -> {
                             try {
-                                snapshot(context.getSource().getWorld(), StringArgumentType.getString(context, "label"));
+                                snapshot(context.getSource().getLevel(), StringArgumentType.getString(context, "label"));
                                 System.out.println("ADVPROBE COMPLETE snapshot");
                                 return 1;
                             } catch (Exception ex) { throw new IllegalStateException("Migration probe failed", ex); }
@@ -60,7 +60,7 @@ final class MigrationProbe {
     }
 
     private void snapshot(World world, String label) throws Exception {
-        if (!MARKER.isFile() || !world.getWorldInfo().getWorldName().equals("AdvantageWorksMigration")) {
+        if (!MARKER.isFile() || !world.getServer().getWorldData().getLevelName().equals("AdvantageWorksMigration")) {
             throw new IllegalStateException("Refusing an unmarked or unexpected world");
         }
         if (!label.matches("[a-zA-Z0-9_-]+")) throw new IllegalArgumentException("Invalid snapshot label");
@@ -73,14 +73,14 @@ final class MigrationProbe {
             BlockState state = world.getBlockState(pos);
             entry.addProperty("actualName", state.getBlock().getRegistryName().toString());
             JsonObject properties = new JsonObject();
-            for (IProperty<?> property : state.getProperties()) {
-                properties.addProperty(property.getName(), state.get(property).toString().toLowerCase(Locale.ROOT));
+            for (Property<?> property : state.getProperties()) {
+                properties.addProperty(property.getName(), state.getValue(property).toString().toLowerCase(Locale.ROOT));
             }
             entry.add("properties", properties);
-            TileEntity tile = world.getTileEntity(pos);
+            TileEntity tile = world.getBlockEntity(pos);
             if (tile != null) {
-                tile.markDirty();
-                CompoundNBT nbt = tile.write(new CompoundNBT());
+                tile.setChanged();
+                CompoundNBT nbt = tile.save(new CompoundNBT());
                 entry.addProperty("nbt", nbt.toString());
                 java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
                 net.minecraft.nbt.CompressedStreamTools.writeCompressed(nbt, bytes);

@@ -18,7 +18,7 @@ final class NativeEntityHold {
             Entity entity = entry.getKey();
             State state = entry.getValue();
             // ServerWorld increments this even when canUpdate() is false.
-            entity.ticksExisted = state.ticks;
+            entity.tickCount = state.ticks;
             entity.canUpdate(state.updating);
         }
         held.clear();
@@ -30,7 +30,7 @@ final class NativeEntityHold {
 
         State(Entity entity) {
             updating = entity.canUpdate();
-            ticks = entity.ticksExisted;
+            ticks = entity.tickCount;
         }
     }
 }
