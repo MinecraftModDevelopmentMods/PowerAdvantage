@@ -14,7 +14,7 @@ Power Advantage 2.4.7.116051 (Minecraft 1.16.5)
 - Prepare both mods' stored items before entity flattening, keeping Base Metals tool durability in dropped items and minecarts.
 - Detach chunk data before migration so pending asynchronous saves are not modified in place.
 - Keep unloaded machine capabilities unavailable until the tile is revived, with fresh wrappers and retained contents.
-- Track the new tests and remaining manual checks in docs/1.16/PORT-STATUS.md. Earlier acceptance does not qualify this version.
+- Record the current-jar machine, upgrade, mining, recipe, unloading and endurance checks in docs/1.16/CURRENT-QUALIFICATION.md, keeping native differences and manual acceptance separate.
 
 Power Advantage 2.4.6.115021 (Minecraft 1.15.2)
 
