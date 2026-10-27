@@ -39,14 +39,14 @@ final class JsonNbtConverter {
             return result;
         }
         JsonPrimitive primitive = element.getAsJsonPrimitive();
-        if (primitive.isBoolean()) return new ByteNBT((byte) (primitive.getAsBoolean() ? 1 : 0));
-        if (primitive.isString()) return new StringNBT(primitive.getAsString());
+        if (primitive.isBoolean()) return ByteNBT.valueOf((byte) (primitive.getAsBoolean() ? 1 : 0));
+        if (primitive.isString()) return StringNBT.valueOf(primitive.getAsString());
         String number = primitive.getAsString();
         if (number.contains(".") || number.contains("e") || number.contains("E")) {
-            return new DoubleNBT(primitive.getAsDouble());
+            return DoubleNBT.valueOf(primitive.getAsDouble());
         }
         long value = primitive.getAsLong();
         return value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE
-                ? new IntNBT((int) value) : new LongNBT(value);
+                ? IntNBT.valueOf((int) value) : LongNBT.valueOf(value);
     }
 }

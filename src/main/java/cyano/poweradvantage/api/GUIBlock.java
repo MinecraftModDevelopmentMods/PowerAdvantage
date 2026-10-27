@@ -12,6 +12,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.IBlockReader;
@@ -44,7 +45,7 @@ public abstract class GUIBlock extends net.minecraft.block.ContainerBlock{
 	}
 
 	public GUIBlock(Material m, float hardness) {
-		this(Block.Properties.create(m).hardnessAndResistance(hardness).variableOpacity());
+		this(Block.Properties.create(m).hardnessAndResistance(hardness).notSolid().variableOpacity());
 	}
 
 	protected GUIBlock(Block.Properties properties) {
@@ -108,12 +109,6 @@ public abstract class GUIBlock extends net.minecraft.block.ContainerBlock{
         return false;
     }
 
-    /** 1.13 uses this flag, not the legacy opacity overload, to cull neighbours. */
-    @Override
-    public boolean isSolid(BlockState state) {
-        return false;
-    }
-	
 	/**
 	 * 3 = normal block (model specified in assets folder as .json model)<br>
 	 * -1 = special renderer
@@ -132,31 +127,31 @@ public abstract class GUIBlock extends net.minecraft.block.ContainerBlock{
      */
 	@SuppressWarnings("deprecation")
     @Override
-    public boolean onBlockActivated(BlockState bs, World w, BlockPos coord,
+    public ActionResultType onBlockActivated(BlockState bs, World w, BlockPos coord,
                                     PlayerEntity player, Hand hand, net.minecraft.util.math.BlockRayTraceResult hit) {
         Direction facing = hit.getFace();
         if (w.isRemote) {
-            return true;
+            return ActionResultType.SUCCESS;
         }
         final TileEntity tileEntity = w.getTileEntity(coord);
         if (tileEntity == null || player.isSneaking()) {
-        	return false;
+            return ActionResultType.PASS;
         }
         // handle buckets and fluid containers
 		net.minecraft.item.ItemStack item = player.getHeldItem(hand);
 		if(item != null && !item.isEmpty() && tileEntity instanceof IAdvantageFluidHandler
 				&& FluidContainerHelper.interact(player, hand, (IAdvantageFluidHandler) tileEntity, facing)) {
-			return true;
+			return ActionResultType.SUCCESS;
 		}
 
         // open GUI
-        if(this.getGuiOwner() == null) return false;
+        if(this.getGuiOwner() == null) return ActionResultType.PASS;
 		if(tileEntity instanceof PoweredEntity && player instanceof ServerPlayerEntity){
 			((PoweredEntity)tileEntity).syncPowerAdvantageDataTo((ServerPlayerEntity)player);
 		}
-		if (!(player instanceof ServerPlayerEntity)) return false;
+		if (!(player instanceof ServerPlayerEntity)) return ActionResultType.PASS;
 		MachineGUIRegistry.open((ServerPlayerEntity) player, w, coord, this.getGuiID());
-        return true;
+        return ActionResultType.SUCCESS;
     }
 
     

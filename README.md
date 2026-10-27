@@ -1,35 +1,54 @@
 # PowerAdvantage
 
-**Minecraft 1.14.4**
+**Minecraft 1.15.2**
 
-This port has passed the automated machine/migration tests and a manual check of
-visuals and recipe unlocks. See the [qualification report](docs/1.14/BROADER-QUALIFICATION.md)
-for coverage and limits. Use disposable copies for upgrades.
+Power Advantage 2.4.6.115021 targets Minecraft 1.15.2. See the
+[current test record](docs/1.15/CURRENT-QUALIFICATION.md) for the exact jars,
+automated results and remaining limits. Visuals and recipe unlocks were
+accepted on 27 October 2026; machine behavior is covered by the recorded
+automated tests.
 
 Power Advantage provides shared power, fluids, item transport and compatibility APIs for Steam Advantage and Electric Advantage.
 
-This port keeps existing registry names and carries forward migration from 1.10 and 1.12.
-Always back up a world before upgrading, and check that its other mods also support the target version.
-The archived [1.13 qualification notes](docs/1.13/CURRENT-QUALIFICATION.md) separate its tested scenarios from remaining gaps;
-they are not a guarantee that an entire modpack can be upgraded without losses.
-The [1.14 qualification report](docs/1.14/BROADER-QUALIFICATION.md) records the
-repeated checks, exact tested jars and remaining limits for this candidate.
+**Back up the entire world before upgrading. Test only disposable copies.**
+The port retains existing registry names and legacy migration code. Upgrade tests
+use disposable original and maintained saves, including connected machines.
+Check every other mod's target-version support too.
+The accepted [1.14 results](docs/1.14/BROADER-QUALIFICATION.md) are historical
+evidence, not qualification of this port or a whole modpack.
 
 Recipe-book discovery now follows relevant ingredients. See the [all-Advantage material checklist and automated discovery tests](docs/1.13/RECIPE-DISCOVERY.md). To regenerate the checked-in unlock JSON after changing recipes, run `node tools/generate-recipe-unlocks.js`; `check` rejects missing or stale ingredient criteria.
 
 The [manufacturing progression audit](docs/1.13/MANUFACTURING-PROGRESSION.md) traces survival parts from raw resources, including configured material aliases, processing, loot-only parts and automated restart checks.
 
-## Building Minecraft 1.14.4
+## Building Minecraft 1.15.2
 
-The `master-1.14.4` build uses Forge 28.2.26, ForgeGradle 7.0.34 and Gradle 9.6.1. Run Gradle with Java 17; Gradle resolves the Java 8 production toolchain.
+The `master-1.15.2` build uses Forge 31.2.57, snapshot mappings
+`20200514-1.15.1`, MCP `20200515.085601`, ForgeGradle 7.0.34 and Gradle 9.6.1.
+Run Gradle with Java 17 and compile production code with Java 8. Mavenizer also
+needs Java 25. CI pins all three JDKs; the [test commands](docs/1.15/TEST-HARNESS.md)
+show how to select local installations explicitly.
 
-Build the pinned Base Metals `3.0.1.114041` and OreSpawn `4.1.1.114041` deobf jars in their sibling checkouts, then run:
+Build the pinned Base Metals `3.0.2.115021` and OreSpawn `4.1.1.115021` deobf jars first.
+The exact Base Metals source is
+`ac1781e7cade15045ffe0135077087b4d1722603`. CI builds that dependency first;
+the checksums and complete source pins are in `gradle.properties`.
+
+Then run from `D:\PowerAdvantage\PA115\PowerAdvantage`:
 
 ```text
 gradlew.bat clean check build javadoc verifyReleaseDependencies verifyReleaseArtifacts writeReleaseChecksums verifyEclipseProductionClasspath
 ```
 
-The default dependency paths follow the local MMD checkout layout. Other layouts can pass `-PbaseMetalsDeobfJar=<path>` and `-PoreSpawnDeobfJar=<path>`. Dependencies are present on development classpaths but are never embedded in PowerAdvantage artifacts.
+The default dependency jars are:
+
+```text
+D:\BaseMetals\BaseMetals 115\BaseMetals\build\libs-dev\BaseMetals-3.0.2.115021-deobf.jar
+D:\MinecraftMineralogy\OS115\OreSpawn\build\libs-dev\OreSpawn-4.1.1.115021-deobf.jar
+```
+
+Other layouts can pass `-PbaseMetalsDeobfJar=<path>` and `-PoreSpawnDeobfJar=<path>`.
+Dependencies are never embedded in PowerAdvantage artifacts.
 
 Dependency checksums and source commits are recorded in `gradle.properties`.
 Unknown artifacts fail the dependency audit. Archives use reproducible ordering,
@@ -47,39 +66,30 @@ Refresh the project in Eclipse, allow its Java build to finish, and launch the g
 
 Eclipse copies production resources from `build/resources/main`, not directly from `src/main/resources`. This prevents its builder from overwriting the expanded `mods.toml` with raw `${version}` placeholders. After updating this setup, use **Gradle > Refresh Gradle Project**, then **Project > Clean** before relaunching. After editing resources or version properties, run `processResources` or refresh the Gradle project before the Eclipse build. See the [metadata regression notes](docs/1.13/ECLIPSE-METADATA.md).
 
-To test all three Advantage mods together, run `gradlew.bat prepareCombinedEclipseLaunch`, refresh Eclipse, and launch `runClientAllAdvantage.launch`. This additional profile loads the pinned Steam/Electric deobf jars, Base Metals and OreSpawn alongside Power's Eclipse output. It uses the same `run` directory and test saves; it does not copy, open or modify a save automatically. The ordinary `runClient.launch` remains Power-only. Alternative checkout layouts can pass `-PsteamAdvantageDeobfJar=<path>` and `-PelectricAdvantageDeobfJar=<path>`; supplied jars must match the `test-rig/profiles/native114/dev-core.json` pins. Regenerate the combined launch after refreshing its dependencies or the base launch.
+To prepare a combined client, build the Steam/Electric `2.2.7.115021` deobf jars,
+run `gradlew.bat prepareCombinedEclipseLaunch`, refresh Eclipse, then launch
+`runClientAllAdvantage.launch`. Inputs must match
+`test-rig/profiles/native115/dev-core.json`; alternative layouts can pass
+`-PsteamAdvantageDeobfJar=<path>` and `-PelectricAdvantageDeobfJar=<path>`.
+The ordinary `runClient.launch` remains Power-only. Both use the `run` directory;
+preparing a launch does not copy, open or qualify a save.
 
-The combined [client resource probe](test-rig/client-resources/README.md) checks native baked models, textures, creative entries, translated item names, fluid rendering and tank gauges without opening a save. Static resource and locale regressions also run under `check`. Automated recipe-book fixtures and the accepted manual visual/recipe-unlock checks have separate scopes; see the [current port status](docs/1.14/PORT-STATUS.md).
-
-The [broader 1.14 test results and play-test checklist](docs/1.14/BROADER-QUALIFICATION.md) separate migration, connected machinery, endurance and manual checks. Test worlds and reports stay local; use disposable copies when trying an old save.
+Client-resource and recipe-book checks run against the 1.15 candidate. Manual
+visual and interaction acceptance remains separate; see the current test record.
 
 ## Compatibility
 
-The implementation namespace is `zone.moddev.mc.poweradvantage`. The historical `cyano.poweradvantage.api` surface, including `FluidNetworkApi`, remains available to dependent mods. Registry names, fluids, tile IDs, NBT keys, OreSpawn provider IDs, and configuration meaning remain stable.
+The implementation namespace remains `zone.moddev.mc.poweradvantage`, with the
+historical `cyano.poweradvantage.api` package retained. The port keeps registry,
+fluid, tile, NBT and provider identities. The current test record distinguishes
+machine preservation, actual operation and vanilla migration differences.
 
-Forge 1.14 handles oil rendering, fluid containers, registered menus, tag updates
-and parts-loot events directly. Advantage's public fluid contract is bridged to
-native sided fluid capabilities; its millibucket units and saved tank keys remain
-unchanged. The remaining coremod runs before vanilla's legacy-world data fixes.
+The 1.15 changes use native activation results, non-solid block properties,
+texture-atlas access and client render-layer registration. The shared migration
+hook is retargeted to 1.15; its presence is not proof that an upgrade is safe.
 
-PowerAdvantage owns the shared pre-flattening migration hook used by all three Advantage mods. See [the 1.13 migration guide](docs/1.13/MIGRATION.md) before opening an irreplaceable 1.10 or 1.12 world. The [Advantage Works rig](test-rig/README.md) provides repeatable machine, restart, world-generation, and migration checks.
-
-The [endurance protocol](docs/1.13/ENDURANCE.md) exercises repeat-batch operation in fresh and migrated disposable worlds, followed by a complete server-process restart. Its coverage limits are separate from frozen-state migration and manual client acceptance.
-
-The [chunk and moving-drill protocol](docs/1.13/CHUNK-AND-DRILLS.md) adds genuine chunk unload/reload witnesses, finite-energy track moves in all six facings, rear-output conservation, and mid-block progress checks.
-
-The [partial-network and extended-drill protocol](docs/1.13/PARTIAL-NETWORKS-AND-EXTENDED-DRILLS.md) separates endpoint unloading/recovery from whole-network reloads, and covers repeated moves, vertical track travel, junctions, blocked output and redstone interruption.
-
-The archived [player and entity migration report](docs/1.13/PLAYER-AND-ENTITY-MIGRATION.md) covers player files, inventories, nested items, ownership, saved entities and full restarts on 1.13. Its eight routes passed with the repaired 1.12 bridge. Use Electric Advantage `2.2.3.112021` for that bridge's turbine and drill fixes; the original `2.2.1.112021` jar remains a failing historical control.
-
-The [additional-dimension protocol](docs/1.13/DIMENSIONS-AND-ENTITY-LIFECYCLE.md)
-covers Nether/End player and entity fixtures, native passenger/leash relationships
-and separate death/respawn controls. The [transformer-order report](docs/1.13/TRANSFORMER-ORDERING.md)
-qualifies both BaseMetals/Advantage application orders and records the
-order-dependent provenance of loose-file backups.
-
-Networks use loaded chunks only. Missing conduit sections interrupt distribution;
-normal chunk loading reconnects them without replacing pipes. The same protocol
-records acquisition-stack diagnostics and pipe-only bridge regressions.
+The [legacy migration guide](docs/1.13/MIGRATION.md) and
+[Advantage Works rig](test-rig/README.md) describe the earlier protocols.
+The [1.15 status](docs/1.15/PORT-STATUS.md) links the current qualification.
 
 The historical 1.10 handbook remains on the [1.10.2 branch](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.10.2/docs/1.10/README.md).

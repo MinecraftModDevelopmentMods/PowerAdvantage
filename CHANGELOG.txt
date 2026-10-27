@@ -1,3 +1,16 @@
+Power Advantage 2.4.6.115021 (Minecraft 1.15.2)
+
+- Move to Forge 31.2.57, snapshot mappings 20200514-1.15.1 and MCP 20200515.085601; retain ForgeGradle 7, Gradle 9.6.1 and Java 8 production bytecode.
+- Use native interaction results and block properties, keeping solar panels solid and thin machinery non-solid.
+- Allow conduit subclasses to supply native block properties without duplicating connection and lifecycle code.
+- Use the native texture-atlas getters for GUI fluids and oil sprites; register frame cutout and oil translucent render layers during client setup.
+- Update the still's light-query signature and retarget the shared legacy migration hook to 1.15 without renaming saved identities.
+- Register recipe conditions on Forge's loading thread so parallel mod loading cannot intermittently remove recipes.
+- Initialize the shared creative tab once when the three mods load together.
+- Add 1.15-specific operating, migration, mining, recipe and client checks; the exact tested jars and remaining manual work are recorded in docs/1.15/CURRENT-QUALIFICATION.md.
+- Record the accepted in-game visuals and recipe unlocks alongside the automated machine checks.
+- Back up the entire world before upgrading and test only disposable copies. Earlier 1.14 acceptance does not qualify 1.15 upgrades.
+
 Power Advantage 2.4.5.114041 (Minecraft 1.14.4)
 
 - Move to Minecraft 1.14.4 and Forge 28.2.26, retaining existing registry names, saved-state keys and public API packages.

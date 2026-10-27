@@ -31,7 +31,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
+import java.util.function.LongSupplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.net.URL;
@@ -59,9 +62,11 @@ public final class WorksRunner {
         if (arguments.serverPort != null) profile.serverPort = arguments.serverPort;
         File testRig = findTestRig(arguments.profile);
         File powerRoot = testRig.getParentFile().getCanonicalFile();
+        // Pin validation precedes directory creation, downloads, and world access.
+        requireInputPins(profile);
         if (arguments.validateOnly) {
             List<Map<String, Object>> inputs = stageMods(testRig, null, profile.mods);
-            System.out.println("Native 1.14.4 profile preflight only (no world opened): " + GSON.toJson(inputs));
+            System.out.println("Native 1.15.2 profile preflight only (no world opened): " + GSON.toJson(inputs));
             return;
         }
         String stamp = timestamp();
@@ -113,13 +118,16 @@ public final class WorksRunner {
                 }
                 checkStations(first, lifecycleStations, selectedLifecycle);
             }
+            long firstShutdownDeadline = 0L;
             if (profile.worldgenSampleRadius > 0) {
                 Thread.sleep(stationRunSeconds * 1000L);
-                send(first, "advworks sample-worldgen " + profile.worldgenSampleRadius);
+                firstShutdownDeadline = worldgenDeadline(profile.shutdownTimeoutSeconds, System.nanoTime());
+                awaitWorldgen(first, results, "first-run", profile.worldgenSampleRadius, firstShutdownDeadline);
             }
             send(first, "save-all");
             send(first, "stop");
-            requireExit(first, profile.shutdownTimeoutSeconds);
+            if (profile.worldgenSampleRadius > 0) requireExitUntil(first, firstShutdownDeadline);
+            else requireExit(first, profile.shutdownTimeoutSeconds);
             requireNoCommandFailures(latestLog, "first-run");
             copyIfPresent(latestLog, new File(results, "first-run.log"));
             File firstWorldgen = new File(results, "worldgen-first-run.json");
@@ -144,12 +152,15 @@ public final class WorksRunner {
                 }
                 checkStations(second, lifecycleStations, selectedLifecycle);
             }
+            long secondShutdownDeadline = 0L;
             if (profile.worldgenSampleRadius > 0) {
-                send(second, "advworks sample-worldgen " + profile.worldgenSampleRadius);
+                secondShutdownDeadline = worldgenDeadline(profile.shutdownTimeoutSeconds, System.nanoTime());
+                awaitWorldgen(second, results, "restart-run", profile.worldgenSampleRadius, secondShutdownDeadline);
             }
             send(second, "save-all");
             send(second, "stop");
-            requireExit(second, profile.shutdownTimeoutSeconds);
+            if (profile.worldgenSampleRadius > 0) requireExitUntil(second, secondShutdownDeadline);
+            else requireExit(second, profile.shutdownTimeoutSeconds);
             requireNoCommandFailures(latestLog, "restart-run");
             copyIfPresent(latestLog, new File(results, "restart-run.log"));
             File restartWorldgen = new File(results, "worldgen-restart-run.json");
@@ -266,6 +277,111 @@ public final class WorksRunner {
         }
         if (process.exitValue() != 0) {
             throw new IllegalStateException("Server process failed with exit " + process.exitValue());
+        }
+    }
+
+    static long worldgenDeadline(int timeoutSeconds, long now) {
+        if (timeoutSeconds <= 0) throw new IllegalArgumentException("Worldgen completion requires a bounded shutdown budget");
+        return now + TimeUnit.SECONDS.toNanos(timeoutSeconds);
+    }
+
+    private static void requireExitUntil(Process process, long deadline) throws Exception {
+        long remaining = deadline - System.nanoTime();
+        if (remaining <= 0 || !process.waitFor(remaining, TimeUnit.NANOSECONDS)) {
+            process.destroyForcibly();
+            throw new IllegalStateException("Worldgen completion and shutdown exceeded the shared shutdown budget");
+        }
+        if (process.exitValue() != 0) throw new IllegalStateException("Server process failed with exit " + process.exitValue());
+    }
+
+    private static void awaitWorldgen(Process process, File results, String phase, int radius, long deadline)
+            throws Exception {
+        withWorldgenFailureCleanup(process, deadline, System::nanoTime, () -> {
+            WorldgenCompletion completion = new WorldgenCompletion(results, phase);
+            send(process, "advworks sample-worldgen " + radius);
+            awaitWorldgenCompletion(process::isAlive, completion, deadline, System::nanoTime, () -> Thread.sleep(100L));
+        });
+    }
+
+    interface WorldgenPause { void pause() throws Exception; }
+
+    static void withWorldgenFailureCleanup(Process process, long deadline, LongSupplier clock,
+                                          WorldgenPause request) throws Exception {
+        try {
+            request.pause();
+        } catch (Exception failure) {
+            boolean interrupted = failure instanceof InterruptedException || Thread.currentThread().isInterrupted();
+            try {
+                if (process.isAlive()) {
+                    send(process, "stop");
+                    long remaining = deadline - clock.getAsLong();
+                    if (!interrupted && !Thread.currentThread().isInterrupted() && remaining > 0) {
+                        process.waitFor(remaining, TimeUnit.NANOSECONDS);
+                    }
+                }
+            } catch (Throwable cleanupFailure) {
+                if (cleanupFailure != failure) failure.addSuppressed(cleanupFailure);
+                if (cleanupFailure instanceof InterruptedException) interrupted = true;
+            } finally {
+                try {
+                    if (process.isAlive()) process.destroyForcibly();
+                } catch (Throwable cleanupFailure) {
+                    if (cleanupFailure != failure) failure.addSuppressed(cleanupFailure);
+                } finally {
+                    if (interrupted) Thread.currentThread().interrupt();
+                }
+            }
+            throw failure;
+        }
+    }
+
+    static void awaitWorldgenCompletion(BooleanSupplier alive, WorldgenCompletion completion, long deadline,
+                                       LongSupplier clock, WorldgenPause pause) throws Exception {
+        while (true) {
+            if (clock.getAsLong() >= deadline) {
+                throw new IllegalStateException("Worldgen sample did not complete within the shared shutdown budget");
+            }
+            if (!alive.getAsBoolean()) throw new IllegalStateException("Server exited before worldgen sample completion");
+            if (completion.complete()) return;
+            pause.pause();
+        }
+    }
+
+    static final class WorldgenCompletion {
+        final File report;
+        final File failure;
+        final File previousReport;
+        final File previousFailure;
+
+        WorldgenCompletion(File results, String phase) throws Exception {
+            report = new File(results, "worldgen-sample.json");
+            failure = new File(results, "worldgen-sample-failed.json");
+            // Removing the old path by archival is the freshness barrier, even for identical counts/timestamps.
+            previousReport = archive(report, phase);
+            previousFailure = archive(failure, phase);
+        }
+
+        boolean complete() throws Exception {
+            if (failure.isFile()) throw new IllegalStateException("Worldgen sample failed: " + readJsonObject(failure));
+            if (!report.isFile()) return false;
+            JsonObject document = readJsonObject(report);
+            if (!document.has("format") || document.get("format").getAsInt() != 1
+                    || !document.has("station") || !"worldgen".equals(document.get("station").getAsString())
+                    || !document.has("kind") || !"sample".equals(document.get("kind").getAsString())) {
+                throw new IllegalStateException("Invalid worldgen completion report " + report);
+            }
+            for (String metric : Arrays.asList("radius", "chunksScanned", "centers", "counts",
+                    "biomeViolations", "biomeBoundaryBlocks")) {
+                if (!document.has(metric)) throw new IllegalStateException("Incomplete worldgen report: " + metric);
+            }
+            return true;
+        }
+
+        private static File archive(File file, String phase) throws Exception {
+            if (!file.exists()) return null;
+            File archived = new File(file.getParentFile(), file.getName() + ".before-" + phase + "-" + UUID.randomUUID());
+            Files.move(file.toPath(), archived.toPath());
+            return archived;
         }
     }
 
@@ -425,7 +541,7 @@ public final class WorksRunner {
         }
         File executable = javaExecutable(home);
         if (!executable.isFile()) {
-            throw new IllegalStateException("Java 8 is required for packaged Forge 1.14.4. Set "
+            throw new IllegalStateException("Java 8 is required for packaged Forge 1.15.2. Set "
                     + "ADVANTAGE_WORKS_JAVA8_HOME; checked " + home);
         }
         return home.getCanonicalFile();
@@ -489,7 +605,7 @@ public final class WorksRunner {
                 + "level-seed=" + profile.levelSeed + "\n"
                 + "level-type=" + profile.levelType + "\n"
                 + "max-players=8\n"
-                + "motd=Advantage Works 1.14.4 Commissioning Ground\n"
+                + "motd=Advantage Works 1.15.2 Commissioning Ground\n"
                 + "online-mode=false\n"
                 + "server-ip=127.0.0.1\n"
                 + "pvp=false\n"
@@ -532,25 +648,37 @@ public final class WorksRunner {
     }
 
     static Profile readProfile(File file) throws Exception {
+        return readProfile(file, "1.15.2", "1.15.2-31.2.57");
+    }
+
+    static Profile readProfile(File file, String minecraft, String forge) throws Exception {
         try (InputStreamReader reader = new InputStreamReader(
                 new FileInputStream(file), StandardCharsets.UTF_8)) {
             Profile profile = GSON.fromJson(reader, Profile.class);
             if (profile == null || profile.name == null || profile.mode == null) {
                 throw new IllegalArgumentException("Incomplete profile " + file);
             }
-            if (!"1.14.4".equals(profile.minecraftVersion)) {
-                throw new IllegalArgumentException("Historical source profile, not a native114 destination: " + file);
+            if (!minecraft.equals(profile.minecraftVersion)) {
+                throw new IllegalArgumentException("Historical source profile, not a native115 destination: " + file);
             }
             if (!"PORTED_UNQUALIFIED".equals(profile.portStatus)) {
-                throw new IllegalStateException("Native114 profile is not ported: " + profile.portBlocker);
+                throw new IllegalStateException("Native115 profile is not ported: " + profile.portBlocker);
             }
-            if (profile.forge == null || !"1.14.4-28.2.26".equals(profile.forge.version)) {
-                throw new IllegalArgumentException("Native114 profile must select Forge 1.14.4-28.2.26");
+            if (profile.forge == null || !forge.equals(profile.forge.version)) {
+                throw new IllegalArgumentException("Native115 profile must select Forge 1.15.2-31.2.57");
             }
             if (profile.levelName == null || !profile.levelName.startsWith("AdvantageWorks")) {
                 throw new IllegalArgumentException("Profile levelName must begin with AdvantageWorks: " + file);
             }
             return profile;
+        }
+    }
+
+    static void requireInputPins(Profile profile) {
+        for (ModInput input : profile.mods) {
+            if (input.sha256 == null || !input.sha256.matches("[A-Fa-f0-9]{64}")) {
+                throw new IllegalStateException("Pending native115 SHA-256 pin: " + input.id);
+            }
         }
     }
 
@@ -931,13 +1059,13 @@ public final class WorksRunner {
     static final class Profile {
         String name;
         String mode;
-        String runtimeBase = "build/works-native114";
+        String runtimeBase = "build/works-native115";
         int serverPort = 25565;
         int startupTimeoutSeconds = 120;
         int shutdownTimeoutSeconds = 60;
         int stationRunSeconds = 5;
         String levelName = "AdvantageWorks";
-        String levelSeed = "advantage-works-1.14.4-v1";
+        String levelSeed = "advantage-works-1.15.2-v1";
         String levelType = "FLAT";
         String generatorSettings = "";
         boolean buildWorks = true;

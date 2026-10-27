@@ -275,7 +275,7 @@ final class DimensionEntityProbe {
             destination.setBlockState(SPAWN.east(), Blocks.RED_BED.getDefaultState().with(BedBlock.HORIZONTAL_FACING, Direction.EAST)
                     .with(BedBlock.PART, net.minecraft.state.properties.BedPart.HEAD), 2);
         }
-        player.setSpawnPoint(SPAWN, bedMode.equals("forced"), DimensionType.OVERWORLD);
+        player.setSpawnPoint(SPAWN, bedMode.equals("forced"), false, DimensionType.OVERWORLD);
         JsonObject result = new JsonObject(); result.addProperty("scope", "server-only-dummy-network");
         result.addProperty("handler", "ServerPlayNetHandler.PERFORM_RESPAWN");
         result.addProperty("keepInventory", keep); result.addProperty("bedMode", bedMode);

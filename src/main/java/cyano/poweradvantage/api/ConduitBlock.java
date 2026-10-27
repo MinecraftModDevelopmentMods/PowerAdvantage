@@ -34,7 +34,11 @@ public abstract class ConduitBlock extends net.minecraft.block.Block implements 
 	}
 
 	protected ConduitBlock(Material mat, float hardness) {
-		super(Properties.create(mat).hardnessAndResistance(hardness));
+		this(Properties.create(mat).hardnessAndResistance(hardness));
+	}
+
+	protected ConduitBlock(Properties properties) {
+		super(properties);
 	}
 
 	/**

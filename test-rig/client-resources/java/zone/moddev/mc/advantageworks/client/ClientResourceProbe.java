@@ -45,8 +45,8 @@ public final class ClientResourceProbe {
         try {
             result.addProperty("minecraft", net.minecraftforge.versions.mcp.MCPVersion.getMCVersion());
             result.addProperty("forge", net.minecraftforge.versions.forge.ForgeVersion.getVersion());
-            require("1.14.4".equals(result.get("minecraft").getAsString())
-                    && "28.2.26".equals(result.get("forge").getAsString()), "Wrong native client target");
+            require("1.15.2".equals(result.get("minecraft").getAsString())
+                    && "31.2.57".equals(result.get("forge").getAsString()), "Wrong native client target");
             require(minecraft.world == null && minecraft.player == null && !minecraft.isIntegratedServerRunning(),
                     "Resource probe must not open a world or connect to a server");
             com.google.gson.JsonArray mods = new com.google.gson.JsonArray();
@@ -64,6 +64,10 @@ public final class ClientResourceProbe {
             result.add("mod_versions", versions);
             require(versions.has("poweradvantage") && zone.moddev.mc.poweradvantage.PowerAdvantage.VERSION
                     .equals(versions.get("poweradvantage").getAsString()), "Power metadata does not match the compiled version");
+            require("2.4.6.115021".equals(versions.get("poweradvantage").getAsString()), "Wrong native Power candidate");
+            for (String id : new String[]{"steamadvantage", "electricadvantage"}) {
+                if (versions.has(id)) require("2.2.7.115021".equals(versions.get(id).getAsString()), "Wrong native expansion candidate: " + id);
+            }
             require(minecraft.getModelManager().getMissingModel() != null, "Timed out before model baking");
             require(minecraft.getLoadingGui() == null, "Timed out before native resource loading completed");
             int items = 0;
@@ -98,6 +102,8 @@ public final class ClientResourceProbe {
             TankVisualProbe.verify(minecraft, result);
             OilRenderProbe.verify(minecraft, result);
             RecipeBookGroupingProbe.verify(minecraft, result);
+            result.addProperty("primary_resource_status", "PASS");
+            if (Boolean.getBoolean("advantageworks.childRendererGeometry")) ChildRendererGeometryProbe.verify(minecraft, result);
             result.addProperty("status", "PASS");
             result.addProperty("items", items);
             result.addProperty("block_states", states);
@@ -127,7 +133,7 @@ public final class ClientResourceProbe {
         List<BakedQuad> quads = new ArrayList<>(model.getQuads(state, null, random));
         for (Direction side : Direction.values()) quads.addAll(model.getQuads(state, side, random));
         require(!requireQuads || !quads.isEmpty(), "Empty baked model: " + id);
-        for (BakedQuad quad : quads) require(!"missingno".equals(quad.getSprite().getName().getPath()), "Missing face texture: " + id);
+        for (BakedQuad quad : quads) require(!"missingno".equals(quad.func_187508_a().getName().getPath()), "Missing face texture: " + id);
     }
 
     private static void require(boolean condition, String message) {

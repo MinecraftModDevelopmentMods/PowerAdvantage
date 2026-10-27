@@ -64,8 +64,8 @@ public class FluidTankGUI extends SimpleMachineGUI {
 	) {
 		if (fs == null || fs.getFluid() == null || width <= 0 || height <= 0) return;
 		// The atlas supplies the current animation frame; water's sprite is grayscale.
-		TextureAtlasSprite sprite = guiContainer.getMinecraft().getTextureMap()
-				.getSprite(fs.getFluid().getAttributes().getStillTexture());
+		TextureAtlasSprite sprite = guiContainer.getMinecraft().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE)
+				.apply(fs.getFluid().getAttributes().getStillTexture());
 		guiContainer.getMinecraft().getTextureManager().bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
 		int color = fs.getFluid().getAttributes().getColor(zone.moddev.mc.poweradvantage.util.ForgeFluidAdapter.toForge(fs));
 		if (fs.getFluid().isEquivalentTo(net.minecraft.fluid.Fluids.WATER)) {
@@ -82,8 +82,8 @@ public class FluidTankGUI extends SimpleMachineGUI {
 			int tileHeight = Math.min(16, height - dy);
 			for (int dx = 0; dx < width; dx += 16) {
 				int tileWidth = Math.min(16, width - dx);
-				double u0 = sprite.getMinU(), u1 = sprite.getInterpolatedU(tileWidth);
-				double v0 = sprite.getMinV(), v1 = sprite.getInterpolatedV(tileHeight);
+				float u0 = sprite.getMinU(), u1 = sprite.getInterpolatedU(tileWidth);
+				float v0 = sprite.getMinV(), v1 = sprite.getInterpolatedV(tileHeight);
 				vertexbuffer.pos(x + dx, y + dy + tileHeight, zLevel).tex(u0, v1).color(red, green, blue, 1F).endVertex();
 				vertexbuffer.pos(x + dx + tileWidth, y + dy + tileHeight, zLevel).tex(u1, v1).color(red, green, blue, 1F).endVertex();
 				vertexbuffer.pos(x + dx + tileWidth, y + dy, zLevel).tex(u1, v0).color(red, green, blue, 1F).endVertex();

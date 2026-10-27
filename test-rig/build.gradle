@@ -51,14 +51,39 @@ repositories {
     }
 }
 
+def powerCompileJar = file(project.findProperty('powerAdvantageDeobfJar')
+        ?: '../build/libs-dev/PowerAdvantage-2.4.6.115021-deobf.jar')
+
 dependencies {
     implementation minecraft.dependency(
             "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}")
     runnerImplementation 'com.google.code.gson:gson:2.8.0'
     testImplementation sourceSets.runner.output
     testImplementation 'junit:junit:4.13.2'
-    compileOnly files(project.findProperty('powerAdvantageDeobfJar')
-            ?: '../build/libs-dev/PowerAdvantage-2.4.5.114041-deobf.jar')
+    compileOnly files(powerCompileJar)
+}
+
+tasks.register('verifyWorksCompileInputPin') {
+    group = 'verification'
+    description = 'Checks the exact parent-supplied Power API artifact before harness compilation.'
+    inputs.file(powerCompileJar)
+    inputs.property('sha256', project.poweradvantage_deobf_sha256)
+    doLast {
+        if (!powerCompileJar.isFile()) throw new GradleException("Missing native115 Power compile input: ${powerCompileJar}")
+        String actual = java.security.MessageDigest.getInstance('SHA-256')
+                .digest(powerCompileJar.bytes).encodeHex().toString().toUpperCase(Locale.ROOT)
+        if (actual != project.poweradvantage_deobf_sha256) {
+            throw new GradleException("Native115 Power compile input changed: ${actual}; obtain a new parent pin")
+        }
+    }
+}
+
+tasks.named('compileJava') { dependsOn tasks.named('verifyWorksCompileInputPin') }
+
+tasks.named('test', Test) {
+    def temp = layout.buildDirectory.dir('test-temp')
+    doFirst { temp.get().asFile.mkdirs() }
+    systemProperty 'java.io.tmpdir', temp.get().asFile.absolutePath
 }
 
 tasks.named('processResources', ProcessResources) {
@@ -114,7 +139,7 @@ def registerWorksRunner = { String taskName, String profileName, boolean automat
         classpath = sourceSets.runner.runtimeClasspath
         mainClass = 'zone.moddev.mc.advantageworks.runner.WorksRunner'
         if (!automated) standardInput = System.in
-        args '--profile', file("profiles/native114/${profileName}.json").absolutePath
+        args '--profile', file("profiles/native115/${profileName}.json").absolutePath
         if (automated) args '--automated'
         if (project.hasProperty('worksStations')) {
             args '--stations', project.property('worksStations').toString()
@@ -129,7 +154,7 @@ def registerWorksRunner = { String taskName, String profileName, boolean automat
 }
 
 registerWorksRunner('runWorksDev', 'dev-core', false,
-        'Builds and launches a disposable interactive 1.14.4 Advantage Works development server.')
+        'Builds and launches a disposable interactive 1.15.2 Advantage Works development server.')
 registerWorksRunner('verifyWorksDev', 'dev-core', true,
         'Generates, checks, restarts, and rechecks the disposable development works.')
 registerWorksRunner('verifyWorksTechProgression', 'dev-core-tech-progression', true,
@@ -153,13 +178,13 @@ registerWorksRunner('verifyWorksWorldgenLegacyImport', 'worldgen-legacy-import',
 registerWorksRunner('runWorksPackagedCurrent', 'packaged-current', false,
         'Launches the complete packaged works on localhost for manual inspection.')
 
-tasks.register('verifyWorksNative114Inputs', JavaExec) {
+tasks.register('verifyWorksNative115Inputs', JavaExec) {
     group = 'verification'
-    description = 'Checks native114 candidate identities and hashes without creating or opening a world.'
+    description = 'Checks native115 candidate identities and hashes without creating or opening a world.'
     dependsOn tasks.named('runnerClasses'), tasks.named('jar'), releaseJar
     classpath = sourceSets.runner.runtimeClasspath
     mainClass = 'zone.moddev.mc.advantageworks.runner.WorksRunner'
-    args '--profile', file("profiles/native114/${project.findProperty('worksProfile') ?: 'packaged-current'}.json").absolutePath,
+    args '--profile', file("profiles/native115/${project.findProperty('worksProfile') ?: 'packaged-current'}.json").absolutePath,
             '--validate-only'
 }
 
@@ -168,7 +193,7 @@ tasks.register('verifyHarnessIsolation') {
     description = 'Confirms the PowerAdvantage release contains no test-harness content.'
     doLast {
         File powerJar = file(project.findProperty('powerAdvantageReleaseJar')
-                ?: '../build/libs/PowerAdvantage-2.4.5.114041.jar')
+                ?: '../build/libs/PowerAdvantage-2.4.6.115021.jar')
         if (!powerJar.isFile()) {
             throw new GradleException("Build PowerAdvantage first: ${powerJar}")
         }

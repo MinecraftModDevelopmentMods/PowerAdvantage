@@ -20,7 +20,7 @@ public class NativePlatformContractTest {
         String json = new String(Files.readAllBytes(Paths.get("src/main/resources/META-INF/coremods.json")), StandardCharsets.UTF_8);
         JsonObject coremods = new JsonParser().parse(json).getAsJsonObject();
         assertEquals(1, coremods.size());
-        assertEquals("coremods/poweradvantage_114_migration.js", coremods.get("poweradvantage_114_migration").getAsString());
+        assertEquals("coremods/poweradvantage_115_migration.js", coremods.get("poweradvantage_115_migration").getAsString());
         for (String removed : new String[] {"oil_renderer", "material_tags", "parts_loot"})
             assertFalse(Files.exists(Paths.get("src/main/resources/coremods/poweradvantage_" + removed + ".js")));
     }

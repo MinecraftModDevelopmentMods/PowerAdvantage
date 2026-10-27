@@ -95,7 +95,7 @@ public class StillBlock extends BlockSimpleFluidMachine {
 	}
 
 	@Override
-	public int getLightValue(BlockState bs, net.minecraft.world.IEnviromentBlockReader world, BlockPos coord) {
+	public int getLightValue(BlockState bs, net.minecraft.world.IBlockReader world, BlockPos coord) {
 		return bs.get(ACTIVE) ? 12 : 0;
 	}
 
