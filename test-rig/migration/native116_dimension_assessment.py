@@ -60,6 +60,18 @@ def exact_except_native_health(expected, actual, path=()):
     return expected == actual
 
 
+def semantic_player_spawn_defaults(state):
+    """Expose only the proven absent player respawn dimension's Overworld default."""
+    result = copy.deepcopy(state)
+    for root in ("file", "adapter"):
+        player = result.get(root)
+        if (isinstance(player, dict) and "SpawnDimension" not in player
+                and all(type(player.get(key)) is int and -(1 << 31) <= player[key] < (1 << 31)
+                        for key in ("SpawnX", "SpawnY", "SpawnZ"))):
+            player["SpawnDimension"] = 0
+    return result
+
+
 def _scope(value, scope, adapter):
     if scope == "exact":
         result = copy.deepcopy(value)
@@ -72,7 +84,7 @@ def _scope(value, scope, adapter):
             result.pop("playerWorldDimension", None)
     else:
         raise ValueError("Unknown historical comparison scope")
-    return semantic_modifier_representation(result)
+    return semantic_player_spawn_defaults(semantic_modifier_representation(result))
 
 
 def assess(expected, actual, strict, proof_path=None, scope="exact", adapter=True):

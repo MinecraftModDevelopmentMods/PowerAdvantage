@@ -1,0 +1,1800 @@
+{
+  "cases": [
+    {
+      "after": {
+        "adapter": {
+          "Dimension": -1,
+          "EnderItems": [
+            {
+              "Count": 1,
+              "Slot": 0,
+              "id": "steamadvantage:musket",
+              "tag": {
+                "Damage": 5,
+                "Enchantments": [
+                  {
+                    "id": "steamadvantage:powderless",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:recoil",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:high_explosive",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:rapid_reload",
+                    "lvl": 1
+                  }
+                ],
+                "MigrationWitness": "steamadvantage:musket",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 1,
+              "id": "electricadvantage:lithium_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lithium_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 2,
+              "id": "electricadvantage:lead_acid_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lead_acid_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 3,
+              "id": "electricadvantage:alkaline_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:alkaline_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 4,
+              "id": "electricadvantage:nickel_hydride_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:nickel_hydride_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 1,
+              "Slot": 5,
+              "id": "poweradvantage:crude_oil",
+              "tag": {
+                "MigrationWitness": "poweradvantage:crude_oil",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            }
+          ],
+          "Health": 17,
+          "Inventory": [
+            {
+              "Count": 1,
+              "Slot": 0,
+              "id": "steamadvantage:musket",
+              "tag": {
+                "Damage": 5,
+                "Enchantments": [
+                  {
+                    "id": "steamadvantage:powderless",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:recoil",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:high_explosive",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:rapid_reload",
+                    "lvl": 1
+                  }
+                ],
+                "MigrationWitness": "steamadvantage:musket",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 1,
+              "id": "electricadvantage:lithium_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lithium_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 2,
+              "id": "electricadvantage:lead_acid_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lead_acid_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 3,
+              "id": "electricadvantage:alkaline_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:alkaline_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 4,
+              "id": "electricadvantage:nickel_hydride_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:nickel_hydride_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 1,
+              "Slot": 5,
+              "id": "poweradvantage:crude_oil",
+              "tag": {
+                "MigrationWitness": "poweradvantage:crude_oil",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            }
+          ],
+          "Pos": [
+            144.5,
+            100,
+            8.5
+          ],
+          "Rotation": [
+            37,
+            -12
+          ],
+          "SelectedItemSlot": 3,
+          "SpawnDimension": 0,
+          "SpawnForced": 1,
+          "SpawnX": 160,
+          "SpawnY": 100,
+          "SpawnZ": 24,
+          "UUIDLeast": -4818000392674683000,
+          "UUIDMost": -2290499263509218600,
+          "XpLevel": 23,
+          "XpP": 0.375,
+          "XpTotal": 751,
+          "foodLevel": 16,
+          "foodSaturationLevel": 3.5
+        },
+        "file": {
+          "Dimension": -1,
+          "EnderItems": [
+            {
+              "Count": 1,
+              "Slot": 0,
+              "id": "steamadvantage:musket",
+              "tag": {
+                "Damage": 5,
+                "Enchantments": [
+                  {
+                    "id": "steamadvantage:powderless",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:recoil",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:high_explosive",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:rapid_reload",
+                    "lvl": 1
+                  }
+                ],
+                "MigrationWitness": "steamadvantage:musket",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 1,
+              "id": "electricadvantage:lithium_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lithium_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 2,
+              "id": "electricadvantage:lead_acid_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lead_acid_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 3,
+              "id": "electricadvantage:alkaline_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:alkaline_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 4,
+              "id": "electricadvantage:nickel_hydride_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:nickel_hydride_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 1,
+              "Slot": 5,
+              "id": "poweradvantage:crude_oil",
+              "tag": {
+                "MigrationWitness": "poweradvantage:crude_oil",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            }
+          ],
+          "Health": 17,
+          "Inventory": [
+            {
+              "Count": 1,
+              "Slot": 0,
+              "id": "steamadvantage:musket",
+              "tag": {
+                "Damage": 5,
+                "Enchantments": [
+                  {
+                    "id": "steamadvantage:powderless",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:recoil",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:high_explosive",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:rapid_reload",
+                    "lvl": 1
+                  }
+                ],
+                "MigrationWitness": "steamadvantage:musket",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 1,
+              "id": "electricadvantage:lithium_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lithium_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 2,
+              "id": "electricadvantage:lead_acid_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lead_acid_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 3,
+              "id": "electricadvantage:alkaline_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:alkaline_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 4,
+              "id": "electricadvantage:nickel_hydride_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:nickel_hydride_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 1,
+              "Slot": 5,
+              "id": "poweradvantage:crude_oil",
+              "tag": {
+                "MigrationWitness": "poweradvantage:crude_oil",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            }
+          ],
+          "Pos": [
+            144.5,
+            100,
+            8.5
+          ],
+          "Rotation": [
+            37,
+            -12
+          ],
+          "SelectedItemSlot": 3,
+          "SpawnDimension": 0,
+          "SpawnForced": 1,
+          "SpawnX": 160,
+          "SpawnY": 100,
+          "SpawnZ": 24,
+          "UUIDLeast": -4818000392674683000,
+          "UUIDMost": -2290499263509218600,
+          "XpLevel": 23,
+          "XpP": 0.375,
+          "XpTotal": 751,
+          "foodLevel": 16,
+          "foodSaturationLevel": 3.5
+        }
+      },
+      "before": {
+        "adapter": {
+          "Dimension": -1,
+          "EnderItems": [
+            {
+              "Count": 1,
+              "Slot": 0,
+              "id": "steamadvantage:musket",
+              "tag": {
+                "Damage": 5,
+                "Enchantments": [
+                  {
+                    "id": "steamadvantage:powderless",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:recoil",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:high_explosive",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:rapid_reload",
+                    "lvl": 1
+                  }
+                ],
+                "MigrationWitness": "steamadvantage:musket",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 1,
+              "id": "electricadvantage:lithium_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lithium_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 2,
+              "id": "electricadvantage:lead_acid_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lead_acid_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 3,
+              "id": "electricadvantage:alkaline_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:alkaline_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 4,
+              "id": "electricadvantage:nickel_hydride_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:nickel_hydride_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 1,
+              "Slot": 5,
+              "id": "poweradvantage:crude_oil",
+              "tag": {
+                "MigrationWitness": "poweradvantage:crude_oil",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            }
+          ],
+          "Health": 17,
+          "Inventory": [
+            {
+              "Count": 1,
+              "Slot": 0,
+              "id": "steamadvantage:musket",
+              "tag": {
+                "Damage": 5,
+                "Enchantments": [
+                  {
+                    "id": "steamadvantage:powderless",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:recoil",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:high_explosive",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:rapid_reload",
+                    "lvl": 1
+                  }
+                ],
+                "MigrationWitness": "steamadvantage:musket",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 1,
+              "id": "electricadvantage:lithium_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lithium_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 2,
+              "id": "electricadvantage:lead_acid_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lead_acid_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 3,
+              "id": "electricadvantage:alkaline_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:alkaline_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 4,
+              "id": "electricadvantage:nickel_hydride_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:nickel_hydride_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 1,
+              "Slot": 5,
+              "id": "poweradvantage:crude_oil",
+              "tag": {
+                "MigrationWitness": "poweradvantage:crude_oil",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            }
+          ],
+          "Pos": [
+            144.5,
+            100,
+            8.5
+          ],
+          "Rotation": [
+            37,
+            -12
+          ],
+          "SelectedItemSlot": 3,
+          "SpawnForced": 1,
+          "SpawnX": 160,
+          "SpawnY": 100,
+          "SpawnZ": 24,
+          "UUIDLeast": -4818000392674683000,
+          "UUIDMost": -2290499263509218600,
+          "XpLevel": 23,
+          "XpP": 0.375,
+          "XpTotal": 751,
+          "foodLevel": 16,
+          "foodSaturationLevel": 3.5
+        },
+        "file": {
+          "Dimension": -1,
+          "EnderItems": [
+            {
+              "Count": 1,
+              "Slot": 0,
+              "id": "steamadvantage:musket",
+              "tag": {
+                "Damage": 5,
+                "Enchantments": [
+                  {
+                    "id": "steamadvantage:powderless",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:recoil",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:high_explosive",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:rapid_reload",
+                    "lvl": 1
+                  }
+                ],
+                "MigrationWitness": "steamadvantage:musket",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 1,
+              "id": "electricadvantage:lithium_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lithium_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 2,
+              "id": "electricadvantage:lead_acid_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lead_acid_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 3,
+              "id": "electricadvantage:alkaline_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:alkaline_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 4,
+              "id": "electricadvantage:nickel_hydride_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:nickel_hydride_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 1,
+              "Slot": 5,
+              "id": "poweradvantage:crude_oil",
+              "tag": {
+                "MigrationWitness": "poweradvantage:crude_oil",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            }
+          ],
+          "Health": 17,
+          "Inventory": [
+            {
+              "Count": 1,
+              "Slot": 0,
+              "id": "steamadvantage:musket",
+              "tag": {
+                "Damage": 5,
+                "Enchantments": [
+                  {
+                    "id": "steamadvantage:powderless",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:recoil",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:high_explosive",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:rapid_reload",
+                    "lvl": 1
+                  }
+                ],
+                "MigrationWitness": "steamadvantage:musket",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 1,
+              "id": "electricadvantage:lithium_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lithium_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 2,
+              "id": "electricadvantage:lead_acid_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lead_acid_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 3,
+              "id": "electricadvantage:alkaline_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:alkaline_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 4,
+              "id": "electricadvantage:nickel_hydride_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:nickel_hydride_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 1,
+              "Slot": 5,
+              "id": "poweradvantage:crude_oil",
+              "tag": {
+                "MigrationWitness": "poweradvantage:crude_oil",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            }
+          ],
+          "Pos": [
+            144.5,
+            100,
+            8.5
+          ],
+          "Rotation": [
+            37,
+            -12
+          ],
+          "SelectedItemSlot": 3,
+          "SpawnForced": 1,
+          "SpawnX": 160,
+          "SpawnY": 100,
+          "SpawnZ": 24,
+          "UUIDLeast": -4818000392674683000,
+          "UUIDMost": -2290499263509218600,
+          "XpLevel": 23,
+          "XpP": 0.375,
+          "XpTotal": 751,
+          "foodLevel": 16,
+          "foodSaturationLevel": 3.5
+        }
+      },
+      "name": "original110",
+      "sourcePlayer": {
+        "path": "C:\\Users\\johnb\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Local\\AdvantageWorks\\qualification\\20261007-dimensions-nether-final\\nether\\original110\\dimension-evidence\\source\\player.dat",
+        "sha256": "CB636FD59EFB8B9F04E9F3EEBB39C5D026E144F8EA730408E4C84C2C49EEE420"
+      },
+      "targetEvidenceScope": "J_HELD_POWERE",
+      "targetPlayer": {
+        "path": "D:\\PowerAdvantage\\PA116\\PowerAdvantage\\test-rig\\build\\native116_actor_j_20261027\\dimensions-nether\\original110\\dimension-evidence\\adapter\\player.dat",
+        "sha256": "5F60B67C9A9AFC6C1CA4C08214D033FCD6B7ED281EF8C2779370EFA7ECCBA9B1"
+      },
+      "targetSemantic": {
+        "path": "D:\\PowerAdvantage\\PA116\\PowerAdvantage\\test-rig\\build\\native116_actor_j_20261027\\dimensions-nether\\original110\\dimension-semantic-adapter.json",
+        "sha256": "C6D64C7F33B666BA7D4193FD0B384F126C6E5E108698A040136DA6313AA87A6C"
+      }
+    },
+    {
+      "after": {
+        "adapter": {
+          "Dimension": -1,
+          "EnderItems": [
+            {
+              "Count": 1,
+              "Slot": 0,
+              "id": "steamadvantage:musket",
+              "tag": {
+                "Damage": 5,
+                "Enchantments": [
+                  {
+                    "id": "steamadvantage:recoil",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:powderless",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:high_explosive",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:rapid_reload",
+                    "lvl": 1
+                  }
+                ],
+                "MigrationWitness": "steamadvantage:musket",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 1,
+              "id": "electricadvantage:lithium_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lithium_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 2,
+              "id": "electricadvantage:lead_acid_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lead_acid_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 3,
+              "id": "electricadvantage:alkaline_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:alkaline_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 4,
+              "id": "electricadvantage:nickel_hydride_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:nickel_hydride_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 1,
+              "Slot": 5,
+              "id": "poweradvantage:crude_oil_bucket",
+              "tag": {
+                "MigrationWitness": "forge:bucketfilled",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            }
+          ],
+          "Health": 17,
+          "Inventory": [
+            {
+              "Count": 1,
+              "Slot": 0,
+              "id": "steamadvantage:musket",
+              "tag": {
+                "Damage": 5,
+                "Enchantments": [
+                  {
+                    "id": "steamadvantage:recoil",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:powderless",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:high_explosive",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:rapid_reload",
+                    "lvl": 1
+                  }
+                ],
+                "MigrationWitness": "steamadvantage:musket",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 1,
+              "id": "electricadvantage:lithium_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lithium_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 2,
+              "id": "electricadvantage:lead_acid_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lead_acid_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 3,
+              "id": "electricadvantage:alkaline_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:alkaline_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 4,
+              "id": "electricadvantage:nickel_hydride_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:nickel_hydride_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 1,
+              "Slot": 5,
+              "id": "poweradvantage:crude_oil_bucket",
+              "tag": {
+                "MigrationWitness": "forge:bucketfilled",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            }
+          ],
+          "Pos": [
+            144.5,
+            100,
+            8.5
+          ],
+          "Rotation": [
+            37,
+            -12
+          ],
+          "SelectedItemSlot": 3,
+          "SpawnDimension": 0,
+          "SpawnForced": 1,
+          "SpawnX": 160,
+          "SpawnY": 100,
+          "SpawnZ": 24,
+          "UUIDLeast": -4818000392674683000,
+          "UUIDMost": -2290499263509218600,
+          "XpLevel": 23,
+          "XpP": 0.375,
+          "XpTotal": 751,
+          "foodLevel": 16,
+          "foodSaturationLevel": 3.5
+        },
+        "file": {
+          "Dimension": -1,
+          "EnderItems": [
+            {
+              "Count": 1,
+              "Slot": 0,
+              "id": "steamadvantage:musket",
+              "tag": {
+                "Damage": 5,
+                "Enchantments": [
+                  {
+                    "id": "steamadvantage:recoil",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:powderless",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:high_explosive",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:rapid_reload",
+                    "lvl": 1
+                  }
+                ],
+                "MigrationWitness": "steamadvantage:musket",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 1,
+              "id": "electricadvantage:lithium_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lithium_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 2,
+              "id": "electricadvantage:lead_acid_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lead_acid_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 3,
+              "id": "electricadvantage:alkaline_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:alkaline_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 4,
+              "id": "electricadvantage:nickel_hydride_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:nickel_hydride_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 1,
+              "Slot": 5,
+              "id": "poweradvantage:crude_oil_bucket",
+              "tag": {
+                "MigrationWitness": "forge:bucketfilled",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            }
+          ],
+          "Health": 17,
+          "Inventory": [
+            {
+              "Count": 1,
+              "Slot": 0,
+              "id": "steamadvantage:musket",
+              "tag": {
+                "Damage": 5,
+                "Enchantments": [
+                  {
+                    "id": "steamadvantage:recoil",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:powderless",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:high_explosive",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:rapid_reload",
+                    "lvl": 1
+                  }
+                ],
+                "MigrationWitness": "steamadvantage:musket",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 1,
+              "id": "electricadvantage:lithium_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lithium_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 2,
+              "id": "electricadvantage:lead_acid_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lead_acid_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 3,
+              "id": "electricadvantage:alkaline_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:alkaline_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 4,
+              "id": "electricadvantage:nickel_hydride_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:nickel_hydride_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 1,
+              "Slot": 5,
+              "id": "poweradvantage:crude_oil_bucket",
+              "tag": {
+                "MigrationWitness": "forge:bucketfilled",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            }
+          ],
+          "Pos": [
+            144.5,
+            100,
+            8.5
+          ],
+          "Rotation": [
+            37,
+            -12
+          ],
+          "SelectedItemSlot": 3,
+          "SpawnDimension": 0,
+          "SpawnForced": 1,
+          "SpawnX": 160,
+          "SpawnY": 100,
+          "SpawnZ": 24,
+          "UUIDLeast": -4818000392674683000,
+          "UUIDMost": -2290499263509218600,
+          "XpLevel": 23,
+          "XpP": 0.375,
+          "XpTotal": 751,
+          "foodLevel": 16,
+          "foodSaturationLevel": 3.5
+        }
+      },
+      "before": {
+        "adapter": {
+          "Dimension": -1,
+          "EnderItems": [
+            {
+              "Count": 1,
+              "Slot": 0,
+              "id": "steamadvantage:musket",
+              "tag": {
+                "Damage": 5,
+                "Enchantments": [
+                  {
+                    "id": "steamadvantage:recoil",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:powderless",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:high_explosive",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:rapid_reload",
+                    "lvl": 1
+                  }
+                ],
+                "MigrationWitness": "steamadvantage:musket",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 1,
+              "id": "electricadvantage:lithium_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lithium_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 2,
+              "id": "electricadvantage:lead_acid_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lead_acid_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 3,
+              "id": "electricadvantage:alkaline_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:alkaline_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 4,
+              "id": "electricadvantage:nickel_hydride_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:nickel_hydride_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 1,
+              "Slot": 5,
+              "id": "poweradvantage:crude_oil_bucket",
+              "tag": {
+                "MigrationWitness": "forge:bucketfilled",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            }
+          ],
+          "Health": 17,
+          "Inventory": [
+            {
+              "Count": 1,
+              "Slot": 0,
+              "id": "steamadvantage:musket",
+              "tag": {
+                "Damage": 5,
+                "Enchantments": [
+                  {
+                    "id": "steamadvantage:recoil",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:powderless",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:high_explosive",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:rapid_reload",
+                    "lvl": 1
+                  }
+                ],
+                "MigrationWitness": "steamadvantage:musket",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 1,
+              "id": "electricadvantage:lithium_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lithium_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 2,
+              "id": "electricadvantage:lead_acid_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lead_acid_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 3,
+              "id": "electricadvantage:alkaline_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:alkaline_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 4,
+              "id": "electricadvantage:nickel_hydride_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:nickel_hydride_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 1,
+              "Slot": 5,
+              "id": "poweradvantage:crude_oil_bucket",
+              "tag": {
+                "MigrationWitness": "forge:bucketfilled",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            }
+          ],
+          "Pos": [
+            144.5,
+            100,
+            8.5
+          ],
+          "Rotation": [
+            37,
+            -12
+          ],
+          "SelectedItemSlot": 3,
+          "SpawnForced": 1,
+          "SpawnX": 160,
+          "SpawnY": 100,
+          "SpawnZ": 24,
+          "UUIDLeast": -4818000392674683000,
+          "UUIDMost": -2290499263509218600,
+          "XpLevel": 23,
+          "XpP": 0.375,
+          "XpTotal": 751,
+          "foodLevel": 16,
+          "foodSaturationLevel": 3.5
+        },
+        "file": {
+          "Dimension": -1,
+          "EnderItems": [
+            {
+              "Count": 1,
+              "Slot": 0,
+              "id": "steamadvantage:musket",
+              "tag": {
+                "Damage": 5,
+                "Enchantments": [
+                  {
+                    "id": "steamadvantage:recoil",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:powderless",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:high_explosive",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:rapid_reload",
+                    "lvl": 1
+                  }
+                ],
+                "MigrationWitness": "steamadvantage:musket",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 1,
+              "id": "electricadvantage:lithium_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lithium_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 2,
+              "id": "electricadvantage:lead_acid_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lead_acid_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 3,
+              "id": "electricadvantage:alkaline_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:alkaline_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 4,
+              "id": "electricadvantage:nickel_hydride_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:nickel_hydride_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 1,
+              "Slot": 5,
+              "id": "poweradvantage:crude_oil_bucket",
+              "tag": {
+                "MigrationWitness": "forge:bucketfilled",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            }
+          ],
+          "Health": 17,
+          "Inventory": [
+            {
+              "Count": 1,
+              "Slot": 0,
+              "id": "steamadvantage:musket",
+              "tag": {
+                "Damage": 5,
+                "Enchantments": [
+                  {
+                    "id": "steamadvantage:recoil",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:powderless",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:high_explosive",
+                    "lvl": 1
+                  },
+                  {
+                    "id": "steamadvantage:rapid_reload",
+                    "lvl": 1
+                  }
+                ],
+                "MigrationWitness": "steamadvantage:musket",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 1,
+              "id": "electricadvantage:lithium_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lithium_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 2,
+              "id": "electricadvantage:lead_acid_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:lead_acid_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 3,
+              "id": "electricadvantage:alkaline_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:alkaline_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 3,
+              "Slot": 4,
+              "id": "electricadvantage:nickel_hydride_battery",
+              "tag": {
+                "MigrationWitness": "electricadvantage:nickel_hydride_battery",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                },
+                "energy": 123
+              }
+            },
+            {
+              "Count": 1,
+              "Slot": 5,
+              "id": "poweradvantage:crude_oil_bucket",
+              "tag": {
+                "MigrationWitness": "forge:bucketfilled",
+                "Nested": {
+                  "OwnerNote": "keep-this-verbatim"
+                }
+              }
+            }
+          ],
+          "Pos": [
+            144.5,
+            100,
+            8.5
+          ],
+          "Rotation": [
+            37,
+            -12
+          ],
+          "SelectedItemSlot": 3,
+          "SpawnForced": 1,
+          "SpawnX": 160,
+          "SpawnY": 100,
+          "SpawnZ": 24,
+          "UUIDLeast": -4818000392674683000,
+          "UUIDMost": -2290499263509218600,
+          "XpLevel": 23,
+          "XpP": 0.375,
+          "XpTotal": 751,
+          "foodLevel": 16,
+          "foodSaturationLevel": 3.5
+        }
+      },
+      "name": "legacy112",
+      "sourcePlayer": {
+        "path": "C:\\Users\\johnb\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Local\\AdvantageWorks\\qualification\\20261007-dimensions-nether-final\\nether\\legacy112\\dimension-evidence\\source\\player.dat",
+        "sha256": "FE92D198DFB396897FF0855A26333CD74B874CA93CAF32B447C49B0AAAA81C40"
+      },
+      "targetEvidenceScope": "H_RETAINED_POWERD_SCHEMA_EVIDENCE_ONLY",
+      "targetPlayer": {
+        "path": "D:\\PowerAdvantage\\PA116\\PowerAdvantage\\test-rig\\build\\native116_actor_h_20261027\\dimensions-nether\\legacy112\\dimension-evidence\\adapter\\player.dat",
+        "sha256": "36D461034110C2F2502DABA255D13AFA11FEF6613B8247FAFDF7B781A28671E1"
+      },
+      "targetSemantic": {
+        "path": "D:\\PowerAdvantage\\PA116\\PowerAdvantage\\test-rig\\build\\native116_actor_h_20261027\\dimensions-nether\\legacy112\\dimension-semantic-adapter.json",
+        "sha256": "DE27EC47855349CAC7C7F9FB8F4D57615C90B80D6904CD4408A0357D53E29170"
+      }
+    }
+  ],
+  "primarySourceProof": [
+    {
+      "archive": "D:\\PowerAdvantage\\PA110\\PowerAdvantage\\.gradle\\mavenizer\\repo\\net\\minecraftforge\\forge\\1.10.2-12.18.3.2511\\forge-1.10.2-12.18.3.2511-sources.jar",
+      "entries": [
+        {
+          "entry": "net/minecraft/entity/player/EntityPlayer.java",
+          "entrySha256": "C16F58FB303DFEBF713272BEB05FC910AAD533464F1E6833E626F891D07AD175",
+          "excerpts": [
+            {
+              "firstLine": 980,
+              "lastLine": 994,
+              "text": "        if (compound.hasKey(\"SpawnX\", 99) && compound.hasKey(\"SpawnY\", 99) && compound.hasKey(\"SpawnZ\", 99))\n        {\n            this.spawnChunk = new BlockPos(compound.getInteger(\"SpawnX\"), compound.getInteger(\"SpawnY\"), compound.getInteger(\"SpawnZ\"));\n            this.spawnForced = compound.getBoolean(\"SpawnForced\");\n        }\n\n        NBTTagList spawnlist = null;\n        spawnlist = compound.getTagList(\"Spawns\", 10);\n        for (int i = 0; i < spawnlist.tagCount(); i++)\n        {\n            NBTTagCompound spawndata = (NBTTagCompound)spawnlist.getCompoundTagAt(i);\n            int spawndim = spawndata.getInteger(\"Dim\");\n            this.spawnChunkMap.put(spawndim, new BlockPos(spawndata.getInteger(\"SpawnX\"), spawndata.getInteger(\"SpawnY\"), spawndata.getInteger(\"SpawnZ\")));\n            this.spawnForcedMap.put(spawndim, spawndata.getBoolean(\"SpawnForced\"));\n        }"
+            },
+            {
+              "firstLine": 1023,
+              "lastLine": 1029,
+              "text": "        if (this.spawnChunk != null)\n        {\n            compound.setInteger(\"SpawnX\", this.spawnChunk.getX());\n            compound.setInteger(\"SpawnY\", this.spawnChunk.getY());\n            compound.setInteger(\"SpawnZ\", this.spawnChunk.getZ());\n            compound.setBoolean(\"SpawnForced\", this.spawnForced);\n        }"
+            },
+            {
+              "firstLine": 2740,
+              "lastLine": 2742,
+              "text": "    public BlockPos getBedLocation(int dimension)\n    {\n        return dimension == 0 ? spawnChunk : spawnChunkMap.get(dimension);"
+            }
+          ]
+        },
+        {
+          "entry": "net/minecraft/world/WorldProvider.java",
+          "entrySha256": "9A72676CA1A2A5532709AD9704194DC7415C62BECB7DA4D33EBDBECFC4209852",
+          "excerpts": [
+            {
+              "firstLine": 404,
+              "lastLine": 406,
+              "text": "    public int getRespawnDimension(net.minecraft.entity.player.EntityPlayerMP player)\n    {\n        return 0;"
+            }
+          ]
+        }
+      ],
+      "sha256": "7D0148D301495D7A6E24D1030B7FD98163E748A8E0F37FCF74D1B7C4A05BB94B"
+    },
+    {
+      "archive": "D:\\PowerAdvantage\\PA112\\PowerAdvantage\\.gradle\\mavenizer\\repo\\net\\minecraftforge\\forge\\1.12.2-14.23.5.2859\\forge-1.12.2-14.23.5.2859-sources.jar",
+      "entries": [
+        {
+          "entry": "net/minecraft/entity/player/EntityPlayer.java",
+          "entrySha256": "8251CB91AC54C51216D788B24921662137C339915DDE22B1E993E68923FFAEA7",
+          "excerpts": [
+            {
+              "firstLine": 1005,
+              "lastLine": 1005,
+              "text": "        this.spawnDimension = compound.getBoolean(\"HasSpawnDimensionSet\") ? compound.getInteger(\"SpawnDimension\") : null;"
+            },
+            {
+              "firstLine": 1070,
+              "lastLine": 1072,
+              "text": "        compound.setBoolean(\"HasSpawnDimensionSet\", this.hasSpawnDimension());\n        if (this.hasSpawnDimension())\n            compound.setInteger(\"SpawnDimension\", this.getSpawnDimension());"
+            },
+            {
+              "firstLine": 3011,
+              "lastLine": 3015,
+              "text": "    @Nullable\n    private Integer spawnDimension;\n    public boolean hasSpawnDimension() { return spawnDimension != null; }\n    public int getSpawnDimension() { return spawnDimension != null ? spawnDimension : 0; }\n    public void setSpawnDimension(@Nullable Integer dimension) { this.spawnDimension = dimension; }"
+            }
+          ]
+        }
+      ],
+      "sha256": "C2C7CAF7A08BD441992F6A38B2EC93195465D41D4127630A9C0F2102C921CF58"
+    },
+    {
+      "archive": "D:\\GradleCaches\\ea116b-20261027\\caches\\minecraftforge\\forgegradle\\mavenizer\\caches\\forge\\net\\minecraftforge\\forge\\1.16.5-36.2.34\\official\\1.16.5\\remapped-javadoc.jar",
+      "entries": [
+        {
+          "entry": "net/minecraft/entity/player/ServerPlayerEntity.java",
+          "entrySha256": "DD482BB42F23CE8557133A97918E525A1840DF6C6DBAA2D2606FAF75A96019BF",
+          "excerpts": [
+            {
+              "firstLine": 166,
+              "lastLine": 166,
+              "text": "   private RegistryKey<World> respawnDimension = World.OVERWORLD;"
+            },
+            {
+              "firstLine": 259,
+              "lastLine": 265,
+              "text": "      if (p_70037_1_.contains(\"SpawnX\", 99) && p_70037_1_.contains(\"SpawnY\", 99) && p_70037_1_.contains(\"SpawnZ\", 99)) {\n         this.respawnPosition = new BlockPos(p_70037_1_.getInt(\"SpawnX\"), p_70037_1_.getInt(\"SpawnY\"), p_70037_1_.getInt(\"SpawnZ\"));\n         this.respawnForced = p_70037_1_.getBoolean(\"SpawnForced\");\n         this.respawnAngle = p_70037_1_.getFloat(\"SpawnAngle\");\n         if (p_70037_1_.contains(\"SpawnDimension\")) {\n            this.respawnDimension = World.RESOURCE_KEY_CODEC.parse(NBTDynamicOps.INSTANCE, p_70037_1_.get(\"SpawnDimension\")).resultOrPartial(LOGGER::error).orElse(World.OVERWORLD);\n         }"
+            },
+            {
+              "firstLine": 295,
+              "lastLine": 304,
+              "text": "      p_213281_1_.putString(\"Dimension\", this.level.dimension().location().toString());\n      if (this.respawnPosition != null) {\n         p_213281_1_.putInt(\"SpawnX\", this.respawnPosition.getX());\n         p_213281_1_.putInt(\"SpawnY\", this.respawnPosition.getY());\n         p_213281_1_.putInt(\"SpawnZ\", this.respawnPosition.getZ());\n         p_213281_1_.putBoolean(\"SpawnForced\", this.respawnForced);\n         p_213281_1_.putFloat(\"SpawnAngle\", this.respawnAngle);\n         ResourceLocation.CODEC.encodeStart(NBTDynamicOps.INSTANCE, this.respawnDimension.location()).resultOrPartial(LOGGER::error).ifPresent((p_241148_1_) -> {\n            p_213281_1_.put(\"SpawnDimension\", p_241148_1_);\n         });"
+            }
+          ]
+        }
+      ],
+      "sha256": "3212FA0AEC99F1E156FEF59D08B20B7AF440C72E3B0B1FF5F69E73C9906290A6"
+    }
+  ],
+  "schemaVersion": 1,
+  "scope": "AUTHENTIC_PLAYER_ROOT_SCHEMA_FIXTURES_NOT_NEW_RUNTIME_QUALIFICATION"
+}
