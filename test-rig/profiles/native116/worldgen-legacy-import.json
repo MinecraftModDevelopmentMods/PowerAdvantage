@@ -1,0 +1,240 @@
+{
+  "mode": "packaged",
+  "runtimeBase": "build/works-native116",
+  "serverPort": 25565,
+  "startupTimeoutSeconds": 180,
+  "stationRunSeconds": 5,
+  "recipeMode": "NORMAL",
+  "sourceCommit": "2116a35a40dd150d79e7dfdcdc891637793178b7",
+  "sourceVersion": "2.4.7.116051",
+  "forge": {
+    "version": "1.16.5-36.2.34",
+    "installerPath": "build/native116-artifacts/53B73DBBCC486F38726E76CE923B13381044984C83C762847C7193340F97130F/forge-1.16.5-36.2.34-installer.jar",
+    "url": "https://maven.minecraftforge.net/net/minecraftforge/forge/1.16.5-36.2.34/forge-1.16.5-36.2.34-installer.jar",
+    "sha256": "53B73DBBCC486F38726E76CE923B13381044984C83C762847C7193340F97130F"
+  },
+  "mods": [
+    {
+      "id": "advantageworkstest",
+      "version": "1.1.0.116051",
+      "file": "AdvantageWorksTestHarness-1.1.0.116051.jar",
+      "path": "build/native116-artifacts/9F450BB7F81DD08918CCFCBCF59DE81117A323F798F47AF4603829FBC542F430/AdvantageWorksTestHarness-1.1.0.116051.jar",
+      "workspaceProduced": true,
+      "originPath": "D:/PowerAdvantage/PA116/PowerAdvantage/test-rig/build/gradle/libs/AdvantageWorksTestHarness-1.1.0.116051.jar",
+      "sha256": "9F450BB7F81DD08918CCFCBCF59DE81117A323F798F47AF4603829FBC542F430",
+      "sourceRef": "9e4dd7444993ec3d42e1436a6c0673ed86a570a6",
+      "pinStatus": "PINNED_UNQUALIFIED"
+    },
+    {
+      "id": "poweradvantage",
+      "version": "2.4.7.116051",
+      "file": "PowerAdvantage-2.4.7.116051.jar",
+      "path": "build/native116-artifacts/94C36D3F157A120943C067D4317D1C55D62792BAB43E309640DB64BAEE3FFE7E/PowerAdvantage-2.4.7.116051.jar",
+      "workspaceProduced": true,
+      "originPath": "D:/PowerAdvantage/_verification/advantage-116-port-20261027/power-bootstrap-d/PowerAdvantage-2.4.7.116051.jar",
+      "sha256": "94C36D3F157A120943C067D4317D1C55D62792BAB43E309640DB64BAEE3FFE7E",
+      "sourceRef": "2116a35a40dd150d79e7dfdcdc891637793178b7",
+      "pinStatus": "PINNED_UNQUALIFIED"
+    },
+    {
+      "id": "steamadvantage",
+      "version": "2.2.8.116051",
+      "file": "SteamAdvantage-2.2.8.116051.jar",
+      "path": "build/native116-artifacts/0E8EF7DA681A5105E5206F166A36F56AEF356DFD227F1C3910DE7BDC606AA148/SteamAdvantage-2.2.8.116051.jar",
+      "workspaceProduced": true,
+      "originPath": "D:/PowerAdvantage/PA116/SteamAdvantage/SteamAdvantage/build/libs/SteamAdvantage-2.2.8.116051.jar",
+      "sha256": "0E8EF7DA681A5105E5206F166A36F56AEF356DFD227F1C3910DE7BDC606AA148",
+      "sourceRef": "362048a513267fae47ed9cfa187f08b97726d40b",
+      "pinStatus": "PINNED_UNQUALIFIED"
+    },
+    {
+      "id": "electricadvantage",
+      "version": "2.2.8.116051",
+      "file": "ElectricAdvantage-2.2.8.116051.jar",
+      "path": "build/native116-artifacts/A9B62DD737E42455FEE72BD2D855C9C5EDBF5A9C5EAD7B48C650C9073A35B129/ElectricAdvantage-2.2.8.116051.jar",
+      "workspaceProduced": true,
+      "originPath": "D:/PowerAdvantage/PA116/ElectricAdvantage/ElectricAdvantage/build/libs/ElectricAdvantage-2.2.8.116051.jar",
+      "sha256": "A9B62DD737E42455FEE72BD2D855C9C5EDBF5A9C5EAD7B48C650C9073A35B129",
+      "sourceRef": "391c1fc48495d0c746d28bba35c92b6e1a15c89c",
+      "pinStatus": "PINNED_UNQUALIFIED"
+    },
+    {
+      "id": "orespawn",
+      "version": "4.1.0.116051",
+      "file": "OreSpawn-4.1.0.116051.jar",
+      "path": "build/native116-artifacts/CDF59D83F191C5FBCD8921228DB577066A63A8FEB25CA79DB4EAEEA32D32DB04/OreSpawn-4.1.0.116051.jar",
+      "workspaceProduced": true,
+      "originPath": "D:/MinecraftMineralogy/OS116/OreSpawn/build/libs/OreSpawn-4.1.0.116051.jar",
+      "sha256": "CDF59D83F191C5FBCD8921228DB577066A63A8FEB25CA79DB4EAEEA32D32DB04",
+      "sourceRef": "a113e5d767169189f0e35ade1e173a12d550b00e",
+      "pinStatus": "PINNED_UNQUALIFIED"
+    }
+  ],
+  "name": "worldgen-legacy-import",
+  "levelName": "AdvantageWorksWorldgen",
+  "levelSeed": "advantage-works-worldgen-1.15.2-v1",
+  "levelType": "DEFAULT",
+  "generatorSettings": "",
+  "buildWorks": false,
+  "worldgenSampleRadius": 8,
+  "stableWorldgenCountExclusions": [
+    "poweradvantage:crude_oil"
+  ],
+  "shutdownTimeoutSeconds": 300,
+  "lifecycleStations": [],
+  "configFixtures": [
+    {
+      "source": "../../../PA113/PowerAdvantage/test-rig/../src/test/resources/orespawn-legacy/poweradvantage.json",
+      "destination": "config/orespawn/poweradvantage.json"
+    },
+    {
+      "source": "../../../PA113/PowerAdvantage/test-rig/../../ElectricAdvantage/ElectricAdvantage/src/test/resources/orespawn-legacy/electricadvantage.json",
+      "destination": "config/orespawn/electricadvantage.json"
+    }
+  ],
+  "firstProfileAssertions": [
+    {
+      "id": "legacy-oil-retained",
+      "section": "ores",
+      "entry": "poweradvantage:legacy/poweradvantage_crude_oil_0",
+      "present": true,
+      "field": "enabled",
+      "expectedBoolean": true
+    },
+    {
+      "id": "legacy-lithium-retained",
+      "section": "ores",
+      "entry": "electricadvantage:legacy/electricadvantage_li_ore_0",
+      "present": true,
+      "field": "enabled",
+      "expectedBoolean": true
+    },
+    {
+      "id": "legacy-sulfur-retained",
+      "section": "ores",
+      "entry": "electricadvantage:legacy/electricadvantage_sulfur_ore_1",
+      "present": true,
+      "field": "enabled",
+      "expectedBoolean": true
+    },
+    {
+      "id": "modern-oil-not-duplicated",
+      "section": "fluid_deposits",
+      "entry": "poweradvantage:fluid_deposit/desert_crude_oil",
+      "present": false
+    },
+    {
+      "id": "modern-lithium-not-duplicated",
+      "section": "ores",
+      "entry": "electricadvantage:ore/lithium",
+      "present": false
+    },
+    {
+      "id": "modern-sulfur-not-duplicated",
+      "section": "ores",
+      "entry": "electricadvantage:ore/sulfur",
+      "present": false
+    }
+  ],
+  "restartProfileAssertions": [
+    {
+      "id": "legacy-oil-retained",
+      "section": "ores",
+      "entry": "poweradvantage:legacy/poweradvantage_crude_oil_0",
+      "present": true,
+      "field": "enabled",
+      "expectedBoolean": true
+    },
+    {
+      "id": "legacy-lithium-retained",
+      "section": "ores",
+      "entry": "electricadvantage:legacy/electricadvantage_li_ore_0",
+      "present": true,
+      "field": "enabled",
+      "expectedBoolean": true
+    },
+    {
+      "id": "legacy-sulfur-retained",
+      "section": "ores",
+      "entry": "electricadvantage:legacy/electricadvantage_sulfur_ore_1",
+      "present": true,
+      "field": "enabled",
+      "expectedBoolean": true
+    },
+    {
+      "id": "modern-oil-not-duplicated",
+      "section": "fluid_deposits",
+      "entry": "poweradvantage:fluid_deposit/desert_crude_oil",
+      "present": false
+    },
+    {
+      "id": "modern-lithium-not-duplicated",
+      "section": "ores",
+      "entry": "electricadvantage:ore/lithium",
+      "present": false
+    },
+    {
+      "id": "modern-sulfur-not-duplicated",
+      "section": "ores",
+      "entry": "electricadvantage:ore/sulfur",
+      "present": false
+    }
+  ],
+  "firstFileAssertions": [
+    {
+      "id": "migration-report",
+      "path": "config/orespawn-os3-migration-report.json",
+      "contains": "os1_config_source",
+      "minimumOccurrences": 2
+    },
+    {
+      "id": "power-provider",
+      "path": "config/poweradvantage-orespawn.json",
+      "contains": "poweradvantage:legacy/poweradvantage_crude_oil_0",
+      "minimumOccurrences": 1
+    },
+    {
+      "id": "electric-provider",
+      "path": "config/electricadvantage-orespawn.json",
+      "contains": "electricadvantage:legacy/electricadvantage_li_ore_0",
+      "minimumOccurrences": 1
+    }
+  ],
+  "restartFileAssertions": [
+    {
+      "id": "migration-report",
+      "path": "config/orespawn-os3-migration-report.json",
+      "contains": "os1_config_source",
+      "minimumOccurrences": 2
+    },
+    {
+      "id": "power-provider",
+      "path": "config/poweradvantage-orespawn.json",
+      "contains": "poweradvantage:legacy/poweradvantage_crude_oil_0",
+      "minimumOccurrences": 1
+    },
+    {
+      "id": "electric-provider",
+      "path": "config/electricadvantage-orespawn.json",
+      "contains": "electricadvantage:legacy/electricadvantage_li_ore_0",
+      "minimumOccurrences": 1
+    }
+  ],
+  "worldgenExpectations": {
+    "minimumCounts": {
+      "poweradvantage:crude_oil": 1,
+      "electricadvantage:li_ore": 1,
+      "electricadvantage:sulfur_ore": 1
+    },
+    "maximumCounts": {
+      "mineralogy:crude_oil": 0,
+      "mineralogy:sulfur_ore": 0
+    },
+    "zeroBiomeViolations": false
+  },
+  "minecraftVersion": "1.16.5",
+  "portStatus": "PORTED_UNQUALIFIED",
+  "qualificationStatus": "UNQUALIFIED",
+  "legacySourceProfile": "../../../PA113/PowerAdvantage/test-rig/profiles/worldgen-legacy-import.json",
+  "inputStatus": "PINNED_UNQUALIFIED"
+}
