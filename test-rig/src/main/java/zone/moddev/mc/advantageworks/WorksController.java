@@ -87,8 +87,7 @@ final class WorksController {
 
     void requireAuthorizedWorld(MinecraftServer server) throws CommandException {
         File marker = new File("advantage-works.allow");
-        if (!marker.isFile() || !server.getWorldPath(net.minecraft.world.storage.FolderName.ROOT)
-                .getFileName().toString().startsWith("AdvantageWorks")) {
+        if (!WorksWorldGuard.authorized(server.getWorldPath(net.minecraft.world.storage.FolderName.ROOT), marker.isFile())) {
             throw commandError("Refusing to alter an unmarked world. Expected AdvantageWorks level and advantage-works.allow.");
         }
     }
