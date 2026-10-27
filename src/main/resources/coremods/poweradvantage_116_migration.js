@@ -41,9 +41,35 @@ function initializeCoreMod() {
                         'Lnet/minecraft/nbt/CompoundNBT;';
                 var patchedRead = false;
                 var patchedReturn = false;
+                var patchedOwnership = false;
+                var patchedEntities = false;
                 for (var i = 0; i < classNode.methods.size(); ++i) {
                     var method = classNode.methods.get(i);
+                    if (method.desc === '(Lnet/minecraft/util/math/ChunkPos;)Lnet/minecraft/nbt/CompoundNBT;') {
+                        for (var read = method.instructions.getFirst(); read !== null; read = read.getNext()) {
+                            if (read.getOpcode() === Opcodes.ARETURN) {
+                                method.instructions.insertBefore(read, new MethodInsnNode(Opcodes.INVOKESTATIC,
+                                        hook, 'copyChunkForMigration',
+                                        '(Lnet/minecraft/nbt/CompoundNBT;)Lnet/minecraft/nbt/CompoundNBT;', false));
+                                patchedOwnership = true;
+                            }
+                        }
+                    }
                     if (method.desc !== descriptor) continue;
+                    // Other coremods prepend their preparation. Stay after all those entry
+                    // hooks so modded item durability is rescued before entity flattening.
+                    for (var first = method.instructions.getFirst(); first !== null; first = first.getNext()) {
+                        if (first.getOpcode() === Opcodes.INVOKESTATIC && first.owner === classNode.name &&
+                                first.desc === '(Lnet/minecraft/nbt/CompoundNBT;)I') {
+                            var entities = new InsnList();
+                            entities.add(new VarInsnNode(Opcodes.ALOAD, 3));
+                            entities.add(new MethodInsnNode(Opcodes.INVOKESTATIC, hook,
+                                    'prepareLegacyEntities', '(Lnet/minecraft/nbt/CompoundNBT;)V', false));
+                            method.instructions.insertBefore(first, entities);
+                            patchedEntities = true;
+                            break;
+                        }
+                    }
                     var prepare = new InsnList();
                     prepare.add(new VarInsnNode(Opcodes.ALOAD, 3));
                     prepare.add(new MethodInsnNode(Opcodes.INVOKESTATIC, hook,
@@ -60,7 +86,7 @@ function initializeCoreMod() {
                         }
                     }
                 }
-                if (!patchedRead || !patchedReturn) {
+                if (!patchedRead || !patchedReturn || !patchedOwnership || !patchedEntities) {
                     throw new Error('Power Advantage could not attach its legacy chunk converter');
                 }
                 return classNode;

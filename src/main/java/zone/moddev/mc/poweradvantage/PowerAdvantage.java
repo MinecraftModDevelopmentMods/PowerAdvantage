@@ -75,6 +75,7 @@ public final class PowerAdvantage {
         instance = this;
 
         AdvantageLegacyMigrations.registerPowerAdvantage();
+        zone.moddev.mc.poweradvantage.migration.VanillaRegistryRemaps.register();
         MinecraftForge.EVENT_BUS.addListener(ConduitRegistry.getInstance()::onChunkLoad);
         MinecraftForge.EVENT_BUS.addListener(ConduitRegistry.getInstance()::onChunkUnload);
         MinecraftForge.EVENT_BUS.addListener(RecipeDiscovery::onPlayerLogin);

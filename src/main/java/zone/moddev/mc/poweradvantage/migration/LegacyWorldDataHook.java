@@ -22,8 +22,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.mojang.serialization.Dynamic;
-import com.mojang.datafixers.DataFixer;
-import com.mojang.datafixers.DataFixUtils;
 
 import cpw.mods.modlauncher.api.INameMappingService;
 import cyano.poweradvantage.api.migration.LegacyMigrationApi;
@@ -36,8 +34,6 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.datafix.fixes.BlockStateFlatteningMap;
-import net.minecraft.util.datafix.DataFixesManager;
-import net.minecraft.util.datafix.TypeReferences;
 import net.minecraft.world.storage.SaveFormat.LevelSave;
 import net.minecraft.world.storage.IServerConfiguration;
 import net.minecraftforge.fml.WorldPersistenceHooks;
@@ -59,7 +55,6 @@ public final class LegacyWorldDataHook implements WorldPersistenceHooks.WorldPer
     private static final Map<Long, Integer> LEGACY_BLOCK_COUNTS = new ConcurrentHashMap<>();
     private static final Map<String, String> VANILLA_BLOCK_ENTITY_IDS = vanillaBlockEntityIds();
     private static final String PRESERVE_CHUNK_MARKER = "AdvantageLegacyPreserveChunk";
-    private static final int LAST_PRE_FLATTENING_VERSION = 1343;
     private static boolean legacyWorldActive;
     private static boolean registered;
 
@@ -99,10 +94,27 @@ public final class LegacyWorldDataHook implements WorldPersistenceHooks.WorldPer
             try (FileInputStream input = new FileInputStream(levelDat)) {
                 root = CompressedStreamTools.readCompressed(input);
             }
-            if (removeRetiredVanillaProfessionRegistry(root)) writeWithBackup(levelDat, root);
+            boolean changed = removeRetiredVanillaProfessionRegistry(root);
+            changed |= renameFlattenedBiomeRegistry(root);
+            if (changed) writeWithBackup(levelDat, root);
         } catch (IOException exception) {
             throw new IllegalStateException("Could not prepare the old villager registry in " + levelDat, exception);
         }
+    }
+
+    static boolean renameFlattenedBiomeRegistry(CompoundNBT root) {
+        // Uppercase FML remains the untouched pre-flattening registry archive.
+        if (root.getCompound("Data").getInt("DataVersion") < 1519) return false;
+        CompoundNBT registries = root.getCompound("fml").getCompound("Registries");
+        String old = "minecraft:biomes", current = "minecraft:worldgen/biome";
+        if (!registries.contains(old, 10)) return false;
+        CompoundNBT snapshot = registries.getCompound(old);
+        if (registries.contains(current) && !snapshot.equals(registries.get(current))) {
+            throw new IllegalStateException("Conflicting old and current biome registry snapshots; preserve the world backup and resolve the registry conflict before loading");
+        }
+        registries.put(current, snapshot);
+        registries.remove(old);
+        return true;
     }
 
     static boolean removeRetiredVanillaProfessionRegistry(CompoundNBT root) {
@@ -134,7 +146,6 @@ public final class LegacyWorldDataHook implements WorldPersistenceHooks.WorldPer
     public static synchronized void prepareLegacyChunk(CompoundNBT root) {
         if (root == null) return;
         migrateLegacyNbt(root);
-        migrateLegacyEntities(root);
         if (!legacyWorldActive || !root.contains("Level", 10)) return;
         CompoundNBT level = root.getCompound("Level");
         int legacyBlocks = countLegacyBlocks(level);
@@ -147,40 +158,19 @@ public final class LegacyWorldDataHook implements WorldPersistenceHooks.WorldPer
         level.putBoolean(PRESERVE_CHUNK_MARKER, true);
     }
 
-    private static void migrateLegacyEntities(CompoundNBT root) {
-        int version = root.contains("DataVersion", 99) ? root.getInt("DataVersion") : -1;
-        if (version >= LAST_PRE_FLATTENING_VERSION || !root.contains("Level", 10)) return;
-        DataFixer fixer = DataFixesManager.getDataFixer();
-        Set<?> vanillaIds = fixer.getSchema(DataFixUtils.makeKey(version))
-                .findChoiceType(TypeReferences.ENTITY).types().keySet();
-        ListNBT entities = root.getCompound("Level").getList("Entities", 10);
-        for (int index = 0; index < entities.size(); index++) {
-            entities.set(index, migrateVanillaEntity(entities.getCompound(index), version, fixer, vanillaIds));
-        }
+    /** Detaches pending-save data before either mod's migration hook can mutate it. */
+    public static CompoundNBT copyChunkForMigration(CompoundNBT root) {
+        return root == null ? null : root.copy();
     }
 
-    private static CompoundNBT migrateVanillaEntity(CompoundNBT entity, int version,
-            DataFixer fixer, Set<?> vanillaIds) {
-        boolean hasPassengers = entity.contains("Passengers", 9);
-        ListNBT passengers = entity.getList("Passengers", 10);
-        // An unknown mod choice can stop a mixed chunk's early entity-ID fixes.
-        // Fix each recognised vanilla entity independently, without its passengers.
-        if (vanillaIds.contains(entity.getString("id"))) {
-            CompoundNBT isolated = entity.copy();
-            isolated.remove("Passengers");
-            entity = (CompoundNBT) fixer.update(TypeReferences.ENTITY,
-                    new Dynamic<>(net.minecraft.nbt.NBTDynamicOps.INSTANCE, isolated),
-                    version, LAST_PRE_FLATTENING_VERSION).getValue();
-        }
-        for (int index = 0; index < passengers.size(); index++) {
-            passengers.set(index, migrateVanillaEntity(passengers.getCompound(index), version, fixer, vanillaIds));
-        }
-        if (hasPassengers) entity.put("Passengers", passengers);
-        return entity;
+    /** Called after all mods' entry hooks, immediately before native chunk datafixing. */
+    public static void prepareLegacyEntities(CompoundNBT root) {
+        if (root != null) LegacyEntityDataFixes.prepare(root);
     }
 
     /** Called after vanilla datafixing, before a legacy chunk is returned. */
     public static CompoundNBT finalizeLegacyChunk(CompoundNBT root) {
+        LegacyEntityDataFixes.finish(root);
         if (root != null && root.contains("Level", 10)) {
             CompoundNBT level = root.getCompound("Level");
             if (level.getBoolean(PRESERVE_CHUNK_MARKER)) {

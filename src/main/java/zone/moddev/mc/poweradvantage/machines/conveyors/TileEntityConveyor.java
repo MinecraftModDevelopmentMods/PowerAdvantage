@@ -35,13 +35,21 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 
     @Override public <T> net.minecraftforge.common.util.LazyOptional<T> getCapability(
             net.minecraftforge.common.capabilities.Capability<T> capability, Direction face) {
+        if (isRemoved() || (machineCapabilities != null && !machineCapabilities.isValid()))
+            return net.minecraftforge.common.util.LazyOptional.empty();
+        if (machineCapabilities == null) return super.getCapability(capability, face);
         net.minecraftforge.common.util.LazyOptional<T> local = machineCapabilities.get(capability, face);
         return local.isPresent() ? local : super.getCapability(capability, face);
     }
 
     @Override protected void invalidateCaps() {
+        if (machineCapabilities != null) machineCapabilities.invalidate();
         super.invalidateCaps();
-        machineCapabilities.invalidate();
+    }
+
+    @Override protected void reviveCaps() {
+        super.reviveCaps();
+        if (machineCapabilities != null) machineCapabilities.revive();
     }
 
     @Override public void clearRemoved() {

@@ -84,6 +84,12 @@ historical `cyano.poweradvantage.api` package retained. The port keeps registry,
 fluid, tile, NBT and provider identities. The current test record distinguishes
 machine preservation, actual operation and vanilla migration differences.
 
+The upgrade path prepares stored items before vanilla flattening and converts
+entities individually, so a mod entity cannot prevent a nearby pet's UUID and
+ownership from being migrated. Old vanilla registry names are remapped explicitly;
+unknown mod mappings still require their own compatible mod rather than being
+silently discarded.
+
 The 1.16 port uses native dimension registry keys, tile save/load methods and
 matrix-based menus. Config-dependent material aliases are resolved during the
 server's native tag load and synchronized to clients. The shared pre-flattening

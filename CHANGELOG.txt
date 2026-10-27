@@ -6,6 +6,11 @@ Power Advantage 2.4.7.116051 (Minecraft 1.16.5)
 - Use the native tile save/load and matrix-based menu APIs without changing stored machine data.
 - Resolve configured rubber and solder aliases during the server's native tag reload.
 - Retarget the shared legacy-world hook and keep both Base Metals transformer orders covered.
+- Carry forward vanilla registry renames when upgrading 1.13, 1.14 and 1.15 saves, without discarding unknown mod entries.
+- Preserve entity UUIDs, pet ownership and passenger state when vanilla and mod entities share an old chunk.
+- Prepare both mods' stored items before entity flattening, keeping Base Metals tool durability in dropped items and minecarts.
+- Detach chunk data before migration so pending asynchronous saves are not modified in place.
+- Keep unloaded machine capabilities unavailable until the tile is revived, with fresh wrappers and retained contents.
 - Track the new tests and remaining manual checks in docs/1.16/PORT-STATUS.md. Earlier acceptance does not qualify this version.
 
 Power Advantage 2.4.6.115021 (Minecraft 1.15.2)

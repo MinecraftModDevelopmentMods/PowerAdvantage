@@ -65,17 +65,18 @@ public class TileEntityRFConverter extends TileEntityConverter implements IEnerg
 
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction side) {
-        return !isRemoved() && capability == CapabilityEnergy.ENERGY ? energyCapability.cast() : super.getCapability(capability, side);
+        if (!areCapabilitiesValid()) return LazyOptional.empty();
+        return energyCapability != null && capability == CapabilityEnergy.ENERGY ? energyCapability.cast() : super.getCapability(capability, side);
     }
 
     @Override protected void invalidateCaps() {
         super.invalidateCaps();
-        energyCapability.invalidate();
+        if (energyCapability != null) energyCapability.invalidate();
     }
 
-    @Override public void clearRemoved() {
-        super.clearRemoved();
-        if (!energyCapability.isPresent()) energyCapability = LazyOptional.of(() -> this);
+    @Override protected void reviveCaps() {
+        super.reviveCaps();
+        if (energyCapability != null && !energyCapability.isPresent()) energyCapability = LazyOptional.of(() -> this);
     }
 
     @Override public double getOtherEnergy() { return forgeBuffer; }

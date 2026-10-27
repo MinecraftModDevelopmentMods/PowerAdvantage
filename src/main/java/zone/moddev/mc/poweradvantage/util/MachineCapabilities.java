@@ -19,11 +19,12 @@ public final class MachineCapabilities {
     private final TileEntity owner;
     private final Map<Direction, LazyOptional<?>> fluids = new HashMap<>();
     private final Map<Direction, LazyOptional<?>> items = new HashMap<>();
+    private boolean valid = true;
 
     public MachineCapabilities(TileEntity owner) { this.owner = owner; }
 
     public <T> LazyOptional<T> get(Capability<T> capability, Direction face) {
-        if (owner.isRemoved()) return LazyOptional.empty();
+        if (!valid || owner.isRemoved()) return LazyOptional.empty();
         if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && owner instanceof IAdvantageFluidHandler) {
             return fluids.computeIfAbsent(face, side -> LazyOptional.of(() ->
                     new ForgeFluidAdapter((IAdvantageFluidHandler) owner, side, owner::setChanged))).cast();
@@ -36,9 +37,14 @@ public final class MachineCapabilities {
     }
 
     public void invalidate() {
+        valid = false;
         fluids.values().forEach(LazyOptional::invalidate);
         items.values().forEach(LazyOptional::invalidate);
         fluids.clear();
         items.clear();
     }
+
+    public boolean isValid() { return valid; }
+
+    public void revive() { valid = true; }
 }
