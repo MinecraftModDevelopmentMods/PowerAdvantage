@@ -31,6 +31,8 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 import zone.moddev.mc.poweradvantage.machines.conveyors.BlockConveyor;
 import zone.moddev.mc.poweradvantage.machines.conveyors.TileEntityConveyor;
@@ -221,6 +223,87 @@ final class NativeInteropProbe {
         });
     }
 
+    private static final class CallbackTank extends StorageTankTileEntity {
+        void reviveNativeCapabilities() { super.reviveCaps(); }
+    }
+
+    private static CallbackTank callbackTank() {
+        require(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY != null
+                && CapabilityItemHandler.ITEM_HANDLER_CAPABILITY != null,
+                "Forge did not inject native fluid and item capability tokens");
+        require((Object) CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY != CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,
+                "Native fluid and item capability tokens alias each other");
+        CallbackTank tile = new CallbackTank();
+        require(tile.getLevel() == null && !tile.isRemoved(), "Callback fixture is not a fresh standalone tank");
+        cyano.poweradvantage.api.fluid.FluidStack contents =
+                new cyano.poweradvantage.api.fluid.FluidStack(net.minecraft.fluid.Fluids.WATER, 500);
+        contents.tag = new CompoundNBT();
+        contents.tag.putString("InteropWitness", "native116-callback");
+        tile.getTank().setFluid(contents);
+        return tile;
+    }
+
+    private static void requireUnavailable(CallbackTank tile) {
+        for (Direction face : Direction.values()) {
+            require(!tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, face).isPresent()
+                    && !tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, face).isPresent(),
+                    "Unloaded callback tank recreated a sided capability: " + face);
+        }
+        require(!tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null).isPresent()
+                && !tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).isPresent(),
+                "Unloaded callback tank recreated an unsided capability");
+    }
+
+    private static void capabilityCallbacks(JsonArray checks) {
+        // These unplaced tanks witness native callbacks, not physical chunk unloading.
+        check(checks, "capability/native-chunk-unloaded-callback", () -> {
+            CallbackTank tile = callbackTank();
+            LazyOptional<IFluidHandler> oldFluid = tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.UP);
+            LazyOptional<IItemHandler> oldItems = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.DOWN);
+            require(oldFluid.isPresent() && oldItems.isPresent(), "Standalone tank lacks native capability wrappers");
+            CompoundNBT contents = tile.getTank().writeToNBT(new CompoundNBT());
+            tile.onChunkUnloaded();
+            require(!tile.isRemoved(), "Native unload callback unexpectedly marked the standalone tank removed");
+            require(!oldFluid.isPresent() && !oldItems.isPresent(), "Unload callback left old optionals valid");
+            requireUnavailable(tile);
+            require(contents.equals(tile.getTank().writeToNBT(new CompoundNBT()))
+                    && tile.getContainerSize() == 0 && tile.isEmpty(), "Unload callback changed tank contents");
+        });
+        check(checks, "capability/native-clear-removed-and-revive", () -> {
+            for (boolean clearRemoved : new boolean[] {true, false}) {
+                CallbackTank tile = callbackTank();
+                LazyOptional<IFluidHandler> oldFluid = tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.UP);
+                LazyOptional<IItemHandler> oldItems = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.DOWN);
+                IFluidHandler oldFluidWrapper = oldFluid.orElseThrow(() -> new AssertionError("Missing original fluid wrapper"));
+                IItemHandler oldItemWrapper = oldItems.orElseThrow(() -> new AssertionError("Missing original item wrapper"));
+                FluidStack before = oldFluidWrapper.getFluidInTank(0);
+                require(before.getFluid() == net.minecraft.fluid.Fluids.WATER && before.getAmount() == 500
+                        && before.hasTag() && before.getTag().getString("InteropWitness").equals("native116-callback")
+                        && oldItemWrapper.getSlots() == 0, "Standalone wrappers do not expose the seeded tank contents");
+                CompoundNBT contents = tile.getTank().writeToNBT(new CompoundNBT());
+                CompoundNBT exposedFluid = before.writeToNBT(new CompoundNBT());
+                tile.onChunkUnloaded();
+                require(!tile.isRemoved() && !oldFluid.isPresent() && !oldItems.isPresent(),
+                        "Revival fixture was not invalidated while unremoved");
+                requireUnavailable(tile);
+                if (clearRemoved) tile.clearRemoved();
+                else tile.reviveNativeCapabilities();
+                LazyOptional<IFluidHandler> currentFluid = tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.UP);
+                LazyOptional<IItemHandler> currentItems = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.DOWN);
+                IFluidHandler currentFluidWrapper = currentFluid.orElseThrow(() -> new AssertionError("Revival did not restore fluid capability"));
+                IItemHandler currentItemWrapper = currentItems.orElseThrow(() -> new AssertionError("Revival did not restore item capability"));
+                require(!tile.isRemoved() && currentFluid != oldFluid && currentItems != oldItems
+                        && currentFluidWrapper != oldFluidWrapper && currentItemWrapper != oldItemWrapper,
+                        "Native revival did not create fresh fluid and item wrappers; clearRemoved=" + clearRemoved);
+                require(!oldFluid.isPresent() && !oldItems.isPresent(), "Native revival revalidated old optionals");
+                require(contents.equals(tile.getTank().writeToNBT(new CompoundNBT()))
+                        && exposedFluid.equals(currentFluidWrapper.getFluidInTank(0).writeToNBT(new CompoundNBT()))
+                        && currentItemWrapper.getSlots() == 0 && tile.getContainerSize() == 0 && tile.isEmpty(),
+                        "Native revival changed fluid identity, amount, tag or empty item contents");
+            }
+        });
+    }
+
     private static void run(ServerWorld world, String phase) throws Exception {
         require(MARKER.isFile() && world.getServer().getWorldData().getLevelName().equals("AdvantageWorksMigration"), "Unmarked world");
         require(phase.equals("exercise") || phase.equals("restored"), "Unknown interop phase");
@@ -229,6 +312,7 @@ final class NativeInteropProbe {
             energy(world, checks);
             tank(world, checks);
             locks(world, checks);
+            capabilityCallbacks(checks);
         } else {
             check(checks, "portable-tank/full-process-restart", () -> {
                 FluidStack stack = fluid(world.getBlockEntity(TANK)).getFluidInTank(0);

@@ -5,17 +5,43 @@ from datetime import datetime, timezone
 from pathlib import Path
 import traceback
 
-from matrix import Server, digest, write_json
+from matrix import digest, write_json
+from native116_code import Server
 from native116 import output_path, pinned_profile, require_disjoint
 from native116_lifecycle import prepare, read_json, require_native_boot, verify_staged
 
 
+EXERCISE_CHECK_IDS = frozenset(
+    f"{converter}/{check}"
+    for converter in ("converter_rf_steam", "converter_rf_electricity", "converter_rf_quantum",
+                      "converter_tr_electricity")
+    for check in ("capability", "forge-to-advantage", "advantage-to-forge", "invalidation")
+) | frozenset((
+    "fluid/simulation-conservation-and-identity",
+    "portable-tank/native-break-drop-and-replace",
+    "locked-chest/conveyor-refuses-extraction",
+    "unlocked-chest/conveyor-transfers-exactly",
+    "capability/native-chunk-unloaded-callback",
+    "capability/native-clear-removed-and-revive",
+))
+RESTORED_CHECK_IDS = frozenset((
+    "portable-tank/full-process-restart",
+    "conveyor/full-process-restart",
+))
+
+
 def require_checks(document, phase):
-    expected = 20 if phase == "exercise" else 2
-    if document.get("phase") != phase or len(document.get("checks", [])) != expected:
+    if phase not in ("exercise", "restored"):
+        raise AssertionError("Unknown native interop phase: " + str(phase))
+    expected = EXERCISE_CHECK_IDS if phase == "exercise" else RESTORED_CHECK_IDS
+    if document.get("phase") != phase or len(document.get("checks", [])) != len(expected):
         raise AssertionError("Incomplete native interop witness set")
-    if len({row["id"] for row in document["checks"]}) != expected:
+    actual = {row["id"] for row in document["checks"]}
+    if len(actual) != len(expected):
         raise AssertionError("Duplicate native interop witnesses")
+    if actual != expected:
+        raise AssertionError("Unexpected native interop witnesses: " + str(sorted(actual - expected))
+                             + "; missing: " + str(sorted(expected - actual)))
     failed = [row for row in document["checks"] if row.get("status") != "PASS"]
     if failed or document.get("status") != "PASS":
         raise AssertionError("Native interop defects: " + str(failed))
@@ -31,8 +57,8 @@ def run(args):
     (output / "advantage-native-interop.allow").touch()
     report = dict(status="RUNNING", started_at_utc=datetime.now(timezone.utc).isoformat(), phases={},
                   target_manifest=str(args.target_manifest.resolve()), target_manifest_sha256=digest(args.target_manifest),
-                  scope="Live Forge capability contracts, both conversion directions, native tank loot, locked chest automation and full restart",
-                  limitation="No third-party mod-specific energy implementation or real client input is claimed")
+                  scope="Live Forge capability contracts, standalone tank unload/revival callbacks, both conversion directions, native tank loot, locked chest automation and full restart",
+                  limitation="Standalone tank callbacks do not prove physical chunk unload; no third-party mod-specific energy implementation or real client input is claimed")
     server = None
     try:
         for phase in ("exercise", "restored"):
