@@ -7,7 +7,7 @@
   "shutdownTimeoutSeconds": 60,
   "stationRunSeconds": 5,
   "recipeMode": "NORMAL",
-  "sourceCommit": "3f1100e6f75b1fb949cc883be7288aa30789876d",
+  "sourceCommit": "bcb75bfa91c14751ebf1e31865e1ec0ffa82c0b7",
   "sourceVersion": "2.4.7.116051",
   "mods": [
     {
@@ -16,9 +16,9 @@
       "file": "AdvantageWorksTestHarness-1.1.0.116051-deobf.jar",
       "path": "build/native116-artifacts/74BBC23BAF35CB2A0784741D03B23610C0D628454FAD970B5D9F0FC54A03909E/AdvantageWorksTestHarness-1.1.0.116051-deobf.jar",
       "workspaceProduced": true,
-      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027\\harness-j-context-3201f4b\\AdvantageWorksTestHarness-1.1.0.116051-deobf.jar",
+      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027\\harness-k-power-f\\AdvantageWorksTestHarness-1.1.0.116051-deobf.jar",
       "sha256": "74BBC23BAF35CB2A0784741D03B23610C0D628454FAD970B5D9F0FC54A03909E",
-      "sourceRef": "3201f4b496a09ce67f45ae0ec8096df0ee82ff73",
+      "sourceRef": "c7a79fc9894e067ed0645daad253e1355628d138",
       "pinStatus": "PINNED_UNQUALIFIED"
     },
     {
@@ -27,9 +27,9 @@
       "file": "SteamAdvantage-2.2.8.116051-deobf.jar",
       "path": "build/native116-artifacts/EDDE662A815DAD2E7B0C9C3224881E04F5259434B4A0757591836CB0B969EC7D/SteamAdvantage-2.2.8.116051-deobf.jar",
       "workspaceProduced": true,
-      "originPath": "D:/PowerAdvantage/PA116/SteamAdvantage/SteamAdvantage/build/libs-dev/SteamAdvantage-2.2.8.116051-deobf.jar",
+      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027\\Steam F Build 20261027-a\\artifacts\\SteamAdvantage-2.2.8.116051-deobf.jar",
       "sha256": "EDDE662A815DAD2E7B0C9C3224881E04F5259434B4A0757591836CB0B969EC7D",
-      "sourceRef": "b820801e8959a0383af36fc7fb4d38f30ebc1e1b",
+      "sourceRef": "5be1ce9faf7465d072f2c8b0e3206899bafb34e8",
       "pinStatus": "PINNED_UNQUALIFIED"
     },
     {
@@ -38,9 +38,9 @@
       "file": "ElectricAdvantage-2.2.8.116051-deobf.jar",
       "path": "build/native116-artifacts/3FC2AF7D0B931B4377D8A826AE24432FF76EB298045989EED3BBC6F8FAC98CAE/ElectricAdvantage-2.2.8.116051-deobf.jar",
       "workspaceProduced": true,
-      "originPath": "D:/PowerAdvantage/PA116/ElectricAdvantage/ElectricAdvantage/build/libs-dev/ElectricAdvantage-2.2.8.116051-deobf.jar",
+      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027\\Electric F Build 20261027-a\\ElectricAdvantage-2.2.8.116051-deobf.jar",
       "sha256": "3FC2AF7D0B931B4377D8A826AE24432FF76EB298045989EED3BBC6F8FAC98CAE",
-      "sourceRef": "61cbe49e513d4063f47a762dc3095b2239c625c2",
+      "sourceRef": "9a8fdf53a111499f2ebc969ac24a6f3e1017c18e",
       "pinStatus": "PINNED_UNQUALIFIED"
     }
   ],

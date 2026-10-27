@@ -7,7 +7,7 @@
   "shutdownTimeoutSeconds": 60,
   "stationRunSeconds": 5,
   "recipeMode": "NORMAL",
-  "sourceCommit": "3f1100e6f75b1fb949cc883be7288aa30789876d",
+  "sourceCommit": "bcb75bfa91c14751ebf1e31865e1ec0ffa82c0b7",
   "sourceVersion": "2.4.7.116051",
   "forge": {
     "version": "1.16.5-36.2.34",
@@ -22,20 +22,20 @@
       "file": "AdvantageWorksTestHarness-1.1.0.116051.jar",
       "path": "build/native116-artifacts/607D4C91275D0CD1236CAB98A1C7F70B8A798726D75FAD2BB27563993BEF159A/AdvantageWorksTestHarness-1.1.0.116051.jar",
       "workspaceProduced": true,
-      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027\\harness-j-context-3201f4b\\AdvantageWorksTestHarness-1.1.0.116051.jar",
+      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027\\harness-k-power-f\\AdvantageWorksTestHarness-1.1.0.116051.jar",
       "sha256": "607D4C91275D0CD1236CAB98A1C7F70B8A798726D75FAD2BB27563993BEF159A",
-      "sourceRef": "3201f4b496a09ce67f45ae0ec8096df0ee82ff73",
+      "sourceRef": "c7a79fc9894e067ed0645daad253e1355628d138",
       "pinStatus": "PINNED_UNQUALIFIED"
     },
     {
       "id": "poweradvantage",
       "version": "2.4.7.116051",
       "file": "PowerAdvantage-2.4.7.116051.jar",
-      "path": "build/native116-artifacts/EB226ADC200BFB96278F1449CDB7C6941F289DB43330C8206369048378E931EB/PowerAdvantage-2.4.7.116051.jar",
+      "path": "build/native116-artifacts/5BE5C05D9F78BAF730553B71D07D76BA923EA0A54ABCA53F4149386B27019E71/PowerAdvantage-2.4.7.116051.jar",
       "workspaceProduced": true,
-      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027/power-bootstrap-e/PowerAdvantage-2.4.7.116051.jar",
-      "sha256": "EB226ADC200BFB96278F1449CDB7C6941F289DB43330C8206369048378E931EB",
-      "sourceRef": "3f1100e6f75b1fb949cc883be7288aa30789876d",
+      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027\\power-bootstrap-f\\PowerAdvantage-2.4.7.116051.jar",
+      "sha256": "5BE5C05D9F78BAF730553B71D07D76BA923EA0A54ABCA53F4149386B27019E71",
+      "sourceRef": "bcb75bfa91c14751ebf1e31865e1ec0ffa82c0b7",
       "pinStatus": "PINNED_UNQUALIFIED"
     },
     {
@@ -44,9 +44,9 @@
       "file": "SteamAdvantage-2.2.8.116051.jar",
       "path": "build/native116-artifacts/0E8EF7DA681A5105E5206F166A36F56AEF356DFD227F1C3910DE7BDC606AA148/SteamAdvantage-2.2.8.116051.jar",
       "workspaceProduced": true,
-      "originPath": "D:/PowerAdvantage/PA116/SteamAdvantage/SteamAdvantage/build/libs/SteamAdvantage-2.2.8.116051.jar",
+      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027\\Steam F Build 20261027-a\\artifacts\\SteamAdvantage-2.2.8.116051.jar",
       "sha256": "0E8EF7DA681A5105E5206F166A36F56AEF356DFD227F1C3910DE7BDC606AA148",
-      "sourceRef": "b820801e8959a0383af36fc7fb4d38f30ebc1e1b",
+      "sourceRef": "5be1ce9faf7465d072f2c8b0e3206899bafb34e8",
       "pinStatus": "PINNED_UNQUALIFIED"
     },
     {
@@ -55,9 +55,9 @@
       "file": "ElectricAdvantage-2.2.8.116051.jar",
       "path": "build/native116-artifacts/A9B62DD737E42455FEE72BD2D855C9C5EDBF5A9C5EAD7B48C650C9073A35B129/ElectricAdvantage-2.2.8.116051.jar",
       "workspaceProduced": true,
-      "originPath": "D:/PowerAdvantage/PA116/ElectricAdvantage/ElectricAdvantage/build/libs/ElectricAdvantage-2.2.8.116051.jar",
+      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027\\Electric F Build 20261027-a\\ElectricAdvantage-2.2.8.116051.jar",
       "sha256": "A9B62DD737E42455FEE72BD2D855C9C5EDBF5A9C5EAD7B48C650C9073A35B129",
-      "sourceRef": "61cbe49e513d4063f47a762dc3095b2239c625c2",
+      "sourceRef": "9a8fdf53a111499f2ebc969ac24a6f3e1017c18e",
       "pinStatus": "PINNED_UNQUALIFIED"
     },
     {
@@ -66,7 +66,7 @@
       "file": "BaseMetals-3.1.1.116051.jar",
       "path": "build/native116-artifacts/8643678EAC85A20F646139749AE316EE9CA00A01AD96C6F25B5994CB80B99700/BaseMetals-3.1.1.116051.jar",
       "workspaceProduced": true,
-      "originPath": "D:/BaseMetals/BaseMetals 116/BaseMetals/build/libs/BaseMetals-3.1.1.116051.jar",
+      "originPath": "D:\\PowerAdvantage\\PA116\\PowerAdvantage\\test-rig\\build\\native116-artifacts\\8643678EAC85A20F646139749AE316EE9CA00A01AD96C6F25B5994CB80B99700\\BaseMetals-3.1.1.116051.jar",
       "sha256": "8643678EAC85A20F646139749AE316EE9CA00A01AD96C6F25B5994CB80B99700",
       "sourceRef": "995f6cc4dd2d5eecc628a42e5c43fa5390c24bca",
       "pinStatus": "PINNED_UNQUALIFIED"
@@ -77,7 +77,7 @@
       "file": "OreSpawn-4.1.0.116051.jar",
       "path": "build/native116-artifacts/CDF59D83F191C5FBCD8921228DB577066A63A8FEB25CA79DB4EAEEA32D32DB04/OreSpawn-4.1.0.116051.jar",
       "workspaceProduced": true,
-      "originPath": "D:/MinecraftMineralogy/OS116/OreSpawn/build/libs/OreSpawn-4.1.0.116051.jar",
+      "originPath": "D:\\PowerAdvantage\\PA116\\PowerAdvantage\\test-rig\\build\\native116-artifacts\\CDF59D83F191C5FBCD8921228DB577066A63A8FEB25CA79DB4EAEEA32D32DB04\\OreSpawn-4.1.0.116051.jar",
       "sha256": "CDF59D83F191C5FBCD8921228DB577066A63A8FEB25CA79DB4EAEEA32D32DB04",
       "sourceRef": "a113e5d767169189f0e35ade1e173a12d550b00e",
       "pinStatus": "PINNED_UNQUALIFIED"
