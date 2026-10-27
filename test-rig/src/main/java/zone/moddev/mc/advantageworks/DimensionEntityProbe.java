@@ -211,6 +211,8 @@ final class DimensionEntityProbe {
     private JsonObject snapshot(MinecraftServer server, ServerWorld world, JsonObject definition, String operation) throws Exception {
         JsonObject result = new JsonObject(); result.add("definition", definition);
         result.addProperty("operation", operation); result.addProperty("dimension", Native116Worlds.legacyId(world.dimension()));
+        result.addProperty("worldDimensionKey", world.dimension().location().toString());
+        result.addProperty("nativeEntityContextVersion", 1);
         result.addProperty("gameTime", world.getGameTime()); result.addProperty("frozen", frozen(world, definition));
         result.addProperty("nativeOnLoad", nativeOnLoad(definition));
         boolean read = operation.equals("read") || operation.equals("respawn");
@@ -224,9 +226,13 @@ final class DimensionEntityProbe {
         }
         JsonArray entities = new JsonArray();
         for (Entity entity : witnesses(world)) {
+            JsonObject context = Native116EntityContext.observe(entity, world);
             // This native writer includes type ID and works for both roots and riding passengers.
             CompoundNBT nbt = entityNbt(entity);
             JsonObject entry = encode(nbt); entry.addProperty("witness", entity.getPersistentData().getString(WITNESS));
+            entry.add("worldDimensionKey", context.get("worldDimensionKey"));
+            entry.add("sameWorld", context.get("sameWorld"));
+            entry.add("entityWorlds", context.get("entityWorlds"));
             entry.addProperty("uuid", entity.getUUID().toString()); entry.addProperty("ticksExisted", entity.tickCount);
             entry.addProperty("entityId", entity.getId());
             entry.addProperty("instanceId", System.identityHashCode(entity));

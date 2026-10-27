@@ -10,9 +10,9 @@ passes do not qualify this version. Publication follows manual acceptance.
 - Minecraft 1.16.5, Forge 36.2.34, official 1.16.5 mappings, MCP 20210115.111550.
 - ForgeGradle 7.0.34, Gradle 9.6.1, Java 8 bytecode.
 - Java 17 runs Gradle; pinned Java 8u502 compiles the harness; Java 25 runs Mavenizer.
-- Power 2.4.7.116051 source: `2116a35a40dd150d79e7dfdcdc891637793178b7`.
-- Deobf SHA-256: `F58B93DAF03CF303F32B18CCCA140E55E886A2BA82732A3F286ADF3E31194B6A`.
-- Release SHA-256: `94C36D3F157A120943C067D4317D1C55D62792BAB43E309640DB64BAEE3FFE7E`.
+- Power 2.4.7.116051 source: `3f1100e6f75b1fb949cc883be7288aa30789876d`.
+- Deobf SHA-256: `1A3E5B9EE45CF932CE963146D016E5270BD587A5D5AA2B9283886FF89EF14FD4`.
+- Release SHA-256: `EB226ADC200BFB96278F1449CDB7C6941F289DB43330C8206369048378E931EB`.
 
 The portable compile default is `../build/libs-dev/PowerAdvantage-2.4.7.116051-deobf.jar`.
 `-PpowerAdvantageDeobfJar` overrides its location, not its exact hash check.
