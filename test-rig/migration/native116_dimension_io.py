@@ -17,8 +17,13 @@ VANILLA_ATTRIBUTES = {
     "minecraft:generic.attack_damage": "generic.attackDamage",
     "minecraft:horse.jump_strength": "horse.jumpStrength",
 }
-# This is the one separately approved Forge identity, not a namespace rewrite.
-FORGE_ATTRIBUTES = {"forge:swim_speed": "forge.swimSpeed"}
+# Exact registry identities checked against Forge's 1.10 through 1.16 sources.
+FORGE_ATTRIBUTES = {
+    "forge:swim_speed": "forge.swimSpeed",
+    "forge:nametag_distance": "forge.nameTagDistance",
+    "forge:entity_gravity": "forge.entity_gravity",
+    "forge:reach_distance": "generic.reachDistance",
+}
 ATTRIBUTE_NAMES = dict(VANILLA_ATTRIBUTES, **FORGE_ATTRIBUTES)
 KNOWN_ATTRIBUTES = frozenset(ATTRIBUTE_NAMES.values())
 

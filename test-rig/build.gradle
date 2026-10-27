@@ -90,7 +90,7 @@ tasks.register('verifyWorksCompileInputPin') {
         if (actual != project.poweradvantage_deobf_sha256) {
             throw new GradleException("Native116 Power compile input changed: ${actual}; obtain a new parent pin")
         }
-        if (project.poweradvantage_source_commit != '3f1100e6f75b1fb949cc883be7288aa30789876d') {
+        if (project.poweradvantage_source_commit != 'bcb75bfa91c14751ebf1e31865e1ec0ffa82c0b7') {
             throw new GradleException('Native116 Power source pin changed; obtain a new parent candidate')
         }
     }

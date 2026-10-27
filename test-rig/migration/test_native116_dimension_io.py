@@ -12,7 +12,7 @@ import nbtlib
 import native116_actor_io
 import dimensions
 from matrix import WORLD
-from native116_dimension_io import (ATTRIBUTE_NAMES, VANILLA_ATTRIBUTES, attribute_list, entity_uuid,
+from native116_dimension_io import (ATTRIBUTE_NAMES, FORGE_ATTRIBUTES, VANILLA_ATTRIBUTES, attribute_list, entity_uuid,
                                     observed_context, parse_dimension_nbt, project_entity, validate_record)
 
 
@@ -70,8 +70,18 @@ class AttributeProjectionTest(unittest.TestCase):
             self.assertEqual(expected, attribute_list(source))
             self.assertEqual(before, source)
 
-    def test_only_the_one_approved_forge_identity_is_projected(self):
-        self.assertEqual("forge.swimSpeed", attribute_list([{"Name": "forge:swim_speed", "Base": 2.0}])[0]["Name"])
+    def test_only_the_four_source_verified_forge_identities_are_projected(self):
+        self.assertEqual({"forge:swim_speed": "forge.swimSpeed",
+                          "forge:nametag_distance": "forge.nameTagDistance",
+                          "forge:entity_gravity": "forge.entity_gravity",
+                          "forge:reach_distance": "generic.reachDistance"}, FORGE_ATTRIBUTES)
+        for native, legacy in FORGE_ATTRIBUTES.items():
+            source = [{"Name": native, "Base": 12.5, "Private": {"Name": native},
+                       "Modifiers": [{"UUID": ROOT, "Amount": 0.125, "Operation": 0, "Private": "keep"}]}]
+            before = copy.deepcopy(source)
+            expected = copy.deepcopy(source); expected[0]["Name"] = legacy
+            self.assertEqual(expected, attribute_list(source))
+            self.assertEqual(before, source)
         for name in ("forge:other", "forge:swimSpeed", "example:swim_speed", "generic.max_health"):
             source = [{"Name": name, "Base": 2.0, "Unknown": [1, 2]}]
             self.assertEqual(source, attribute_list(source))
