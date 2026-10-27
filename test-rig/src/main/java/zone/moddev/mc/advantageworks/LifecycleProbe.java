@@ -30,7 +30,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import zone.moddev.mc.poweradvantage.conduitnetwork.ConduitRegistry;
 
 /** Observes real tile movement and chunk lifecycles only in marked disposable worlds. */
@@ -170,8 +170,8 @@ final class LifecycleProbe {
         MinecraftForge.EVENT_BUS.addListener(probe::load);
     }
 
-    private void starting(FMLServerStartingEvent event) {
-        event.getServer().getCommands().getDispatcher().register(Commands.literal("advlifecycle")
+    private void starting(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("advlifecycle")
                 .requires(source -> source.hasPermission(4))
                 .then(Commands.argument("operation", StringArgumentType.word())
                         .then(Commands.argument("label", StringArgumentType.word()).executes(context -> {

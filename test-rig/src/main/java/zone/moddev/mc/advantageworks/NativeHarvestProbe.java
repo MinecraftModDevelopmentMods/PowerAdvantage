@@ -36,7 +36,7 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.ToolType;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 /** Actual survival harvesting, not loot-JSON presence or a synthetic getDrops call. */
@@ -48,8 +48,8 @@ final class NativeHarvestProbe {
         if (MARKER.isFile()) MinecraftForge.EVENT_BUS.addListener(new NativeHarvestProbe()::starting);
     }
 
-    private void starting(FMLServerStartingEvent event) {
-        event.getServer().getCommands().getDispatcher().register(Commands.literal("advharvest")
+    private void starting(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("advharvest")
                 .requires(source -> source.hasPermission(4))
                 .then(Commands.argument("label", StringArgumentType.word()).executes(context -> {
                     WorksController.getInstance().requireAuthorizedWorld(context.getSource().getServer());

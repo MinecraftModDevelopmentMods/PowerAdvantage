@@ -17,7 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import zone.moddev.mc.advantageworks.connected.ConnectedSession;
 
 /** The target adapter has no construction, inventory, energy or network-reset operation. */
@@ -50,8 +50,8 @@ final class ConnectedProbe implements ConnectedSession.Port {
         } catch (Exception ex) { throw new IllegalStateException("Connected probe failed", ex); }
     }
 
-    private void starting(FMLServerStartingEvent event) {
-        event.getServer().getCommands().getDispatcher().register(Commands.literal("advconnected").requires(s -> s.hasPermission(4))
+    private void starting(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("advconnected").requires(s -> s.hasPermission(4))
                 .then(Commands.literal("snapshot").then(Commands.argument("label", StringArgumentType.word()).executes(c -> {
                     execute(c.getSource().getLevel(), "snapshot", StringArgumentType.getString(c, "label"), 0); return 1;
                 })))

@@ -2,7 +2,7 @@ package zone.moddev.mc.advantageworks;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.common.world.ForgeWorldType;
 
@@ -26,7 +26,7 @@ public final class AdvantageWorksMod {
         MinecraftForge.EVENT_BUS.addListener(this::serverStarting);
     }
 
-    private void serverStarting(FMLServerStartingEvent event) {
-        AdvantageWorksCommand.register(event.getServer().getCommands().getDispatcher());
+    private void serverStarting(RegisterCommandsEvent event) {
+        AdvantageWorksCommand.register(event.getDispatcher());
     }
 }

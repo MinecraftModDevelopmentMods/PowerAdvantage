@@ -21,7 +21,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 
 /** Read-only state witnesses in explicitly marked disposable migration worlds. */
 final class MigrationProbe {
@@ -46,8 +46,8 @@ final class MigrationProbe {
         if (!world.isClientSide && !new File("migration-operate.allow").isFile()) world.tickableBlockEntities.clear();
     }
 
-    private void starting(FMLServerStartingEvent event) {
-        event.getServer().getCommands().getDispatcher().register(Commands.literal("advprobe")
+    private void starting(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("advprobe")
                 .requires(source -> source.hasPermission(4))
                 .then(Commands.literal("snapshot")
                         .then(Commands.argument("label", StringArgumentType.word()).executes(context -> {

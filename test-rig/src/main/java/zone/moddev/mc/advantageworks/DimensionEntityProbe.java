@@ -50,7 +50,7 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 
 /** Native additional-dimension player and entity observations, without client acceptance claims. */
 final class DimensionEntityProbe {
@@ -121,9 +121,9 @@ final class DimensionEntityProbe {
         }
     }
 
-    private void starting(FMLServerStartingEvent event) {
+    private void starting(RegisterCommandsEvent event) {
         for (String operation : new String[] {"read", "snapshot", "operate", "respawn"}) {
-            event.getServer().getCommands().getDispatcher().register(Commands.literal("advdimensions").requires(source -> source.hasPermission(4))
+            event.getDispatcher().register(Commands.literal("advdimensions").requires(source -> source.hasPermission(4))
                     .then(Commands.literal(operation).then(Commands.argument("label", StringArgumentType.word()).executes(context -> {
                         try {
                             execute(context.getSource().getServer(), operation, StringArgumentType.getString(context, "label"));

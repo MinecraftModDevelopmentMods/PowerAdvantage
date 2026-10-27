@@ -22,7 +22,7 @@ import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 
 /** Real server player-file adapter and saved-entity witnesses; not a client login. */
 final class ActorProbe {
@@ -55,9 +55,9 @@ final class ActorProbe {
         }
     }
 
-    private void starting(FMLServerStartingEvent event) {
+    private void starting(RegisterCommandsEvent event) {
         for (String operation : new String[] {"snapshot", "read", "operate"}) {
-            event.getServer().getCommands().getDispatcher().register(Commands.literal("advactors").requires(source -> source.hasPermission(4))
+            event.getDispatcher().register(Commands.literal("advactors").requires(source -> source.hasPermission(4))
                     .then(Commands.literal(operation).then(Commands.argument("label", StringArgumentType.word()).executes(context -> {
                         try {
                             snapshot(context.getSource().getServer(), context.getSource().getLevel(),

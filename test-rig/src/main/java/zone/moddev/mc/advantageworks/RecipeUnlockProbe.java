@@ -35,7 +35,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 /** Native criteria, reward and saved-player checks in marked disposable worlds only. */
@@ -48,8 +48,8 @@ final class RecipeUnlockProbe {
         if (MARKER.isFile()) MinecraftForge.EVENT_BUS.addListener(new RecipeUnlockProbe()::starting);
     }
 
-    private void starting(FMLServerStartingEvent event) {
-        event.getServer().getCommands().getDispatcher().register(Commands.literal("advrecipes")
+    private void starting(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("advrecipes")
                 .requires(source -> source.hasPermission(4))
                 .then(Commands.argument("operation", StringArgumentType.word())
                         .then(Commands.argument("label", StringArgumentType.word()).executes(context -> {

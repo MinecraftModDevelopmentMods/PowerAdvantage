@@ -30,7 +30,7 @@ import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import zone.moddev.mc.poweradvantage.machines.conveyors.BlockConveyor;
 import zone.moddev.mc.poweradvantage.machines.conveyors.TileEntityConveyor;
@@ -47,8 +47,8 @@ final class NativeInteropProbe {
         if (MARKER.isFile()) MinecraftForge.EVENT_BUS.addListener(new NativeInteropProbe()::starting);
     }
 
-    private void starting(FMLServerStartingEvent event) {
-        event.getServer().getCommands().getDispatcher().register(Commands.literal("advinterop")
+    private void starting(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("advinterop")
                 .requires(source -> source.hasPermission(4))
                 .then(Commands.argument("phase", StringArgumentType.word()).executes(context -> {
                     String phase = StringArgumentType.getString(context, "phase");

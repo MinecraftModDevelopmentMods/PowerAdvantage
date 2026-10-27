@@ -44,7 +44,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.loot.LootContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraft.item.crafting.IRecipeType;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import zone.moddev.mc.poweradvantage.PowerAdvantage;
 import zone.moddev.mc.poweradvantage.RecipeMode;
@@ -58,8 +58,8 @@ final class ProgressionProbe {
         if (MARKER.isFile()) MinecraftForge.EVENT_BUS.addListener(new ProgressionProbe()::starting);
     }
 
-    private void starting(FMLServerStartingEvent event) {
-        event.getServer().getCommands().getDispatcher().register(Commands.literal("advprogression").requires(source -> source.hasPermission(4))
+    private void starting(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("advprogression").requires(source -> source.hasPermission(4))
                 .then(Commands.argument("label", StringArgumentType.word()).executes(context -> {
                     String label = StringArgumentType.getString(context, "label");
                     try { audit(context.getSource().getServer(), context.getSource().getLevel(), label); }
