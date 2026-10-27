@@ -104,10 +104,7 @@ def require_native_boot(path):
                    "Forge mod loading, version 36.2.34, for MC 1.16.5 with MCP 20210115.111550"):
         if marker not in text:
             raise AssertionError("Missing genuine native116 boot proof: " + marker)
-    # Forge 28 logs this one configuration-watcher notice at FATAL without
-    # throwing; every other FATAL remains a qualification failure.
-    failures = [line for line in text.splitlines() if
-                ("/FATAL]" in line and not line.endswith(CONFIG_NOTICE)) or any(token in line for token in (
+    failures = [line for line in text.splitlines() if any(token in line for token in (
                     "Lifecycle probe failed", "ADVLIFECYCLE FAIL", "Unknown or incomplete command",
                     "Incorrect argument for command", "An unexpected error occurred trying to execute that command"))]
     if failures:

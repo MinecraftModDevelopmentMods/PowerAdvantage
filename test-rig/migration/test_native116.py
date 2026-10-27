@@ -88,6 +88,17 @@ class Native116DestinationTest(unittest.TestCase):
         log.write_text("[Server thread/WARN] No data fixer registered for custom entity\n[Server thread/INFO] Done\n")
         require_clean_log(log)
 
+    def test_fatal_and_uncaught_java_failures_are_rejected_on_the_destination(self):
+        log = self.root / "console.log"
+        for failure in ("[Server thread/FATAL] [orespawn]: Loading Integration For basemetals",
+                        'Exception in thread "Server thread" java.lang.IllegalStateException: broken',
+                        "Caused by: java.lang.NoClassDefFoundError: missing/Dependency",
+                        "java.lang.VerifyError: invalid bytecode"):
+            with self.subTest(failure=failure):
+                log.write_text("[Server thread/INFO] Done\n" + failure + "\n")
+                with self.assertRaises(AssertionError):
+                    require_clean_log(log)
+
     def test_new_stage_uses_harness_preset_not_vanilla_flat_json(self):
         seed = self.root / "seed"
         (seed / "libraries").mkdir(parents=True)

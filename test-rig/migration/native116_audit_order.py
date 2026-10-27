@@ -10,6 +10,7 @@ import transformer_order as historical
 from matrix import compare, digest, fingerprint, write_json
 from native116 import LEGACY_POWER, native_normalized, require_clean_log
 from native116_transformer_order import COREMODS, native_order_evidence
+from native116_observation_plan import audit_runtime
 
 
 def replay(root):
@@ -37,6 +38,10 @@ def replay(root):
             actual[label] = capture_actors(runtime, label, runtime / "ordering-evidence" / label)
             if label != "converted":
                 actual[label].pop("embedded", None)
+        custody = dict(status="PASS", proof=audit_runtime(runtime, root / "observation-plan.json",
+                       summary["observationPlanSha256"]))
+        if custody != recorded["observation-code-custody"]:
+            findings.append(case + ": observation code custody differs from the sealed plan")
         for label in ("converted", "restarted"):
             proof = native_order_evidence(runtime, mode, label)
             if proof != recorded[("converted" if label == "converted" else "restart") + "-controls"]["order"]:

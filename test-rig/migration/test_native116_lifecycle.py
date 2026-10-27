@@ -129,11 +129,12 @@ class NativeLifecycleTests(unittest.TestCase):
                 "Forge mod loading, version 36.2.34, for MC 1.16.5 with MCP 20210115.111550\nDone\n")
         log.write_text(good)
         native.require_native_boot(log)
-        notice = "[Thread-1/FATAL] [ne.mi.co.ForgeConfig/CORE]: Forge config just got changed on the file system!\n"
+        notice = "[Thread-1/DEBUG] [ne.mi.co.ForgeConfig/CORE]: Forge config just got changed on the file system!\n"
         log.write_text(good + notice)
         native.require_native_boot(log)
         for text in (good.replace("1.16.5", "1.13.2"), good + "[Server thread/ERROR] failure\n",
-                     good + "[Server thread/FATAL] failure\n", good + notice.replace("ForgeConfig/CORE", "Other/CORE")):
+                     good + "[Server thread/FATAL] failure\n", good + notice.replace("/DEBUG]", "/FATAL]"),
+                     good + notice.replace("/DEBUG]", "/FATAL]").replace("ForgeConfig/CORE", "Other/CORE")):
             log.write_text(text)
             with self.assertRaises(AssertionError):
                 native.require_native_boot(log)

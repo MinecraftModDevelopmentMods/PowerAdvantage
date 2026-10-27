@@ -15,6 +15,7 @@ from native116_actor_io import capture_actors, capture_dimensions
 import transformer_order as historical
 from matrix import WORLD, compare, copy_fixture, digest, fingerprint, write_json
 from native116_code import Server
+from native116_observation_plan import make_plan, seal_runtime, audit_runtime
 from native116 import LEGACY_POWER, native_normalized, output_path, pinned_profile, require_clean_log, require_disjoint
 
 
@@ -116,6 +117,10 @@ def run(args):
             port.bind(("127.0.0.1", args.port))
     root.mkdir(parents=True)
     patched = build_bridge(root, target, args.java8)
+    plan_path = root / "observation-plan.json"
+    write_json(plan_path, make_plan(target[0], digest(target[0] / "native116-code-inventory.json"),
+               patched, digest(patched), root / "probe-build.json", digest(root / "probe-build.json")))
+    plan_sha256 = digest(plan_path)
     if args.probe_only:
         return 0
     results, cross, fingerprints = {}, {}, {}
@@ -138,6 +143,7 @@ def run(args):
                 runtime = root / (name + "-" + mode)
                 launcher = native116_boot(runtime, target, args.java8, args.port)
                 shutil.copy2(patched, runtime / COREMODS)
+                seal_runtime(runtime, plan_path, plan_sha256)
                 (runtime / "transformer-order.mode").write_text(mode)
                 copy_fixture(mixed, runtime)
                 shutil.copy2(mixed / "actor-fixture.json", runtime / "actor-fixture.json")
@@ -152,6 +158,7 @@ def run(args):
                     "idempotence": historical.strict_equal(adapter, restarted),
                     "backup-stability": historical.strict_equal(backups, historical.migration_backups(runtime)),
                     "backup-provenance": provenance, "converted-controls": first, "restart-controls": second,
+                    "observation-code-custody": dict(status="PASS", proof=audit_runtime(runtime, plan_path, plan_sha256)),
                 }
                 for label in ("converted", "restarted"):
                     entries = json.loads((runtime / f"migration-{label}.json").read_text())
@@ -181,6 +188,7 @@ def run(args):
     write_json(root / "summary.json", {"status": status, "semanticStatus": "FAIL" if failed else "PASS", "crossOrder": cross,
                "runtimes": len(results), "serverLaunches": len(results) * 2, "sourceFixtures": "UNCHANGED",
                "targetManifestSha256": digest(args.target_manifest), "patchedLibrarySha256": digest(patched),
+               "observationPlanSha256": plan_sha256,
                "powerBackupOriginOrderDependent": dependent})
     return int(failed)
 

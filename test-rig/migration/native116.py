@@ -61,8 +61,11 @@ def native_normalized(value, enchantments=None):
 def require_clean_log(path):
     verify_if_sealed(path.parent)
     text = path.read_text(encoding="utf-8", errors="replace")
-    failures = [line for line in text.splitlines() if "/ERROR]" in line or any(marker in line for marker in (
-        "NoSuchFieldError", "NoSuchMethodError", "Failed to reload data packs", "Encountered an unexpected exception"))]
+    failures = [line for line in text.splitlines() if "/ERROR]" in line or "/FATAL]" in line
+                or re.search(r"\b(?:[\w$]+\.)*[\w$]+(?:Exception|Error)\b", line)
+                or any(marker in line for marker in (
+                    "Exception in thread", "Caused by:", "Failed to reload data packs",
+                    "Encountered an unexpected exception"))]
     if failures:
         raise AssertionError(f"Native runtime errors in {path}: {failures[:5]}")
 

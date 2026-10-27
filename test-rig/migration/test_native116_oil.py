@@ -203,11 +203,12 @@ class NativeOilTests(unittest.TestCase):
 
     def test_native_log_requires_both_versions_and_rejects_runtime_command_and_probe_errors(self):
         log = self.root / "console.log"
-        log.write_text(BOOT_PROOF + "[watcher/FATAL] " + native.CONFIG_NOTICE + "\n")
+        log.write_text(BOOT_PROOF + "[watcher/DEBUG] " + native.CONFIG_NOTICE + "\n")
         native.require_native_boot(log)
         for text in (BOOT_PROOF.replace("1.16.5", "1.13.2"), BOOT_PROOF.replace("36.2.34", "25.0.223"),
                      *[BOOT_PROOF + failure + "\n" for failure in (
-                         "[main/ERROR] bad", "[main/FATAL] actual fatal", "NoSuchFieldError: bad",
+                         "[main/ERROR] bad", "[main/FATAL] actual fatal", "[watcher/FATAL] " + native.CONFIG_NOTICE,
+                         "NoSuchFieldError: bad",
                          "NoSuchMethodError: bad", "Failed to reload data packs", "Lifecycle probe failed",
                          "ADVLIFECYCLE FAIL", "Unknown or incomplete command",
                          "Incorrect argument for command", "An unexpected error occurred trying to execute that command")]):
