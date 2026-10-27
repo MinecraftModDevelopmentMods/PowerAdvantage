@@ -5,7 +5,7 @@
   "startupTimeoutSeconds": 180,
   "stationRunSeconds": 5,
   "recipeMode": "NORMAL",
-  "sourceCommit": "2116a35a40dd150d79e7dfdcdc891637793178b7",
+  "sourceCommit": "3f1100e6f75b1fb949cc883be7288aa30789876d",
   "sourceVersion": "2.4.7.116051",
   "forge": {
     "version": "1.16.5-36.2.34",
@@ -18,22 +18,22 @@
       "id": "advantageworkstest",
       "version": "1.1.0.116051",
       "file": "AdvantageWorksTestHarness-1.1.0.116051.jar",
-      "path": "build/native116-artifacts/9F450BB7F81DD08918CCFCBCF59DE81117A323F798F47AF4603829FBC542F430/AdvantageWorksTestHarness-1.1.0.116051.jar",
+      "path": "build/native116-artifacts/607D4C91275D0CD1236CAB98A1C7F70B8A798726D75FAD2BB27563993BEF159A/AdvantageWorksTestHarness-1.1.0.116051.jar",
       "workspaceProduced": true,
-      "originPath": "D:/PowerAdvantage/PA116/PowerAdvantage/test-rig/build/gradle/libs/AdvantageWorksTestHarness-1.1.0.116051.jar",
-      "sha256": "9F450BB7F81DD08918CCFCBCF59DE81117A323F798F47AF4603829FBC542F430",
-      "sourceRef": "9e4dd7444993ec3d42e1436a6c0673ed86a570a6",
+      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027\\harness-j-context-3201f4b\\AdvantageWorksTestHarness-1.1.0.116051.jar",
+      "sha256": "607D4C91275D0CD1236CAB98A1C7F70B8A798726D75FAD2BB27563993BEF159A",
+      "sourceRef": "3201f4b496a09ce67f45ae0ec8096df0ee82ff73",
       "pinStatus": "PINNED_UNQUALIFIED"
     },
     {
       "id": "poweradvantage",
       "version": "2.4.7.116051",
       "file": "PowerAdvantage-2.4.7.116051.jar",
-      "path": "build/native116-artifacts/94C36D3F157A120943C067D4317D1C55D62792BAB43E309640DB64BAEE3FFE7E/PowerAdvantage-2.4.7.116051.jar",
+      "path": "build/native116-artifacts/EB226ADC200BFB96278F1449CDB7C6941F289DB43330C8206369048378E931EB/PowerAdvantage-2.4.7.116051.jar",
       "workspaceProduced": true,
-      "originPath": "D:/PowerAdvantage/_verification/advantage-116-port-20261027/power-bootstrap-d/PowerAdvantage-2.4.7.116051.jar",
-      "sha256": "94C36D3F157A120943C067D4317D1C55D62792BAB43E309640DB64BAEE3FFE7E",
-      "sourceRef": "2116a35a40dd150d79e7dfdcdc891637793178b7",
+      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027/power-bootstrap-e/PowerAdvantage-2.4.7.116051.jar",
+      "sha256": "EB226ADC200BFB96278F1449CDB7C6941F289DB43330C8206369048378E931EB",
+      "sourceRef": "3f1100e6f75b1fb949cc883be7288aa30789876d",
       "pinStatus": "PINNED_UNQUALIFIED"
     },
     {
@@ -44,7 +44,7 @@
       "workspaceProduced": true,
       "originPath": "D:/PowerAdvantage/PA116/SteamAdvantage/SteamAdvantage/build/libs/SteamAdvantage-2.2.8.116051.jar",
       "sha256": "0E8EF7DA681A5105E5206F166A36F56AEF356DFD227F1C3910DE7BDC606AA148",
-      "sourceRef": "362048a513267fae47ed9cfa187f08b97726d40b",
+      "sourceRef": "b820801e8959a0383af36fc7fb4d38f30ebc1e1b",
       "pinStatus": "PINNED_UNQUALIFIED"
     },
     {
@@ -55,7 +55,7 @@
       "workspaceProduced": true,
       "originPath": "D:/PowerAdvantage/PA116/ElectricAdvantage/ElectricAdvantage/build/libs/ElectricAdvantage-2.2.8.116051.jar",
       "sha256": "A9B62DD737E42455FEE72BD2D855C9C5EDBF5A9C5EAD7B48C650C9073A35B129",
-      "sourceRef": "391c1fc48495d0c746d28bba35c92b6e1a15c89c",
+      "sourceRef": "61cbe49e513d4063f47a762dc3095b2239c625c2",
       "pinStatus": "PINNED_UNQUALIFIED"
     },
     {

@@ -7,7 +7,7 @@
   "shutdownTimeoutSeconds": 60,
   "stationRunSeconds": 5,
   "recipeMode": "TECH_PROGRESSION",
-  "sourceCommit": "2116a35a40dd150d79e7dfdcdc891637793178b7",
+  "sourceCommit": "3f1100e6f75b1fb949cc883be7288aa30789876d",
   "sourceVersion": "2.4.7.116051",
   "lifecycleStations": [],
   "mods": [
@@ -15,11 +15,11 @@
       "id": "advantageworkstest",
       "version": "1.1.0.116051",
       "file": "AdvantageWorksTestHarness-1.1.0.116051-deobf.jar",
-      "path": "build/native116-artifacts/1C5E130265DEB5A1759F2664B10E78E6F7D0230F7442011C4D08E0C3D92EB1F1/AdvantageWorksTestHarness-1.1.0.116051-deobf.jar",
+      "path": "build/native116-artifacts/74BBC23BAF35CB2A0784741D03B23610C0D628454FAD970B5D9F0FC54A03909E/AdvantageWorksTestHarness-1.1.0.116051-deobf.jar",
       "workspaceProduced": true,
-      "originPath": "D:/PowerAdvantage/PA116/PowerAdvantage/test-rig/build/gradle/libs-dev/AdvantageWorksTestHarness-1.1.0.116051-deobf.jar",
-      "sha256": "1C5E130265DEB5A1759F2664B10E78E6F7D0230F7442011C4D08E0C3D92EB1F1",
-      "sourceRef": "9e4dd7444993ec3d42e1436a6c0673ed86a570a6",
+      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027\\harness-j-context-3201f4b\\AdvantageWorksTestHarness-1.1.0.116051-deobf.jar",
+      "sha256": "74BBC23BAF35CB2A0784741D03B23610C0D628454FAD970B5D9F0FC54A03909E",
+      "sourceRef": "3201f4b496a09ce67f45ae0ec8096df0ee82ff73",
       "pinStatus": "PINNED_UNQUALIFIED"
     },
     {
@@ -30,7 +30,7 @@
       "workspaceProduced": true,
       "originPath": "D:/PowerAdvantage/PA116/SteamAdvantage/SteamAdvantage/build/libs-dev/SteamAdvantage-2.2.8.116051-deobf.jar",
       "sha256": "EDDE662A815DAD2E7B0C9C3224881E04F5259434B4A0757591836CB0B969EC7D",
-      "sourceRef": "362048a513267fae47ed9cfa187f08b97726d40b",
+      "sourceRef": "b820801e8959a0383af36fc7fb4d38f30ebc1e1b",
       "pinStatus": "PINNED_UNQUALIFIED"
     },
     {
@@ -41,7 +41,7 @@
       "workspaceProduced": true,
       "originPath": "D:/PowerAdvantage/PA116/ElectricAdvantage/ElectricAdvantage/build/libs-dev/ElectricAdvantage-2.2.8.116051-deobf.jar",
       "sha256": "3FC2AF7D0B931B4377D8A826AE24432FF76EB298045989EED3BBC6F8FAC98CAE",
-      "sourceRef": "391c1fc48495d0c746d28bba35c92b6e1a15c89c",
+      "sourceRef": "61cbe49e513d4063f47a762dc3095b2239c625c2",
       "pinStatus": "PINNED_UNQUALIFIED"
     }
   ],
