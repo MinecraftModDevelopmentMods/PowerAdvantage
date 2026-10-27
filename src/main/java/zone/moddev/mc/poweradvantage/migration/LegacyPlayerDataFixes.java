@@ -17,6 +17,7 @@ public final class LegacyPlayerDataFixes {
         CompoundNBT result = source.copy();
         int current = SharedConstants.getCurrentVersion().getWorldVersion();
         if (version >= current) return result;
+        LegacyEntityDataFixes.preparePlayerAttributes(result);
         if (version < 704) {
             // Re-read the native namespaced container schema before later choice fixes.
             result = NBTUtil.update(fixer, type, result, version, 704);

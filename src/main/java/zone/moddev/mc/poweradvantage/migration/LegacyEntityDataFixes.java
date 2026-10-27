@@ -44,6 +44,7 @@ final class LegacyEntityDataFixes {
     private static CompoundNBT upgrade(CompoundNBT source, int version, int current,
             DataFixer fixer, Set<?> vanillaIds) {
         CompoundNBT entity = source.copy();
+        renameSwimAttribute(entity);
         boolean hasPassengers = source.contains("Passengers");
         ListNBT passengers = source.getList("Passengers", 10);
         entity.remove("Passengers");
@@ -73,6 +74,45 @@ final class LegacyEntityDataFixes {
             entity.put("Passengers", fixed);
         }
         return entity;
+    }
+
+    static void preparePlayerAttributes(CompoundNBT player) {
+        renameSwimAttribute(player);
+        if (!player.contains("RootVehicle")) return;
+        if (!player.contains("RootVehicle", 10)) throw new IllegalStateException("Malformed player RootVehicle");
+        CompoundNBT vehicle = player.getCompound("RootVehicle");
+        if (!vehicle.contains("Entity")) return;
+        if (!vehicle.contains("Entity", 10)) throw new IllegalStateException("Malformed player RootVehicle.Entity");
+        prepareAttributeTree(vehicle.getCompound("Entity"));
+    }
+
+    private static void prepareAttributeTree(CompoundNBT entity) {
+        renameSwimAttribute(entity);
+        if (!entity.contains("Passengers")) return;
+        requireCompoundList(entity, "Passengers");
+        ListNBT passengers = entity.getList("Passengers", 10);
+        for (int index = 0; index < passengers.size(); index++) {
+            prepareAttributeTree(passengers.getCompound(index));
+        }
+    }
+
+    private static void renameSwimAttribute(CompoundNBT entity) {
+        if (!entity.contains("Attributes")) return;
+        requireCompoundList(entity, "Attributes");
+        ListNBT attributes = entity.getList("Attributes", 10);
+        CompoundNBT legacy = null;
+        int identities = 0;
+        for (int index = 0; index < attributes.size(); index++) {
+            CompoundNBT attribute = attributes.getCompound(index);
+            if (attribute.getString("Name").equals("forge.swimSpeed")) {
+                legacy = attribute;
+                identities++;
+            } else if (attribute.getString("Name").equals("forge:swim_speed")) {
+                identities++;
+            }
+        }
+        if (identities > 1) throw new IllegalStateException("Ambiguous Forge swim speed attribute");
+        if (legacy != null) legacy.putString("Name", "forge:swim_speed");
     }
 
     static void finish(CompoundNBT root) {

@@ -10,6 +10,7 @@ Power Advantage 2.4.7.116051 (Minecraft 1.16.5)
 - Preserve entity UUIDs, pet ownership and passenger state when vanilla and mod entities share an old chunk.
 - Keep old material variants, tool wear and enchantments in machine inventories during world upgrades.
 - Keep named enchantments in player inventories and stored books when upgrading older worlds.
+- Preserve the old Forge swimming-speed attribute, including custom values and modifiers, when upgrading entities and player data.
 - Prepare both mods' stored items before entity flattening, keeping Base Metals tool durability in dropped items and minecarts.
 - Detach chunk data before migration so pending asynchronous saves are not modified in place.
 - Keep unloaded machine capabilities unavailable until the tile is revived, with fresh wrappers and retained contents.
