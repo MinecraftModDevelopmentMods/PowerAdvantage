@@ -262,6 +262,7 @@ class NativeIndependentAssessmentReplayTest(unittest.TestCase):
             platform["assessment"]["status"] = "PASS"
         (route / "native116-platform-assessment.json").write_text(json.dumps(platform))
         with patch.object(native116_audit_actors, "fingerprint", return_value={}), \
+             patch.object(native116_audit_actors, "validate_mod_inventory", return_value={"status": "PASS"}), \
              patch.object(native116_audit_actors, "pinned_profile"), \
              patch.object(native116_audit_actors, "baseline", return_value=(before, "source")), \
              patch.object(native116_audit_actors, "capture_dimensions", return_value=copy.deepcopy(after)), \

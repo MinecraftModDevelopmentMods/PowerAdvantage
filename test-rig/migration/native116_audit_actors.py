@@ -12,6 +12,7 @@ from native116 import pinned_profile, require_clean_log
 from native116_actors import baseline, expected_state, native_dimension_state, raw
 from native116_dimension_assessment import assess, summarize_checks
 import native116_dimension_assessment
+from native116_mod_inventory import InventoryError, validate_mod_inventory
 
 
 def inherited_sources(proofs):
@@ -81,13 +82,15 @@ def replay(run, kind, persistence=False):
         source = Path(provenance["source"])
         if fingerprint(source) != provenance["sourceFingerprint"]:
             findings.append(route + ": protected source fingerprint changed")
-        manifest = Path(provenance["targetManifest"])
-        if digest(manifest) != provenance["targetManifestSha256"]:
-            findings.append(route + ": target manifest changed")
-        pinned_profile(manifest, "target116")
-        for jar in json.loads((runtime / "input-jars.json").read_text()):
-            if digest(runtime / "mods" / jar["file"]) != jar["sha256"]:
-                findings.append(route + ": staged jar changed: " + jar["file"])
+        try:
+            inventory = validate_mod_inventory(runtime, provenance.get("targetManifest"),
+                                               provenance.get("targetManifestSha256"))
+        except InventoryError as error:
+            inventory = {"status": "FAIL", "scope": "EXACT_SIX_MOD_INVENTORY_ONLY",
+                         "atomicSnapshot": False, "error": str(error)}
+            findings.append(route + ": exact mod inventory fails: " + str(error))
+        else:
+            pinned_profile(Path(provenance["targetManifest"]), "target116")
         controls = persistence_controls(runtime, kind) if persistence else None
         if controls and controls["status"] != "PASS":
             findings.append(route + ": bounded persistence controls fail")
@@ -99,7 +102,8 @@ def replay(run, kind, persistence=False):
                 except AssertionError as error:
                     findings.append(route + ": " + str(error))
             routes[route] = {"status": "FAIL", "recordedCampaignError": checks["campaign-error"],
-                             "semanticReplay": "NOT_POSSIBLE_WITH_INCOMPLETE_SAVED_EVIDENCE"}
+                             "semanticReplay": "NOT_POSSIBLE_WITH_INCOMPLETE_SAVED_EVIDENCE",
+                             "modInventory": inventory}
             if persistence:
                 routes[route]["persistenceControls"] = controls
             continue
@@ -174,7 +178,7 @@ def replay(run, kind, persistence=False):
                 findings.append(route + "/" + key + ": behavioral assertion fails")
         for label in ("conversion", "restart", "runtime-restart"):
             require_clean_log(runtime / ("console-" + label + ".log"))
-        routes[route] = {"oracles": fresh, "exactItems": strict_items,
+        routes[route] = {"oracles": fresh, "exactItems": strict_items, "modInventory": inventory,
                          "carriedItems": sum(item["Count"] for item in expected["file"].get("Inventory", [])),
                          "enderItems": sum(item["Count"] for item in expected["file"].get("EnderItems", []))}
         if persistence:

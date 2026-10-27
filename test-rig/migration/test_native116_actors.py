@@ -106,7 +106,7 @@ class NativeActorOracleTest(unittest.TestCase):
             (runtime / "input-jars.json").write_text("[]")
             (runtime / "console-conversion.log").write_text("[Server thread/ERROR] Exception stopping the server")
             with patch("native116_audit_actors.fingerprint", return_value={"approved": "hash"}), \
-                 patch("native116_audit_actors.digest", return_value="manifest-hash"), \
+                 patch("native116_audit_actors.validate_mod_inventory", return_value={"status": "PASS"}), \
                  patch("native116_audit_actors.pinned_profile"), \
                  patch("native116_audit_actors.dimensions.capture") as capture:
                 result = replay(root, "dimensions")
