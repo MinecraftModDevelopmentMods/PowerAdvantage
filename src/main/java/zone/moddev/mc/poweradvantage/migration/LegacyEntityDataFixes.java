@@ -16,6 +16,13 @@ import net.minecraft.util.datafix.fixes.EntityUUID;
 /** Isolates vanilla entity choices from mod choices during the chunk datafix. */
 final class LegacyEntityDataFixes {
     private static final String STAGED = "AdvantageLegacyEntityDataFix";
+    // Forge moved these saved identities into its attribute registry in 1.16.
+    private static final String[][] FORGE_ATTRIBUTES = {
+        {"forge.swimSpeed", "forge:swim_speed"},
+        {"forge.nameTagDistance", "forge:nametag_distance"},
+        {"forge.entity_gravity", "forge:entity_gravity"},
+        {"generic.reachDistance", "forge:reach_distance"}
+    };
 
     private LegacyEntityDataFixes() {}
 
@@ -44,7 +51,7 @@ final class LegacyEntityDataFixes {
     private static CompoundNBT upgrade(CompoundNBT source, int version, int current,
             DataFixer fixer, Set<?> vanillaIds) {
         CompoundNBT entity = source.copy();
-        renameSwimAttribute(entity);
+        renameForgeAttributes(entity);
         boolean hasPassengers = source.contains("Passengers");
         ListNBT passengers = source.getList("Passengers", 10);
         entity.remove("Passengers");
@@ -77,7 +84,7 @@ final class LegacyEntityDataFixes {
     }
 
     static void preparePlayerAttributes(CompoundNBT player) {
-        renameSwimAttribute(player);
+        renameForgeAttributes(player);
         if (!player.contains("RootVehicle")) return;
         if (!player.contains("RootVehicle", 10)) throw new IllegalStateException("Malformed player RootVehicle");
         CompoundNBT vehicle = player.getCompound("RootVehicle");
@@ -87,7 +94,7 @@ final class LegacyEntityDataFixes {
     }
 
     private static void prepareAttributeTree(CompoundNBT entity) {
-        renameSwimAttribute(entity);
+        renameForgeAttributes(entity);
         if (!entity.contains("Passengers")) return;
         requireCompoundList(entity, "Passengers");
         ListNBT passengers = entity.getList("Passengers", 10);
@@ -96,23 +103,25 @@ final class LegacyEntityDataFixes {
         }
     }
 
-    private static void renameSwimAttribute(CompoundNBT entity) {
+    private static void renameForgeAttributes(CompoundNBT entity) {
         if (!entity.contains("Attributes")) return;
         requireCompoundList(entity, "Attributes");
         ListNBT attributes = entity.getList("Attributes", 10);
-        CompoundNBT legacy = null;
-        int identities = 0;
-        for (int index = 0; index < attributes.size(); index++) {
-            CompoundNBT attribute = attributes.getCompound(index);
-            if (attribute.getString("Name").equals("forge.swimSpeed")) {
-                legacy = attribute;
-                identities++;
-            } else if (attribute.getString("Name").equals("forge:swim_speed")) {
-                identities++;
+        for (String[] alias : FORGE_ATTRIBUTES) {
+            CompoundNBT legacy = null;
+            int identities = 0;
+            for (int index = 0; index < attributes.size(); index++) {
+                CompoundNBT attribute = attributes.getCompound(index);
+                if (attribute.getString("Name").equals(alias[0])) {
+                    legacy = attribute;
+                    identities++;
+                } else if (attribute.getString("Name").equals(alias[1])) {
+                    identities++;
+                }
             }
+            if (identities > 1) throw new IllegalStateException("Ambiguous Forge attribute: " + alias[1]);
+            if (legacy != null) legacy.putString("Name", alias[1]);
         }
-        if (identities > 1) throw new IllegalStateException("Ambiguous Forge swim speed attribute");
-        if (legacy != null) legacy.putString("Name", "forge:swim_speed");
     }
 
     static void finish(CompoundNBT root) {

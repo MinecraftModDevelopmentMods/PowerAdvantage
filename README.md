@@ -89,8 +89,8 @@ entities individually, so a mod entity cannot prevent a nearby pet's UUID and
 ownership from being migrated. Old vanilla registry names are remapped explicitly;
 unknown mod mappings still require their own compatible mod rather than being
 silently discarded.
-Legacy Forge swimming-speed values and modifiers are carried forward under the
-native attribute name rather than being silently replaced with the default.
+Legacy Forge swimming speed, name-tag distance, gravity and player reach use
+their native registry names without discarding saved values or modifiers.
 
 The 1.16 port uses native dimension registry keys, tile save/load methods and
 matrix-based menus. Config-dependent material aliases are resolved during the
