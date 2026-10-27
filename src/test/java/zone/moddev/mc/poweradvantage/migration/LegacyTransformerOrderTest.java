@@ -46,7 +46,7 @@ public class LegacyTransformerOrderTest {
 
     private static void transform(ClassNode node, String target, boolean base) throws Exception {
         String mod = base ? "basemetals" : "poweradvantage";
-        String path = base ? "/coremods/basemetals_115_compatibility.js" : "/coremods/poweradvantage_115_migration.js";
+        String path = base ? "/coremods/basemetals_116_compatibility.js" : "/coremods/poweradvantage_116_migration.js";
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
         assertNotNull("Transformer tests require the Java 8 test toolchain", engine);
         try (InputStreamReader reader = new InputStreamReader(getResource(path), StandardCharsets.UTF_8)) { engine.eval(reader); }

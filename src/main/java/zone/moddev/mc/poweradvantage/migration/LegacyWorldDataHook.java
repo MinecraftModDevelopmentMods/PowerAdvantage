@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Dynamic;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.DataFixUtils;
 
@@ -38,8 +38,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.datafix.fixes.BlockStateFlatteningMap;
 import net.minecraft.util.datafix.DataFixesManager;
 import net.minecraft.util.datafix.TypeReferences;
-import net.minecraft.world.storage.SaveHandler;
-import net.minecraft.world.storage.WorldInfo;
+import net.minecraft.world.storage.SaveFormat.LevelSave;
+import net.minecraft.world.storage.IServerConfiguration;
 import net.minecraftforge.fml.WorldPersistenceHooks;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -168,7 +168,7 @@ public final class LegacyWorldDataHook implements WorldPersistenceHooks.WorldPer
         if (vanillaIds.contains(entity.getString("id"))) {
             CompoundNBT isolated = entity.copy();
             isolated.remove("Passengers");
-            entity = (CompoundNBT) fixer.update(TypeReferences.ENTITY_TYPE,
+            entity = (CompoundNBT) fixer.update(TypeReferences.ENTITY,
                     new Dynamic<>(net.minecraft.nbt.NBTDynamicOps.INSTANCE, isolated),
                     version, LAST_PRE_FLATTENING_VERSION).getValue();
         }
@@ -199,14 +199,14 @@ public final class LegacyWorldDataHook implements WorldPersistenceHooks.WorldPer
     @Override public String getModId() { return "FML"; }
 
     @Override
-    public CompoundNBT getDataForWriting(SaveHandler handler, WorldInfo info) {
-        CompoundNBT legacy = LEGACY_WORLD_DATA.get(worldKey(handler.getWorldDirectory()));
+    public CompoundNBT getDataForWriting(LevelSave handler, IServerConfiguration info) {
+        CompoundNBT legacy = LEGACY_WORLD_DATA.get(worldKey(handler.getWorldDir().toFile()));
         return legacy == null ? new CompoundNBT() : legacy.copy();
     }
 
     @Override
-    public void readData(SaveHandler handler, WorldInfo info, CompoundNBT tag) {
-        prepareLegacyData(handler.getWorldDirectory(), tag);
+    public void readData(LevelSave handler, IServerConfiguration info, CompoundNBT tag) {
+        prepareLegacyData(handler.getWorldDir().toFile(), tag);
     }
 
     private static synchronized void prepareLegacyData(File worldDirectory, CompoundNBT tag) {
@@ -255,7 +255,7 @@ public final class LegacyWorldDataHook implements WorldPersistenceHooks.WorldPer
             for (int metadata = 0; metadata < 16; metadata++) {
                 BlockState state = LegacyMigrationApi.decodeBlockState(entry.getKey(), block, metadata);
                 table[(entry.getValue().intValue() << 4) | metadata] =
-                        BlockStateFlatteningMap.makeDynamic(NBTUtil.writeBlockState(state).toString());
+                        BlockStateFlatteningMap.parse(NBTUtil.writeBlockState(state).toString());
                 mapped++;
             }
         }
@@ -381,7 +381,7 @@ public final class LegacyWorldDataHook implements WorldPersistenceHooks.WorldPer
             changed += migrateFluidName(compound, "FluidID");
             if (migrateLegacyEnchantments(compound, LEGACY_ENCHANTMENTS)) changed++;
             if (LegacyMigrationApi.migrateRegisteredNbt(compound)) changed++;
-            for (String key : new ArrayList<>(compound.keySet())) {
+            for (String key : new ArrayList<>(compound.getAllKeys())) {
                 INBT child = compound.get(key);
                 if (child != null) changed += migrateLegacyNbt(child);
             }

@@ -23,7 +23,7 @@ public final class InventoryLocks {
             if (inventory instanceof net.minecraft.inventory.DoubleSidedInventory)
                 return isLocked(FIRST.get(inventory)) || isLocked(SECOND.get(inventory));
             return inventory instanceof LockableTileEntity
-                    && !((LockCode) CODE.get(inventory)).func_219964_a(ItemStack.EMPTY);
+                    && !((LockCode) CODE.get(inventory)) .unlocksWith(ItemStack.EMPTY);
         } catch (IllegalAccessException failure) {
             throw new IllegalStateException("Cannot inspect vanilla inventory lock", failure);
         }

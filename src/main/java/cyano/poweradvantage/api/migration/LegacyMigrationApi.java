@@ -102,7 +102,7 @@ public final class LegacyMigrationApi {
 
     public static synchronized BlockState decodeBlockState(ResourceLocation legacyId, Block block, int metadata) {
         BlockStateCodec codec = BLOCK_CODECS.get(legacyId);
-        return codec == null ? block.getDefaultState() : codec.decode(block, metadata & 15);
+        return codec == null ? block.defaultBlockState() : codec.decode(block, metadata & 15);
     }
 
     public static synchronized String tileTarget(String legacyId) {

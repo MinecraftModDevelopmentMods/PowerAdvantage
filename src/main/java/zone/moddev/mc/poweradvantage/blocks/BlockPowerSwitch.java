@@ -36,10 +36,10 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	 * @param mapColor      Color on a map
 	 */
 	public BlockPowerSwitch(ConduitType powerType, Material blockMaterial, float blockHardness) {
-		super(Block.Properties.create(blockMaterial).hardnessAndResistance(blockHardness));
+		super(Block.Properties.of(blockMaterial).strength(blockHardness));
 		this.powerType = new ConduitType[1];
 		this.powerType[0] = powerType;
-		this.setDefaultState(getDefaultState().with(ACTIVE, false));
+		this.registerDefaultState(defaultBlockState().setValue(ACTIVE, false));
 	}
 
 	/**
@@ -55,7 +55,7 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	 * Creates a blockstate
 	 */
 	@Override
-	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
 		builder.add(ACTIVE);
 	}
 
@@ -63,15 +63,15 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	 * Converts metadata into blockstate
 	 */
 	public BlockState getStateFromMeta(final int metaValue) {
-		return this.getDefaultState()
-				.with(ACTIVE, metaValue > 0);
+		return this.defaultBlockState()
+				.setValue(ACTIVE, metaValue > 0);
 	}
 
 	/**
 	 * Converts blockstate into metadata
 	 */
 	public int getMetaFromState(final BlockState bs) {
-		if ((Boolean) (bs .get(ACTIVE))) {
+		if ((Boolean) (bs .getValue(ACTIVE))) {
 			return 1;
 		} else {
 			return 0;
@@ -86,7 +86,7 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	 */
 	@Override
 	public boolean canAcceptConnection(PowerConnectorContext connection) {
-		return (Boolean) connection.thisBlock .get(ACTIVE) && ConduitType.areSameType(powerType[0], connection.powerType);
+		return (Boolean) connection.thisBlock .getValue(ACTIVE) && ConduitType.areSameType(powerType[0], connection.powerType);
 	}
 
 	@Override
@@ -119,29 +119,29 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	 * Override of default block behavior
 	 */
 	@Override
-	public void onBlockAdded(final BlockState state, final World world, final BlockPos coord, final BlockState oldState, final boolean isMoving) {
-		super.onBlockAdded(state, world, coord, oldState, isMoving);
-		ConduitRegistry.getInstance().conduitBlockPlacedEvent(world, world.dimension.getType().getId(), coord, getTypes());
+	public void onPlace(final BlockState state, final World world, final BlockPos coord, final BlockState oldState, final boolean isMoving) {
+		super.onPlace(state, world, coord, oldState, isMoving);
+		ConduitRegistry.getInstance().conduitBlockPlacedEvent(world, coord, getTypes());
 	}
 
 	/**
 	 * This method is called when the block is removed from the world by an entity.
 	 */
 	@Override
-	public void onReplaced(BlockState state, World w, BlockPos coord, BlockState newState, boolean isMoving) {
+	public void onRemove(BlockState state, World w, BlockPos coord, BlockState newState, boolean isMoving) {
 		if (state.getBlock() != newState.getBlock()) {
-			ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.dimension.getType().getId(), coord, getTypes());
+			ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, coord, getTypes());
 		}
-		super.onReplaced(state, w, coord, newState, isMoving);
+		super.onRemove(state, w, coord, newState, isMoving);
 	}
 
 	/**
 	 * This method is called when the block is destroyed by an explosion.
 	 */
 	@Override
-	public void onExplosionDestroy(World w, BlockPos coord, Explosion boom) {
-		super.onExplosionDestroy(w, coord, boom);
-		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.dimension.getType().getId(), coord, getTypes());
+	public void wasExploded(World w, BlockPos coord, Explosion boom) {
+		super.wasExploded(w, coord, boom);
+		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, coord, getTypes());
 	}
 
 	/**
@@ -152,12 +152,12 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 			World world = (World) w;
 			BlockState state = world.getBlockState(pos);
 			// redstone power given or taken
-			boolean activated = !world.isBlockPowered(pos);
-			world.setBlockState(pos, state.with(ACTIVE, activated), 2);
+			boolean activated = !world.hasNeighborSignal(pos);
+			world.setBlock(pos, state.setValue(ACTIVE, activated), 2);
 			if (activated) {
-				ConduitRegistry.getInstance().conduitBlockPlacedEvent(world, world.dimension.getType().getId(), pos, getTypes());
+				ConduitRegistry.getInstance().conduitBlockPlacedEvent(world, pos, getTypes());
 			} else {
-				ConduitRegistry.getInstance().conduitBlockRemovedEvent(world, world.dimension.getType().getId(), pos, getTypes());
+				ConduitRegistry.getInstance().conduitBlockRemovedEvent(world, pos, getTypes());
 			}
 		}
 	}

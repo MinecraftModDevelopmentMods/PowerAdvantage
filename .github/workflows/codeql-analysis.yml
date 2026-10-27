@@ -2,9 +2,9 @@ name: CodeQL
 
 on:
   push:
-    branches: [master-1.15.2, 'feature/**']
+    branches: [master-1.16.5, 'feature/**']
   pull_request:
-    branches: [master-1.15.2]
+    branches: [master-1.16.5]
   schedule:
     - cron: '47 7 * * 4'
 
@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: MinecraftModDevelopmentMods/OreSpawn
-          ref: 5613baf876747ed071cb7ad7e2aff4e0ce4f0a03
+          ref: a113e5d767169189f0e35ade1e173a12d550b00e
           path: .ci-dependencies/OreSpawn
       - name: Use canonical LF dependency inputs
         # Use the same source bytes on hosted and local dependency builds.
@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: MinecraftModDevelopmentMods/BaseMetals
-          ref: ac1781e7cade15045ffe0135077087b4d1722603
+          ref: 995f6cc4dd2d5eecc628a42e5c43fa5390c24bca
           path: .ci-dependencies/BaseMetals
       - name: Install pinned Java 25 Mavenizer runtime
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
@@ -70,8 +70,8 @@ jobs:
           chmod +x "$orespawn/gradlew" "$basemetals/gradlew"
           (cd "$orespawn" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)
           (cd "$basemetals" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)
-          echo "orespawn=$orespawn/build/libs-dev/OreSpawn-4.1.1.115021-deobf.jar" >> "$GITHUB_OUTPUT"
-          echo "basemetals=$basemetals/build/libs-dev/BaseMetals-3.0.2.115021-deobf.jar" >> "$GITHUB_OUTPUT"
+          echo "orespawn=$orespawn/build/libs-dev/OreSpawn-4.1.0.116051-deobf.jar" >> "$GITHUB_OUTPUT"
+          echo "basemetals=$basemetals/build/libs-dev/BaseMetals-3.1.1.116051-deobf.jar" >> "$GITHUB_OUTPUT"
       - name: Initialize CodeQL
         uses: github/codeql-action/init@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4
         with:

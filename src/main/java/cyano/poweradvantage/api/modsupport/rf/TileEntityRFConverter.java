@@ -31,9 +31,9 @@ public class TileEntityRFConverter extends TileEntityConverter implements IEnerg
     @Override
     public void tickUpdate(boolean server) {
         if (!server) return;
-        int index = (int) (getWorld().getGameTime() % Direction.values().length);
+        int index = (int) (getLevel().getGameTime() % Direction.values().length);
         Direction side = Direction.values()[index];
-        TileEntity neighbor = getWorld().getTileEntity(getPos().offset(side));
+        TileEntity neighbor = getLevel().getBlockEntity(getBlockPos().relative(side));
         if (neighbor == null) return;
         neighbor.getCapability(CapabilityEnergy.ENERGY, side.getOpposite()).ifPresent(storage -> {
             int delta = forgeBuffer - halfBuffer;
@@ -50,12 +50,12 @@ public class TileEntityRFConverter extends TileEntityConverter implements IEnerg
 
     @Override public int receiveEnergy(int maxReceive, boolean simulate) {
         int accepted = Math.min(Math.max(0, maxReceive), forgeBufferSize - forgeBuffer);
-        if (!simulate && accepted > 0) { forgeBuffer += accepted; markDirty(); }
+        if (!simulate && accepted > 0) { forgeBuffer += accepted; setChanged(); }
         return accepted;
     }
     @Override public int extractEnergy(int maxExtract, boolean simulate) {
         int extracted = Math.min(Math.max(0, maxExtract), forgeBuffer);
-        if (!simulate && extracted > 0) { forgeBuffer -= extracted; markDirty(); }
+        if (!simulate && extracted > 0) { forgeBuffer -= extracted; setChanged(); }
         return extracted;
     }
     @Override public int getEnergyStored() { return forgeBuffer; }
@@ -73,8 +73,8 @@ public class TileEntityRFConverter extends TileEntityConverter implements IEnerg
         energyCapability.invalidate();
     }
 
-    @Override public void validate() {
-        super.validate();
+    @Override public void clearRemoved() {
+        super.clearRemoved();
         if (!energyCapability.isPresent()) energyCapability = LazyOptional.of(() -> this);
     }
 

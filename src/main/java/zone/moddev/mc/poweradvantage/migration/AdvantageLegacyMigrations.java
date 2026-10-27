@@ -81,9 +81,9 @@ public final class AdvantageLegacyMigrations {
             return ((BlockSimplePowerMachine) block).getStateFromMeta(metadata);
         }
         if (block instanceof FlowingFluidBlock) {
-            return block.getDefaultState().with(FlowingFluidBlock.LEVEL, Integer.valueOf(metadata & 15));
+            return block.defaultBlockState().setValue(FlowingFluidBlock.LEVEL, Integer.valueOf(metadata & 15));
         }
-        return block.getDefaultState();
+        return block.defaultBlockState();
     }
 
     private static ResourceLocation id(String path) {

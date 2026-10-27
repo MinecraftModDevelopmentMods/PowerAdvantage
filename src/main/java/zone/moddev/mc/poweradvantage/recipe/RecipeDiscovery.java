@@ -23,12 +23,12 @@ public final class RecipeDiscovery {
         // Disabled recipes have no reward to grant. Replay only already-earned
         // discoveries when that exact recipe becomes available on a later login.
         for (IRecipe recipe : player.getServer().getRecipeManager().getRecipes()) {
-            if (!NAMESPACES.contains(recipe.getId().getNamespace()) || recipe.isDynamic()
-                    || player.getRecipeBook().isUnlocked(recipe)) continue;
-            Advancement advancement = player.getServer().getAdvancementManager().getAdvancement(
+            if (!NAMESPACES.contains(recipe.getId().getNamespace()) || recipe.isSpecial()
+                    || player .getRecipeBook().contains(recipe)) continue;
+            Advancement advancement = player.getServer().getAdvancements().getAdvancement(
                     new ResourceLocation(recipe.getId().getNamespace(), "recipes/" + recipe.getId().getPath()));
-            if (advancement != null && player.getAdvancements().getProgress(advancement).isDone()) {
-                player.unlockRecipes(Collections.singletonList(recipe));
+            if (advancement != null && player .getAdvancements().getOrStartProgress(advancement).isDone()) {
+                player .awardRecipes(Collections.singletonList(recipe));
             }
         }
     }

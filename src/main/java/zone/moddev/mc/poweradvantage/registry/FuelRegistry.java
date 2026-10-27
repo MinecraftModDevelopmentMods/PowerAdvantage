@@ -54,7 +54,7 @@ public class FuelRegistry {
 	 * @param burnTime How long it should burn (in game ticks)
 	 */
 	public void registerFuel(Block block, final Short burnTime){
-		registerFuel(Item.getItemFromBlock(block),(ItemStack i)->burnTime);
+		registerFuel(Item.byBlock(block),(ItemStack i)->burnTime);
 	}
 	/**
 	 * Registers a fuel item/block
@@ -70,7 +70,7 @@ public class FuelRegistry {
 	 * @param algorithm A function (usually as a lambda expression) that computes the burntime of an ItemStack
 	 */
 	public void registerFuel(Block block, Function<ItemStack,Short> algorithm){
-		registerFuel(Item.getItemFromBlock(block),algorithm);
+		registerFuel(Item.byBlock(block),algorithm);
 	}
 	/**
 	 * Registers a fuel item/block as an algorithm for calculating the burn time based on the specific ItemStack instance
@@ -142,7 +142,7 @@ public class FuelRegistry {
 		if(fuel == null || fuel.isEmpty()) return 0;
 		int custom = getInstance().getBurnTime(fuel);
 		if (custom > 0) return (short) Math.min(Short.MAX_VALUE, custom);
-		Integer vanilla = AbstractFurnaceTileEntity.getBurnTimes().get(fuel.getItem());
+		Integer vanilla = AbstractFurnaceTileEntity.getFuel().get(fuel.getItem());
 		int burnTime = ForgeEventFactory.getItemBurnTime(fuel, vanilla == null ? 0 : vanilla.intValue());
 		return (short) Math.min(Short.MAX_VALUE, Math.max(0, burnTime));
 	}

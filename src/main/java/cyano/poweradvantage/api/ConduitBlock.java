@@ -34,7 +34,7 @@ public abstract class ConduitBlock extends net.minecraft.block.Block implements 
 	}
 
 	protected ConduitBlock(Material mat, float hardness) {
-		this(Properties.create(mat).hardnessAndResistance(hardness));
+		this(Properties.of(mat).strength(hardness));
 	}
 
 	protected ConduitBlock(Properties properties) {
@@ -45,29 +45,29 @@ public abstract class ConduitBlock extends net.minecraft.block.Block implements 
 	 * This method is called whenever the block is placed into the world
 	 */
 	@Override
-	public void onBlockAdded(BlockState state, World w, BlockPos coord, BlockState oldState, boolean isMoving) {
-		super.onBlockAdded(state, w, coord, oldState, isMoving);
-		ConduitRegistry.getInstance().conduitBlockPlacedEvent(w, w.dimension.getType().getId(), coord, getTypes());
+	public void onPlace(BlockState state, World w, BlockPos coord, BlockState oldState, boolean isMoving) {
+		super.onPlace(state, w, coord, oldState, isMoving);
+		ConduitRegistry.getInstance().conduitBlockPlacedEvent(w, coord, getTypes());
 	}
 
 	/**
 	 * This method is called when the block is removed from the world by an entity.
 	 */
 	@Override
-	public void onReplaced(BlockState state, World w, BlockPos coord, BlockState newState, boolean isMoving) {
+	public void onRemove(BlockState state, World w, BlockPos coord, BlockState newState, boolean isMoving) {
 		if (state.getBlock() != newState.getBlock()) {
-			ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.dimension.getType().getId(), coord, getTypes());
+			ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, coord, getTypes());
 		}
-		super.onReplaced(state, w, coord, newState, isMoving);
+		super.onRemove(state, w, coord, newState, isMoving);
 	}
 
 	/**
 	 * This method is called when the block is destroyed by an explosion.
 	 */
 	@Override
-	public void onExplosionDestroy(World w, BlockPos coord, Explosion boom) {
-		super.onExplosionDestroy(w, coord, boom);
-		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.dimension.getType().getId(), coord, getTypes());
+	public void wasExploded(World w, BlockPos coord, Explosion boom) {
+		super.wasExploded(w, coord, boom);
+		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, coord, getTypes());
 	}
 
 }

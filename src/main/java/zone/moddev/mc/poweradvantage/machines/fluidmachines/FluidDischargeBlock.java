@@ -20,7 +20,7 @@ public class FluidDischargeBlock extends BlockSimpleFluidMachine {
 	}
 
 	@Override
-	public PoweredEntity createNewTileEntity(IBlockReader w) {
+	public PoweredEntity newBlockEntity(IBlockReader w) {
 		return new FluidDischargeTileEntity();
 	}
 
@@ -29,25 +29,25 @@ public class FluidDischargeBlock extends BlockSimpleFluidMachine {
 	 * breaks.
 	 */
 	@Override
-	public void onReplaced(BlockState state, World world, BlockPos coord, BlockState newState, boolean isMoving) {
+	public void onRemove(BlockState state, World world, BlockPos coord, BlockState newState, boolean isMoving) {
 		if (state.getBlock() != newState.getBlock()) {
-			final TileEntity tileEntity = world.getTileEntity(coord);
+			final TileEntity tileEntity = world.getBlockEntity(coord);
 			if (tileEntity instanceof TileEntitySimplePowerMachine) {
-				InventoryHelper.dropInventoryItems(world, coord, (IInventory) tileEntity);
-				world.updateComparatorOutputLevel(coord, this);
+				InventoryHelper.dropContents(world, coord, (IInventory) tileEntity);
+				world .updateNeighbourForOutputSignal(coord, this);
 			}
 		}
-		super.onReplaced(state, world, coord, newState, isMoving);
+		super.onRemove(state, world, coord, newState, isMoving);
 	}
 
 	@Override
-	public boolean hasComparatorInputOverride(BlockState state) {
+	public boolean hasAnalogOutputSignal(BlockState state) {
 		return true;
 	}
 
 	@Override
-	public int getComparatorInputOverride(BlockState state, World world, BlockPos coord) {
-		TileEntity te = world.getTileEntity(coord);
+	public int getAnalogOutputSignal(BlockState state, World world, BlockPos coord) {
+		TileEntity te = world.getBlockEntity(coord);
 		if (te != null && te instanceof FluidDischargeTileEntity) {
 			return ((FluidDischargeTileEntity) te).getRedstoneOutput();
 		}

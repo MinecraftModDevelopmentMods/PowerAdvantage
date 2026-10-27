@@ -29,7 +29,7 @@ public abstract class PowerHelper {
 						&& ((ITypedConduit) connection.otherBlock.getBlock()).canAcceptConnection(connection.reverse());
 			} else if (connection.otherBlock.getBlock() instanceof ITileEntityProvider
 					&& PowerAdvantage.forgeEnergyConversionTable.containsKey(connection.powerType)) {
-				TileEntity tile = connection.world.getTileEntity(connection.otherBlockPosition);
+				TileEntity tile = connection.world.getBlockEntity(connection.otherBlockPosition);
 				if (tile == null) return false;
 				for (Direction side : Direction.values()) {
 					if (tile.getCapability(CapabilityEnergy.ENERGY, side).isPresent()) return true;

@@ -103,13 +103,13 @@ public final class Blocks {
         infinite_electricity = (GUIBlock) add(new InfiniteEnergyBlock(new ConduitType("electricity")), "infinite_electricity");
         infinite_quantum = (GUIBlock) add(new InfiniteEnergyBlock(new ConduitType("quantum")), "infinite_quantum");
 
-        Block.Properties oilProperties = Block.Properties.create(Material.WATER).doesNotBlockMovement()
-                .hardnessAndResistance(100.0F).variableOpacity();
+        Block.Properties oilProperties = Block.Properties.of(Material.WATER).noCollission()
+                .strength(100.0F).dynamicShape();
         refined_oil_block = (FlowingFluidBlock) add(new InteractiveFluidBlock(Fluids.refined_oil,
-                oilProperties, true, (world, entity) -> entity.addPotionEffect(new EffectInstance(Effects.NAUSEA, 200))),
+                oilProperties, true, (world, entity) -> entity .addEffect(new EffectInstance(Effects.CONFUSION, 200))),
                 "refined_oil");
         crude_oil_block = (FlowingFluidBlock) add(new InteractiveFluidBlock(Fluids.crude_oil,
-                oilProperties, true, (world, entity) -> entity.addPotionEffect(new EffectInstance(Effects.SLOWNESS, 200, 2))),
+                oilProperties, true, (world, entity) -> entity .addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 200, 2))),
                 "crude_oil");
 
         ModSupport.initBlocks();
@@ -140,7 +140,7 @@ public final class Blocks {
             Item.Properties properties = new Item.Properties();
             if (!"fluid_pipe_terminal".equals(entry.getKey())
                     && !(entry.getValue() instanceof FlowingFluidBlock)) {
-                properties.group(ItemGroups.tab_powerAdvantage);
+                properties.tab(ItemGroups.tab_powerAdvantage);
             }
             BlockItem item = new BlockItem(entry.getValue(), properties);
             item.setRegistryName(PowerAdvantage.MODID, entry.getKey());

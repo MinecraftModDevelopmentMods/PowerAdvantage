@@ -40,7 +40,7 @@ public class FunctionalCreativeTab  extends ItemGroup {
 			}
 		};
 		this.searchEnabled = searchBar;
-		if (this.searchEnabled) setBackgroundImageName("item_search.png");
+		if (this.searchEnabled) setBackgroundSuffix("item_search.png");
 	}
 
 
@@ -62,8 +62,8 @@ public class FunctionalCreativeTab  extends ItemGroup {
 	 */
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void fill(NonNullList<ItemStack> itemList) {
-		super.fill(itemList);
+	public void fillItemList(NonNullList<ItemStack> itemList) {
+		super.fillItemList(itemList);
 		itemList.sort(itemSortingAlgorithm);
 	}
 
@@ -73,7 +73,7 @@ public class FunctionalCreativeTab  extends ItemGroup {
 	 */
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public ItemStack createIcon() {
+	public ItemStack makeIcon() {
 		return new ItemStack(itemSupplier.get());
 	}
 }

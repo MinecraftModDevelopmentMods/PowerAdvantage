@@ -27,7 +27,7 @@ public class PersistenceRegistrationThreadTest {
                     MethodInsnNode call = (MethodInsnNode) instruction;
                     assertFalse("Do not mutate Forge's ArrayList during parallel mod construction",
                             call.owner.equals(hook) && call.name.equals("register"));
-                    if (call.owner.equals("net/minecraftforge/fml/DeferredWorkQueue") && call.name.equals("runLater") && hookRunnable) {
+                    if (call.owner.equals("net/minecraftforge/fml/event/lifecycle/FMLCommonSetupEvent") && call.name.equals("enqueueWork") && hookRunnable) {
                         assertEquals("Queue the hook during common setup", "commonSetup", method.name);
                         queuedRegistrations++;
                         hookRunnable = false;

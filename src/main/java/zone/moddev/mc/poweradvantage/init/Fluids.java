@@ -8,7 +8,7 @@ import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.FlowingFluid;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.IFluidState;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.Item;
 import net.minecraft.state.StateContainer;
 import net.minecraft.util.Direction;
@@ -143,18 +143,18 @@ public final class Fluids {
 
         public static final class Flowing extends PowerFluid {
             public Flowing(Kind kind) { super(kind); }
-            @Override protected void fillStateContainer(StateContainer.Builder<Fluid, IFluidState> builder) {
-                super.fillStateContainer(builder);
-                builder.add(LEVEL_1_8);
+            @Override protected void createFluidStateDefinition(StateContainer.Builder<Fluid, FluidState> builder) {
+                super.createFluidStateDefinition(builder);
+                builder.add(LEVEL);
             }
-            @Override public int getLevel(IFluidState state) { return state.get(LEVEL_1_8); }
-            @Override public boolean isSource(IFluidState state) { return false; }
+            @Override public int getAmount(FluidState state) { return state.getValue(LEVEL); }
+            @Override public boolean isSource(FluidState state) { return false; }
         }
 
         public static final class Source extends PowerFluid {
             public Source(Kind kind) { super(kind); }
-            @Override public int getLevel(IFluidState state) { return 8; }
-            @Override public boolean isSource(IFluidState state) { return true; }
+            @Override public int getAmount(FluidState state) { return 8; }
+            @Override public boolean isSource(FluidState state) { return true; }
         }
     }
 }

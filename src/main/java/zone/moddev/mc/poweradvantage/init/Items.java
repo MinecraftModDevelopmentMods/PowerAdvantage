@@ -33,16 +33,16 @@ public final class Items {
         starch = add("starch", new Item(properties()));
         bioplastic_ingot = add("bioplastic_ingot", new Item(properties()));
         sprocket = add("sprocket", new Item(properties()));
-        rotator_tool = add("rotator_tool", new RotationTool(properties().maxStackSize(1)));
+        rotator_tool = add("rotator_tool", new RotationTool(properties().stacksTo(1)));
         crude_oil_bucket = add("crude_oil_bucket", new BucketItem(Fluids.crude_oil,
-                new Item.Properties().group(ItemGroups.tab_powerAdvantage).maxStackSize(1).containerItem(net.minecraft.item.Items.BUCKET)));
+                new Item.Properties().tab(ItemGroups.tab_powerAdvantage).stacksTo(1).craftRemainder(net.minecraft.item.Items.BUCKET)));
         refined_oil_bucket = add("refined_oil_bucket", new BucketItem(Fluids.refined_oil,
-                new Item.Properties().group(ItemGroups.tab_powerAdvantage).maxStackSize(1).containerItem(net.minecraft.item.Items.BUCKET)));
+                new Item.Properties().tab(ItemGroups.tab_powerAdvantage).stacksTo(1).craftRemainder(net.minecraft.item.Items.BUCKET)));
         initialized = true;
     }
 
     private static Item.Properties properties() {
-        return new Item.Properties().group(ItemGroups.tab_powerAdvantage);
+        return new Item.Properties().tab(ItemGroups.tab_powerAdvantage);
     }
 
     private static Item add(String id, Item item) {

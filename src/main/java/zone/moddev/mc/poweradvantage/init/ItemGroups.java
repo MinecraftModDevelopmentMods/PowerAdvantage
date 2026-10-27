@@ -42,7 +42,7 @@ public class ItemGroups {
 		Item item = i.getItem();
 		sb.append(ForgeRegistries.ITEMS.getKey(item).getNamespace());
 		if (item instanceof BlockItem) {
-			if (((BlockItem) item).getBlock().hasTileEntity(((BlockItem) item).getBlock().getDefaultState())) {
+			if (((BlockItem) item).getBlock().hasTileEntity(((BlockItem) item).getBlock().defaultBlockState())) {
 				sb.append("A");
 			} else {
 				sb.append("B");
@@ -50,7 +50,7 @@ public class ItemGroups {
 		} else {
 			sb.append("I");
 		}
-		sb.append(item.getTranslationKey());
+		sb.append(item.getDescriptionId());
 		return sb.toString();
 	}
 }

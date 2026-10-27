@@ -17,10 +17,10 @@ public class BuildWorkflowContractTest {
             int policy = workflow.indexOf("run: git config --global core.autocrlf false");
             int checkout = workflow.indexOf("- name: Check out pinned Base Metals");
             assertTrue(name, policy >= 0 && checkout > policy);
-            assertTrue(name, workflow.contains("ref: ac1781e7cade15045ffe0135077087b4d1722603"));
-            assertTrue(name, workflow.contains("BaseMetals-3.0.2.115021-deobf.jar"));
-            assertTrue(name, workflow.contains("ref: 5613baf876747ed071cb7ad7e2aff4e0ce4f0a03"));
-            assertTrue(name, workflow.contains("master-1.15.2"));
+            assertTrue(name, workflow.contains("ref: 995f6cc4dd2d5eecc628a42e5c43fa5390c24bca"));
+            assertTrue(name, workflow.contains("BaseMetals-3.1.1.116051-deobf.jar"));
+            assertTrue(name, workflow.contains("ref: a113e5d767169189f0e35ade1e173a12d550b00e"));
+            assertTrue(name, workflow.contains("master-1.16.5"));
             assertTrue(name, workflow.contains("java-version: '25.0.3+9.0.LTS'"));
             assertTrue(name, workflow.contains("java-version: '17.0.1+12'"));
             assertTrue(name, workflow.contains("java-version: '8.0.502+7'"));

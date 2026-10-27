@@ -14,7 +14,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import zone.moddev.mc.poweradvantage.registry.MachineGUIRegistry;
@@ -125,8 +126,13 @@ guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, t
 		return new Container(player.inventory,(IInventory)e);
 	}
 
-    public Container createContainer(int windowId, PlayerInventory player, IInventory inventory) {
+    public Container createMenu(int windowId, PlayerInventory player, IInventory inventory) {
         return new Container(windowId, player, inventory);
+    }
+
+    /** @deprecated Use the native menu factory name. */
+    @Deprecated public Container createContainer(int windowId, PlayerInventory player, IInventory inventory) {
+        return createMenu(windowId, player, inventory);
     }
 
 	/**
@@ -177,8 +183,8 @@ guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, t
         }
 		
 		@Override
-		public boolean canInteractWith(PlayerEntity entityplayer) {
-			return entity.isUsableByPlayer(entityplayer);
+		public boolean stillValid(PlayerEntity entityplayer) {
+			return entity.stillValid(entityplayer);
 		}
 		
 		protected void bindPlayerInventory(PlayerInventory inventoryPlayer, int yOffset) {
@@ -193,30 +199,30 @@ guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, t
 		}
 		
 		@Override
-		public ItemStack transferStackInSlot(PlayerEntity player, int slot) {
+		public ItemStack quickMoveStack(PlayerEntity player, int slot) {
 			int hostSize = inventorySlotCoordinates.length;
 			ItemStack stack = ItemStack.EMPTY;
-			Slot slotObject = (Slot) inventorySlots.get(slot);
+			Slot slotObject = (Slot) slots.get(slot);
 			//null checks and checks if the item can be stacked (maxStackSize > 1)
-			if (slotObject != null && slotObject.getHasStack()) {
-				ItemStack stackInSlot = slotObject.getStack();
+			if (slotObject != null && slotObject.hasItem()) {
+				ItemStack stackInSlot = slotObject.getItem();
 				stack = stackInSlot.copy();
 
 				//merges the item into player inventory since its in the tileEntity
 				if (slot < hostSize) {
-					if (!this.mergeItemStack(stackInSlot, hostSize, 36+hostSize, true)) {
+					if (!this.moveItemStackTo(stackInSlot, hostSize, 36+hostSize, true)) {
 						return ItemStack.EMPTY;
 					}
 				}
 				//places it into the tileEntity if possible since it's in the player inventory
-				else if (!this.mergeItemStack(stackInSlot, 0, hostSize, false)) {
+				else if (!this.moveItemStackTo(stackInSlot, 0, hostSize, false)) {
 					return ItemStack.EMPTY;
 				}
 
 				if (stackInSlot.isEmpty()) {
-					slotObject.putStack(ItemStack.EMPTY);
+					slotObject.set(ItemStack.EMPTY);
 				} else {
-					slotObject.onSlotChanged();
+					slotObject.setChanged();
 				}
 
 				if (stackInSlot.getCount() == stack.getCount()) {
@@ -238,6 +244,7 @@ guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, t
 	@OnlyIn(Dist.CLIENT)
 	public class GUIContainer extends net.minecraft.client.gui.screen.inventory.ContainerScreen<Container>{
 		private final Object entity;
+		private MatrixStack matrices;
 
         public net.minecraft.client.Minecraft getMinecraft() { return minecraft; }
 		public GUIContainer(PlayerInventory playerItems, IInventory entity) {
@@ -247,23 +254,31 @@ guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, t
         public GUIContainer(Container container, PlayerInventory playerItems, ITextComponent title) {
             super(container, playerItems, title);
 //System.out.println("Size: "+this.xSize+"x"+this.ySize+" at coordinate ("+this.guiLeft+","+this.guiTop+")");
-			this.xSize = guiWidth;
-			this.ySize = guiHeight;
+			this.imageWidth = guiWidth;
+			this.imageHeight = guiHeight;
 			this.entity = container.entity;
 		}
 		@Override
-		protected void drawGuiContainerBackgroundLayer(float f, int i, int j) {
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			this.minecraft.getTextureManager().bindTexture(playerInventoryBox);
-			int x = (width - xSize) / 2;
-			int y = (height - ySize) / 2;
+		protected void renderBg(MatrixStack matrices, float f, int i, int j) {
+			this.matrices = matrices;
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			this.minecraft.getTextureManager().bind(playerInventoryBox);
+			int x = (width - imageWidth) / 2;
+			int y = (height - imageHeight) / 2;
 			final int playerInventoryWidth = 176;
 			final int playerInventoryHeight = 222;
 			this.blit(x, y, 0, 0, playerInventoryWidth, playerInventoryHeight);
-			this.minecraft.getTextureManager().bindTexture(guiDisplayImage);
+			this.minecraft.getTextureManager().bind(guiDisplayImage);
 			this.blit(x, y, 0, 0, guiWidth, guiHeight);
 			drawGUIDecorations(entity, this, x, y, this.getBlitOffset());
 		}
+
+		/** Retains the decoration API while using the current screen matrix. */
+		public void blit(int x, int y, int u, int v, int width, int height) {
+			super.blit(matrices, x, y, u, v, width, height);
+		}
+
+		public MatrixStack getMatrices() { return matrices; }
 		/**
 		 * Gets the z-coordinate of this GUI element
 		 * @return screen depth coordinate
@@ -276,7 +291,7 @@ guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, t
 		 * @return size of GUI
 		 */
 		public int getXSize(){
-			return this.xSize;
+			return this.imageWidth;
 		}
 
 		/**
@@ -284,14 +299,14 @@ guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, t
 		 * @return size of GUI
 		 */
 		public int getYSize(){
-			return this.ySize;
+			return this.imageHeight;
 		}
 		/**
 		 * Gets the GUI offset from left side of screen, in pixels
 		 * @return pixels to left of GUI
 		 */
 		public int getLeft(){
-			return this.guiLeft;
+			return this.leftPos;
 		}
 
 		/**
@@ -299,7 +314,7 @@ guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, t
 		 * @return pixels to above the GUI
 		 */
 		public int getTop(){
-			return this.guiTop;
+			return this.topPos;
 		}
 		
 	}

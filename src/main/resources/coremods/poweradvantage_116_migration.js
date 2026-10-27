@@ -6,7 +6,7 @@ var LabelNode = Java.type('org.objectweb.asm.tree.LabelNode');
 var MethodInsnNode = Java.type('org.objectweb.asm.tree.MethodInsnNode');
 var VarInsnNode = Java.type('org.objectweb.asm.tree.VarInsnNode');
 
-// Only the pre-datafix migration needs bytecode integration on Forge 1.15.
+// Only the pre-datafix migration needs bytecode integration on Forge 1.16.
 var hook = 'zone/moddev/mc/poweradvantage/migration/LegacyWorldDataHook';
 
 function initializeCoreMod() {
@@ -17,10 +17,13 @@ function initializeCoreMod() {
                 var patched = false;
                 for (var i = 0; i < classNode.methods.size(); ++i) {
                     var method = classNode.methods.get(i);
-                    if (method.desc !== '(Ljava/io/File;Lcom/mojang/datafixers/DataFixer;' +
-                            'Lnet/minecraft/world/storage/SaveHandler;)Lnet/minecraft/world/storage/WorldInfo;') continue;
+                    if (method.desc !== '(Lcom/mojang/serialization/DynamicOps;' +
+                            'Lnet/minecraft/util/datafix/codec/DatapackCodec;' +
+                            'Lnet/minecraft/world/storage/SaveFormat$LevelSave;' +
+                            'Ljava/io/File;Lcom/mojang/datafixers/DataFixer;)' +
+                            'Lnet/minecraft/world/storage/ServerWorldInfo;') continue;
                     var prefix = new InsnList();
-                    prefix.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                    prefix.add(new VarInsnNode(Opcodes.ALOAD, 3));
                     prefix.add(new MethodInsnNode(Opcodes.INVOKESTATIC, hook,
                             'prepareLegacyWorld', '(Ljava/io/File;)V', false));
                     method.instructions.insert(prefix);
@@ -33,7 +36,7 @@ function initializeCoreMod() {
         'poweradvantage_legacy_chunk_status': {
             'target': { 'type': 'CLASS', 'name': 'net.minecraft.world.chunk.storage.ChunkLoader' },
             'transformer': function(classNode) {
-                var descriptor = '(Lnet/minecraft/world/dimension/DimensionType;' +
+                var descriptor = '(Lnet/minecraft/util/RegistryKey;' +
                         'Ljava/util/function/Supplier;Lnet/minecraft/nbt/CompoundNBT;)' +
                         'Lnet/minecraft/nbt/CompoundNBT;';
                 var patchedRead = false;
@@ -67,7 +70,7 @@ function initializeCoreMod() {
             'target': { 'type': 'CLASS', 'name': 'net.minecraft.world.gen.WorldGenRegion' },
             'transformer': function(classNode) {
                 var descriptor = '(Lnet/minecraft/util/math/BlockPos;' +
-                        'Lnet/minecraft/block/BlockState;I)Z';
+                        'Lnet/minecraft/block/BlockState;II)Z';
                 var patched = false;
                 for (var i = 0; i < classNode.methods.size(); ++i) {
                     var method = classNode.methods.get(i);

@@ -9,7 +9,7 @@ public class TileEntityFoodFilter extends TileEntityConveyorFilter {
 	@Override
 	public boolean matchesFilter(ItemStack item) {
 		if (item == null) return false;
-		return !item.isEmpty() && item.getItem().isFood();
+		return !item.isEmpty() && item.getItem().isEdible();
 	}
 
 }

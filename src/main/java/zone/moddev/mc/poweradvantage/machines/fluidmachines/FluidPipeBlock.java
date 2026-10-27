@@ -32,15 +32,15 @@ public class FluidPipeBlock extends BlockSimpleFluidConduit {
 	/**
 	 * Called by ItemBlocks after a block is set in the world, to allow post-place logic
 	 */
-	public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
-		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+	public void setPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+		super.setPlacedBy(worldIn, pos, state, placer, stack);
 		pipeCheck(worldIn, pos);
 	}
 
 	private void pipeCheck(World w, BlockPos pos) {
-		if (!w.isRemote) {
+		if (!w.isClientSide) {
 			if (numberOfAdjacentFluidHandlers(w, pos) > 0) {
-				w.setBlockState(pos, Blocks.fluid_pipe_terminal.getDefaultState());
+				w.setBlock(pos, Blocks.fluid_pipe_terminal.defaultBlockState(), 3);
 			}
 		}
 	}
@@ -49,7 +49,7 @@ public class FluidPipeBlock extends BlockSimpleFluidConduit {
 	protected static int numberOfAdjacentFluidHandlers(World w, BlockPos pos) {
 		int sum = 0;
 		for (Direction f : Direction.values()) {
-			TileEntity e = w.getTileEntity(pos.offset(f));
+			TileEntity e = w.getBlockEntity(pos.relative(f));
 			if (FluidHandlerHelper.hasHandler(e, f.getOpposite()) && !(e instanceof cyano.poweradvantage.api.PoweredEntity)) {
 				sum++;
 			}

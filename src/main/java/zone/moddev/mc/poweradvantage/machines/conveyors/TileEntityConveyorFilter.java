@@ -29,8 +29,8 @@ public abstract class TileEntityConveyorFilter extends TileEntityConveyor {
 
 	@Override
 	public void tick() {
-		World w = getWorld();
-		if (w.isRemote) return;
+		World w = getLevel();
+		if (w.isClientSide) return;
 		if (transferCooldown > 0) transferCooldown--;
 		if (transferCooldown == 0) {
 			// do tick update
@@ -39,31 +39,31 @@ public abstract class TileEntityConveyorFilter extends TileEntityConveyor {
 				// not holding item, get item
 				Direction myDir = dir.getOpposite();
 				Direction theirDir = dir;
-				BlockPos targetPos = getPos().offset(myDir);
-				TileEntity target = w.getTileEntity(targetPos);
+				BlockPos targetPos = getBlockPos().relative(myDir);
+				TileEntity target = w.getBlockEntity(targetPos);
 				if (target != null) {
 					if (target instanceof IInventory) {
-						ISidedInventory them = InventoryWrapper.wrap(HopperTileEntity.getInventoryAtPosition(getWorld(), targetPos.getX(), targetPos.getY(), targetPos.getZ()));
+						ISidedInventory them = InventoryWrapper.wrap(HopperTileEntity.getContainerAt(getLevel(), targetPos.getX(), targetPos.getY(), targetPos.getZ()));
 						if (transferItem(them, theirDir, this, myDir)) {
-							this.markDirty();
+							this.setChanged();
 						}
 					}
 				}
 			} else {
 				Direction myDir = dir;
 				Direction theirDir = dir.getOpposite();
-				BlockPos targetPos = getPos().offset(myDir);
-				TileEntity target = w.getTileEntity(targetPos);
-				TileEntity dropTarget = w.getTileEntity(getPos().offset(Direction.DOWN));
+				BlockPos targetPos = getBlockPos().relative(myDir);
+				TileEntity target = w.getBlockEntity(targetPos);
+				TileEntity dropTarget = w.getBlockEntity(getBlockPos().relative(Direction.DOWN));
 				if (matchesFilter(this.getInventory()[0])) {
 					if (isValidItemFor(getInventory()[0], dropTarget, Direction.UP)) {
 						dropItem(dropTarget);
 						return;
 					}
 				} else if (target instanceof IInventory) {
-					ISidedInventory them = InventoryWrapper.wrap(HopperTileEntity.getInventoryAtPosition(getWorld(), targetPos.getX(), targetPos.getY(), targetPos.getZ()));
+					ISidedInventory them = InventoryWrapper.wrap(HopperTileEntity.getContainerAt(getLevel(), targetPos.getX(), targetPos.getY(), targetPos.getZ()));
 					if (transferItem(this, myDir, them, theirDir)) {
-						this.markDirty();
+						this.setChanged();
 					}
 				}
 			}
@@ -75,12 +75,12 @@ public abstract class TileEntityConveyorFilter extends TileEntityConveyor {
 	protected boolean isValidItemFor(ItemStack item, TileEntity target, Direction side) {
 		if (item == null) return false;
 		if (target instanceof IInventory) {
-			BlockPos targetPos = target.getPos();
-			ISidedInventory dt = InventoryWrapper.wrap(HopperTileEntity.getInventoryAtPosition(getWorld(), targetPos.getX(), targetPos.getY(), targetPos.getZ()));
+			BlockPos targetPos = target.getBlockPos();
+			ISidedInventory dt = InventoryWrapper.wrap(HopperTileEntity.getContainerAt(getLevel(), targetPos.getX(), targetPos.getY(), targetPos.getZ()));
 			int[] slots = dt.getSlotsForFace(side);
 			for (int i = 0; i < slots.length; i++) {
 				int slot = slots[i];
-				if (dt.canInsertItem(slot, item, side)) {
+				if (dt.canPlaceItemThroughFace(slot, item, side)) {
 					return true;
 				}
 			}
@@ -91,25 +91,25 @@ public abstract class TileEntityConveyorFilter extends TileEntityConveyor {
 	}
 
 	private void dropItem(TileEntity target) {
-		World w = getWorld();
-		BlockState bs = w.getBlockState(getPos().down());
-		if (target == null && !(bs.getMaterial().blocksMovement())) {
+		World w = getLevel();
+		BlockState bs = w.getBlockState(getBlockPos().below());
+		if (target == null && !(bs.getMaterial().blocksMotion())) {
 			// drop item in the air
-			ItemEntity ie = new ItemEntity(w, getPos().getX() + 0.5, getPos().getY() - 0.5, getPos().getZ() + 0.5, getInventory()[0]);
-			ie.setMotion(0, 0, 0);
-			w.addEntity(ie);
+			ItemEntity ie = new ItemEntity(w, getBlockPos().getX() + 0.5, getBlockPos().getY() - 0.5, getBlockPos().getZ() + 0.5, getInventory()[0]);
+			ie.setDeltaMovement(0, 0, 0);
+			w .addFreshEntity(ie);
 			getInventory()[0] = null;
 			transferCooldown = transferInvterval;
-			this.markDirty();
+			this.setChanged();
 		} else if (target instanceof IInventory) {
 			// add item to inventory
 			Direction myDir = Direction.DOWN;
 			Direction theirDir = Direction.UP;
-			BlockPos targetPos = target.getPos();
-			ISidedInventory targetInv = InventoryWrapper.wrap(HopperTileEntity.getInventoryAtPosition(getWorld(), targetPos.getX(), targetPos.getY(), targetPos.getZ()));
+			BlockPos targetPos = target.getBlockPos();
+			ISidedInventory targetInv = InventoryWrapper.wrap(HopperTileEntity.getContainerAt(getLevel(), targetPos.getX(), targetPos.getY(), targetPos.getZ()));
 			if (transferItem(this, myDir, targetInv, theirDir)) {
 				transferCooldown = transferInvterval;
-				this.markDirty();
+				this.setChanged();
 			}
 		}
 	}
@@ -121,11 +121,11 @@ public abstract class TileEntityConveyorFilter extends TileEntityConveyor {
 	 */
 	@Override
 	public Direction getFacing() {
-		BlockState state = getWorld().getBlockState(getPos());
-		if (state.has(BlockConveyorFilter.FACING)) {
-			return state.get(BlockConveyorFilter.FACING);
+		BlockState state = getLevel().getBlockState(getBlockPos());
+		if (state.hasProperty(BlockConveyorFilter.FACING)) {
+			return state.getValue(BlockConveyorFilter.FACING);
 		} else {
-			PowerAdvantage.LOGGER.warn("{}.getFacing(): blockstate at {} does not have BlockConveyorFilter.FACING", this.getClass().getName(), getPos());
+			PowerAdvantage.LOGGER.warn("{}.getFacing(): blockstate at {} does not have BlockConveyorFilter.FACING", this.getClass().getName(), getBlockPos());
 			return Direction.NORTH;
 		}
 	}
@@ -140,13 +140,13 @@ public abstract class TileEntityConveyorFilter extends TileEntityConveyor {
 	 * @return true if the item is allowed to be pulled, false otherwise
 	 */
 	@Override
-	public boolean canExtractItem(final int slot, final ItemStack targetItem, final Direction side) {
+	public boolean canTakeItemThroughFace(final int slot, final ItemStack targetItem, final Direction side) {
 		boolean filterMatch = matchesFilter(targetItem);
 		if (slot != 0) return false;
 		if (side == Direction.DOWN) {
 			return filterMatch;
 		} else {
-			return (!filterMatch) && super.canExtractItem(slot, targetItem, side);
+			return (!filterMatch) && super.canTakeItemThroughFace(slot, targetItem, side);
 		}
 	}
 }

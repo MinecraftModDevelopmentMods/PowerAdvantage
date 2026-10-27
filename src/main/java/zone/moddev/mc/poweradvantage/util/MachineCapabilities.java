@@ -26,7 +26,7 @@ public final class MachineCapabilities {
         if (owner.isRemoved()) return LazyOptional.empty();
         if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && owner instanceof IAdvantageFluidHandler) {
             return fluids.computeIfAbsent(face, side -> LazyOptional.of(() ->
-                    new ForgeFluidAdapter((IAdvantageFluidHandler) owner, side, owner::markDirty))).cast();
+                    new ForgeFluidAdapter((IAdvantageFluidHandler) owner, side, owner::setChanged))).cast();
         }
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && owner instanceof IInventory) {
             return items.computeIfAbsent(face, side -> LazyOptional.of(() -> side != null && owner instanceof ISidedInventory

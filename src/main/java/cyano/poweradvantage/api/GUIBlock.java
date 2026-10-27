@@ -45,7 +45,7 @@ public abstract class GUIBlock extends net.minecraft.block.ContainerBlock{
 	}
 
 	public GUIBlock(Material m, float hardness) {
-		this(Block.Properties.create(m).hardnessAndResistance(hardness).notSolid().variableOpacity());
+		this(Block.Properties.of(m).strength(hardness).noOcclusion().dynamicShape());
 	}
 
 	protected GUIBlock(Block.Properties properties) {
@@ -114,7 +114,7 @@ public abstract class GUIBlock extends net.minecraft.block.ContainerBlock{
 	 * -1 = special renderer
 	 */
 	@Override
-    public BlockRenderType getRenderType(BlockState bs) {
+    public BlockRenderType getRenderShape(BlockState bs) {
         return BlockRenderType.MODEL;
     }
 	
@@ -127,18 +127,18 @@ public abstract class GUIBlock extends net.minecraft.block.ContainerBlock{
      */
 	@SuppressWarnings("deprecation")
     @Override
-    public ActionResultType onBlockActivated(BlockState bs, World w, BlockPos coord,
+    public ActionResultType use(BlockState bs, World w, BlockPos coord,
                                     PlayerEntity player, Hand hand, net.minecraft.util.math.BlockRayTraceResult hit) {
-        Direction facing = hit.getFace();
-        if (w.isRemote) {
+        Direction facing = hit.getDirection();
+        if (w.isClientSide) {
             return ActionResultType.SUCCESS;
         }
-        final TileEntity tileEntity = w.getTileEntity(coord);
-        if (tileEntity == null || player.isSneaking()) {
+        final TileEntity tileEntity = w.getBlockEntity(coord);
+        if (tileEntity == null || player.isShiftKeyDown()) {
             return ActionResultType.PASS;
         }
         // handle buckets and fluid containers
-		net.minecraft.item.ItemStack item = player.getHeldItem(hand);
+		net.minecraft.item.ItemStack item = player.getItemInHand(hand);
 		if(item != null && !item.isEmpty() && tileEntity instanceof IAdvantageFluidHandler
 				&& FluidContainerHelper.interact(player, hand, (IAdvantageFluidHandler) tileEntity, facing)) {
 			return ActionResultType.SUCCESS;
@@ -157,16 +157,16 @@ public abstract class GUIBlock extends net.minecraft.block.ContainerBlock{
     
    
 	@Override
-	public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState,
+	public void onRemove(BlockState state, World world, BlockPos pos, BlockState newState,
 			boolean isMoving) {
 		if (state.getBlock() != newState.getBlock()) {
-			TileEntity te = world.getTileEntity(pos);
+			TileEntity te = world.getBlockEntity(pos);
 			if (te instanceof IInventory) {
-				InventoryHelper.dropInventoryItems(world, pos, (IInventory) te);
-				((IInventory) te).clear();
-				world.updateComparatorOutputLevel(pos, this);
+				InventoryHelper.dropContents(world, pos, (IInventory) te);
+				((IInventory) te).clearContent();
+				world .updateNeighbourForOutputSignal(pos, this);
 			}
-			super.onReplaced(state, world, pos, newState, isMoving);
+			super.onRemove(state, world, pos, newState, isMoving);
 		}
 	}
 

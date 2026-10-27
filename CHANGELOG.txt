@@ -1,3 +1,13 @@
+Power Advantage 2.4.7.116051 (Minecraft 1.16.5)
+
+- Move to Forge 36.2.34 and official 1.16.5 mappings, keeping Java 8 production bytecode.
+- Keep the existing block, item, fluid, tile, provider and saved-state names.
+- Use dimension registry keys for conduit caches, including custom dimensions.
+- Use the native tile save/load and matrix-based menu APIs without changing stored machine data.
+- Resolve configured rubber and solder aliases during the server's native tag reload.
+- Retarget the shared legacy-world hook and keep both Base Metals transformer orders covered.
+- Track the new tests and remaining manual checks in docs/1.16/PORT-STATUS.md. Earlier acceptance does not qualify this version.
+
 Power Advantage 2.4.6.115021 (Minecraft 1.15.2)
 
 - Move to Forge 31.2.57, snapshot mappings 20200514-1.15.1 and MCP 20200515.085601; retain ForgeGradle 7, Gradle 9.6.1 and Java 8 production bytecode.

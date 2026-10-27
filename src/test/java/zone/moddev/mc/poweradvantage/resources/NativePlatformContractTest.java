@@ -20,24 +20,25 @@ public class NativePlatformContractTest {
         String json = new String(Files.readAllBytes(Paths.get("src/main/resources/META-INF/coremods.json")), StandardCharsets.UTF_8);
         JsonObject coremods = new JsonParser().parse(json).getAsJsonObject();
         assertEquals(1, coremods.size());
-        assertEquals("coremods/poweradvantage_115_migration.js", coremods.get("poweradvantage_115_migration").getAsString());
+        assertEquals("coremods/poweradvantage_116_migration.js", coremods.get("poweradvantage_116_migration").getAsString());
         for (String removed : new String[] {"oil_renderer", "material_tags", "parts_loot"})
             assertFalse(Files.exists(Paths.get("src/main/resources/coremods/poweradvantage_" + removed + ".js")));
     }
 
-    @Test public void pinnedForgeFiresTagsUpdatedAfterInstallingAllFourCollections() throws Exception {
-        ClassNode node = read("net/minecraft/tags/NetworkTagManager");
+    @Test public void pinnedForgeFiresTagEventAfterBindingNativeCollections() throws Exception {
+        ClassNode node = read("net/minecraft/tags/ITagCollectionSupplier");
         int events = 0;
         for (MethodNode method : node.methods) {
-            int installed = 0;
+            boolean installed = false;
             for (AbstractInsnNode instruction : method.instructions.toArray()) {
                 if (instruction instanceof MethodInsnNode) {
                     MethodInsnNode call = (MethodInsnNode) instruction;
-                    if (call.owner.startsWith("net/minecraft/tags/") && call.name.equals("setCollection")) installed++;
+                    if (call.owner.equals("net/minecraft/tags/TagRegistryManager")
+                            && call.name.equals("resetAll")) installed = true;
                 }
                 if (instruction instanceof TypeInsnNode
-                        && ((TypeInsnNode) instruction).desc.equals("net/minecraftforge/event/TagsUpdatedEvent")) {
-                    assertEquals(4, installed);
+                        && ((TypeInsnNode) instruction).desc.equals("net/minecraftforge/event/TagsUpdatedEvent$VanillaTagTypes")) {
+                    assertTrue("Bind tags before notifying observers", installed);
                     events++;
                 }
             }
@@ -46,14 +47,16 @@ public class NativePlatformContractTest {
     }
 
     @Test public void nativeLootLoaderCallsForgeJsonHookAndNotTheRemovedAdvantageBridge() throws Exception {
-        ClassNode node = read("net/minecraft/world/storage/loot/LootTableManager");
+        ClassNode node = read("net/minecraft/loot/LootTableManager");
         int calls = 0;
         for (MethodNode method : node.methods) for (AbstractInsnNode instruction : method.instructions.toArray()) {
             if (!(instruction instanceof MethodInsnNode)) continue;
             MethodInsnNode call = (MethodInsnNode) instruction;
             assertNotEquals("zone/moddev/mc/poweradvantage/recipe/PartsLoot", call.owner);
             if (call.owner.equals("net/minecraftforge/common/ForgeHooks") && call.name.equals("loadLootTable")) {
-                assertTrue(call.desc.contains("Lcom/google/gson/JsonObject;Z"));
+                assertEquals("(Lcom/google/gson/Gson;Lnet/minecraft/util/ResourceLocation;"
+                        + "Lcom/google/gson/JsonElement;ZLnet/minecraft/loot/LootTableManager;)"
+                        + "Lnet/minecraft/loot/LootTable;", call.desc);
                 calls++;
             }
         }

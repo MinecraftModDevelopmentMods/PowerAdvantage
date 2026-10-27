@@ -18,17 +18,17 @@ public final class FluidContainerHelper {
 
     public static boolean interact(PlayerEntity player, Hand hand,
             IAdvantageFluidHandler handler, Direction face) {
-        if (player.world.isRemote) return false;
+        if (player.level.isClientSide) return false;
         return net.minecraftforge.fluids.FluidUtil.interactWithFluidHandler(player, hand,
                 new ForgeFluidAdapter(handler, face, () -> {
                     if (handler instanceof net.minecraft.tileentity.TileEntity)
-                        ((net.minecraft.tileentity.TileEntity) handler).markDirty();
+                        ((net.minecraft.tileentity.TileEntity) handler).setChanged();
                 }));
     }
 
     public static Fluid fluidForBucket(Item bucketItem) {
         for (Fluid fluid : net.minecraftforge.registries.ForgeRegistries.FLUIDS) {
-            if (fluid.getFilledBucket() == bucketItem && bucketItem != Items.BUCKET) return fluid;
+            if (fluid.getBucket() == bucketItem && bucketItem != Items.BUCKET) return fluid;
         }
         return null;
     }

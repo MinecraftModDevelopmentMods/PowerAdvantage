@@ -24,20 +24,20 @@ public class TileEntityOverflowFilter extends TileEntityConveyorFilter {
 	}
 
 	private boolean canInsert(ItemStack item, Direction f) {
-		TileEntity target = getWorld().getTileEntity(getPos().offset(f));
+		TileEntity target = getLevel().getBlockEntity(getBlockPos().relative(f));
 		if (target instanceof IInventory) {
 			Direction side = f.getOpposite();
 			ISidedInventory dt = InventoryWrapper.wrap((IInventory) target);
 			int[] slots = dt.getSlotsForFace(side);
 			for (int i = 0; i < slots.length; i++) {
 				int slot = slots[i];
-				if (dt.canInsertItem(slot, item, side)) {
-					ItemStack targetSlot = dt.getStackInSlot(slot);
+				if (dt.canPlaceItemThroughFace(slot, item, side)) {
+					ItemStack targetSlot = dt.getItem(slot);
 					if ((targetSlot == null) ||
-							(ItemStack.areItemsEqual(item, targetSlot)
-									&& !targetSlot.getItem().isDamageable()
+							(ItemStack.isSame(item, targetSlot)
+									&& !targetSlot.isDamageableItem()
 									&& targetSlot.getCount() < targetSlot.getMaxStackSize()
-									&& targetSlot.getCount() < dt.getInventoryStackLimit())) {
+									&& targetSlot.getCount() < dt.getMaxStackSize())) {
 						return true;
 					}
 				}

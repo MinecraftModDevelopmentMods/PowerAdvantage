@@ -23,7 +23,7 @@ public class ExternalPowerRequest extends PowerRequest {
 	public ExternalPowerRequest(float requestSize, TileEntity source) {
 		super(0, requestSize, null);
 		externalPowerAcceptor = source;
-		pos = source.getPos();
+		pos = source.getBlockPos();
 	}
 
 }

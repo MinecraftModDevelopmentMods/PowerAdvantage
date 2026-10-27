@@ -174,16 +174,16 @@ public abstract class TileEntityConverter extends TileEntitySimplePowerMachine {
 	}
 
 	@Override
-	public void read(final CompoundNBT tagRoot) {
-		super.read(tagRoot);
+	public void load(net.minecraft.block.BlockState state, final CompoundNBT tagRoot) {
+		super.load(state, tagRoot);
 		if (tagRoot.contains("Other", 99)) {
 			this.setOtherEnergy(tagRoot.getDouble("Other"));
 		}
 	}
 
 	@Override
-	public CompoundNBT write(final CompoundNBT tagRoot) {
-		super .write(tagRoot);
+	public CompoundNBT save(final CompoundNBT tagRoot) {
+		super .save(tagRoot);
 		tagRoot.putDouble("Other", this.getOtherEnergy());
 		return tagRoot;
 	}

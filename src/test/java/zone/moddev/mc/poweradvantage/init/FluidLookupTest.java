@@ -7,7 +7,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class FluidLookupTest {
-    @BeforeClass public static void bootstrap() { net.minecraft.util.registry.Bootstrap.register(); }
+    @BeforeClass public static void bootstrap() { net.minecraft.util.registry.Bootstrap.bootStrap(); }
 
     @Test public void resolvesLegacyUnqualifiedVanillaNamesInsteadOfTheEmptyDefault() {
         assertSame(net.minecraft.fluid.Fluids.WATER, Fluids.byName("water"));

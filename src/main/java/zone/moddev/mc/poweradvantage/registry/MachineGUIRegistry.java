@@ -60,14 +60,14 @@ public final class MachineGUIRegistry {
     private static SimpleMachineGUI.Container createClientContainer(
             int windowId, PlayerInventory inventory, PacketBuffer data) {
         BlockPos pos = data.readBlockPos();
-        World world = inventory.player.world;
-        TileEntity tile = world.getTileEntity(pos);
+        World world = inventory.player.level;
+        TileEntity tile = world.getBlockEntity(pos);
         Block block = world.getBlockState(pos).getBlock();
         if (!(block instanceof GUIBlock) || !(tile instanceof IInventory)) {
             throw new IllegalStateException("Missing machine for container at " + pos);
         }
         // Resolve the local block's definition; numeric registration order is not a network identity.
-        return definition(((GUIBlock) block).getGuiID()).createContainer(windowId, inventory, (IInventory) tile);
+        return definition(((GUIBlock) block).getGuiID()).createMenu(windowId, inventory, (IInventory) tile);
     }
 
     private static SimpleMachineGUI definition(int id) {
@@ -80,36 +80,36 @@ public final class MachineGUIRegistry {
 
     @OnlyIn(Dist.CLIENT)
     public static void registerScreens() {
-        ScreenManager.<SimpleMachineGUI.Container, SimpleMachineGUI.GUIContainer>registerFactory(TYPE,
+        ScreenManager.<SimpleMachineGUI.Container, SimpleMachineGUI.GUIContainer>register(TYPE,
                 (container, inventory, title) -> container.createScreen(inventory, title));
     }
 
     public static void open(ServerPlayerEntity player, World world, BlockPos pos, int id) {
-        TileEntity tile = world.getTileEntity(pos);
-        if (world.isRemote || player.world != world || !(tile instanceof IInventory)) return;
+        TileEntity tile = world.getBlockEntity(pos);
+        if (world.isClientSide || player.level != world || !(tile instanceof IInventory)) return;
         SimpleMachineGUI gui = definition(id);
         NetworkHooks.openGui(player, new INamedContainerProvider() {
             @Override public Container createMenu(int windowId, PlayerInventory inventory, PlayerEntity owner) {
-                return gui.createContainer(windowId, inventory, (IInventory) tile);
+                return gui.createMenu(windowId, inventory, (IInventory) tile);
             }
             @Override public ITextComponent getDisplayName() {
                 return tile instanceof net.minecraft.util.INameable
                         ? ((net.minecraft.util.INameable) tile).getDisplayName()
-                        : new TranslationTextComponent(world.getBlockState(pos).getBlock().getTranslationKey());
+                        : new TranslationTextComponent(world.getBlockState(pos).getBlock().getDescriptionId());
             }
         }, pos);
     }
 
     public Object getServerGuiElement(int id, PlayerEntity player, World world, int x, int y, int z) {
         ITileEntityGUI gui = DEFINITIONS.get(id);
-        TileEntity tile = world.getTileEntity(new BlockPos(x, y, z));
+        TileEntity tile = world.getBlockEntity(new BlockPos(x, y, z));
         return gui == null || tile == null ? null : gui.getContainer(tile, player);
     }
 
     @OnlyIn(Dist.CLIENT)
     public Object getClientGuiElement(int id, PlayerEntity player, World world, int x, int y, int z) {
         ITileEntityGUI gui = DEFINITIONS.get(id);
-        TileEntity tile = world.getTileEntity(new BlockPos(x, y, z));
+        TileEntity tile = world.getBlockEntity(new BlockPos(x, y, z));
         return gui == null || tile == null ? null : gui.getContainerGUI(tile, player);
     }
 }

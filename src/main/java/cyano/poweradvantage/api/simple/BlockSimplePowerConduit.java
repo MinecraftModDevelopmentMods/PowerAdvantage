@@ -31,7 +31,7 @@ public abstract class BlockSimplePowerConduit extends ConduitBlock {
 
     public BlockSimplePowerConduit(Material material, float hardness, float pipeRadius,
             ConduitType... energyTypes) {
-        this(Block.Properties.create(material).hardnessAndResistance(hardness), pipeRadius, energyTypes);
+        this(Block.Properties.of(material).strength(hardness), pipeRadius, energyTypes);
     }
 
     protected BlockSimplePowerConduit(Block.Properties properties, float pipeRadius,
@@ -39,9 +39,9 @@ public abstract class BlockSimplePowerConduit extends ConduitBlock {
         super(properties);
         this.types = energyTypes;
         this.pipeRadius = pipeRadius;
-        setDefaultState(getStateContainer().getBaseState()
-                .with(WEST, false).with(DOWN, false).with(SOUTH, false)
-                .with(EAST, false).with(UP, false).with(NORTH, false));
+        registerDefaultState(getStateDefinition().any()
+                .setValue(WEST, false).setValue(DOWN, false).setValue(SOUTH, false)
+                .setValue(EAST, false).setValue(UP, false).setValue(NORTH, false));
     }
 
     @Override public ConduitType[] getTypes() { return types; }
@@ -58,28 +58,28 @@ public abstract class BlockSimplePowerConduit extends ConduitBlock {
     @Override public boolean isPowerSource(ConduitType conduitType) { return false; }
 
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(WEST, DOWN, SOUTH, EAST, UP, NORTH);
     }
 
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return connectedState(getDefaultState(), context.getWorld(), context.getPos());
+        return connectedState(defaultBlockState(), context.getLevel(), context.getClickedPos());
     }
 
     @Override
-    public BlockState updatePostPlacement(BlockState state, Direction facing, BlockState facingState,
+    public BlockState updateShape(BlockState state, Direction facing, BlockState facingState,
             IWorld world, BlockPos currentPos, BlockPos facingPos) {
-        return state.with(property(facing), canConnectTo(world, currentPos, state, facing, facingPos));
+        return state.setValue(property(facing), canConnectTo(world, currentPos, state, facing, facingPos));
     }
 
     private BlockState connectedState(BlockState state, IBlockReader world, BlockPos pos) {
-        return state.with(WEST, canConnectTo(world, pos, state, Direction.WEST, pos.west()))
-                .with(DOWN, canConnectTo(world, pos, state, Direction.DOWN, pos.down()))
-                .with(SOUTH, canConnectTo(world, pos, state, Direction.SOUTH, pos.south()))
-                .with(EAST, canConnectTo(world, pos, state, Direction.EAST, pos.east()))
-                .with(UP, canConnectTo(world, pos, state, Direction.UP, pos.up()))
-                .with(NORTH, canConnectTo(world, pos, state, Direction.NORTH, pos.north()));
+        return state.setValue(WEST, canConnectTo(world, pos, state, Direction.WEST, pos.west()))
+                .setValue(DOWN, canConnectTo(world, pos, state, Direction.DOWN, pos.below()))
+                .setValue(SOUTH, canConnectTo(world, pos, state, Direction.SOUTH, pos.south()))
+                .setValue(EAST, canConnectTo(world, pos, state, Direction.EAST, pos.east()))
+                .setValue(UP, canConnectTo(world, pos, state, Direction.UP, pos.above()))
+                .setValue(NORTH, canConnectTo(world, pos, state, Direction.NORTH, pos.north()));
     }
 
     private static BooleanProperty property(Direction facing) {
@@ -108,29 +108,29 @@ public abstract class BlockSimplePowerConduit extends ConduitBlock {
     public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, net.minecraft.util.math.shapes.ISelectionContext context) {
         double min = 8.0D - pipeRadius * 16.0D;
         double max = 8.0D + pipeRadius * 16.0D;
-        VoxelShape shape = Block.makeCuboidShape(min, min, min, max, max, max);
+        VoxelShape shape = Block.box(min, min, min, max, max, max);
         boolean connected = false;
         for (Direction facing : Direction.values()) {
-            if (!state.get(property(facing))) continue;
+            if (!state.getValue(property(facing))) continue;
             connected = true;
             switch (facing) {
-                case DOWN: shape = VoxelShapes.or(shape, Block.makeCuboidShape(min, 0, min, max, min, max)); break;
-                case UP: shape = VoxelShapes.or(shape, Block.makeCuboidShape(min, max, min, max, 16, max)); break;
-                case NORTH: shape = VoxelShapes.or(shape, Block.makeCuboidShape(min, min, 0, max, max, min)); break;
-                case SOUTH: shape = VoxelShapes.or(shape, Block.makeCuboidShape(min, min, max, max, max, 16)); break;
-                case WEST: shape = VoxelShapes.or(shape, Block.makeCuboidShape(0, min, min, min, max, max)); break;
-                case EAST: shape = VoxelShapes.or(shape, Block.makeCuboidShape(max, min, min, 16, max, max)); break;
+                case DOWN: shape = VoxelShapes.or(shape, Block.box(min, 0, min, max, min, max)); break;
+                case UP: shape = VoxelShapes.or(shape, Block.box(min, max, min, max, 16, max)); break;
+                case NORTH: shape = VoxelShapes.or(shape, Block.box(min, min, 0, max, max, min)); break;
+                case SOUTH: shape = VoxelShapes.or(shape, Block.box(min, min, max, max, max, 16)); break;
+                case WEST: shape = VoxelShapes.or(shape, Block.box(0, min, min, min, max, max)); break;
+                case EAST: shape = VoxelShapes.or(shape, Block.box(max, min, min, 16, max, max)); break;
             }
         }
         if (!connected) {
-            shape = VoxelShapes.or(shape, Block.makeCuboidShape(0, min, min, 16, max, max));
-            shape = VoxelShapes.or(shape, Block.makeCuboidShape(min, min, 0, max, max, 16));
+            shape = VoxelShapes.or(shape, Block.box(0, min, min, 16, max, max));
+            shape = VoxelShapes.or(shape, Block.box(min, min, 0, max, max, 16));
         }
         return shape;
     }
 
     public boolean isFullCube(BlockState state) { return false; }
-    @Override public boolean allowsMovement(BlockState state, IBlockReader world, BlockPos pos, PathType type) { return false; }
+    @Override public boolean isPathfindable(BlockState state, IBlockReader world, BlockPos pos, PathType type) { return false; }
 
     /** Legacy metadata bridge retained for migration tests. */
     public int getMetaFromState(BlockState state) { return 0; }

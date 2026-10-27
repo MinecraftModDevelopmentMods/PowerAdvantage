@@ -81,7 +81,7 @@ public final class Entities {
     private static <T extends TileEntity> TileEntityType<T> register(
             RegistryEvent.Register<TileEntityType<?>> event, String id,
             java.util.function.Supplier<? extends T> factory, net.minecraft.block.Block... validBlocks) {
-        TileEntityType<T> type = TileEntityType.Builder.<T>create(factory, validBlocks).build(null);
+        TileEntityType<T> type = TileEntityType.Builder.<T>of(factory, validBlocks).build(null);
         type.setRegistryName(PowerAdvantage.MODID, id);
         event.getRegistry().register(type);
         return type;

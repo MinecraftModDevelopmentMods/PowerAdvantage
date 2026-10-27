@@ -70,7 +70,7 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IAdvan
 	 * priority to lowest (energy storage will have lower priority than machines).
 	 */
 	protected List<PowerRequest> getRequestsForFluid(ConduitType powerType) {
-		return ConduitRegistry.getInstance().getRequestsForPower(getWorld(), getPos(), Fluids.fluidConduit_general, powerType);
+		return ConduitRegistry.getInstance().getRequestsForPower(getLevel(), getBlockPos(), Fluids.fluidConduit_general, powerType);
 	}
 
 	/**
@@ -79,8 +79,8 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IAdvan
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	public CompoundNBT write(final CompoundNBT tagRoot) {
-		super.write(tagRoot);
+	public CompoundNBT save(final CompoundNBT tagRoot) {
+		super.save(tagRoot);
 		CompoundNBT tankTag = new CompoundNBT();
 		this.getTank().writeToNBT(tankTag);
 		tagRoot.put("Tank", tankTag);
@@ -93,8 +93,8 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IAdvan
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	public void read(final CompoundNBT tagRoot) {
-		super.read(tagRoot);
+	public void load(net.minecraft.block.BlockState state, final CompoundNBT tagRoot) {
+		super.load(state, tagRoot);
 		if (tagRoot.contains("Tank", 10)) {
 			CompoundNBT tankTag = tagRoot .getCompound("Tank");
 			getTank().readFromNBT(tankTag);
@@ -202,7 +202,7 @@ public abstract class FluidPoweredEntity extends PoweredEntity implements IAdvan
 	 * @param forReal if true, then the fluid in the tank will change
 	 */
 	public int fill(Direction face, FluidStack fluid, boolean forReal) {
-		if (fluid != null && (getTank().getFluidAmount() <= 0 || getTank().getFluid().getFluid().isEquivalentTo(fluid.getFluid()))) {
+		if (fluid != null && (getTank().getFluidAmount() <= 0 || getTank().getFluid().getFluid().isSame(fluid.getFluid()))) {
 			return getTank().fill(fluid, forReal);
 		} else {
 			return 0;

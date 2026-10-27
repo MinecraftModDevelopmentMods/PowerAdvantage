@@ -27,8 +27,8 @@ public class RecipeRegistrationThreadTest {
                     MethodInsnNode call = (MethodInsnNode) instruction;
                     assertFalse("Forge's condition HashMap is not safe during parallel loading",
                             call.owner.equals(conditions) && call.name.equals("register"));
-                    if (call.owner.equals("net/minecraftforge/fml/DeferredWorkQueue")
-                            && call.name.equals("runLater") && registrationRunnable) {
+                    if (call.owner.equals("net/minecraftforge/fml/event/lifecycle/FMLCommonSetupEvent")
+                            && call.name.equals("enqueueWork") && registrationRunnable) {
                         assertEquals("Register conditions during common setup", "commonSetup", method.name);
                         queued++;
                         registrationRunnable = false;

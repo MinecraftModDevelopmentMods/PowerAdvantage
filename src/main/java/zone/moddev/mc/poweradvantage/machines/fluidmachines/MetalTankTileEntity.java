@@ -30,7 +30,7 @@ public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
 	public FluidRequest getFluidRequest(Fluid offer) {
 		FluidStack filterFluid = getFilter();
 		if (filterFluid != null
-				&& !offer.isEquivalentTo(filterFluid.getFluid())) {
+				&& !offer.isSame(filterFluid.getFluid())) {
 			// offer blocked by filter
 			return FluidRequest.REQUEST_NOTHING;
 		}
@@ -90,7 +90,7 @@ public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
 	}
 
 	@Override
-	public boolean isItemValidForSlot(final int slot, final ItemStack item) {
+	public boolean canPlaceItem(final int slot, final ItemStack item) {
 		if (this.getInventory() == null) return false;
 		if (slot >= this.getInventory().length) return false;
 		return item != null && !item.isEmpty() && FluidContainerHelper.fluidForBucket(item.getItem()) != null;
@@ -101,7 +101,7 @@ public class MetalTankTileEntity  extends TileEntitySimpleFluidMachine {
 
 	@Override
 	public void tickUpdate(boolean isServerWorld) {
-		if (isServerWorld && this.getWorld().getGameTime() % 11 == 0) {
+		if (isServerWorld && this.getLevel().getGameTime() % 11 == 0) {
 			// send update
 			FluidStack current = getTank().getFluid();
 			Fluid currentFluid = (current != null ? current.getFluid() : null);

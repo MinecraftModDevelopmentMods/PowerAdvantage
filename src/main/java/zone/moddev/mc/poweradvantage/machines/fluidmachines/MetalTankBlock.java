@@ -17,19 +17,19 @@ public class MetalTankBlock extends BlockSimpleFluidMachine {
 	}
 
 	@Override
-	public PoweredEntity createNewTileEntity(IBlockReader world) {
+	public PoweredEntity newBlockEntity(IBlockReader world) {
 		return new MetalTankTileEntity();
 	}
 
 	@Override
-	public boolean hasComparatorInputOverride(BlockState bs) {
+	public boolean hasAnalogOutputSignal(BlockState bs) {
 		return true;
 	}
 
 
 	@Override
-	public int getComparatorInputOverride(BlockState bs, World world, BlockPos coord) {
-		TileEntity te = world.getTileEntity(coord);
+	public int getAnalogOutputSignal(BlockState bs, World world, BlockPos coord) {
+		TileEntity te = world.getBlockEntity(coord);
 		if (te != null && te instanceof MetalTankTileEntity) {
 			return ((MetalTankTileEntity) te).getRedstoneOutput();
 		}

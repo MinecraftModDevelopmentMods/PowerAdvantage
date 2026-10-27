@@ -15,7 +15,12 @@ import net.minecraft.fluid.Fluid;
 
 public class FluidNetworkApiTest {
     private static final ConduitType WATER = new ConduitType("test-water");
-    private static final Fluid TEST_FLUID = new EmptyFluid();
+    private static final Fluid TEST_FLUID = testFluid();
+
+    private static Fluid testFluid() {
+        net.minecraft.util.registry.Bootstrap.bootStrap();
+        return new EmptyFluid();
+    }
 
     @Test
     public void distributesOnlyWhatConsumersAccept() {

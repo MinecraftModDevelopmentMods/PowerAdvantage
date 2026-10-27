@@ -27,8 +27,8 @@ public class FilteredFluidTankGUI extends SimpleMachineGUI {
 						guiDisplayImage, guiContainer, x, y, z);
 			}
 		}
-		GlStateManager.color4f(1f, 1f, 1f, 1f); // reset tint
-		guiContainer.getMinecraft().getTextureManager().bindTexture(guiDisplayImage);
+		com.mojang.blaze3d.systems.RenderSystem.color4f(1f, 1f, 1f, 1f); // reset tint
+		guiContainer.getMinecraft().getTextureManager().bind(guiDisplayImage);
 		guiContainer.blit(x + 77, y + 6, 176, 0, 22, 66); // x, y, textureOffsetX, textureOffsetY, width, height)
 	}
 
@@ -45,7 +45,7 @@ public class FilteredFluidTankGUI extends SimpleMachineGUI {
 		FluidTankGUI.drawFluidFilledRectangle(guiContainer, fs, x + xPos, y + yPos + barSlotHeight - h, w, h, zLevel);
 		//guiContainer.drawModalRectWithCustomSizedTexture(x+xPos, y+yPos+barSlotHeight-h, 0, 0, w, h, 16, h);//h * texPerPixel); // x, y, u, v, width, height, textureWidth, textureHeight
 
-		guiContainer.getMinecraft().getTextureManager().bindTexture(displayImage);
+		guiContainer.getMinecraft().getTextureManager().bind(displayImage);
 		guiContainer.blit(x + xPos - 3, y + yPos - 3, 176, 0, 22, 66); // x, y, textureOffsetX, textureOffsetY, width, height)
 	}
 }
