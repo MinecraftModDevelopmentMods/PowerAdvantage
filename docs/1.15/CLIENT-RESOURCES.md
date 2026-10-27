@@ -6,8 +6,9 @@ Candidate F passed the actual combined graphical probe on 2026-10-26,
 using fresh F server recipe packets for all three modes. The primary resource,
 model, tank, fluid and recipe checks passed, along with all 25 available
 worldless renderer geometry cases. The existing captures and pixel thresholds
-are unchanged. All 1.15 manual acceptance remains pending, including
-hydroturbine orientation/spin in a disposable client world.
+are unchanged. The maintainer accepted in-game visuals and recipe unlocks on
+27 October 2026. That approval does not individually qualify every remaining
+interactive case, including hydroturbine orientation/spin or real menu sync.
 
 Fresh Eclipse Compiler for Java (ECJ) compilation of production and test sources
 passed for all three projects. Tests executed from those separate ECJ outputs

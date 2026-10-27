@@ -1,9 +1,11 @@
 # Advantage 1.15.2 Port
 
-The three local candidates are Power Advantage **2.4.6.115021** and Steam and
+The three versions are Power Advantage **2.4.6.115021** and Steam and
 Electric Advantage **2.2.7.115021**. The [test record](CURRENT-QUALIFICATION.md)
 identifies the exact jars, completed checks and remaining limits.
-Manual acceptance is separate, and no 1.15 port code has been pushed.
+The maintainer accepted visuals and recipe unlocks on 27 October 2026.
+Machine functionality is supported by the bounded automated checks, not a
+claim that every possible setup was played manually.
 
 **Back up the entire world before upgrading. Test a disposable copy first.**
 The Advantage fixtures do not qualify an entire modpack or another mod's
@@ -17,7 +19,7 @@ conversion support.
 | Snapshot mappings / MCP | 20200514-1.15.1 / 20200515.085601 |
 | ForgeGradle / Gradle / Renamer | 7.0.34 / 9.6.1 / 1.1.5 |
 | Gradle / production / Mavenizer JDK | Java 17 / Java 8 / Java 25 |
-| Base Metals / OreSpawn | local 3.0.2.115021 / 4.1.1.115021 |
+| Base Metals / OreSpawn | 3.0.2.115021 / 4.1.1.115021 |
 
 The implementation uses native activation results, block properties, render
 layers, matrix stacks and vertex buffers. Thin machinery stays non-solid,
@@ -45,10 +47,9 @@ Electric `f39a7f8`. The dependency update is committed locally as Power
 `6666099`, Steam `07f6a05` and Electric `58bb1a7`. Steam and Electric pin
 Power's exact source and development-jar checksum in `gradle.properties`.
 
-Base Metals `3.0.2.115021` is local source `ac1781e7`, fixing the shared
-world-hook registration race found by the migration tests. It has not been
-pushed or published. That dependency must be available upstream before these
-Advantage branches can pass hosted builds or be proposed for merge.
+Base Metals `3.0.2.115021` source `ac1781e7` fixes the shared world-hook
+registration race found by the migration tests. CI checks out that exact
+source before building Advantage. Dependency classes are not embedded.
 
 ## Manual Testing
 
@@ -71,5 +72,6 @@ vanilla differences and the boundaries of the server fixtures.
 
 ## Delivery
 
-The 1.14 PRs are merged. The 1.15 work stays local until manual testing is
-accepted. No 1.15 push, PR, merge, tag or publication is included.
+The maintainer authorized the 1.15 source merges after accepting the visual
+and recipe-unlock checks. Source publication follows the fork-first PR process.
+Tags, CurseForge uploads and other release publication remain separate actions.

@@ -8,6 +8,7 @@ Power Advantage 2.4.6.115021 (Minecraft 1.15.2)
 - Register recipe conditions on Forge's loading thread so parallel mod loading cannot intermittently remove recipes.
 - Initialize the shared creative tab once when the three mods load together.
 - Add 1.15-specific operating, migration, mining, recipe and client checks; the exact tested jars and remaining manual work are recorded in docs/1.15/CURRENT-QUALIFICATION.md.
+- Record the accepted in-game visuals and recipe unlocks alongside the automated machine checks.
 - Back up the entire world before upgrading and test only disposable copies. Earlier 1.14 acceptance does not qualify 1.15 upgrades.
 
 Power Advantage 2.4.5.114041 (Minecraft 1.14.4)

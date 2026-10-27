@@ -34,7 +34,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: MinecraftModDevelopmentMods/BaseMetals
-          # Local-only Base Metals source; publish upstream before PR/hosted builds.
           ref: ac1781e7cade15045ffe0135077087b4d1722603
           path: .ci-dependencies/BaseMetals
       - name: Install pinned Java 25 Mavenizer runtime

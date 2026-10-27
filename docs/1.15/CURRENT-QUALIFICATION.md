@@ -22,7 +22,7 @@ The current test installation uses local Base Metals 3.0.2.115021 and OreSpawn
 Production and dependency jars are archived by hash before testing; a later
 build cannot silently replace a running test's inputs.
 
-Base Metals 3.0.2 is a local, unpublished fix for an intermittent world-data
+Base Metals 3.0.2 fixes an intermittent world-data
 hook registration race found during these tests. Its 64 tests, release audits
 and Eclipse checks pass. The earlier failed migration remains in the record;
 the affected migration, operating and endurance checks have been repeated
@@ -52,7 +52,8 @@ local 1.15 branch only.
 | World generation | PASS with corrected sampler | All three F profiles, including Mineralogy and legacy import, complete and retain exact counts across restart |
 | Thirty-minute operation | PASS with corrected dependency | Both F worlds complete 1,801.58 seconds, full restart and resumed operation; raw conservation and strict-log audits pass |
 | Client resources and recipe-book rendering | PASS with manual gaps | Actual 1.15 client; 94 items, 905 states, both floor faces, gauges, six fluids, three recipe modes and 25 geometry cases |
-| Personal visual and gameplay acceptance | Pending | Not claimed by automated tests |
+| Maintainer visuals and recipe unlocks | ACCEPTED 2026-10-27 | In-game visuals and unlocks reported good; machine functionality relies on the recorded automated checks |
+| Remaining interactive checks | Not individually qualified | The bounded tests and visual acceptance do not establish every control, weapon, menu or multiplayer interaction |
 
 The harness passes 95 Java tests and the final Python adapter suite passes 575
 tests. These validate the test machinery; they are not counted as machine or
@@ -202,5 +203,6 @@ settings no longer point at the private reproducibility cache. The disposable
 [manual server](MANUAL-TESTING.md) is prepared and passes `-CheckOnly`; it has
 not been started.
 
-No 1.15 port code has been pushed. Local commits are allowed, but pushing,
-opening PRs, merging and publishing wait for manual acceptance.
+The maintainer authorized source pushes and merges on 27 October 2026 after
+accepting the visuals and recipe unlocks. The remaining limits above stay
+explicit. A source merge does not authorize a tag, CurseForge upload or release.

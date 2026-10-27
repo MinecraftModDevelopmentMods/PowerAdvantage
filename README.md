@@ -2,9 +2,11 @@
 
 **Minecraft 1.15.2**
 
-Power Advantage 2.4.6.115021 is the local 1.15.2 port candidate. See the
+Power Advantage 2.4.6.115021 targets Minecraft 1.15.2. See the
 [current test record](docs/1.15/CURRENT-QUALIFICATION.md) for the exact jars,
-automated results and remaining manual checks. This version is not published.
+automated results and remaining limits. Visuals and recipe unlocks were
+accepted on 27 October 2026; machine behavior is covered by the recorded
+automated tests.
 
 Power Advantage provides shared power, fluids, item transport and compatibility APIs for Steam Advantage and Electric Advantage.
 
@@ -28,9 +30,9 @@ needs Java 25. CI pins all three JDKs; the [test commands](docs/1.15/TEST-HARNES
 show how to select local installations explicitly.
 
 Build the pinned Base Metals `3.0.2.115021` and OreSpawn `4.1.1.115021` deobf jars first.
-Base Metals source `ac1781e7cade15045ffe0135077087b4d1722603` is local-only and
-unpublished. Publish that exact source upstream before opening a PR or running
-hosted builds; hosted reproducibility and publication readiness are not established.
+The exact Base Metals source is
+`ac1781e7cade15045ffe0135077087b4d1722603`. CI builds that dependency first;
+the checksums and complete source pins are in `gradle.properties`.
 
 Then run from `D:\PowerAdvantage\PA115\PowerAdvantage`:
 
