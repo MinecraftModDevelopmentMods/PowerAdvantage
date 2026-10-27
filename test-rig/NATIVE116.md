@@ -1,24 +1,25 @@
 # Native 1.16.5 Harness
 
-Status: **UNQUALIFIED**. Compile and deterministic tests are not server,
-migration, gameplay or manual acceptance. No 1.15 PASS transfers to 1.16.
-Publication, production code and client-resources belong to the parent task.
+See the [current test record](../docs/1.16/CURRENT-QUALIFICATION.md) for exact
+tested jars, completed checks and remaining work. Compilation and deterministic
+tests alone are not server, gameplay or manual acceptance. Earlier-version
+passes do not qualify this version. Publication follows manual acceptance.
 
 ## Build Input
 
 - Minecraft 1.16.5, Forge 36.2.34, official 1.16.5 mappings, MCP 20210115.111550.
 - ForgeGradle 7.0.34, Gradle 9.6.1, Java 8 bytecode.
 - Java 17 runs Gradle; pinned Java 8u502 compiles the harness; Java 25 runs Mavenizer.
-- Power 2.4.7.116051 bootstrap B source: `098d4625abc8a849bd1a11dcf697b3fee0cade7b`.
-- B deobf SHA-256: `78E58DD2AB04E2B9F3267E5735C64AAE7E93EAC97571CB04485038862C853ED3`.
-- B release SHA-256: `60E10F94F447D948244EF088A3B77134C13FBEBCCA1D8DB6210E8630F94A051F`.
+- Power 2.4.7.116051 source: `2116a35a40dd150d79e7dfdcdc891637793178b7`.
+- Deobf SHA-256: `F58B93DAF03CF303F32B18CCCA140E55E886A2BA82732A3F286ADF3E31194B6A`.
+- Release SHA-256: `94C36D3F157A120943C067D4317D1C55D62792BAB43E309640DB64BAEE3FFE7E`.
 
 The portable compile default is `../build/libs-dev/PowerAdvantage-2.4.7.116051-deobf.jar`.
 `-PpowerAdvantageDeobfJar` overrides its location, not its exact hash check.
 Power is compile-only and is not embedded. `verifyHarnessIsolation` checks the
-separate production release; use `-PpowerAdvantageReleaseJar` for archived B.
-The private build cache used for this port was already warm, not a cold-cache proof.
-Build logs and failed attempts are retained in `build/native116-port-evidence/`.
+separate production release; use `-PpowerAdvantageReleaseJar` when checking an
+archived release. Keep logs and reports in ignored output directories. The test
+record distinguishes cold-cache builds from warm-cache checks.
 
 ## Fresh Creation Preset
 
@@ -36,7 +37,6 @@ tests cover the layers, biome, structures, seed and three dimension keys.
 New disposable runtime properties select the preset, `generate-structures=false`
 and empty `generator-settings`. Worldgen sampling profiles retain DEFAULT.
 These launch properties never rewrite imported level.dat or source worlds.
-The original failed Power-only creation log is retained by the parent.
 Every ERROR, including the registry-ops ERROR, remains a failure.
 
 ## Native Boundaries
@@ -48,10 +48,12 @@ full level 33, max status distance 11, last holder level 44 and radius 13.
 Actual geometry and forced tickets must still be observed in real runtime tests.
 
 Native chunk reads use getChunkNow; world lookup and respawn use RegistryKey.
-PlayerList.save remains protected and is called through its exact mapped method,
-without an access-transformer relaxation. Tile reads use load(BlockState, NBT).
+Connected players use protected PlayerList.save through its exact mapped method,
+without an access-transformer relaxation. Forge skips that method for offline
+probe players without a connection, so those fixtures use native PlayerData.save
+and verify the actual saved file. Tile reads use load(BlockState, NBT).
 SaveFormat's native pre-datafix reader includes LevelSave; ChunkLoader upgrades
-take RegistryKey, Supplier and CompoundNBT. Production hooks remain parent-owned.
+take RegistryKey, Supplier and CompoundNBT.
 
 Native actor comparison translates only exact four-int UUID and dimension-key
 representations. It does not discard changed health, ownership, inventory or IDs.
@@ -66,7 +68,8 @@ real BitArray packing at five, seven and thirteen bits.
 
 The native116 campaign requires 15 frozen and 15 connected routes. All historical
 routes remain, plus native114 and explicit native115 sources. Frozen fixtures
-retain 355 blocks and 332 tiles. Connected routes retain the unchanged operating
+retain each sealed source's exact block and tile counts, including maintained-only
+witnesses. Connected routes retain the unchanged operating
 oracles and two exact 512-tick intervals. No target rebuilding or refilling is allowed.
 
 Six native115 source receipts are required: native115/full and the five historical
@@ -81,19 +84,21 @@ in `migration/native116-historical-inputs.json`. The preserved 1.15 Java harvest
 test cannot compile against native 1.16 APIs; Native116HarvestIsolationTest runs
 the same five assertions with native API names instead. No oracle is relaxed.
 
-## First Server Handoff
+## Running A Profile
 
-Use `profiles/native116/packaged-current.json` after the parent archives every
-runtime input and seals all hashes. Until then input preflight fails before any
-runtime directory, download or world access. The parent-installed code-only seed
-is `build/native116-seed-20261027`; only launcher/root jars and libraries are seed
-inputs, never its worlds. Preserve every failed/partial attempt.
+Use `profiles/native116/packaged-current.json` with the exact archived inputs.
+Input preflight checks their identities and hashes before opening a world.
+A prepared Forge server seed contains only launcher/root jars and libraries,
+never worlds or configuration. Supply its inventory and SHA-256 with
+`--prepared-server-seed`, `--prepared-server-seed-inventory` and
+`--prepared-server-seed-sha256` to use those exact installed code bytes.
+Changing the fixture harness requires its own sealed manifest, not overwriting
+an active campaign's jars. Preserve failed and partial attempts.
 
 Set ADVANTAGE_WORKS_JAVA8_HOME to the pinned 8u502 JDK. Run
 `verifyWorksNative116Inputs -PworksProfile=packaged-current` first. The first
 packaged startup task is `runWorksPackagedCurrent -PworksServerPort=<leased-port>`;
 the bounded two-boot task is `verifyWorksPackagedCurrent`. Both use Gradle
-`-p test-rig` and the archived-B compile override during this handoff. Obtain an
-explicit runtime/port lease before either startup task. The build lease alone
-does not authorize Minecraft. Server startup, broad operation and all migration
-campaigns remain pending, irrespective of deterministic test results.
+`-p test-rig` and the pinned Power compile input above. Coordinate a free local
+port before starting; never stop an unidentified server to make room. Results
+are recorded per campaign rather than inferred from successful compilation.
