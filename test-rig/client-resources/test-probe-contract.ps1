@@ -87,7 +87,8 @@ foreach ($name in 'ClientResourceProbe','TankVisualProbe','OilRenderProbe','Reci
         Assert-Contract ($cases.Length -gt 0 -and $actual.Contains($cases)) 'Oil/water/lava cases, sprites or failure aggregation changed.'
         Assert-Contract ($target.Contains('buffer.popNextBuffer()') -and $target.Contains('built.getFirst().vertexCount()')) 'Read the completed native draw state, not the reset builder count.'
         Assert-Contract ($target.Contains('element.getUsage() == usage && element.getIndex() == index')) 'Native vertex offsets must use the actual format elements.'
-        Assert-Contract ($target.Contains('net.minecraft.tags.TagCollectionManager.bind(previousTags);') -and $target.Contains('previousTags.bindToGlobal();')) 'Synthetic fluid tags must be restored.'
+        Assert-Contract ($target.Contains('net.minecraft.tags.TagCollectionManager.bind(previousTags);') -and $target.Contains('fluidRegistry.reset(restore);') -and $target.Contains('FluidTags.getAllTags() == previousFluids')) 'Synthetic fluid tags must be restored.'
+        Assert-Contract ($target.Contains('FluidTags.getAllTags();') -and $target.Contains('fluidRegistry.reset(temporary);') -and $target -notmatch '\.bindToGlobal\(') 'Worldless setup must not bind unresolved block/item wrappers to themselves.'
         Assert-Contract ($target -notmatch 'IEnviromentBlockReader|getTextureMap\(|getByteBuffer\(|getUvOffsetById\(|getColorOffset\(') 'Removed 1.14 fluid/atlas/vertex APIs remain.'
     }
 }

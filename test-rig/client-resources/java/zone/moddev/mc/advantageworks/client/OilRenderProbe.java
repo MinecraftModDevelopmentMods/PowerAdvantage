@@ -37,7 +37,11 @@ final class OilRenderProbe {
     static void verify(Minecraft minecraft, JsonObject result) {
         // Before a world/server is opened, vanilla's fluid tags have not been synchronized.
         net.minecraft.tags.ITagCollectionSupplier previousTags = net.minecraft.tags.TagCollectionManager.getInstance();
-        Map<ResourceLocation, net.minecraft.tags.ITag<Fluid>> tags = new HashMap<>(previousTags.getFluids().getAllTags());
+        net.minecraft.tags.ITagCollection<Fluid> previousFluids = net.minecraft.tags.FluidTags.getAllTags();
+        net.minecraft.tags.ITagCollectionSupplier restore = net.minecraft.tags.ITagCollectionSupplier.of(
+                previousTags.getBlocks(), previousTags.getItems(), previousFluids, previousTags.getEntityTypes());
+        net.minecraft.tags.TagRegistry<?> fluidRegistry = net.minecraft.tags.TagRegistryManager.get(new ResourceLocation("fluid"));
+        Map<ResourceLocation, net.minecraft.tags.ITag<Fluid>> tags = new HashMap<>(previousFluids.getAllTags());
         tags.put(new ResourceLocation("minecraft", "water"), net.minecraft.tags.ITag.fromSet(
                 new java.util.HashSet<>(java.util.Arrays.asList(net.minecraft.fluid.Fluids.WATER, net.minecraft.fluid.Fluids.FLOWING_WATER))));
         tags.put(new ResourceLocation("minecraft", "lava"), net.minecraft.tags.ITag.fromSet(
@@ -45,7 +49,9 @@ final class OilRenderProbe {
         net.minecraft.tags.ITagCollectionSupplier temporary = net.minecraft.tags.ITagCollectionSupplier.of(
                 previousTags.getBlocks(), previousTags.getItems(), net.minecraft.tags.ITagCollection.of(tags), previousTags.getEntityTypes());
         net.minecraft.tags.TagCollectionManager.bind(temporary);
-        temporary.bindToGlobal();
+        // The initial manager contains named wrappers, not resolved collections. Resetting
+        // every registry would bind those wrappers to themselves and recurse indefinitely.
+        fluidRegistry.reset(temporary);
         try {
         requireBucket(Items.crude_oil_bucket, Fluids.crude_oil);
         requireBucket(Items.refined_oil_bucket, Fluids.refined_oil);
@@ -62,8 +68,9 @@ final class OilRenderProbe {
         valid &= check(minecraft, net.minecraft.fluid.Fluids.LAVA.defaultFluidState(), "minecraft:block/lava_still", false, cases);
         if (!valid) throw new IllegalStateException("Native fluid renderer used the wrong sprite or tint: " + cases);
         } finally {
+            fluidRegistry.reset(restore);
             net.minecraft.tags.TagCollectionManager.bind(previousTags);
-            previousTags.bindToGlobal();
+            require(net.minecraft.tags.FluidTags.getAllTags() == previousFluids, "Synthetic fluid tags were not restored");
         }
     }
 
