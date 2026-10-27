@@ -229,8 +229,7 @@ final class ProcessProgression {
         // the previous witness. Give each bounded fixture a clean native tile instance.
         TileEntity clean = material.createTileEntity(material.getDefaultState(), world);
         if (clean != null) {
-            clean.setWorld(world);
-            clean.setPos(pos);
+            clean.setWorldAndPos(world, pos);
             world.setTileEntity(pos, clean);
         }
         return clean;

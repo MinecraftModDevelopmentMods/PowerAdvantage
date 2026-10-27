@@ -262,14 +262,14 @@ guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, t
 			this.blit(x, y, 0, 0, playerInventoryWidth, playerInventoryHeight);
 			this.minecraft.getTextureManager().bindTexture(guiDisplayImage);
 			this.blit(x, y, 0, 0, guiWidth, guiHeight);
-			drawGUIDecorations(entity, this, x, y, this.blitOffset);
+			drawGUIDecorations(entity, this, x, y, this.getBlitOffset());
 		}
 		/**
 		 * Gets the z-coordinate of this GUI element
 		 * @return screen depth coordinate
 		 */
 		public float getZLevel(){
-			return this.blitOffset;
+			return this.getBlitOffset();
 		}
 		/**
 		 * Gets the width of the GUI

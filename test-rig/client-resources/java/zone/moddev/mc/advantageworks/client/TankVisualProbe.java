@@ -6,6 +6,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.IFluidState;
@@ -89,25 +90,25 @@ final class TankVisualProbe {
         tile.getTank().setFluid(new cyano.poweradvantage.api.fluid.FluidStack(net.minecraft.fluid.Fluids.WATER, 10000));
         Framebuffer framebuffer = new Framebuffer(width, height, true, Minecraft.IS_RUNNING_ON_MAC);
         framebuffer.bindFramebuffer(true);
-        GlStateManager.matrixMode(GL_PROJECTION);
-        GlStateManager.pushMatrix();
-        GlStateManager.loadIdentity();
-        GlStateManager.ortho(0.0D, width, height, 0.0D, -1.0D, 1.0D);
-        GlStateManager.matrixMode(GL_MODELVIEW);
-        GlStateManager.pushMatrix();
-        GlStateManager.loadIdentity();
-        GlStateManager.disableLighting();
-        GlStateManager.disableDepthTest();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        GlStateManager.enableTexture();
-        GlStateManager.color4f(1F, 1F, 1F, 1F);
+        RenderSystem.matrixMode(GL_PROJECTION);
+        RenderSystem.pushMatrix();
+        RenderSystem.loadIdentity();
+        RenderSystem.ortho(0.0D, width, height, 0.0D, -1.0D, 1.0D);
+        RenderSystem.matrixMode(GL_MODELVIEW);
+        RenderSystem.pushMatrix();
+        RenderSystem.loadIdentity();
+        RenderSystem.disableLighting();
+        RenderSystem.disableDepthTest();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.enableTexture();
+        RenderSystem.color4f(1F, 1F, 1F, 1F);
         try {
-            GlStateManager.clearColor(0F, 0F, 0F, 1F);
-            GlStateManager.clear(GL_COLOR_BUFFER_BIT, Minecraft.IS_RUNNING_ON_MAC);
+            RenderSystem.clearColor(0F, 0F, 0F, 1F);
+            RenderSystem.clear(GL_COLOR_BUFFER_BIT, Minecraft.IS_RUNNING_ON_MAC);
             definition.drawGUIDecorations(tile, screen, 0, 0, 0F);
             ByteBuffer pixels = ByteBuffer.allocateDirect(width * height * 4);
-            GlStateManager.readPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+            RenderSystem.readPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
             BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
@@ -121,13 +122,13 @@ final class TankVisualProbe {
         } catch (IOException failure) {
             throw new IllegalStateException("Could not retain the native tank gauge image", failure);
         } finally {
-            GlStateManager.popMatrix();
-            GlStateManager.matrixMode(GL_PROJECTION);
-            GlStateManager.popMatrix();
-            GlStateManager.matrixMode(GL_MODELVIEW);
+            RenderSystem.popMatrix();
+            RenderSystem.matrixMode(GL_PROJECTION);
+            RenderSystem.popMatrix();
+            RenderSystem.matrixMode(GL_MODELVIEW);
             framebuffer.deleteFramebuffer();
             minecraft.getFramebuffer().bindFramebuffer(true);
-            GlStateManager.enableDepthTest();
+            RenderSystem.enableDepthTest();
         }
     }
 

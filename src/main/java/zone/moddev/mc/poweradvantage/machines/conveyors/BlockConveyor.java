@@ -23,7 +23,7 @@ public class BlockConveyor extends GUIBlock {
 
     public BlockConveyor(Material material, float hardness) {
         super(Block.Properties.create(material).hardnessAndResistance(hardness)
-                .sound(SoundType.METAL).variableOpacity());
+                .sound(SoundType.METAL).notSolid().variableOpacity());
         setDefaultState(getStateContainer().getBaseState().with(FACING, Direction.NORTH));
     }
 

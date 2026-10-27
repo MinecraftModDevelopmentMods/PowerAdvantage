@@ -1,0 +1,60 @@
+{
+  "name": "dev-core-apocalyptic",
+  "mode": "development",
+  "runtimeBase": "build/works-native115",
+  "serverPort": 25565,
+  "startupTimeoutSeconds": 180,
+  "shutdownTimeoutSeconds": 60,
+  "stationRunSeconds": 5,
+  "recipeMode": "APOCALYPTIC",
+  "sourceCommit": "75d24d2641e8123ff7a7f961d9a1e5a1d5203194",
+  "sourceVersion": "2.4.6.115021",
+  "lifecycleStations": [],
+  "mods": [
+    {
+      "id": "advantageworkstest",
+      "version": "1.1.0.115021",
+      "file": "AdvantageWorksTestHarness-1.1.0.115021-deobf.jar",
+      "path": "build/native115-artifacts/C854AFC08344C9B5E53AC8B35F9AA0B3E3F60E8180BF1C5F40AC7B5DF594890B/AdvantageWorksTestHarness-1.1.0.115021-deobf.jar",
+      "workspaceProduced": true,
+      "originPath": "D:\\PowerAdvantage\\PA115\\PowerAdvantage\\test-rig\\build\\libs-dev\\AdvantageWorksTestHarness-1.1.0.115021-deobf.jar",
+      "sha256": "C854AFC08344C9B5E53AC8B35F9AA0B3E3F60E8180BF1C5F40AC7B5DF594890B",
+      "sourceRef": "3237cc41da51d17a851a32691a0fa1f19b9ad2b6",
+      "pinStatus": "PINNED_WORKSPACE_ARTIFACT"
+    },
+    {
+      "id": "steamadvantage",
+      "version": "2.2.7.115021",
+      "file": "SteamAdvantage-2.2.7.115021-deobf.jar",
+      "path": "build/native115-artifacts/CB02BE3E9CCD1E4498000503D825B2B6FD350EBDF37A6414EE23697A22BE925E/SteamAdvantage-2.2.7.115021-deobf.jar",
+      "workspaceProduced": true,
+      "originPath": "D:\\PowerAdvantage\\PA115\\SteamAdvantage\\SteamAdvantage\\build\\libs-dev\\SteamAdvantage-2.2.7.115021-deobf.jar",
+      "sha256": "CB02BE3E9CCD1E4498000503D825B2B6FD350EBDF37A6414EE23697A22BE925E",
+      "sourceRef": "7883d9b697a7c0961c721f01baa6ed1046d256de",
+      "pinStatus": "PINNED_WORKSPACE_ARTIFACT"
+    },
+    {
+      "id": "electricadvantage",
+      "version": "2.2.7.115021",
+      "file": "ElectricAdvantage-2.2.7.115021-deobf.jar",
+      "path": "build/native115-artifacts/7CF50EA6FBEB30F1683359EFF5C541B6674A30D12AA4C7D0B236CE5E52D9D7DF/ElectricAdvantage-2.2.7.115021-deobf.jar",
+      "workspaceProduced": true,
+      "originPath": "D:\\PowerAdvantage\\PA115\\ElectricAdvantage\\ElectricAdvantage\\build\\libs-dev\\ElectricAdvantage-2.2.7.115021-deobf.jar",
+      "sha256": "7CF50EA6FBEB30F1683359EFF5C541B6674A30D12AA4C7D0B236CE5E52D9D7DF",
+      "sourceRef": "f39a7f8f2f09727cd8dec1a1ebc553d52d710404",
+      "pinStatus": "PINNED_WORKSPACE_ARTIFACT"
+    }
+  ],
+  "minecraftVersion": "1.15.2",
+  "portStatus": "PORTED_UNQUALIFIED",
+  "qualificationStatus": "UNQUALIFIED",
+  "legacySourceProfile": "../../../PA113/PowerAdvantage/test-rig/profiles/dev-core-apocalyptic.json",
+  "forge": {
+    "version": "1.15.2-31.2.57",
+    "installerPath": "build/native115-cache/forge-1.15.2-31.2.57-installer.jar",
+    "url": "https://maven.minecraftforge.net/net/minecraftforge/forge/1.15.2-31.2.57/forge-1.15.2-31.2.57-installer.jar",
+    "sha256": "84FD49A743978421B26F62AC78222289FE892A46F996CF11CB5E05B7441A7773"
+  },
+  "generatorSettings": "",
+  "inputStatus": "PINNED_INPUTS"
+}

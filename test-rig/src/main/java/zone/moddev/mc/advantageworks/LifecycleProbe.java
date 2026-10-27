@@ -350,7 +350,7 @@ final class LifecycleProbe {
         result.put("pos", coordinates);
         BlockPos pos = position(coordinates);
         // No world.getChunk/getTileEntity call is permitted before this non-loading lookup.
-        Chunk chunk = world.getChunkProvider().func_225313_a(pos.getX() >> 4, pos.getZ() >> 4);
+        Chunk chunk = world.getChunkProvider().getChunkWithoutLoading(pos.getX() >> 4, pos.getZ() >> 4);
         result.put("loaded", chunk != null);
         if (chunk == null) return result;
         result.put("block", chunk.getBlockState(pos).getBlock().getRegistryName().toString());
@@ -415,12 +415,13 @@ final class LifecycleProbe {
             ChunkPos pos = new ChunkPos(key);
             Map<String, Object> entry = new LinkedHashMap<>();
             entry.put("pos", Arrays.asList(pos.x, pos.z));
-            entry.put("loaded", world.getChunkProvider().func_225313_a(pos.x, pos.z) != null);
+            entry.put("loaded", world.getChunkProvider().getChunkWithoutLoading(pos.x, pos.z) != null);
             entry.put("unloads", unloads.getOrDefault(key, 0));
             entry.put("loads", loads.getOrDefault(key, 0));
             chunkStates.add(entry);
         }
         result.put("worldTime", world.getGameTime());
+        result.put("ticketGeometry", NativeTicketGeometry.observe(world));
         result.put("cases", cases);
         result.put("chunks", chunkStates);
         result.put("movements", movements);

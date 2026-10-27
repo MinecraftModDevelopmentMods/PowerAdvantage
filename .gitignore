@@ -59,6 +59,7 @@
 /test-rig/.gradle/
 /test-rig/.cache/
 /test-rig/build/
+/test-rig/logs/
 /test-rig/migration-probe/.gradle/
 /test-rig/migration-probe/build/
 /test-rig/migration/.venv/

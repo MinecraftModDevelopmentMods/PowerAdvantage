@@ -31,7 +31,12 @@ public abstract class BlockSimplePowerConduit extends ConduitBlock {
 
     public BlockSimplePowerConduit(Material material, float hardness, float pipeRadius,
             ConduitType... energyTypes) {
-        super(material, hardness);
+        this(Block.Properties.create(material).hardnessAndResistance(hardness), pipeRadius, energyTypes);
+    }
+
+    protected BlockSimplePowerConduit(Block.Properties properties, float pipeRadius,
+            ConduitType... energyTypes) {
+        super(properties);
         this.types = energyTypes;
         this.pipeRadius = pipeRadius;
         setDefaultState(getStateContainer().getBaseState()

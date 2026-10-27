@@ -5,7 +5,6 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.IWorldReader;
@@ -22,13 +21,7 @@ public class BlockFrame extends Block {
 
 	public BlockFrame(Material material, float hardness, float resistance) {
 		super(Block.Properties.create(material).sound(SoundType.METAL)
-				.hardnessAndResistance(hardness, resistance).variableOpacity());
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	@Override
-	public BlockRenderLayer getRenderLayer() {
-		return BlockRenderLayer.CUTOUT;
+				.hardnessAndResistance(hardness, resistance).notSolid().variableOpacity());
 	}
 
 	public boolean isFullCube(BlockState bs) {
