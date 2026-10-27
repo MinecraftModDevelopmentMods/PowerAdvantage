@@ -9,8 +9,43 @@ var VarInsnNode = Java.type('org.objectweb.asm.tree.VarInsnNode');
 // Only the pre-datafix migration needs bytecode integration on Forge 1.16.
 var hook = 'zone/moddev/mc/poweradvantage/migration/LegacyWorldDataHook';
 
+function patchPlayerDataFix(classNode) {
+    var descriptor = '(Lcom/mojang/datafixers/DataFixer;' +
+            'Lnet/minecraft/util/datafix/DefaultTypeReferences;' +
+            'Lnet/minecraft/nbt/CompoundNBT;I)Lnet/minecraft/nbt/CompoundNBT;';
+    var matches = 0;
+    var matchedMethod = null;
+    var matchedCall = null;
+    for (var i = 0; i < classNode.methods.size(); ++i) {
+        var method = classNode.methods.get(i);
+        for (var instruction = method.instructions.getFirst(); instruction !== null;
+                instruction = instruction.getNext()) {
+            if (instruction.getOpcode() === Opcodes.INVOKESTATIC &&
+                    instruction.owner === 'net/minecraft/nbt/NBTUtil' && instruction.desc === descriptor) {
+                ++matches;
+                matchedMethod = method;
+                matchedCall = instruction;
+            }
+        }
+    }
+    if (matches !== 1) {
+        throw new Error('Power Advantage requires exactly one native player datafix call in ' + classNode.name);
+    }
+    matchedMethod.instructions.set(matchedCall, new MethodInsnNode(Opcodes.INVOKESTATIC,
+            'zone/moddev/mc/poweradvantage/migration/LegacyPlayerDataFixes', 'update', descriptor, false));
+    return classNode;
+}
+
 function initializeCoreMod() {
     return {
+        'poweradvantage_legacy_player_file': {
+            'target': { 'type': 'CLASS', 'name': 'net.minecraft.world.storage.PlayerData' },
+            'transformer': patchPlayerDataFix
+        },
+        'poweradvantage_legacy_embedded_player': {
+            'target': { 'type': 'CLASS', 'name': 'net.minecraft.world.storage.ServerWorldInfo' },
+            'transformer': patchPlayerDataFix
+        },
         'poweradvantage_legacy_world_info': {
             'target': { 'type': 'CLASS', 'name': 'net.minecraft.world.storage.SaveFormat' },
             'transformer': function(classNode) {

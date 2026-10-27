@@ -66,7 +66,6 @@ public class TerminalFluidPipeBlock extends FluidPipeBlock implements ITileEntit
 	 * @param thisBlock  The block that is checking its neighbor
 	 * @param bs         Block state of this block
 	 * @param face       The face on the first block through which the connection would happen
-	 * @param otherBlock Coordinate of neighboring block
 	 * @return Default implementation: true if the neighboring block implements
 	 * ITypedConductor and has the same energy type as this block. Overriding
 	 * the canConnectTo(ConductorType) method will change the results of this

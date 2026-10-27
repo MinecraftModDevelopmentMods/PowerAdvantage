@@ -213,7 +213,6 @@ public class ConduitRegistry {
 	 * Invoke this method anytime a conduit block enters the world
 	 *
 	 * @param w         The world instance for this dimension
-	 * @param dimension The ID number for this dimension
 	 * @param location  The position of the block being added
 	 * @param type      The native energy type of the added conduit block
 	 */
@@ -235,7 +234,6 @@ public class ConduitRegistry {
 	 * Invoke this method anytime a conduit block enters the world
 	 *
 	 * @param w         The world instance for this dimension
-	 * @param dimension The ID number for this dimension
 	 * @param location  The position of the block being added
 	 * @param types     The native energy type of the added conduit block
 	 */
@@ -251,7 +249,6 @@ public class ConduitRegistry {
 	 * neighboring chunks and tile entities were available.
 	 *
 	 * @param w world containing the loaded tile
-	 * @param dimension dimension containing the loaded tile
 	 * @param types power types whose cached networks must be rebuilt
 	 */
 	public void conduitBlockLoadedEvent(World w, ConduitType... types) {
@@ -287,7 +284,6 @@ public class ConduitRegistry {
 	 * Invoke this method anytime a conduit block is removed from the world
 	 *
 	 * @param w         The world instance for this dimension
-	 * @param dimension The ID number for this dimension
 	 * @param location  The position of the block being removed
 	 * @param type      The native energy type of the removed conduit block
 	 */
@@ -309,7 +305,6 @@ public class ConduitRegistry {
 	 * Invoke this method anytime a conduit block is removed from the world
 	 *
 	 * @param w         The world instance for this dimension
-	 * @param dimension The ID number for this dimension
 	 * @param location  The position of the block being removed
 	 * @param types     The native energy type of the removed conduit block
 	 */

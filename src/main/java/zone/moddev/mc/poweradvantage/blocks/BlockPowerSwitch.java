@@ -33,7 +33,6 @@ public class BlockPowerSwitch extends Block implements ITypedConduit {
 	 * @param powerType     Type of power to switch
 	 * @param blockMaterial The block material (usually piston material)
 	 * @param blockHardness The hardness of the block (0.75 is a good value)
-	 * @param mapColor      Color on a map
 	 */
 	public BlockPowerSwitch(ConduitType powerType, Material blockMaterial, float blockHardness) {
 		super(Block.Properties.of(blockMaterial).strength(blockHardness));

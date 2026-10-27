@@ -165,12 +165,16 @@ public final class LegacyWorldDataHook implements WorldPersistenceHooks.WorldPer
 
     /** Called after all mods' entry hooks, immediately before native chunk datafixing. */
     public static void prepareLegacyEntities(CompoundNBT root) {
-        if (root != null) LegacyEntityDataFixes.prepare(root);
+        if (root != null) {
+            LegacyMachineItemDataFixes.prepare(root);
+            LegacyEntityDataFixes.prepare(root);
+        }
     }
 
     /** Called after vanilla datafixing, before a legacy chunk is returned. */
     public static CompoundNBT finalizeLegacyChunk(CompoundNBT root) {
         LegacyEntityDataFixes.finish(root);
+        LegacyMachineItemDataFixes.finish(root);
         if (root != null && root.contains("Level", 10)) {
             CompoundNBT level = root.getCompound("Level");
             if (level.getBoolean(PRESERVE_CHUNK_MARKER)) {
