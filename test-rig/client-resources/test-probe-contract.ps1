@@ -74,6 +74,17 @@ foreach ($name in 'ClientResourceProbe','TankVisualProbe','OilRenderProbe','Reci
     }
     if ($name -eq 'RecipeBookGroupingProbe') {
         $expected = $expected.Replace('import com.mojang.blaze3d.platform.GlStateManager;', 'import com.mojang.blaze3d.systems.RenderSystem;')
+        # 1.16 dereferences the menu to obtain its recipe-book type; 1.15 accepted null.
+        # Remove only this explicit setup when comparing the unchanged capture oracle.
+        $menu = 'net.minecraft.inventory.container.WorkbenchContainer menu = new net.minecraft.inventory.container.WorkbenchContainer(0, new net.minecraft.entity.player.PlayerInventory(null));'
+        $menuGuard = 'require(menu.getRecipeBookType() == net.minecraft.item.crafting.RecipeBookCategory.CRAFTING, "Wrong native crafting menu type");'
+        $menuBinding = @'
+} else if (field.getType() == net.minecraft.inventory.container.RecipeBookContainer.class) {
+                        field.setAccessible(true);
+                        field.set(button, menu);
+'@
+        Assert-Contract ($actual.Contains($menu) -and $actual.Contains($menuGuard) -and $actual.Contains($menuBinding)) 'Native buttons need the real ordinary crafting-menu type, not a null menu or altered filter.'
+        $actual = $actual.Replace($menu, '').Replace($menuGuard, '').Replace($menuBinding, '')
         Assert-Contract ((Canonical-Source $actual) -ceq (Canonical-Source $expected)) 'Recipe grouping/capture changed beyond the explicit native API adaptation.'
     }
     if ($name -eq 'TankVisualProbe') {

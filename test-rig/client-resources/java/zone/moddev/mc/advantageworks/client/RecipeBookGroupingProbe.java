@@ -151,15 +151,19 @@ final class RecipeBookGroupingProbe {
         try {
             RenderSystem.clearColor(0.12F, 0.12F, 0.12F, 1F);
             RenderSystem.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+            net.minecraft.inventory.container.WorkbenchContainer menu = new net.minecraft.inventory.container.WorkbenchContainer(0, new net.minecraft.entity.player.PlayerInventory(null));
+            require(menu.getRecipeBookType() == net.minecraft.item.crafting.RecipeBookCategory.CRAFTING, "Wrong native crafting menu type");
             for (int i = 0; i < shown.size(); i++) {
                 int x = 10 + (i % 5) * 198, y = 12 + (i / 5) * 55;
                 RecipeWidget button = new RecipeWidget();
-                // Native page initialization needs a connected player. Supply only its two
-                // cell/book inputs; null means the ordinary crafting filter in RecipeBook.
+                // Supply the native menu type without opening a world or connecting a player.
                 for (Field field : RecipeWidget.class.getDeclaredFields()) {
                     if (field.getType() == RecipeList.class || field.getType() == RecipeBook.class) {
                         field.setAccessible(true);
                         field.set(button, field.getType() == RecipeList.class ? shown.get(i) : book);
+                    } else if (field.getType() == net.minecraft.inventory.container.RecipeBookContainer.class) {
+                        field.setAccessible(true);
+                        field.set(button, menu);
                     }
                 }
                 button.setPosition(x, y);
