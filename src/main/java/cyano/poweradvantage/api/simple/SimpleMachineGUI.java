@@ -244,7 +244,7 @@ guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, t
 	@OnlyIn(Dist.CLIENT)
 	public class GUIContainer extends net.minecraft.client.gui.screen.inventory.ContainerScreen<Container>{
 		private final Object entity;
-		private MatrixStack matrices;
+		private MatrixStack matrices = new MatrixStack();
 
         public net.minecraft.client.Minecraft getMinecraft() { return minecraft; }
 		public GUIContainer(PlayerInventory playerItems, IInventory entity) {
