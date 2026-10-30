@@ -34,6 +34,10 @@ import java.util.function.Function;
  *
  */
 public class SimpleMachineGUI implements ITileEntityGUI {
+	private static final int MACHINE_TOP = 12;
+	private static final int MACHINE_HEIGHT = 128;
+	private static final int PLAYER_PANEL_TOP = 150;
+	private static final int PLAYER_SLOTS_TOP = PLAYER_PANEL_TOP + 8;
 
 	/**
 	 * This is the texture resource for drawing the player's inventory.
@@ -41,7 +45,7 @@ public class SimpleMachineGUI implements ITileEntityGUI {
 	public final static ResourceLocation playerInventoryBox  = new ResourceLocation(PowerAdvantage.MODID+":"+"textures/gui/container/player_inventory.png");
 	/** Texture resource for the machine's GUI */ 
 	protected final ResourceLocation guiDisplayImage;
-	/** Dimensions of the GUI texture image */ 
+	/** Dimensions of the assembled screen, including its label rows. */
 	protected final int guiWidth, guiHeight;
 	/** List of pixel coordinates for the upper-left corner of each inventory 
 	 * slot that should appear on the screen */
@@ -66,7 +70,7 @@ public class SimpleMachineGUI implements ITileEntityGUI {
 	public SimpleMachineGUI(ResourceLocation guiImage, Integer2D... inventorySlotCoordinates){
 		this.guiDisplayImage = guiImage;
 		this.guiWidth = 176;
-		this.guiHeight = 222;
+		this.guiHeight = 240;
 		if(inventorySlotCoordinates == null){
 			this.inventorySlotCoordinates = new Integer2D[0];
 		} else {
@@ -161,14 +165,14 @@ guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, t
 			int index = 0;
 			for(Integer2D pt : inventorySlotCoordinates){
 				if(specialSlots.containsKey(index)){
-					SlotContext params = new SlotContext(playerItems,entity,index, pt.X, pt.Y);
+					SlotContext params = new SlotContext(playerItems,entity,index, pt.X, pt.Y + MACHINE_TOP);
 					this.addSlot(specialSlots.get(index).apply(params));
 				} else {
-					this.addSlot(new Slot(entity, index, pt.X, pt.Y));
+					this.addSlot(new Slot(entity, index, pt.X, pt.Y + MACHINE_TOP));
 				}
 				index++;
 			}
-			bindPlayerInventory(playerItems, 140);
+			bindPlayerInventory(playerItems, PLAYER_SLOTS_TOP);
 		}
 
         @OnlyIn(Dist.CLIENT)
@@ -251,18 +255,46 @@ guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, t
 			this.ySize = guiHeight;
 			this.entity = container.entity;
 		}
+
+		@Override
+		public void render(int mouseX, int mouseY, float partialTicks) {
+			this.renderBackground();
+			super.render(mouseX, mouseY, partialTicks);
+			this.renderHoveredToolTip(mouseX, mouseY);
+			if (font.getStringWidth(title.getString()) > width - 8
+					&& mouseY >= guiTop + 1 && mouseY < guiTop + MACHINE_TOP) {
+				this.renderTooltip(title.getString(), mouseX, mouseY);
+			}
+		}
+
+		@Override
+		protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+			String machineName = fitLabel(title.getString(), width - 8);
+			font.drawStringWithShadow(machineName, (xSize - font.getStringWidth(machineName)) / 2, 1, 0xFFFFFF);
+			font.drawStringWithShadow(fitLabel(playerInventory.getDisplayName().getString(), xSize - 16),
+					8, MACHINE_TOP + MACHINE_HEIGHT, 0xFFFFFF);
+		}
+
+		private String fitLabel(String text, int availableWidth) {
+			return font.getStringWidth(text) <= availableWidth ? text
+					: font.trimStringToWidth(text, Math.max(0, availableWidth - font.getStringWidth("..."))) + "...";
+		}
+
 		@Override
 		protected void drawGuiContainerBackgroundLayer(float f, int i, int j) {
+			GlStateManager.enableBlend();
+			GlStateManager.blendFuncSeparate(770, 771, 1, 0);
 			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			this.minecraft.getTextureManager().bindTexture(playerInventoryBox);
 			int x = (width - xSize) / 2;
 			int y = (height - ySize) / 2;
 			final int playerInventoryWidth = 176;
-			final int playerInventoryHeight = 222;
-			this.blit(x, y, 0, 0, playerInventoryWidth, playerInventoryHeight);
+			final int playerInventoryHeight = 90;
+			this.blit(x, y + PLAYER_PANEL_TOP, 0, 132, playerInventoryWidth, playerInventoryHeight);
 			this.minecraft.getTextureManager().bindTexture(guiDisplayImage);
-			this.blit(x, y, 0, 0, guiWidth, guiHeight);
-			drawGUIDecorations(entity, this, x, y, this.blitOffset);
+			this.blit(x, y + MACHINE_TOP, 0, 0, guiWidth, MACHINE_HEIGHT);
+			drawGUIDecorations(entity, this, x, y + MACHINE_TOP, this.blitOffset);
+			GlStateManager.disableBlend();
 		}
 		/**
 		 * Gets the z-coordinate of this GUI element

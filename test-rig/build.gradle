@@ -6,6 +6,9 @@ plugins {
     id 'net.minecraftforge.gradle' version '7.0.34'
 }
 
+// Compiler cleanup must never remove disposable worlds or retained reports.
+layout.buildDirectory = layout.projectDirectory.dir('build/gradle')
+
 group = 'zone.moddev.mc.advantageworks'
 version = project.harness_version
 base.archivesName = 'AdvantageWorksTestHarness'

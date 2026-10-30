@@ -1,5 +1,9 @@
 # Advantage 1.14.4 Port
 
+> The earlier acceptance below applies to the archived candidate. See the
+> [stronger regression record](TEST-COVERAGE-BACKPORT.md) for the locally repaired
+> jars and their new machine, migration, restart and GUI results.
+
 ## Starting Point
 
 The tested 1.14.4 candidate is accepted for merging. Visuals and recipe unlocks

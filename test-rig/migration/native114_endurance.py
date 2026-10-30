@@ -1,4 +1,4 @@
-"""Measured native114 endurance using unchanged batch and conservation oracles."""
+"""Measured native114 endurance with historical and independent semantic checks."""
 
 import argparse
 from collections import Counter
@@ -10,7 +10,11 @@ import socket
 import time
 import traceback
 
+import nbtlib
+
 import endurance
+import semantic_machine_audit
+from native114_code import INVENTORY, verify_code
 from audit_endurance import expected_inventory_acknowledgements
 from matrix import WORLD, compare, digest, fingerprint, write_json
 from native114 import native_normalized, output_path, pinned_profile, require_disjoint
@@ -19,11 +23,62 @@ from native114_lifecycle import (prepare, read_json, require_native_boot,
 
 
 NAMES = ("fresh114", "original110-chained113-native114")
+FRESH_WORLD_SEED = 114041
+
+
+def configure_fresh_world(runtime):
+    endurance.require(not (runtime / WORLD).exists(), "Never reconfigure an existing endurance world")
+    properties = runtime / "server.properties"
+    overrides = {"generate-structures": "false", "level-seed": str(FRESH_WORLD_SEED),
+                 "level-type": "FLAT", "generator-settings": ""}
+    retained = [line for line in properties.read_text(encoding="utf-8").splitlines()
+                if line.partition("=")[0].strip() not in overrides]
+    properties.write_text("\n".join(retained + [key + "=" + value for key, value in overrides.items()]) + "\n",
+                          encoding="utf-8")
+
+
+def prepare_endurance(runtime, profile, definition, port, source=None):
+    launcher = prepare(runtime, profile, definition, port, source)
+    if source is None:
+        configure_fresh_world(runtime)
+    return launcher
+
+
+def verify_fresh_world(runtime, phase):
+    path = runtime / WORLD / "level.dat"
+    data = nbtlib.load(path)["Data"]
+    observed = {"map_features": int(data["MapFeatures"]) if "MapFeatures" in data else None,
+                "seed": int(data["RandomSeed"]) if "RandomSeed" in data else None,
+                "generator": str(data["generatorName"]) if "generatorName" in data else None,
+                "data_version": int(data["DataVersion"]) if "DataVersion" in data else None}
+    expected = {"map_features": 0, "seed": FRESH_WORLD_SEED, "generator": "flat", "data_version": 1976}
+    failures = [key for key, value in expected.items() if observed[key] != value]
+    receipt = dict(status="FAIL" if failures else "PASS", observed=observed, expected=expected,
+                   failures=failures, level_dat_sha256=digest(path),
+                   scope="Saved native world settings before rig construction; no world NBT edits")
+    output = runtime / ("native-world-settings-" + phase + ".json")
+    endurance.require(not output.exists(), "Never overwrite native world-settings evidence")
+    write_json(output, receipt)
+    endurance.require(not failures, "Fresh native114 endurance world settings differ: " + ", ".join(failures))
+    return receipt
 
 
 class NativeEnduranceRig(endurance.Rig):
+    def batch(self, label):
+        measured = semantic_machine_audit.endurance_batch(
+            {station: self.documents[station] for station in ("S-04", "E-03", "W-04", "W-03")}, self.definitions)
+        evidence = self.runtime / ("semantic-batch-" + label + ".json")
+        with evidence.open("x", encoding="utf-8") as stream:
+            json.dump(measured, stream, indent=2)
+        endurance.require(measured["status"] == "PASS", "Independent batch measurements failed: " + str(measured))
+        return super().batch(label)
+
     def boot(self, phase):
+        verify_code(self.runtime)
         super().boot(phase)
+        if self.name == "fresh114":
+            self.command("save-all flush", "Saved the game")
+            verify_fresh_world(self.runtime, phase)
         if phase != "endurance-restart":
             return
         # Restore only chunk tickets, never station actions or machine NBT.
@@ -60,6 +115,12 @@ def audit(root, require_endurance=True):
     endurance.require(report["duration_seconds"] >= (1800 if require_endurance else 60), "Duration too short")
     endurance.require(report["source_fixture_unchanged"] and report["helpers_unchanged"], "Source/protocol changed")
     endurance.require(set(report["profiles"]) == set(NAMES), "Missing native environment")
+    for phase in ("endurance", "endurance-restart"):
+        settings = read_json(root / "fresh114" / ("native-world-settings-" + phase + ".json"))
+        expected = {"map_features": 0, "seed": FRESH_WORLD_SEED, "generator": "flat", "data_version": 1976}
+        endurance.require(settings.get("status") == "PASS" and settings.get("expected") == expected
+                          and settings.get("observed") == expected and not settings.get("failures")
+                          and bool(settings.get("level_dat_sha256")), "Missing native fresh-world settings proof")
     result = dict(status="PASS", scope="endurance" if require_endurance else "smoke-only", profiles={})
     failures = ("Unknown slot", "Could not replace", "Unknown or incomplete command", "Incorrect argument",
                 "Unknown item", "There is no container")
@@ -102,6 +163,8 @@ def run(args):
         require_disjoint(output, protected)
     source_before, history = verify_source(args)
     target = pinned_profile(args.target_manifest.resolve(), "target114")
+    target_code = read_json(args.target_manifest)["target114"].get("serverCode")
+    verify_code(target[0], target_code)
     for protected in (target[0], *target[2]):
         require_disjoint(output, protected)
     for port in (args.port, args.port + 1):
@@ -111,7 +174,7 @@ def run(args):
     definitions = {s["id"]: s for s in read_json(definition_path)["stations"]}
     endurance.require(sum(bool(definitions[s].get("exclusive")) for s in endurance.ACTIVE) == 1,
                       "Exclusive stations interfere")
-    helpers = [Path(endurance.__file__), Path(__file__), definition_path]
+    helpers = [Path(endurance.__file__), Path(__file__), Path(semantic_machine_audit.__file__), definition_path]
     before_helpers = {str(p): digest(p) for p in helpers}
     output.mkdir(parents=True, exist_ok=False)
     for path in helpers:
@@ -133,7 +196,9 @@ def run(args):
     try:
         for index, name in enumerate(NAMES):
             runtime = output / name
-            launcher = prepare(runtime, target, [], args.port + index, args.source if index else None)
+            launcher = prepare_endurance(runtime, target, [], args.port + index, args.source if index else None)
+            verify_code(runtime, target_code)
+            write_json(runtime / INVENTORY, target_code)
             for marker in ("migration-operate.allow", "advantage-works.allow"):
                 (runtime / marker).touch()
             rig = NativeEnduranceRig(name, runtime, args.java8, launcher, definitions)

@@ -83,3 +83,35 @@ normal chunk loading reconnects them without replacing pipes. The same protocol
 records acquisition-stack diagnostics and pipe-only bridge regressions.
 
 The historical 1.10 handbook remains on the [1.10.2 branch](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.10.2/docs/1.10/README.md).
+
+The local [test-coverage backport](docs/1.14/TEST-COVERAGE-BACKPORT.md) records the
+repaired candidate, measured machine jobs, restart checks and GUI captures.
+
+## Generator Follow-Up
+
+The [generator follow-up](docs/1.14/TEST-COVERAGE-BACKPORT.md#generator-follow-up) records the older `pa114-candidate-c` inputs.
+Its 126 operating jobs and 126 cold checks, 39 GUI windows, 351 caption cases,
+355 rejected broken controls, thirteen frozen routes and five connected routes
+passed. The corrected paired 30-minute run also passed; the original POI failure
+is retained. This is a pre-final Steam-control checkpoint, not qualification of
+the newer SteamAdvantage jars or harness. Those still need the final sweep.
+Manual play-testing and release review remain separate.
+
+## Final T Candidate
+
+The [final-t checkpoint](docs/1.14/TEST-COVERAGE-BACKPORT.md#final-t-candidate)
+records profile `pa114-candidate-e` and its exact jar hashes. All 132 operating
+jobs and 132 cold-restart comparisons pass, including an independent audit of
+six Steam controls and their nine tile-hold records. GUI checks pass for 39
+windows, 351 caption cases and 355 rejected broken controls.
+Frozen migration passed on 13 routes and connected-source operation passed on
+all five declared routes.
+Fresh and migrated-copy 30-minute runs pass. Power and Electric retain their
+exact-hash release and reproducibility proof; final-t Steam passes its full suite
+and two independent export builds. All 18 mod/version release and reproducibility
+gates pass across the six maintained Minecraft lines. Both requested broad
+profiles and their independent audit pass; the reporter-only unit/replay
+qualification preserves the original native proof. Survival harvest checks pass
+before and after restart. The report's extra network/drill scopes are now
+qualified; manual acceptance remains separate. Earlier checkpoints keep their original scope;
+nothing has been published by this local test work.

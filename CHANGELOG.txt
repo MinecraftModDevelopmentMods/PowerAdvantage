@@ -1,3 +1,13 @@
+Unreleased - Minecraft 1.14.4
+
+- Keep steel frames non-opaque on dedicated servers without changing their collision or drops.
+
+- Keep power refused by one consumer available to the rest of its network.
+- Check all accessible conveyor slots, respect stack limits and keep different item NBT separate.
+- Route overflow into available slots and save both inventories after a transfer.
+- Pick up source fluids without deleting waterlogged blocks or replacing solid blocks at a discharge.
+- Backport measured machine jobs, strict restart checks and required GUI caption checks.
+
 Power Advantage 2.4.5.114041 (Minecraft 1.14.4)
 
 - Move to Minecraft 1.14.4 and Forge 28.2.26, retaining existing registry names, saved-state keys and public API packages.
