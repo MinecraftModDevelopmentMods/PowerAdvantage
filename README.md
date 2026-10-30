@@ -3,7 +3,7 @@
 **Minecraft 1.15.2**
 
 Power Advantage 2.4.6.115021 targets Minecraft 1.15.2. See the
-[current test record](docs/1.15/CURRENT-QUALIFICATION.md) for the exact jars,
+[current test record](docs/1.15/TEST-COVERAGE-BACKPORT.md) for the exact jars,
 automated results and remaining limits. Visuals and recipe unlocks were
 accepted on 27 October 2026; machine behavior is covered by the recorded
 automated tests.
@@ -93,3 +93,32 @@ The [legacy migration guide](docs/1.13/MIGRATION.md) and
 The [1.15 status](docs/1.15/PORT-STATUS.md) links the current qualification.
 
 The historical 1.10 handbook remains on the [1.10.2 branch](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.10.2/docs/1.10/README.md).
+
+## Generator Follow-Up
+
+The [generator follow-up](docs/1.15/TEST-COVERAGE-BACKPORT.md#generator-follow-up) records the older `pa115-candidate-b` inputs.
+Its 126 operating jobs and 126 cold checks, 39 GUI windows, 351 caption cases,
+355 rejected broken controls, thirteen frozen routes, ten connected routes and
+paired 30-minute runs passed. This does not extend the earlier fourteen-route
+proof. It is a pre-final Steam-control checkpoint, not qualification of the newer
+SteamAdvantage jars or harness. Those still need the final sweep.
+Manual play-testing and release review remain separate.
+
+## Final T Candidate
+
+The [final-t checkpoint](docs/1.15/TEST-COVERAGE-BACKPORT.md#final-t-candidate)
+records profile `pa115-candidate-d` and its exact jar hashes. All 132 operating
+jobs and 132 cold-restart comparisons pass, including an independent audit of
+six Steam controls and their nine tile-hold records. GUI checks pass for 39
+windows, 351 caption cases and 355 rejected broken controls.
+Thirteen frozen routes passed. The verified connected aggregate passes all ten
+declared routes across both five-route shards.
+Fresh and migrated-copy 30-minute runs pass. Power and Electric retain their
+exact-hash release and reproducibility proof; final-t Steam passes its full suite
+and two independent export builds. All 18 mod/version release and reproducibility
+gates pass across the six maintained Minecraft lines. Both requested broad
+profiles and their independent audit pass; the reporter-only unit/replay
+qualification preserves the original native proof. Survival harvest checks pass
+before and after restart. The report's extra network/drill scopes are now
+qualified; manual acceptance remains separate. Earlier checkpoints keep their original scope;
+nothing has been published by this local test work.

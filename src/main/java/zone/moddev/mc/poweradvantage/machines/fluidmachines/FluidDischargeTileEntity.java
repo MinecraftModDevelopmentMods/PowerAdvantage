@@ -53,7 +53,9 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
         Direction[] directions = { Direction.DOWN, Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST };
         while (range-- > 0) {
             IFluidState state = world.getFluidState(position);
-            if (state.isEmpty()) return position;
+            if (world.isAirBlock(position) || (!state.isEmpty()
+                    && state.getFluid().isEquivalentTo(fluid) && !state.isSource())) return position;
+            if (state.isEmpty() || !state.getFluid().isEquivalentTo(fluid)) return null;
             java.util.List<BlockPos> candidates = new java.util.ArrayList<>();
             for (Direction direction : directions) {
                 BlockPos candidate = position.offset(direction);

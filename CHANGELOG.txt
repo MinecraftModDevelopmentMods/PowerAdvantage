@@ -1,3 +1,13 @@
+Unreleased 1.15.2 test-coverage backport
+
+- Keep energy that a consumer cannot accept available to the rest of its network.
+- Check every accessible conveyor slot, respect stack limits and keep different item NBT separate.
+- Route overflow into genuinely available slots and save both inventories after a transfer.
+- Pick up source fluids through the native bucket interface without deleting waterlogged blocks.
+- Stop fluid discharges from replacing solid blocks.
+- Backport measured machine jobs, strict restart checks and GUI caption checks from 1.16.
+- Preserve failed runs and original jars so repairs can be checked against the same expectations.
+
 Power Advantage 2.4.6.115021 (Minecraft 1.15.2)
 
 - Move to Forge 31.2.57, snapshot mappings 20200514-1.15.1 and MCP 20200515.085601; retain ForgeGradle 7, Gradle 9.6.1 and Java 8 production bytecode.

@@ -15,7 +15,7 @@ from native115_endurance import (FRESH_FIXTURE_SEED, NativeEnduranceRig, audit,
 
 class NativeEnduranceTests(unittest.TestCase):
     def test_batch_and_conservation_oracles_are_inherited(self):
-        self.assertIs(NativeEnduranceRig.batch, endurance.Rig.batch)
+        self.assertIsNot(NativeEnduranceRig.batch, endurance.Rig.batch)
         self.assertIs(NativeEnduranceRig.invariants, endurance.Rig.invariants)
         self.assertIs(NativeEnduranceRig.inventory, endurance.Rig.inventory)
         self.assertIs(NativeEnduranceRig.seed, endurance.Rig.seed)
@@ -33,7 +33,7 @@ class NativeEnduranceTests(unittest.TestCase):
                 rig.documents = {"W-01": {"worldTime": next(ticks)}}
             rig.checkpoint = checkpoint
             rig.command = lambda command, response=None: commands.append(command)
-            with patch.object(endurance.Rig, "boot"), patch("native115_endurance.time.sleep"):
+            with patch.object(endurance.Rig, "boot"), patch("native115_endurance.verify_code"), patch("native115_endurance.time.sleep"):
                 rig.boot("endurance-restart")
             self.assertEqual(len(observations), 3)
             self.assertEqual(len(commands), len(endurance.CHECKED))
@@ -47,15 +47,42 @@ class NativeEnduranceTests(unittest.TestCase):
             rig = NativeEnduranceRig("test", Path(directory), None, None, definitions)
             rig.command = lambda *args: None
             rig.checkpoint = lambda label: rig.documents.update({"W-01": {"worldTime": 200}})
-            with patch.object(endurance.Rig, "boot"), patch("native115_endurance.time.sleep"):
+            with patch.object(endurance.Rig, "boot"), patch("native115_endurance.verify_code"), patch("native115_endurance.time.sleep"):
                 with self.assertRaisesRegex(TimeoutError, "No actual native tick"):
                     rig.boot("endurance-restart")
 
     def test_initial_boot_does_not_restore_or_rebuild_anything(self):
         rig = NativeEnduranceRig("test", Path("unused"), None, None, {})
         rig.command = lambda *args: self.fail("Initial boot issued a command")
-        with patch.object(endurance.Rig, "boot"):
+        with patch.object(endurance.Rig, "boot"), patch("native115_endurance.verify_code"):
             rig.boot("endurance")
+
+    def test_missing_code_seal_prevents_any_server_boot(self):
+        with tempfile.TemporaryDirectory() as directory:
+            rig = NativeEnduranceRig("test", Path(directory), None, None, {})
+            with patch.object(endurance.Rig, "boot") as boot, self.assertRaises(FileNotFoundError):
+                rig.boot("endurance")
+            boot.assert_not_called()
+
+    def test_independent_failure_is_retained_and_blocks_the_historical_ledger(self):
+        with tempfile.TemporaryDirectory() as directory:
+            rig = NativeEnduranceRig("test", Path(directory), None, None, {})
+            rig.documents = {station: {} for station in ("S-04", "E-03", "W-04", "W-03")}
+            with patch("semantic_machine_audit.endurance_batch", return_value={"status": "FAIL", "failures": ["lost filter"]}), \
+                    patch.object(endurance.Rig, "batch") as historical:
+                with self.assertRaisesRegex(AssertionError, "Independent batch"):
+                    rig.batch("cycle-001")
+                historical.assert_not_called()
+            self.assertEqual("FAIL", __import__("json").loads((Path(directory) / "semantic-batch-cycle-001.json").read_text())["status"])
+
+    def test_independent_pass_keeps_the_historical_material_checks(self):
+        with tempfile.TemporaryDirectory() as directory:
+            rig = NativeEnduranceRig("test", Path(directory), None, None, {})
+            rig.documents = {station: {} for station in ("S-04", "E-03", "W-04", "W-03")}
+            with patch("semantic_machine_audit.endurance_batch", return_value={"status": "PASS", "failures": []}), \
+                    patch.object(endurance.Rig, "batch", return_value={"retained": True}) as historical:
+                self.assertEqual({"retained": True}, rig.batch("cycle-001"))
+                historical.assert_called_once_with("cycle-001")
 
     def test_smoke_result_never_qualifies_as_endurance(self):
         with tempfile.TemporaryDirectory() as directory:

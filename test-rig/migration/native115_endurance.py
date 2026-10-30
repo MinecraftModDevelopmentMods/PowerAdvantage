@@ -1,4 +1,4 @@
-"""Measured native115 endurance using unchanged batch and conservation oracles."""
+"""Measured native115 endurance with historical and independent semantic checks."""
 
 import argparse
 from collections import Counter
@@ -13,6 +13,8 @@ import traceback
 import nbtlib
 
 import endurance
+import semantic_machine_audit
+from native115_code import INVENTORY, verify_code
 from audit_endurance import expected_inventory_acknowledgements
 from matrix import WORLD, compare, digest, fingerprint, write_json
 from native115 import native_normalized, output_path, pinned_profile, require_disjoint
@@ -89,7 +91,17 @@ def prove_fresh_fixture_before_build(rig, configuration):
 
 
 class NativeEnduranceRig(endurance.Rig):
+    def batch(self, label):
+        measured = semantic_machine_audit.endurance_batch(
+            {station: self.documents[station] for station in ("S-04", "E-03", "W-04", "W-03")}, self.definitions)
+        evidence = self.runtime / ("semantic-batch-" + label + ".json")
+        with evidence.open("x", encoding="utf-8") as stream:
+            json.dump(measured, stream, indent=2)
+        endurance.require(measured["status"] == "PASS", "Independent batch measurements failed: " + str(measured))
+        return super().batch(label)
+
     def boot(self, phase):
+        verify_code(self.runtime)
         super().boot(phase)
         if phase != "endurance-restart":
             return
@@ -176,6 +188,8 @@ def run(args):
         require_disjoint(output, protected)
     source_before, history = verify_source(args)
     target = pinned_profile(args.target_manifest.resolve(), "target115")
+    target_code = read_json(args.target_manifest)["target115"].get("serverCode")
+    verify_code(target[0], target_code)
     for protected in (target[0], *target[2]):
         require_disjoint(output, protected)
     for port in (args.port, args.port + 1):
@@ -185,7 +199,7 @@ def run(args):
     definitions = {s["id"]: s for s in read_json(definition_path)["stations"]}
     endurance.require(sum(bool(definitions[s].get("exclusive")) for s in endurance.ACTIVE) == 1,
                       "Exclusive stations interfere")
-    helpers = [Path(endurance.__file__), Path(__file__), definition_path]
+    helpers = [Path(endurance.__file__), Path(__file__), Path(semantic_machine_audit.__file__), definition_path]
     before_helpers = {str(p): digest(p) for p in helpers}
     output.mkdir(parents=True, exist_ok=False)
     for path in helpers:
@@ -211,6 +225,8 @@ def run(args):
         for index, name in enumerate(NAMES):
             runtime = output / name
             launcher = prepare(runtime, target, [], args.port + index, args.source if index else None)
+            verify_code(runtime, target_code)
+            write_json(runtime / INVENTORY, target_code)
             configuration = configure_new_fresh_fixture(runtime) if index == 0 else None
             for marker in ("migration-operate.allow", "advantage-works.allow"):
                 (runtime / marker).touch()

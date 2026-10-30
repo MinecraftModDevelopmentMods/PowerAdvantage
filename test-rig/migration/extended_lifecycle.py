@@ -64,6 +64,40 @@ def verdict(errors, **details):
     return {"status": "FAIL" if errors else "PASS", "failures": errors, **details}
 
 
+def continuous_absence(old_chunks, samples, selected):
+    """Prove one event-stable absence segment ending at the confirmed sample."""
+    anchor_tick, anchor_counts, previous_tick = None, None, None
+    errors = []
+    for index, sample in enumerate(samples):
+        tick = sample.get("worldTime")
+        if type(tick) is not int or tick < 0 or (previous_tick is not None and tick < previous_tick):
+            errors.append("invalid or backwards native observation clock")
+            continue
+        previous_tick = tick
+        states = {tuple(c["pos"]): c for c in sample["chunks"]}
+        if len(states) != len(sample["chunks"]) or any(p not in states for p in selected):
+            errors.append("missing or duplicate selected chunk observation")
+            continue
+        counters = tuple((states[p].get("loads"), states[p].get("unloads")) for p in selected)
+        if any(type(value) is not int or value < 0 for pair in counters for value in pair):
+            errors.append("invalid native chunk event counter")
+            continue
+        absent = all(states[p].get("loaded") is False
+                     and states[p]["unloads"] > old_chunks[p]["unloads"]
+                     and states[p]["loads"] >= old_chunks[p]["loads"] for p in selected)
+        if anchor_tick is None and absent:
+            anchor_tick, anchor_counts = tick, counters
+        if anchor_tick is not None and (not absent or counters != anchor_counts):
+            errors.append("selected endpoint reloaded during observed absence")
+        if sample.get("confirmed") and index != len(samples) - 1:
+            errors.append("absence confirmation is not the terminal observation")
+    terminal = samples[-1] if samples else {}
+    tick = terminal.get("worldTime")
+    stable = (not errors and anchor_tick is not None and terminal.get("confirmed") is True
+              and type(tick) is int and tick - anchor_tick >= 40)
+    return stable, errors
+
+
 def partial_result(definition, before, samples, loaded, group):
     result = {}
     old_chunks = {tuple(c["pos"]): c for c in before["chunks"]}
@@ -73,15 +107,15 @@ def partial_result(definition, before, samples, loaded, group):
         selected = [tuple(p) for p in f["groups"][group]]
         other = "machine" if group == "supply" else "supply"
         retained = [tuple(p) for p in f["groups"][other]]
-        errors, stable, transient = [], False, False
-        for sample_index, sample in enumerate(samples):
+        stable, errors = continuous_absence(old_chunks, samples, selected)
+        transient = False
+        for sample in samples:
             states = {tuple(c["pos"]): c for c in sample["chunks"]}
-            absent = all(not states[p]["loaded"] and states[p]["unloads"] > old_chunks[p]["unloads"] for p in selected)
-            previous_states = {tuple(c["pos"]): c for c in samples[max(0, sample_index - 1)]["chunks"]}
-            duration = sample.get("worldTime", 0) - samples[max(0, sample_index - 1)].get("worldTime", 0)
-            stable |= absent and sample.get("confirmed", False) and duration >= 40 and all(not previous_states[p]["loaded"] for p in selected)
-            transient |= any(states[p]["unloads"] > old_chunks[p]["unloads"] for p in selected)
-            if not all(states[p]["loaded"] and states[p]["unloads"] == old_chunks[p]["unloads"] for p in retained):
+            transient |= any(type(states.get(p, {}).get("unloads")) is int
+                             and states[p]["unloads"] > old_chunks[p]["unloads"] for p in selected)
+            if not all(states.get(p, {}).get("loaded") is True
+                       and states[p].get("loads") == old_chunks[p]["loads"]
+                       and states[p].get("unloads") == old_chunks[p]["unloads"] for p in retained):
                 errors.append("retained endpoint also unloaded")
             for entry in before["cases"][f["id"]]:
                 if (entry["pos"][0] >> 4, entry["pos"][2] >> 4) not in retained or "tileIdentity" not in entry: continue
@@ -89,7 +123,10 @@ def partial_result(definition, before, samples, loaded, group):
                 if now.get("tileIdentity") != entry["tileIdentity"]: errors.append("retained tile identity changed")
         if not stable: errors.append("selected endpoint did not stay genuinely unloaded for two seconds")
         for p in selected:
-            if not new_chunks[p]["loaded"] or new_chunks[p]["loads"] <= old_chunks[p]["loads"]:
+            observed_loads = samples[-1]["chunks"] if samples else []
+            last_loads = next((c.get("loads") for c in observed_loads if tuple(c["pos"]) == p), old_chunks[p]["loads"])
+            minimum_loads = max(old_chunks[p]["loads"], last_loads) if type(last_loads) is int else old_chunks[p]["loads"]
+            if not new_chunks[p]["loaded"] or new_chunks[p]["loads"] <= minimum_loads:
                 errors.append("missing real endpoint reload event")
         for entry in before["cases"][f["id"]]:
             now = at(loaded, f["id"], entry["pos"])

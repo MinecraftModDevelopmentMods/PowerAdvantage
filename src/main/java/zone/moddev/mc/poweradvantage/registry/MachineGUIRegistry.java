@@ -93,11 +93,17 @@ public final class MachineGUIRegistry {
                 return gui.createContainer(windowId, inventory, (IInventory) tile);
             }
             @Override public ITextComponent getDisplayName() {
-                return tile instanceof net.minecraft.util.INameable
-                        ? ((net.minecraft.util.INameable) tile).getDisplayName()
-                        : new TranslationTextComponent(world.getBlockState(pos).getBlock().getTranslationKey());
+                return menuTitle(tile, world.getBlockState(pos).getBlock());
             }
         }, pos);
+    }
+
+    static ITextComponent menuTitle(TileEntity tile, Block block) {
+        if (tile instanceof net.minecraft.util.INameable) {
+            ITextComponent customName = ((net.minecraft.util.INameable) tile).getCustomName();
+            if (customName != null) return customName;
+        }
+        return new TranslationTextComponent(block.getTranslationKey());
     }
 
     public Object getServerGuiElement(int id, PlayerEntity player, World world, int x, int y, int z) {

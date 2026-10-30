@@ -1,0 +1,21 @@
+{
+  "format": 1,
+  "id": "EXTENDED-ABSENCE-001",
+  "scope": "Explicit audited semantic correction, not a claim of historical byte identity. Original historical-input ledgers are unchanged.",
+  "corrections": {
+    "migration/extended_lifecycle.py": {
+      "kind": "semantic-oracle-correction",
+      "historicalSha256": "8A1E84C3E696EFAC711D3D0D847DD532253F57BFEF1A7BC93EF5529605A6280B",
+      "correctedSha256": "EF746EEC9B21E5D9757684A5B1AD6387706EBCD7E2CB15D020234E9B4D57DC82",
+      "unchangedHistoricalAstSha256": "F5B03E76C0509A147048614503AF50DF6970E54C9202D925EBEDFA8E1515BD24",
+      "correctedFunctionAstSha256": {
+        "continuous_absence": "C0D67996E484FA530272E1217CBD1B6F36920914E76E59CF98E71BFFA68AF65C",
+        "partial_result": "69C242C5B111514BB7064C410B3D11E38B53950806231212F4768D715A1E0803"
+      },
+      "reason": "Require at least 40 native ticks of continuous absence through confirmation, with unchanged load/unload counters. The old adjacent-gap check rejected a 189-tick interval ending in a 38-tick gap and could accept hidden reloads.",
+      "evidence": "20 new continuity controls, 13 existing extended controls and 8 independent audit controls per line; separate exact-pin raw re-audits retain original reports and old helper hashes.",
+      "auditReceipt": "raw-audit-115-final.json",
+      "auditReceiptSha256": "F7F7DDA1244CD0C467C81B21272FEBD208C2302B311502E561E26A2694D5EA3F"
+    }
+  }
+}

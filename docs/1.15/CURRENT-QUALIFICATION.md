@@ -1,5 +1,9 @@
 # Advantage 1.15.2 Test Record
 
+> For the locally repaired candidate, read the
+> [stronger test-coverage record](TEST-COVERAGE-BACKPORT.md).
+> The results below are retained historical evidence for the earlier jars.
+
 This is the local test record for Power Advantage 2.4.6.115021 and Steam and
 Electric Advantage 2.2.7.115021 on Forge 31.2.57. It is not a published release.
 The 1.14 versions were accepted separately; none of those results is counted

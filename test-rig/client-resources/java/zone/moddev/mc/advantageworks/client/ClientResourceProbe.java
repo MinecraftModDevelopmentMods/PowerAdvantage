@@ -100,6 +100,7 @@ public final class ClientResourceProbe {
             require(I18n.format("block.poweradvantage.still").equals(I18n.format("tile.poweradvantage.still.name")),
                     "Legacy GUI translation differs from modern block name");
             TankVisualProbe.verify(minecraft, result);
+            MachineGuiLayoutProbe.verify(minecraft, result);
             OilRenderProbe.verify(minecraft, result);
             RecipeBookGroupingProbe.verify(minecraft, result);
             result.addProperty("primary_resource_status", "PASS");
