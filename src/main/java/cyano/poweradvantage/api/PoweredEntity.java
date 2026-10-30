@@ -174,6 +174,10 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 		if (this.isServer() && ((this.getWorld().getTotalWorldTime() + this.getTickOffset()) % powerUpdateInterval == 0)) {
 			this.powerUpdate();
 		}
+		if (this.isServer()) {
+			// Timers and energy may change without a GUI or neighbour update.
+			this.getWorld().markChunkDirty(this.getPos(), this);
+		}
 	}
 
 	private void refreshConduitNetworkAfterLoad() {

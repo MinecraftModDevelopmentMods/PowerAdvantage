@@ -26,21 +26,7 @@ public class TileEntityOverflowFilter extends TileEntityConveyorFilter {
 		if (target instanceof IInventory) {
 			EnumFacing side = f.getOpposite();
 			ISidedInventory dt = InventoryWrapper.wrap((IInventory) target);
-			int[] slots = dt.getSlotsForFace(side);
-			for (int i = 0; i < slots.length; i++) {
-				int slot = slots[i];
-				if (dt.canInsertItem(slot, item, side)) {
-					ItemStack targetSlot = dt.getStackInSlot(slot);
-					if ((targetSlot == null) ||
-							(ItemStack.areItemsEqual(item, targetSlot)
-									&& !targetSlot.getItem().isDamageable()
-									&& targetSlot.getCount() < targetSlot.getMaxStackSize()
-									&& targetSlot.getCount() < dt.getInventoryStackLimit())) {
-						return true;
-					}
-				}
-			}
-			return false;
+			return canInsertItemInto(item, dt, side);
 		} else {
 			return false;
 		}

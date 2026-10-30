@@ -11,6 +11,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -216,6 +217,11 @@ dependencies {
 		acceptedMinecraftVersions = "[1.12.2]")
 public class PowerAdvantage
 {
+	// Forge registers the bucket during its pre-init, before our fluid setup.
+	static {
+		FluidRegistry.enableUniversalBucket();
+	}
+
 	/** The identifier for this mod */
 	public static final String MODID = "poweradvantage";
 	/** The display name for this mod */

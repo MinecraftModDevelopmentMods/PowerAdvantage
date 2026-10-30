@@ -2,6 +2,8 @@
 
 Power Advantage provides shared power, fluid, and item transport systems for its Minecraft 1.12.2 expansion mods.
 
+The [test coverage backport notes](TEST-COVERAGE-BACKPORT.md#final-recorded-candidate) record the final machine, restart, control, partial-network, GUI, endurance, connected-world and reproducibility results alongside exact candidate hashes. The bounded legacy checks pass; the recipe progression graph is still partial. Earlier failures, modern follow-up findings and manual-testing limits are kept in the notes. This is not an all-machines or all-worlds guarantee.
+
 ## Building Minecraft 1.12.2
 
 The `master-1.12.2` build uses ForgeGradle 7.0.34 and Gradle 9.6.1. Run Gradle with Java 17; Gradle resolves the Java 8 toolchain used for compilation.

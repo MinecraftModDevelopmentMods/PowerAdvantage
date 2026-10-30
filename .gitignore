@@ -15,6 +15,12 @@
 /.idea/
 
 # Gradle and Forge run output
+**/build/
+**/.gradle/
+**/logs/
+**/.cache/
+**/__pycache__/
+**/.venv/
 /build/
 /.gradle/
 /eclipse/
@@ -28,6 +34,10 @@
 /.ci-dependencies/
 
 # Machine-specific agent context
+**/AGENTS.md
+**/AGENT.md
+**/agent-notes/
+**/.codex/
 /AGENTS.md
 /AGENT.md
 /agent-notes/
