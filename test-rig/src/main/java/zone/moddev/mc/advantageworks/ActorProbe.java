@@ -22,7 +22,7 @@ import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 
 /** Real server player-file adapter and saved-entity witnesses; not a client login. */
 final class ActorProbe {
@@ -46,7 +46,7 @@ final class ActorProbe {
         if (!(event.world instanceof ServerWorld)) return;
         if (event.phase == TickEvent.Phase.START && frozen(event.world)) {
             NativeEntityHold held = new NativeEntityHold();
-            ((ServerWorld) event.world).getEntities().filter(entity -> entity.getPersistentData().contains("AdvWorksActor", 8))
+            Native116Worlds.entities((ServerWorld) event.world).filter(entity -> entity.getPersistentData().contains("AdvWorksActor", 8))
                     .forEach(held::hold);
             heldActors.put(event.world, held);
         } else if (event.phase == TickEvent.Phase.END) {
@@ -55,12 +55,12 @@ final class ActorProbe {
         }
     }
 
-    private void starting(FMLServerStartingEvent event) {
+    private void starting(RegisterCommandsEvent event) {
         for (String operation : new String[] {"snapshot", "read", "operate"}) {
-            event.getCommandDispatcher().register(Commands.literal("advactors").requires(source -> source.hasPermissionLevel(4))
+            event.getDispatcher().register(Commands.literal("advactors").requires(source -> source.hasPermission(4))
                     .then(Commands.literal(operation).then(Commands.argument("label", StringArgumentType.word()).executes(context -> {
                         try {
-                            snapshot(context.getSource().getServer(), context.getSource().getWorld(),
+                            snapshot(context.getSource().getServer(), context.getSource().getLevel(),
                                     operation, StringArgumentType.getString(context, "label"));
                             return 1;
                         } catch (Exception ex) { throw new IllegalStateException("Actor probe failed", ex); }
@@ -69,15 +69,15 @@ final class ActorProbe {
     }
 
     private void snapshot(MinecraftServer server, ServerWorld world, String operation, String label) throws Exception {
-        if (!MARKER.isFile() || !world.getWorldInfo().getWorldName().equals("AdvantageWorksMigration")
+        if (!MARKER.isFile() || !world.getServer().getWorldData().getLevelName().equals("AdvantageWorksMigration")
                 || !label.matches("[a-zA-Z0-9_-]+")) throw new IllegalStateException("Unmarked world or unsafe label");
         JsonObject definition = JSON.fromJson(new String(Files.readAllBytes(new File("actor-fixture.json").toPath()),
                 StandardCharsets.UTF_8), JsonObject.class);
         // Entity updates require neighbouring chunks and a non-idle world. This
         // sentinel is never logged in and never reads/writes the witness player.
         net.minecraftforge.common.util.FakePlayer sentinel = net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(world);
-        sentinel.setPosition(128.5, 80, -16.5);
-        if (!world.getPlayers().contains(sentinel)) world.getPlayers().add(sentinel);
+        sentinel.setPos(128.5, 80, -16.5);
+        if (!world.players().contains(sentinel)) world.players().add(sentinel);
         for (int x = 6; x <= 13; x++) {
             for (int z = -2; z <= 2; z++) world.getChunk(x, z);
         }
@@ -95,19 +95,19 @@ final class ActorProbe {
             GameProfile profile = new GameProfile(UUID.fromString(definition.get("playerUuid").getAsString()),
                     definition.get("playerName").getAsString());
             ServerPlayerEntity player = new ServerPlayerEntity(server, world, profile, new PlayerInteractionManager(world));
-            if (server.getPlayerList().readPlayerDataFromFile(player) == null) throw new IllegalStateException("No player file loaded");
-            result.add("player", encode(player.writeWithoutTypeId(new CompoundNBT())));
-            world.getSaveHandler().writePlayerData(player);
+            if (server.getPlayerList().load(player) == null) throw new IllegalStateException("No player file loaded");
+            result.add("player", encode(player.saveWithoutId(new CompoundNBT())));
+            Native116PlayerIo.save(server.getPlayerList(), player);
         }
         JsonArray entities = new JsonArray();
-        for (Entity entity : world.getEntities().collect(java.util.stream.Collectors.toList())) {
+        for (Entity entity : Native116Worlds.entities(world).collect(java.util.stream.Collectors.toList())) {
             if (!entity.getPersistentData().contains("AdvWorksActor", 8)) continue;
             if (operation.equals("operate")) entity.canUpdate(true);
             CompoundNBT nbt = new CompoundNBT();
-            if (!entity.writeUnlessRemoved(nbt)) throw new IllegalStateException("Could not serialize actor");
+            if (!entity.saveAsPassenger(nbt)) throw new IllegalStateException("Could not serialize actor");
             JsonObject entry = encode(nbt);
             entry.addProperty("witness", entity.getPersistentData().getString("AdvWorksActor"));
-            entry.addProperty("ticksExisted", entity.ticksExisted);
+            entry.addProperty("ticksExisted", entity.tickCount);
             entities.add(entry);
         }
         result.add("entities", entities);

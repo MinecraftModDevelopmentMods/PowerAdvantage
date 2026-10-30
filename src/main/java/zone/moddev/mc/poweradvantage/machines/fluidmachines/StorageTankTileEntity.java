@@ -80,7 +80,7 @@ public class StorageTankTileEntity  extends TileEntitySimpleFluidMachine {
 
 	@Override
 	public void tickUpdate(boolean isServerWorld) {
-		if (isServerWorld && this.getWorld().getGameTime() % 11 == 0) {
+		if (isServerWorld && this.getLevel().getGameTime() % 11 == 0) {
 			// send update
 			FluidStack current = getTank().getFluid();
 			Fluid currentFluid = (current != null ? current.getFluid() : null);

@@ -14,7 +14,7 @@ public class TileEntityTRElectricityConverter extends TileEntityTRConverter {
 	}
 	
 	@Override
-	public boolean isUsableByPlayer(PlayerEntity player) {
+	public boolean stillValid(PlayerEntity player) {
 		return true;
 	}
 }

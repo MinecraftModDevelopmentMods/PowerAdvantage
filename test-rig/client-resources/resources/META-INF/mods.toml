@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[31,32)"
+loaderVersion="[36,37)"
 license="GPL-3.0-only"
 
 [[mods]]
@@ -11,20 +11,20 @@ description='''Build-only model, texture and translation checks. Never distribut
 [[dependencies.advantageclientresources]]
 modId="poweradvantage"
 mandatory=true
-versionRange="[2.4.6.115021]"
+versionRange="[2.4.7.116051]"
 ordering="AFTER"
 side="CLIENT"
 
 [[dependencies.advantageclientresources]]
 modId="forge"
 mandatory=true
-versionRange="[31.2.57]"
+versionRange="[36.2.34]"
 ordering="NONE"
 side="CLIENT"
 
 [[dependencies.advantageclientresources]]
 modId="minecraft"
 mandatory=true
-versionRange="[1.15.2]"
+versionRange="[1.16.5]"
 ordering="NONE"
 side="CLIENT"

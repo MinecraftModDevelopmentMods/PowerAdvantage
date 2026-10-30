@@ -1,3 +1,32 @@
+Power Advantage 2.4.7.116051 (Minecraft 1.16.5)
+
+- Charge energy sources only for what consumers accept, retaining rejected energy for the next machine.
+- Keep custom item data intact on conveyors, recognize empty overflow destinations and save both inventories after a transfer.
+- Prevent fluid discharges from replacing solid blocks.
+- Use native fluid pickup so drains leave waterlogged blocks in place.
+- Tighten the test harness against missing results, stale restart reports and invalid measurements; record which machine behaviours still need operating tests.
+- Give machine names and Inventory their own label rows without covering the artwork; keep item tooltips and the dimmed backdrop.
+- Use translated conveyor names rather than internal class names, while retaining player-assigned machine names.
+- Require the expected text in rendered GUI tests and reject deliberately missing or misplaced labels; the earlier no-label acceptance was incorrect.
+- Keep fluid gauges within their frames and add a rendered-layout check for every registered Advantage machine screen.
+- Fix Eclipse access errors in migration test fixtures without weakening compiler checks or changing the mod jar.
+- Check cached development jars for damaged entries during build and Eclipse audits, and exercise vanilla networking in the client startup probe.
+- Move to Forge 36.2.34 and official 1.16.5 mappings, keeping Java 8 production bytecode.
+- Keep the existing block, item, fluid, tile, provider and saved-state names.
+- Use dimension registry keys for conduit caches, including custom dimensions.
+- Use the native tile save/load and matrix-based menu APIs without changing stored machine data.
+- Resolve configured rubber and solder aliases during the server's native tag reload.
+- Retarget the shared legacy-world hook and keep both Base Metals transformer orders covered.
+- Carry forward vanilla registry renames when upgrading 1.13, 1.14 and 1.15 saves, without discarding unknown mod entries.
+- Preserve entity UUIDs, pet ownership and passenger state when vanilla and mod entities share an old chunk.
+- Keep old material variants, tool wear and enchantments in machine inventories during world upgrades.
+- Keep named enchantments in player inventories and stored books when upgrading older worlds.
+- Preserve old Forge swimming speed, name-tag distance, gravity and player reach, including custom values and modifiers, when upgrading entities and player data.
+- Prepare both mods' stored items before entity flattening, keeping Base Metals tool durability in dropped items and minecarts.
+- Detach chunk data before migration so pending asynchronous saves are not modified in place.
+- Keep unloaded machine capabilities unavailable until the tile is revived, with fresh wrappers and retained contents.
+- Record the current-jar machine, upgrade, mining, recipe, unloading and endurance checks in docs/1.16/CURRENT-QUALIFICATION.md, keeping native differences and manual acceptance separate.
+
 Power Advantage 2.4.6.115021 (Minecraft 1.15.2)
 
 - Move to Forge 31.2.57, snapshot mappings 20200514-1.15.1 and MCP 20200515.085601; retain ForgeGradle 7, Gradle 9.6.1 and Java 8 production bytecode.

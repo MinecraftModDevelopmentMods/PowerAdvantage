@@ -5,7 +5,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,6 +23,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.FileVisitResult;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -58,21 +67,23 @@ public final class WorksRunner {
 
     public static void main(String[] args) throws Exception {
         Arguments arguments = Arguments.parse(args);
-        Profile profile = readProfile(arguments.profile);
+        Profile profile = readNative116Profile(arguments.profile);
         if (arguments.serverPort != null) profile.serverPort = arguments.serverPort;
         File testRig = findTestRig(arguments.profile);
         File powerRoot = testRig.getParentFile().getCanonicalFile();
         // Pin validation precedes directory creation, downloads, and world access.
         requireInputPins(profile);
+        profile.preparedSeed = preparedServerSeed(testRig, profile, arguments);
         if (arguments.validateOnly) {
             List<Map<String, Object>> inputs = stageMods(testRig, null, profile.mods);
-            System.out.println("Native 1.15.2 profile preflight only (no world opened): " + GSON.toJson(inputs));
+            System.out.println("Native 1.16.5 profile preflight only (no world opened): " + GSON.toJson(inputs));
             return;
         }
         String stamp = timestamp();
         File runtimeBase = resolve(testRig, profile.runtimeBase);
         File runtime = new File(runtimeBase, profile.name + "-" + stamp).getCanonicalFile();
         requireChild(powerRoot, runtime);
+        if (profile.preparedSeed != null) profile.preparedSeed.requireDisjoint(runtime);
         if (!runtime.mkdirs()) throw new IllegalStateException("Cannot create runtime " + runtime);
 
         File mods = new File(runtime, "mods");
@@ -94,6 +105,7 @@ public final class WorksRunner {
                 lifecycleStations, stationRunSeconds);
 
         System.out.println("Advantage Works runtime: " + runtime);
+        try {
         Process first = launch(profile, powerRoot, runtime, results);
         File latestLog = new File(runtime, "logs/latest.log");
         waitForReady(first, latestLog, profile.startupTimeoutSeconds);
@@ -116,6 +128,7 @@ public final class WorksRunner {
                     send(first, "advworks checkpoint " + station + " before-restart");
                     send(first, "advworks stop " + station);
                 }
+                archiveStationResults(results, "first-run", lifecycleStations);
                 checkStations(first, lifecycleStations, selectedLifecycle);
             }
             long firstShutdownDeadline = 0L;
@@ -128,7 +141,9 @@ public final class WorksRunner {
             send(first, "stop");
             if (profile.worldgenSampleRadius > 0) requireExitUntil(first, firstShutdownDeadline);
             else requireExit(first, profile.shutdownTimeoutSeconds);
+            auditPreparedServer(profile, runtime, "first-run-after");
             requireNoCommandFailures(latestLog, "first-run");
+            if (profile.buildWorks) requireAcceptableStations(results, lifecycleStations);
             copyIfPresent(latestLog, new File(results, "first-run.log"));
             File firstWorldgen = new File(results, "worldgen-first-run.json");
             if (profile.worldgenSampleRadius > 0) {
@@ -150,6 +165,7 @@ public final class WorksRunner {
                 for (String station : lifecycleStations) {
                     send(second, "advworks checkpoint " + station + " after-restart");
                 }
+                archiveStationResults(results, "restart-run", lifecycleStations);
                 checkStations(second, lifecycleStations, selectedLifecycle);
             }
             long secondShutdownDeadline = 0L;
@@ -161,6 +177,7 @@ public final class WorksRunner {
             send(second, "stop");
             if (profile.worldgenSampleRadius > 0) requireExitUntil(second, secondShutdownDeadline);
             else requireExit(second, profile.shutdownTimeoutSeconds);
+            auditPreparedServer(profile, runtime, "restart-run-after");
             requireNoCommandFailures(latestLog, "restart-run");
             copyIfPresent(latestLog, new File(results, "restart-run.log"));
             File restartWorldgen = new File(results, "worldgen-restart-run.json");
@@ -178,11 +195,10 @@ public final class WorksRunner {
             if (profile.buildWorks) {
                 if (!selectedLifecycle) {
                     requireAcceptableSummary(new File(results, "all-summary.json"));
-                } else {
-                    requireAcceptableStations(results, lifecycleStations);
                 }
+                requireAcceptableStations(results, lifecycleStations);
             }
-            System.out.println("Automated Advantage Works run complete: " + results);
+            System.out.println("Automated assertion checks complete; manual procedures remain unverified: " + results);
             return;
         }
 
@@ -192,9 +208,19 @@ public final class WorksRunner {
         input.setDaemon(true);
         input.start();
         requireExit(first, 0);
+        auditPreparedServer(profile, runtime, "interactive-after");
+        } catch (Exception failure) {
+            if (profile.preparedSeed != null) {
+                profile.preparedSeed.closeAfterFailure(profile, runtime, failure);
+            }
+            throw failure;
+        }
     }
 
     private static Process launch(Profile profile, File powerRoot, File runtime, File results) throws Exception {
+        if (profile.preparedSeed != null) {
+            auditPreparedServer(profile, runtime, "boot-" + (profile.preparedSeed.processes.size() + 1) + "-before");
+        }
         List<String> command = new ArrayList<>();
         File workingDirectory;
         if ("development".equals(profile.mode)) {
@@ -229,6 +255,7 @@ public final class WorksRunner {
                 ? gradleJavaHome(profile).getAbsolutePath() : java8Home(profile).getAbsolutePath());
         builder.environment().put("ADVANTAGE_WORKS_RUNTIME", runtime.getAbsolutePath());
         Process process = builder.start();
+        if (profile.preparedSeed != null) profile.preparedSeed.processes.add(process);
         Thread output = new Thread(() -> drainOutput(process), "advantage-works-server-output");
         output.setDaemon(true);
         output.start();
@@ -480,7 +507,275 @@ public final class WorksRunner {
         return matcher.find() ? matcher.group(1) : null;
     }
 
-    private static void preparePackagedServer(File testRig, File runtime, Profile profile) throws Exception {
+    static PreparedServerSeed preparedServerSeed(File testRig, Profile profile, Arguments arguments) throws Exception {
+        if (arguments.preparedServerSeed == null && arguments.preparedServerSeedInventory == null
+                && arguments.preparedServerSeedSha256 == null) return null;
+        if (!"packaged".equals(profile.mode) || profile.forge == null || profile.forge.version == null
+                || profile.minecraftVersion == null) {
+            throw new IllegalArgumentException("Prepared server seed requires a packaged Forge profile");
+        }
+        if (arguments.preparedServerSeed == null || arguments.preparedServerSeedInventory == null
+                || arguments.preparedServerSeedSha256 == null) {
+            throw new IllegalArgumentException("Prepared seed requires path, inventory and inventory SHA-256 together");
+        }
+        return new PreparedServerSeed(preparedPath(testRig, arguments.preparedServerSeed),
+                preparedPath(testRig, arguments.preparedServerSeedInventory), arguments.preparedServerSeedSha256,
+                "forge-" + profile.forge.version + ".jar", "minecraft_server." + profile.minecraftVersion + ".jar");
+    }
+
+    private static Path preparedPath(File base, File path) {
+        return (path.isAbsolute() ? path.toPath() : base.toPath().resolve(path.toPath())).toAbsolutePath().normalize();
+    }
+
+    static void auditPreparedServer(Profile profile, File runtime, String phase) throws Exception {
+        if (profile.preparedSeed == null) return;
+        File results = new File(runtime, "advantage-works-results");
+        String filename = "prepared-server-seed-" + phase + ".json";
+        if (new File(results, filename).exists()) throw new IllegalStateException("Existing custody receipt: " + filename);
+        Map<String, Object> report = new LinkedHashMap<>();
+        report.put("phase", phase);
+        report.put("inventorySha256", profile.preparedSeed.inventorySha256);
+        report.put("codeFiles", profile.preparedSeed.files.size());
+        try {
+            profile.preparedSeed.verifySource();
+            profile.preparedSeed.verifyTree(runtime.toPath(), false);
+            report.put("status", "PASS");
+        } catch (Exception failure) {
+            report.put("status", "FAIL");
+            report.put("failure", failure.toString());
+            try { writeRunnerReport(results, filename, report); }
+            catch (Exception receiptFailure) { failure.addSuppressed(receiptFailure); }
+            throw failure;
+        }
+        writeRunnerReport(results, filename, report);
+    }
+
+    static final class PreparedServerSeed {
+        static final String INVENTORY = "native116-code-inventory.json";
+        static final int MAX_INVENTORY_BYTES = 1024 * 1024;
+        static final int MAX_FILES = 4096;
+        static final long MAX_CODE_BYTES = 2L * 1024 * 1024 * 1024;
+        final Path root, inventory;
+        final String inventorySha256;
+        final byte[] inventoryBytes;
+        final Map<String, SeedFile> files = new LinkedHashMap<>();
+        final Set<String> directories = new LinkedHashSet<>();
+        final List<Process> processes = new ArrayList<>();
+
+        PreparedServerSeed(Path root, Path inventory, String expectedHash, String launcher, String minecraft)
+                throws Exception {
+            this.root = root.toAbsolutePath().normalize();
+            this.inventory = inventory.toAbsolutePath().normalize();
+            if (expectedHash == null || !expectedHash.matches("[0-9A-F]{64}")) {
+                throw new IllegalArgumentException("Prepared inventory requires an uppercase SHA-256 pin");
+            }
+            inventorySha256 = expectedHash;
+            requirePlain(this.root);
+            requirePlain(this.inventory);
+            if (!Files.isDirectory(this.root) || !Files.isRegularFile(this.inventory)) {
+                throw new IllegalArgumentException("Missing prepared seed or inventory");
+            }
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            try (InputStream input = Files.newInputStream(this.inventory)) {
+                byte[] buffer = new byte[8192];
+                int count;
+                while ((count = input.read(buffer)) != -1) {
+                    if (bytes.size() + count > MAX_INVENTORY_BYTES) throw new IllegalArgumentException("Inventory exceeds size bound");
+                    bytes.write(buffer, 0, count);
+                }
+            }
+            inventoryBytes = bytes.toByteArray();
+            String actualHash = hex(MessageDigest.getInstance("SHA-256").digest(inventoryBytes));
+            if (!inventorySha256.equals(actualHash)) throw new IllegalStateException("Prepared inventory SHA-256 mismatch");
+            Set<String> folded = new LinkedHashSet<>();
+            long total = 0;
+            try (JsonReader reader = new JsonReader(new InputStreamReader(
+                    new ByteArrayInputStream(inventoryBytes), StandardCharsets.UTF_8))) {
+                reader.setLenient(false);
+                reader.beginObject();
+                if (!reader.hasNext() || !"files".equals(reader.nextName())) throw new IllegalArgumentException("Inventory requires files object");
+                reader.beginObject();
+                while (reader.hasNext()) {
+                    if (files.size() >= MAX_FILES) throw new IllegalArgumentException("Inventory exceeds file bound");
+                    String name = reader.nextName();
+                    if (name.length() > 1024 || !name.matches("[A-Za-z0-9_.+/-]+") || name.startsWith("/")
+                            || !(name.startsWith("libraries/") || name.equals(launcher) || name.equals(minecraft))) {
+                        throw new IllegalArgumentException("Non-code or unsafe inventory path: " + name);
+                    }
+                    for (String part : name.split("/", -1)) {
+                        if (part.isEmpty() || part.equals(".") || part.equals("..")) throw new IllegalArgumentException("Unsafe inventory path: " + name);
+                    }
+                    if (!folded.add(name.toLowerCase(Locale.ROOT))) throw new IllegalArgumentException("Duplicate inventory path: " + name);
+                    String hash = null;
+                    Long size = null;
+                    reader.beginObject();
+                    while (reader.hasNext()) {
+                        String field = reader.nextName();
+                        if (field.equals("sha256") && hash == null && reader.peek() == JsonToken.STRING) {
+                            hash = reader.nextString();
+                        } else if (field.equals("size") && size == null && reader.peek() == JsonToken.NUMBER) {
+                            String number = reader.nextString();
+                            if (!number.matches("0|[1-9][0-9]*")) throw new IllegalArgumentException("Inventory size must be an integer");
+                            size = Long.valueOf(number);
+                        } else throw new IllegalArgumentException("Invalid or duplicate inventory field: " + field);
+                    }
+                    reader.endObject();
+                    if (hash == null || !hash.matches("[0-9A-F]{64}") || size == null
+                            || size > MAX_CODE_BYTES - total) throw new IllegalArgumentException("Invalid inventory hash/size");
+                    total += size;
+                    files.put(name, new SeedFile(hash, size));
+                    int slash = name.indexOf('/');
+                    while (slash >= 0) {
+                        directories.add(name.substring(0, slash));
+                        slash = name.indexOf('/', slash + 1);
+                    }
+                }
+                reader.endObject();
+                if (reader.hasNext()) throw new IllegalArgumentException("Unexpected inventory root field");
+                reader.endObject();
+                if (reader.peek() != JsonToken.END_DOCUMENT) throw new IllegalArgumentException("Trailing inventory data");
+            }
+            if (!files.containsKey(launcher) || !files.containsKey(minecraft) || !directories.contains("libraries")) {
+                throw new IllegalArgumentException("Inventory omits launcher, Minecraft server or libraries");
+            }
+            verifySource();
+        }
+
+        void requireDisjoint(File runtime) {
+            Path target = runtime.toPath().toAbsolutePath().normalize();
+            if (target.startsWith(root) || root.startsWith(target) || inventory.startsWith(target)) {
+                throw new IllegalArgumentException("Prepared seed/inventory overlaps runtime");
+            }
+        }
+
+        void verifySource() throws Exception {
+            requirePlain(inventory);
+            if (Files.size(inventory) != inventoryBytes.length || !inventorySha256.equals(sha256(inventory.toFile()))) {
+                throw new IllegalStateException("Prepared inventory changed");
+            }
+            verifyTree(root, true);
+        }
+
+        void verifyTree(Path location, boolean codeOnly) throws Exception {
+            final Path base = location.toAbsolutePath().normalize();
+            requirePlain(base);
+            final Set<String> seen = new LinkedHashSet<>();
+            Files.walkFileTree(base, new SimpleFileVisitor<Path>() {
+                @Override public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes attributes) throws IOException {
+                    String relative = base.relativize(path).toString().replace('\\', '/');
+                    if (!relative.isEmpty() && !directories.contains(relative)) {
+                        if (codeOnly || relative.startsWith("libraries/") || relative.toLowerCase(Locale.ROOT).endsWith(".jar")) {
+                            throw new IOException("Unexpected code directory: " + relative);
+                        }
+                        return FileVisitResult.SKIP_SUBTREE;
+                    }
+                    requirePlain(path);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override public FileVisitResult visitFile(Path path, BasicFileAttributes attributes) throws IOException {
+                    String relative = base.relativize(path).toString().replace('\\', '/');
+                    if (relative.equals(INVENTORY)) {
+                        requirePlain(path);
+                        try {
+                            if (!inventorySha256.equals(sha256(path.toFile()))) throw new IOException("Staged inventory changed");
+                        } catch (IOException failure) { throw failure; }
+                        catch (Exception failure) { throw new IOException(failure); }
+                        return FileVisitResult.CONTINUE;
+                    }
+                    if (!codeOnly && !relative.startsWith("libraries/") && !relative.toLowerCase(Locale.ROOT).endsWith(".jar")) {
+                        return FileVisitResult.CONTINUE;
+                    }
+                    requirePlain(path);
+                    SeedFile expected = files.get(relative);
+                    if (!attributes.isRegularFile() || expected == null) throw new IOException("Unexpected code file: " + relative);
+                    try {
+                        if (Files.size(path) != expected.size || !sha256(path.toFile()).equals(expected.sha256)) {
+                            throw new IOException("Prepared code differs: " + relative);
+                        }
+                    } catch (IOException failure) { throw failure; }
+                    catch (Exception failure) { throw new IOException(failure); }
+                    seen.add(relative);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+            if (!seen.equals(files.keySet())) throw new IllegalStateException("Prepared code files missing");
+            if (!codeOnly) {
+                Path receipt = base.resolve(INVENTORY);
+                requirePlain(receipt);
+                if (!inventorySha256.equals(sha256(receipt.toFile()))) throw new IllegalStateException("Staged inventory changed");
+            }
+        }
+
+        void stage(File runtime) throws Exception {
+            requireDisjoint(runtime);
+            verifySource();
+            Path target = runtime.toPath().toAbsolutePath().normalize();
+            requirePlain(target);
+            if (Files.exists(target.resolve("libraries")) || Files.exists(target.resolve(INVENTORY))) {
+                throw new IllegalStateException("Prepared runtime already contains code or an inventory");
+            }
+            File[] existing = runtime.listFiles((dir, name) -> name.toLowerCase(Locale.ROOT).endsWith(".jar"));
+            if (existing == null || existing.length != 0) throw new IllegalStateException("Prepared runtime already contains root jars");
+            for (String name : files.keySet()) {
+                Path destination = target.resolve(name);
+                Files.createDirectories(destination.getParent());
+                Files.copy(root.resolve(name), destination, StandardCopyOption.COPY_ATTRIBUTES);
+            }
+            Files.write(target.resolve(INVENTORY), inventoryBytes);
+            verifySource();
+            verifyTree(target, false);
+        }
+
+        void closeAfterFailure(Profile profile, File runtime, Exception primary) {
+            boolean interrupted = primary instanceof InterruptedException || Thread.currentThread().isInterrupted();
+            for (Process process : processes) {
+                try {
+                    if (process.isAlive()) {
+                        send(process, "stop");
+                        if (!interrupted) process.waitFor(Math.max(1, Math.min(300, profile.shutdownTimeoutSeconds)), TimeUnit.SECONDS);
+                        if (process.isAlive()) process.destroyForcibly();
+                        if (!interrupted) process.waitFor(5, TimeUnit.SECONDS);
+                        if (process.isAlive()) throw new IllegalStateException("Prepared server still running; post-close audit unavailable");
+                    }
+                } catch (Exception failure) {
+                    primary.addSuppressed(failure);
+                    try { process.destroyForcibly(); }
+                    catch (RuntimeException destroyFailure) { primary.addSuppressed(destroyFailure); }
+                    if (failure instanceof InterruptedException) interrupted = true;
+                }
+            }
+            try {
+                if (processes.stream().anyMatch(Process::isAlive)) throw new IllegalStateException("Prepared server has not closed");
+                auditPreparedServer(profile, runtime, "failure-after-close");
+            } catch (Exception failure) { primary.addSuppressed(failure); }
+            finally { if (interrupted) Thread.currentThread().interrupt(); }
+        }
+
+        private static void requirePlain(Path path) throws IOException {
+            if (Files.isSymbolicLink(path) || !path.toRealPath().equals(path.toAbsolutePath().normalize())) {
+                throw new IOException("Linked/reparse prepared path rejected: " + path);
+            }
+        }
+
+        private static String hex(byte[] bytes) {
+            StringBuilder result = new StringBuilder();
+            for (byte value : bytes) result.append(String.format(Locale.ROOT, "%02X", value & 255));
+            return result.toString();
+        }
+    }
+
+    static final class SeedFile {
+        final String sha256;
+        final long size;
+        SeedFile(String sha256, long size) { this.sha256 = sha256; this.size = size; }
+    }
+
+    static void preparePackagedServer(File testRig, File runtime, Profile profile) throws Exception {
+        if (profile.preparedSeed != null) {
+            profile.preparedSeed.stage(runtime);
+            return;
+        }
         if (profile.forge == null || profile.forge.version == null
                 || profile.forge.installerPath == null || profile.forge.sha256 == null) {
             throw new IllegalArgumentException("Packaged profile must pin Forge installer path, version, and SHA-256");
@@ -541,7 +836,7 @@ public final class WorksRunner {
         }
         File executable = javaExecutable(home);
         if (!executable.isFile()) {
-            throw new IllegalStateException("Java 8 is required for packaged Forge 1.15.2. Set "
+            throw new IllegalStateException("Java 8 is required for packaged Forge 1.16.5. Set "
                     + "ADVANTAGE_WORKS_JAVA8_HOME; checked " + home);
         }
         return home.getCanonicalFile();
@@ -605,7 +900,7 @@ public final class WorksRunner {
                 + "level-seed=" + profile.levelSeed + "\n"
                 + "level-type=" + profile.levelType + "\n"
                 + "max-players=8\n"
-                + "motd=Advantage Works 1.15.2 Commissioning Ground\n"
+                + "motd=Advantage Works 1.16.5 Commissioning Ground\n"
                 + "online-mode=false\n"
                 + "server-ip=127.0.0.1\n"
                 + "pvp=false\n"
@@ -641,6 +936,10 @@ public final class WorksRunner {
         manifest.put("stationRunSeconds", stationRunSeconds);
         manifest.put("oilDistillationMinimumRunSeconds", OIL_DISTILLATION_RUN_SECONDS);
         manifest.put("mods", staged);
+        if (profile.preparedSeed != null) {
+            manifest.put("preparedServerSeed", profile.preparedSeed.root.toString());
+            manifest.put("preparedServerSeedInventorySha256", profile.preparedSeed.inventorySha256);
+        }
         try (OutputStreamWriter writer = new OutputStreamWriter(
                 new FileOutputStream(new File(runtime, "run-manifest.json")), StandardCharsets.UTF_8)) {
             GSON.toJson(manifest, writer);
@@ -651,6 +950,19 @@ public final class WorksRunner {
         return readProfile(file, "1.15.2", "1.15.2-31.2.57");
     }
 
+    static Profile readNative116Profile(File file) throws Exception {
+        Profile profile = readProfile(file, "1.16.5", "1.16.5-36.2.34");
+        if (!"UNQUALIFIED".equals(profile.qualificationStatus)) {
+            throw new IllegalArgumentException("Native116 destination must start UNQUALIFIED");
+        }
+        for (ModInput input : profile.mods) {
+            if (input.version == null || !input.version.endsWith(".116051")) {
+                throw new IllegalArgumentException("Non-native116 destination mod version: " + input.id);
+            }
+        }
+        return profile;
+    }
+
     static Profile readProfile(File file, String minecraft, String forge) throws Exception {
         try (InputStreamReader reader = new InputStreamReader(
                 new FileInputStream(file), StandardCharsets.UTF_8)) {
@@ -659,13 +971,13 @@ public final class WorksRunner {
                 throw new IllegalArgumentException("Incomplete profile " + file);
             }
             if (!minecraft.equals(profile.minecraftVersion)) {
-                throw new IllegalArgumentException("Historical source profile, not a native115 destination: " + file);
+                throw new IllegalArgumentException("Historical source profile, not a native " + minecraft + " destination: " + file);
             }
             if (!"PORTED_UNQUALIFIED".equals(profile.portStatus)) {
-                throw new IllegalStateException("Native115 profile is not ported: " + profile.portBlocker);
+                throw new IllegalStateException("Native " + minecraft + " profile is not ported: " + profile.portBlocker);
             }
             if (profile.forge == null || !forge.equals(profile.forge.version)) {
-                throw new IllegalArgumentException("Native115 profile must select Forge 1.15.2-31.2.57");
+                throw new IllegalArgumentException("Native destination must select Forge " + forge);
             }
             if (profile.levelName == null || !profile.levelName.startsWith("AdvantageWorks")) {
                 throw new IllegalArgumentException("Profile levelName must begin with AdvantageWorks: " + file);
@@ -677,7 +989,7 @@ public final class WorksRunner {
     static void requireInputPins(Profile profile) {
         for (ModInput input : profile.mods) {
             if (input.sha256 == null || !input.sha256.matches("[A-Fa-f0-9]{64}")) {
-                throw new IllegalStateException("Pending native115 SHA-256 pin: " + input.id);
+                throw new IllegalStateException("Pending native destination SHA-256 pin: " + input.id);
             }
         }
     }
@@ -974,12 +1286,32 @@ public final class WorksRunner {
         try (InputStreamReader reader = new InputStreamReader(
                 new FileInputStream(summary), StandardCharsets.UTF_8)) {
             JsonObject root = GSON.fromJson(reader, JsonObject.class);
+            if (root == null || !root.has("summary") || !root.get("summary").isJsonObject()
+                    || !root.has("stationStatuses") || !root.get("stationStatuses").isJsonObject()) {
+                throw new IllegalStateException("Missing station summary or identities: " + summary);
+            }
             JsonObject counts = root.getAsJsonObject("summary");
-            int failed = counts != null && counts.has("FAIL") ? counts.get("FAIL").getAsInt() : 0;
-            int unexpected = counts != null && counts.has("UNEXPECTED_PASS")
-                    ? counts.get("UNEXPECTED_PASS").getAsInt() : 0;
-            if (failed > 0 || unexpected > 0) {
-                throw new IllegalStateException("Final Advantage Works result is not acceptable: " + counts);
+            JsonObject stations = root.getAsJsonObject("stationStatuses");
+            Map<String, Integer> observed = new LinkedHashMap<>();
+            int completed = 0;
+            if (stations.entrySet().size() != DEFAULT_LIFECYCLE_STATIONS.size()) {
+                throw new IllegalStateException("Incomplete station summary: " + stations);
+            }
+            for (String station : DEFAULT_LIFECYCLE_STATIONS) {
+                if (!stations.has(station)) throw new IllegalStateException("Missing station " + station);
+                String status = stations.get(station).getAsString();
+                requireKnownStatus(status);
+                observed.put(status, observed.getOrDefault(status, 0) + 1);
+                if (!"SKIP".equals(status)) completed++;
+            }
+            if (completed == 0 || counts.entrySet().size() != observed.size()) {
+                throw new IllegalStateException("No completed station checks or inconsistent counts: " + counts);
+            }
+            for (Map.Entry<String, Integer> count : observed.entrySet()) {
+                if (!counts.has(count.getKey()) || !counts.get(count.getKey()).getAsJsonPrimitive().isNumber()
+                        || counts.get(count.getKey()).getAsDouble() != count.getValue()) {
+                    throw new IllegalStateException("Station counts disagree with identities: " + counts);
+                }
             }
         }
     }
@@ -993,18 +1325,66 @@ public final class WorksRunner {
     }
 
     private static void requireAcceptableStations(File results, List<String> stations) throws Exception {
+        if (stations.isEmpty()) throw new IllegalStateException("No stations requested");
+        int completed = 0;
         for (String station : stations) {
             File result = new File(results, station + "-latest.json");
             if (!result.isFile()) throw new IllegalStateException("Missing final station result " + result);
             try (InputStreamReader reader = new InputStreamReader(
                     new FileInputStream(result), StandardCharsets.UTF_8)) {
                 JsonObject root = GSON.fromJson(reader, JsonObject.class);
-                String status = root.has("status") ? root.get("status").getAsString() : "";
-                if ("FAIL".equals(status) || "UNEXPECTED_PASS".equals(status)) {
-                    throw new IllegalStateException("Final Advantage Works station result is not acceptable: "
-                            + station + "=" + status);
+                String status = root != null && root.has("status") ? root.get("status").getAsString() : "";
+                requireKnownStatus(status);
+                if (!root.has("station") || !station.equals(root.get("station").getAsString())) {
+                    throw new IllegalStateException("Wrong station result: " + result);
                 }
+                if ("SKIP".equals(status)) {
+                    if (!root.has("skipReason") || root.get("skipReason").getAsString().trim().isEmpty()) {
+                        throw new IllegalStateException("Skipped station needs an explicit reason: " + result);
+                    }
+                    continue;
+                }
+                if (!root.has("assertions") || !root.get("assertions").isJsonArray()) {
+                    throw new IllegalStateException("Missing assertions: " + result);
+                }
+                Set<String> ids = new LinkedHashSet<>();
+                int passed = 0;
+                for (JsonElement element : root.getAsJsonArray("assertions")) {
+                    JsonObject assertion = element.getAsJsonObject();
+                    if (!assertion.has("id") || assertion.get("id").getAsString().isEmpty()
+                            || !ids.add(assertion.get("id").getAsString()) || !assertion.has("status")) {
+                        throw new IllegalStateException("Missing or duplicate assertion identity: " + result);
+                    }
+                    String value = assertion.get("status").getAsString();
+                    if ("PASS".equals(value)) passed++;
+                    else if (!"SKIP".equals(value)) throw new IllegalStateException("Unacceptable assertion " + assertion);
+                }
+                if (passed == 0) throw new IllegalStateException("No passing measurements: " + result);
+                boolean manual = root.has("manualChecks") && root.getAsJsonArray("manualChecks").size() > 0;
+                if (manual != "MANUAL_REQUIRED".equals(status)) {
+                    throw new IllegalStateException("Manual checks/status disagree: " + result);
+                }
+                completed++;
             }
+        }
+        if (completed == 0) throw new IllegalStateException("All requested stations skipped");
+    }
+
+    private static void requireKnownStatus(String status) {
+        if (!"PASS".equals(status) && !"MANUAL_REQUIRED".equals(status) && !"SKIP".equals(status)) {
+            throw new IllegalStateException("Unacceptable or incomplete station status: " + status);
+        }
+    }
+
+    static void archiveStationResults(File results, String phase, List<String> stations) throws Exception {
+        File previous = new File(results, "previous-" + phase);
+        if (!previous.mkdir()) throw new IllegalStateException("Cannot create result custody directory: " + previous);
+        List<String> names = new ArrayList<>();
+        names.add("all-summary.json");
+        for (String station : stations) names.add(station + "-latest.json");
+        for (String name : names) {
+            File stale = new File(results, name);
+            if (stale.isFile()) Files.move(stale.toPath(), new File(previous, name).toPath());
         }
     }
 
@@ -1014,13 +1394,16 @@ public final class WorksRunner {
         return format.format(new Date());
     }
 
-    private static final class Arguments {
+    static final class Arguments {
         File profile;
         boolean automated;
         boolean validateOnly;
         List<String> lifecycleStations;
         Integer stationRunSeconds;
         Integer serverPort;
+        File preparedServerSeed;
+        File preparedServerSeedInventory;
+        String preparedServerSeedSha256;
 
         static Arguments parse(String[] args) {
             Arguments result = new Arguments();
@@ -1028,6 +1411,18 @@ public final class WorksRunner {
                 if ("--profile".equals(args[i]) && i + 1 < args.length) result.profile = new File(args[++i]);
                 else if ("--automated".equals(args[i])) result.automated = true;
                 else if ("--validate-only".equals(args[i])) result.validateOnly = true;
+                else if ("--prepared-server-seed".equals(args[i]) && i + 1 < args.length) {
+                    if (result.preparedServerSeed != null) throw new IllegalArgumentException("Duplicate prepared seed option");
+                    result.preparedServerSeed = new File(args[++i]);
+                }
+                else if ("--prepared-server-seed-inventory".equals(args[i]) && i + 1 < args.length) {
+                    if (result.preparedServerSeedInventory != null) throw new IllegalArgumentException("Duplicate inventory option");
+                    result.preparedServerSeedInventory = new File(args[++i]);
+                }
+                else if ("--prepared-server-seed-sha256".equals(args[i]) && i + 1 < args.length) {
+                    if (result.preparedServerSeedSha256 != null) throw new IllegalArgumentException("Duplicate inventory hash option");
+                    result.preparedServerSeedSha256 = args[++i];
+                }
                 else if ("--stations".equals(args[i]) && i + 1 < args.length) {
                     result.lifecycleStations = new ArrayList<>();
                     for (String station : args[++i].split(",")) {
@@ -1052,6 +1447,12 @@ public final class WorksRunner {
                 else throw new IllegalArgumentException("Unknown runner argument " + args[i]);
             }
             if (result.profile == null) throw new IllegalArgumentException("--profile is required");
+            boolean anySeed = result.preparedServerSeed != null || result.preparedServerSeedInventory != null
+                    || result.preparedServerSeedSha256 != null;
+            if (anySeed && (result.preparedServerSeed == null || result.preparedServerSeedInventory == null
+                    || result.preparedServerSeedSha256 == null)) {
+                throw new IllegalArgumentException("Prepared seed requires path, inventory and inventory SHA-256 together");
+            }
             return result;
         }
     }
@@ -1059,14 +1460,14 @@ public final class WorksRunner {
     static final class Profile {
         String name;
         String mode;
-        String runtimeBase = "build/works-native115";
+        String runtimeBase = "build/works-native116";
         int serverPort = 25565;
         int startupTimeoutSeconds = 120;
         int shutdownTimeoutSeconds = 60;
         int stationRunSeconds = 5;
         String levelName = "AdvantageWorks";
-        String levelSeed = "advantage-works-1.15.2-v1";
-        String levelType = "FLAT";
+        String levelSeed = "advantage-works-1.16.5-v1";
+        String levelType = "advantageworkstest:test_flat";
         String generatorSettings = "";
         boolean buildWorks = true;
         int worldgenSampleRadius;
@@ -1083,6 +1484,7 @@ public final class WorksRunner {
         String qualificationStatus;
         String legacySourceProfile;
         ForgeInput forge;
+        transient PreparedServerSeed preparedSeed;
         List<String> launchCommand = new ArrayList<>();
         List<ModInput> mods = new ArrayList<>();
         List<ConfigFixture> configFixtures = new ArrayList<>();

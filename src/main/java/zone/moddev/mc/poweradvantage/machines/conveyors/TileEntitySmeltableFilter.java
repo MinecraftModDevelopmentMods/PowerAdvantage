@@ -11,10 +11,10 @@ public class TileEntitySmeltableFilter extends TileEntityConveyorFilter {
 
 	@Override
 	public boolean matchesFilter(ItemStack item) {
-		if (item == null || item.isEmpty() || world == null) return false;
+		if (item == null || item.isEmpty() || level == null) return false;
 		Inventory probe = new Inventory(1);
-		probe.setInventorySlotContents(0, item.copy());
-		return world.getRecipeManager().getRecipe(IRecipeType.SMELTING, probe, world).isPresent();
+		probe.setItem(0, item.copy());
+		return level.getRecipeManager().getRecipeFor(IRecipeType.SMELTING, probe, level).isPresent();
 	}
 
 }

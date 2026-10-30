@@ -58,14 +58,14 @@ final class ChildRendererGeometryProbe {
         result.add("child_renderer_geometry", report);
         try {
             require(Boolean.getBoolean("advantageworks.requireExtensions"), "Child renderer geometry requires the combined profile");
-            require(minecraft.world == null && minecraft.player == null && !minecraft.isIntegratedServerRunning(), "Geometry probe must remain worldless");
+            require(minecraft.level == null && minecraft.player == null && !minecraft.hasSingleplayerServer(), "Geometry probe must remain worldless");
             steam(minecraft, cases);
             drill(minecraft, cases);
             turret(minecraft, cases);
             run(cases, "hydroturbine-registration", row -> {
                 EntityType<?> type = ForgeRegistries.ENTITIES.getValue(new ResourceLocation("electricadvantage:hydroturbine"));
                 require(type != null, "Missing registered hydroturbine type");
-                EntityRenderer<?> renderer = minecraft.getRenderManager().renderers.get(type);
+                EntityRenderer<?> renderer = minecraft.getEntityRenderDispatcher().renderers.get(type);
                 require(renderer != null && TURBINE_RENDERER.equals(renderer.getClass().getName()), "Missing production hydroturbine renderer");
                 row.addProperty("renderer", renderer.getClass().getName());
                 ResourceLocation texture = (ResourceLocation) valueOfType(renderer, ResourceLocation.class);
@@ -178,7 +178,7 @@ final class ChildRendererGeometryProbe {
         TileEntityType<?> type = ForgeRegistries.TILE_ENTITIES.getValue(new ResourceLocation(id));
         require(type != null, "Missing registered tile type " + id);
         TileEntity tile = type.create();
-        require(tile != null && tile.getWorld() == null, "Tile factory must create a worldless native fixture");
+        require(tile != null && tile.getLevel() == null, "Tile factory must create a worldless native fixture");
         return tile;
     }
 
@@ -189,9 +189,9 @@ final class ChildRendererGeometryProbe {
         row.addProperty("renderer", renderer.getClass().getName());
         row.addProperty("partial_tick", partial);
         MatrixStack matrices = new MatrixStack();
-        MatrixStack.Entry original = matrices.getLast();
-        net.minecraft.client.renderer.Matrix4f position = original.getMatrix().copy();
-        net.minecraft.client.renderer.Matrix3f normal = original.getNormal().copy();
+        MatrixStack.Entry original = matrices.last();
+        net.minecraft.util.math.vector.Matrix4f position = original.pose().copy();
+        net.minecraft.util.math.vector.Matrix3f normal = original.normal().copy();
         Capture buffers = new Capture(minecraft, new ResourceLocation(expectedTexture), row);
         boolean balanced;
         Throwable renderFailure = null;
@@ -202,8 +202,8 @@ final class ChildRendererGeometryProbe {
             row.addProperty("render_error", failure.toString());
             throw failure;
         } finally {
-            balanced = matrices.clear() && matrices.getLast() == original
-                    && position.equals(original.getMatrix()) && normal.equals(original.getNormal());
+            balanced = matrices.clear() && matrices.last() == original
+                    && position.equals(original.pose()) && normal.equals(original.normal());
             row.addProperty("matrix_balanced", balanced);
             try { buffers.finish(); }
             catch (Exception failure) {
@@ -232,12 +232,12 @@ final class ChildRendererGeometryProbe {
         }
 
         @Override public IVertexBuilder getBuffer(RenderType type) {
-            require(type.getDrawMode() == 7 && type.getVertexFormat().equals(DefaultVertexFormats.ENTITY), "Unexpected production renderer vertex format/mode");
+            require(type.mode() == 7 && type.format().equals(DefaultVertexFormats.NEW_ENTITY), "Unexpected production renderer vertex format/mode");
             BufferBuilder buffer = buffers.get(type);
             if (buffer == null) {
                 require(buffers.size() < 8, "Renderer requested too many buffers");
                 buffer = new BufferBuilder(4096);
-                buffer.begin(type.getDrawMode(), type.getVertexFormat());
+                buffer.begin(type.mode(), type.format());
                 buffers.put(type, buffer);
             }
             return buffer;
@@ -246,24 +246,24 @@ final class ChildRendererGeometryProbe {
         void finish() throws Exception {
             for (Map.Entry<RenderType, BufferBuilder> entry : buffers.entrySet()) {
                 BufferBuilder buffer = entry.getValue();
-                buffer.finishDrawing();
-                Pair<BufferBuilder.DrawState, ByteBuffer> built = buffer.getNextBuffer();
-                int count = built.getFirst().getVertexCount();
+                buffer.end();
+                Pair<BufferBuilder.DrawState, ByteBuffer> built = buffer.popNextBuffer();
+                int count = built.getFirst().vertexCount();
                 JsonObject batch = new JsonObject();
                 batches.add(batch);
                 batch.addProperty("vertex_count", count);
-                batch.addProperty("format", built.getFirst().getFormat().toString());
+                batch.addProperty("format", built.getFirst().format().toString());
                 JsonArray raw = new JsonArray();
                 batch.add("vertices_xyz_uv_normal_alpha", raw);
                 require(count <= 4096, "Renderer exceeded the bounded geometry fixture");
-                VertexFormat format = built.getFirst().getFormat();
+                VertexFormat format = built.getFirst().format();
                 ByteBuffer data = built.getSecond();
                 int p = offset(format, VertexFormatElement.Usage.POSITION, 0);
                 int uv = offset(format, VertexFormatElement.Usage.UV, 0);
                 int n = offset(format, VertexFormatElement.Usage.NORMAL, 0);
                 int c = offset(format, VertexFormatElement.Usage.COLOR, 0);
                 for (int i = 0; i < count; i++) {
-                    int base = i * format.getSize();
+                    int base = i * format.getVertexSize();
                     float[] vertex = {data.getFloat(base + p), data.getFloat(base + p + 4), data.getFloat(base + p + 8),
                             data.getFloat(base + uv), data.getFloat(base + uv + 4), data.get(base + n) / 127F,
                             data.get(base + n + 1) / 127F, data.get(base + n + 2) / 127F, (data.get(base + c + 3) & 255) / 255F};

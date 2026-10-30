@@ -35,17 +35,28 @@ public abstract class PoweredEntity extends TileEntity implements ITickableTileE
     @Override
     public <T> net.minecraftforge.common.util.LazyOptional<T> getCapability(
             net.minecraftforge.common.capabilities.Capability<T> capability, net.minecraft.util.Direction face) {
+        if (!areCapabilitiesValid()) return net.minecraftforge.common.util.LazyOptional.empty();
+        if (machineCapabilities == null) return super.getCapability(capability, face);
         net.minecraftforge.common.util.LazyOptional<T> local = machineCapabilities.get(capability, face);
         return local.isPresent() ? local : super.getCapability(capability, face);
     }
 
     @Override protected void invalidateCaps() {
+        if (machineCapabilities != null) machineCapabilities.invalidate();
         super.invalidateCaps();
-        machineCapabilities.invalidate();
     }
 
-    @Override public void validate() {
-        super.validate();
+    @Override protected void reviveCaps() {
+        super.reviveCaps();
+        if (machineCapabilities != null) machineCapabilities.revive();
+    }
+
+    protected boolean areCapabilitiesValid() {
+        return !isRemoved() && (machineCapabilities == null || machineCapabilities.isValid());
+    }
+
+    @Override public void clearRemoved() {
+        super.clearRemoved();
         reviveCaps();
     }
 
@@ -128,10 +139,10 @@ public abstract class PoweredEntity extends TileEntity implements ITickableTileE
 	 * Tells Minecraft to synchronize this tile entity
 	 */
 	protected final void sync() {
-		if (this.world == null || this.world.isRemote) return;
-		this.markDirty();
-        BlockState state = this.world.getBlockState(getPos());
-        this.world.notifyBlockUpdate(getPos(), state, state, 2);
+		if (this.level == null || this.level.isClientSide) return;
+		this.setChanged();
+        BlockState state = this.level.getBlockState(getBlockPos());
+        this.level.sendBlockUpdated(getBlockPos(), state, state, 2);
 	}
 
 	/**
@@ -148,19 +159,19 @@ public abstract class PoweredEntity extends TileEntity implements ITickableTileE
 	}
 
 	protected final World powerAdvantageWorld() {
-		return super.getWorld();
+		return super.getLevel();
 	}
 
 	protected final BlockPos powerAdvantagePos() {
-		return super.getPos();
+		return super.getBlockPos();
 	}
 
 	@Override
 	public void onLoad() {
 		super.onLoad();
 		this.conduitRefreshDelay = 2;
-		if (this.world != null && !this.world.isRemote) {
-			ConduitRegistry.getInstance().conduitBlockLoadedEvent(this.world, this.world.dimension.getType().getId(), this.getTypes());
+		if (this.level != null && !this.level.isClientSide) {
+			ConduitRegistry.getInstance().conduitBlockLoadedEvent(this.level, this.getTypes());
 		}
 	}
 
@@ -172,10 +183,10 @@ public abstract class PoweredEntity extends TileEntity implements ITickableTileE
 	 * @param player player receiving the current machine state
 	 */
 	public final void syncPowerAdvantageDataTo(ServerPlayerEntity player) {
-		this.markDirty();
+		this.setChanged();
 		IPacket<?> packet = this.getUpdatePacket();
 		if (packet != null) {
-			player.connection.sendPacket(packet);
+			player.connection .send(packet);
 		}
 	}
 
@@ -190,7 +201,7 @@ public abstract class PoweredEntity extends TileEntity implements ITickableTileE
 			this.refreshConduitNetworkAfterLoad();
 		}
 		this.tickUpdate(this.isServer());
-		if (this.isServer() && ((this.getWorld().getGameTime() + this.getTickOffset()) % powerUpdateInterval == 0)) {
+		if (this.isServer() && ((this.getLevel().getGameTime() + this.getTickOffset()) % powerUpdateInterval == 0)) {
 			this.powerUpdate();
 		}
 	}
@@ -198,7 +209,7 @@ public abstract class PoweredEntity extends TileEntity implements ITickableTileE
 	private void refreshConduitNetworkAfterLoad() {
 		if (this.conduitRefreshDelay < 0) return;
 		if (this.conduitRefreshDelay-- > 0) return;
-		ConduitRegistry.getInstance().conduitBlockLoadedEvent(this.world, this.world.dimension.getType().getId(), this.getTypes());
+		ConduitRegistry.getInstance().conduitBlockLoadedEvent(this.level, this.getTypes());
 	}
 
 	/**
@@ -223,7 +234,7 @@ public abstract class PoweredEntity extends TileEntity implements ITickableTileE
 	 * @return true if on server world, false otherwise
 	 */
 	public boolean isServer() {
-		return !this.getWorld().isRemote;
+		return !this.getLevel().isClientSide;
 	}
 
 	/**
@@ -233,7 +244,7 @@ public abstract class PoweredEntity extends TileEntity implements ITickableTileE
 	 * @return false if on server world, true if on client
 	 */
 	public boolean isClient() {
-		return this.getWorld().isRemote;
+		return this.getLevel().isClientSide;
 	}
 
 	/**
@@ -244,7 +255,7 @@ public abstract class PoweredEntity extends TileEntity implements ITickableTileE
 	 * @return
 	 */
 	private final int getTickOffset() {
-		BlockPos coord = this.getPos();
+		BlockPos coord = this.getBlockPos();
 		int x = coord.getX();
 		int y = coord.getY();
 		int z = coord.getZ();
@@ -256,8 +267,8 @@ public abstract class PoweredEntity extends TileEntity implements ITickableTileE
 	 * packet.
 	 */
 	@Override
-	public void read(final CompoundNBT tagRoot) {
-		super.read(tagRoot);
+	public void load(net.minecraft.block.BlockState state, final CompoundNBT tagRoot) {
+		super.load(state, tagRoot);
 		this.conduitRefreshDelay = 2;
 		if (tagRoot.contains("Energy", 11)) {
 			int[] data = tagRoot.getIntArray("Energy");
@@ -273,8 +284,8 @@ public abstract class PoweredEntity extends TileEntity implements ITickableTileE
 	 * the network.
 	 */
 	@Override
-	public CompoundNBT write(final CompoundNBT tagRoot) {
-		super.write(tagRoot);
+	public CompoundNBT save(final CompoundNBT tagRoot) {
+		super.save(tagRoot);
 		int[] data = new int[this.getTypes().length];
 		for (int i = 0; i < data.length; i++) {
 			data[i] = Float.floatToIntBits(this.getEnergy(this.getTypes()[i]));
@@ -282,6 +293,12 @@ public abstract class PoweredEntity extends TileEntity implements ITickableTileE
 		tagRoot.putIntArray("Energy", data);
 		return tagRoot;
 	}
+
+	/** @deprecated Minecraft now calls {@link #load(BlockState, CompoundNBT)}. */
+	@Deprecated public void read(CompoundNBT tag) { load(getBlockState(), tag); }
+
+	/** @deprecated Minecraft now calls {@link #save(CompoundNBT)}. */
+	@Deprecated public CompoundNBT write(CompoundNBT tag) { return save(tag); }
 
 
 	/**
@@ -292,7 +309,7 @@ public abstract class PoweredEntity extends TileEntity implements ITickableTileE
 	 * priority to lowest (energy storage will have lower priority than machines).
 	 */
 	protected List<PowerRequest> getRequestsForPower(ConduitType powerType) {
-		return ConduitRegistry.getInstance().getRequestsForPower(getWorld(), getPos(), powerType, powerType);
+		return ConduitRegistry.getInstance().getRequestsForPower(getLevel(), getBlockPos(), powerType, powerType);
 	}
 
 	/**

@@ -88,7 +88,7 @@ public class PowerConnectorContext {
 		this.thisBlock = connectorBlock;
 		this.thisBlockPosition = connectorPosition;
 		this.thisBlockSide = connectorSide;
-		this.otherBlockPosition = connectorPosition.offset(connectorSide);
+		this.otherBlockPosition = connectorPosition.relative(connectorSide);
 		this.otherBlockSide = connectorSide.getOpposite();
 		this.otherBlock = world.getBlockState(otherBlockPosition);
 	}

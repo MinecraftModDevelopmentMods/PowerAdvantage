@@ -1,0 +1,96 @@
+{
+  "name": "packaged-mineralogy",
+  "mode": "packaged",
+  "runtimeBase": "build/works-native116",
+  "serverPort": 25565,
+  "startupTimeoutSeconds": 180,
+  "shutdownTimeoutSeconds": 60,
+  "stationRunSeconds": 5,
+  "recipeMode": "NORMAL",
+  "sourceCommit": "bcb75bfa91c14751ebf1e31865e1ec0ffa82c0b7",
+  "sourceVersion": "2.4.7.116051",
+  "forge": {
+    "version": "1.16.5-36.2.34",
+    "installerPath": "build/native116-artifacts/53B73DBBCC486F38726E76CE923B13381044984C83C762847C7193340F97130F/forge-1.16.5-36.2.34-installer.jar",
+    "url": "https://maven.minecraftforge.net/net/minecraftforge/forge/1.16.5-36.2.34/forge-1.16.5-36.2.34-installer.jar",
+    "sha256": "53B73DBBCC486F38726E76CE923B13381044984C83C762847C7193340F97130F"
+  },
+  "mods": [
+    {
+      "id": "advantageworkstest",
+      "version": "1.1.0.116051",
+      "file": "AdvantageWorksTestHarness-1.1.0.116051.jar",
+      "path": "build/native116-artifacts/607D4C91275D0CD1236CAB98A1C7F70B8A798726D75FAD2BB27563993BEF159A/AdvantageWorksTestHarness-1.1.0.116051.jar",
+      "workspaceProduced": true,
+      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027\\harness-k-power-f\\AdvantageWorksTestHarness-1.1.0.116051.jar",
+      "sha256": "607D4C91275D0CD1236CAB98A1C7F70B8A798726D75FAD2BB27563993BEF159A",
+      "sourceRef": "c7a79fc9894e067ed0645daad253e1355628d138",
+      "pinStatus": "PINNED_UNQUALIFIED"
+    },
+    {
+      "id": "poweradvantage",
+      "version": "2.4.7.116051",
+      "file": "PowerAdvantage-2.4.7.116051.jar",
+      "path": "build/native116-artifacts/5BE5C05D9F78BAF730553B71D07D76BA923EA0A54ABCA53F4149386B27019E71/PowerAdvantage-2.4.7.116051.jar",
+      "workspaceProduced": true,
+      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027\\power-bootstrap-f\\PowerAdvantage-2.4.7.116051.jar",
+      "sha256": "5BE5C05D9F78BAF730553B71D07D76BA923EA0A54ABCA53F4149386B27019E71",
+      "sourceRef": "bcb75bfa91c14751ebf1e31865e1ec0ffa82c0b7",
+      "pinStatus": "PINNED_UNQUALIFIED"
+    },
+    {
+      "id": "steamadvantage",
+      "version": "2.2.8.116051",
+      "file": "SteamAdvantage-2.2.8.116051.jar",
+      "path": "build/native116-artifacts/0E8EF7DA681A5105E5206F166A36F56AEF356DFD227F1C3910DE7BDC606AA148/SteamAdvantage-2.2.8.116051.jar",
+      "workspaceProduced": true,
+      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027\\Steam F Build 20261027-a\\artifacts\\SteamAdvantage-2.2.8.116051.jar",
+      "sha256": "0E8EF7DA681A5105E5206F166A36F56AEF356DFD227F1C3910DE7BDC606AA148",
+      "sourceRef": "5be1ce9faf7465d072f2c8b0e3206899bafb34e8",
+      "pinStatus": "PINNED_UNQUALIFIED"
+    },
+    {
+      "id": "electricadvantage",
+      "version": "2.2.8.116051",
+      "file": "ElectricAdvantage-2.2.8.116051.jar",
+      "path": "build/native116-artifacts/A9B62DD737E42455FEE72BD2D855C9C5EDBF5A9C5EAD7B48C650C9073A35B129/ElectricAdvantage-2.2.8.116051.jar",
+      "workspaceProduced": true,
+      "originPath": "D:\\PowerAdvantage\\_verification\\advantage-116-port-20261027\\Electric F Build 20261027-a\\ElectricAdvantage-2.2.8.116051.jar",
+      "sha256": "A9B62DD737E42455FEE72BD2D855C9C5EDBF5A9C5EAD7B48C650C9073A35B129",
+      "sourceRef": "9a8fdf53a111499f2ebc969ac24a6f3e1017c18e",
+      "pinStatus": "PINNED_UNQUALIFIED"
+    },
+    {
+      "id": "orespawn",
+      "version": "4.1.0.116051",
+      "file": "OreSpawn-4.1.0.116051.jar",
+      "path": "build/native116-artifacts/CDF59D83F191C5FBCD8921228DB577066A63A8FEB25CA79DB4EAEEA32D32DB04/OreSpawn-4.1.0.116051.jar",
+      "workspaceProduced": true,
+      "originPath": "D:\\PowerAdvantage\\PA116\\PowerAdvantage\\test-rig\\build\\native116-artifacts\\CDF59D83F191C5FBCD8921228DB577066A63A8FEB25CA79DB4EAEEA32D32DB04\\OreSpawn-4.1.0.116051.jar",
+      "sha256": "CDF59D83F191C5FBCD8921228DB577066A63A8FEB25CA79DB4EAEEA32D32DB04",
+      "sourceRef": "a113e5d767169189f0e35ade1e173a12d550b00e",
+      "pinStatus": "PINNED_UNQUALIFIED"
+    },
+    {
+      "id": "mineralogy",
+      "version": "6.1.4.116051",
+      "file": "Mineralogy-6.1.4.116051.jar",
+      "path": "build/native116-artifacts/6A46E7D24B9394F0BFBCE82E47E76CBC4DBA260DD3D7499F9B3A946029E8D7F7/Mineralogy-6.1.4.116051.jar",
+      "workspaceProduced": true,
+      "originPath": "D:\\PowerAdvantage\\PA116\\PowerAdvantage\\test-rig\\build\\native116-artifacts\\6A46E7D24B9394F0BFBCE82E47E76CBC4DBA260DD3D7499F9B3A946029E8D7F7\\Mineralogy-6.1.4.116051.jar",
+      "sha256": "6A46E7D24B9394F0BFBCE82E47E76CBC4DBA260DD3D7499F9B3A946029E8D7F7",
+      "sourceRef": "f6d603d54ee7e6ad7424a5dd44e7a2858c89c846",
+      "pinStatus": "PINNED_UNQUALIFIED"
+    }
+  ],
+  "lifecycleStations": [
+    "W-03",
+    "S-01"
+  ],
+  "minecraftVersion": "1.16.5",
+  "portStatus": "PORTED_UNQUALIFIED",
+  "qualificationStatus": "UNQUALIFIED",
+  "legacySourceProfile": "../../../PA113/PowerAdvantage/test-rig/profiles/packaged-mineralogy.json",
+  "generatorSettings": "",
+  "inputStatus": "PINNED_UNQUALIFIED"
+}

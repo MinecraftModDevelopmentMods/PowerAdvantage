@@ -24,15 +24,15 @@ public class StillBlock extends BlockSimpleFluidMachine {
 
 	public StillBlock() {
 		super(Material.PISTON, 3f);
-		this.setDefaultState(getDefaultState().with(ACTIVE, false));
+		this.registerDefaultState(defaultBlockState().setValue(ACTIVE, false));
 	}
 
 	/**
 	 * Creates a blockstate
 	 */
 	@Override
-	protected void fillStateContainer(StateContainer.Builder<net.minecraft.block.Block, BlockState> builder) {
-		super.fillStateContainer(builder);
+	protected void createBlockStateDefinition(StateContainer.Builder<net.minecraft.block.Block, BlockState> builder) {
+		super.createBlockStateDefinition(builder);
 		builder.add(ACTIVE);
 	}
 
@@ -45,8 +45,8 @@ public class StillBlock extends BlockSimpleFluidMachine {
 		if (enumFacing.getAxis() == Direction.Axis.Y) {
 			enumFacing = Direction.NORTH;
 		}
-		return this.getDefaultState().with(FACING, enumFacing)
-				.with(ACTIVE, (metaValue & 0x4) != 0);
+		return this.defaultBlockState().setValue(FACING, enumFacing)
+				.setValue(ACTIVE, (metaValue & 0x4) != 0);
 	}
 
 	/**
@@ -55,12 +55,12 @@ public class StillBlock extends BlockSimpleFluidMachine {
 	@Override
 	public int getMetaFromState(final BlockState bs) {
 		int extraBit;
-		if ((Boolean) (bs .get(ACTIVE))) {
+		if ((Boolean) (bs .getValue(ACTIVE))) {
 			extraBit = 0x4;
 		} else {
 			extraBit = 0;
 		}
-		return facingToMeta((Direction) bs .get(FACING)) | extraBit;
+		return facingToMeta((Direction) bs .getValue(FACING)) | extraBit;
 	}
 
 	private int facingToMeta(Direction f) {
@@ -96,22 +96,22 @@ public class StillBlock extends BlockSimpleFluidMachine {
 
 	@Override
 	public int getLightValue(BlockState bs, net.minecraft.world.IBlockReader world, BlockPos coord) {
-		return bs.get(ACTIVE) ? 12 : 0;
+		return bs.getValue(ACTIVE) ? 12 : 0;
 	}
 
 	@Override
-	public PoweredEntity createNewTileEntity(IBlockReader world) {
+	public PoweredEntity newBlockEntity(IBlockReader world) {
 		return new StillTileEntity();
 	}
 
 	@Override
-	public boolean hasComparatorInputOverride(BlockState bs) {
+	public boolean hasAnalogOutputSignal(BlockState bs) {
 		return true;
 	}
 
 	@Override
-	public int getComparatorInputOverride(BlockState bs, World world, BlockPos coord) {
-		TileEntity te = world.getTileEntity(coord);
+	public int getAnalogOutputSignal(BlockState bs, World world, BlockPos coord) {
+		TileEntity te = world.getBlockEntity(coord);
 		if (te instanceof StillTileEntity) {
 			return ((StillTileEntity) te).getRedstoneOutput();
 		}

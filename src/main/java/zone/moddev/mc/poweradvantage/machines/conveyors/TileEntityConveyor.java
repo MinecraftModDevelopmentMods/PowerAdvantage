@@ -35,17 +35,25 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 
     @Override public <T> net.minecraftforge.common.util.LazyOptional<T> getCapability(
             net.minecraftforge.common.capabilities.Capability<T> capability, Direction face) {
+        if (isRemoved() || (machineCapabilities != null && !machineCapabilities.isValid()))
+            return net.minecraftforge.common.util.LazyOptional.empty();
+        if (machineCapabilities == null) return super.getCapability(capability, face);
         net.minecraftforge.common.util.LazyOptional<T> local = machineCapabilities.get(capability, face);
         return local.isPresent() ? local : super.getCapability(capability, face);
     }
 
     @Override protected void invalidateCaps() {
+        if (machineCapabilities != null) machineCapabilities.invalidate();
         super.invalidateCaps();
-        machineCapabilities.invalidate();
     }
 
-    @Override public void validate() {
-        super.validate();
+    @Override protected void reviveCaps() {
+        super.reviveCaps();
+        if (machineCapabilities != null) machineCapabilities.revive();
+    }
+
+    @Override public void clearRemoved() {
+        super.clearRemoved();
         reviveCaps();
     }
 	
@@ -71,8 +79,8 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 	
 	@Override
 	public void tick() {
-		World w = getWorld();
-		if(w.isRemote) return;
+		World w = getLevel();
+		if(w.isClientSide) return;
 		if(transferCooldown > 0) transferCooldown--;
 		if(transferCooldown == 0){
 			// do tick update
@@ -81,15 +89,15 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 			// deposit item
 			Direction myDir = dir;
 			Direction theirDir = dir.getOpposite();
-			BlockPos targetPos = getPos().offset(myDir);
-			TileEntity target = w.getTileEntity(targetPos);
+			BlockPos targetPos = getBlockPos().relative(myDir);
+			TileEntity target = w.getBlockEntity(targetPos);
 			if(target != null) {
 				if( target instanceof IInventory){
-					ISidedInventory them = InventoryWrapper.wrap(HopperTileEntity.getInventoryAtPosition(getWorld(),targetPos.getX(), targetPos.getY(), targetPos.getZ()));
+					ISidedInventory them = InventoryWrapper.wrap(HopperTileEntity.getContainerAt(getLevel(),targetPos.getX(), targetPos.getY(), targetPos.getZ()));
 
 					if(transferItem(this,myDir,them,theirDir)){
 						transferCooldown = transferInvterval;
-						this.markDirty();
+						this.setChanged();
 					}
 				}
 			}
@@ -97,15 +105,15 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 			// get item
 			myDir = dir.getOpposite();
 			theirDir = dir;
-			BlockPos upstreamBlock = getPos().offset(myDir);
-			if(w.isAirBlock(upstreamBlock)){
+			BlockPos upstreamBlock = getBlockPos().relative(myDir);
+			if(w.isEmptyBlock(upstreamBlock)){
 				// grab items sitting on the ground behind the conveyor
-				List<ItemEntity> list = w.getEntitiesWithinAABB(ItemEntity.class, new AxisAlignedBB(
+				List<ItemEntity> list = w.getEntitiesOfClass(ItemEntity.class, new AxisAlignedBB(
 						upstreamBlock.getX(), upstreamBlock.getY(), upstreamBlock.getZ(), 
 						upstreamBlock.getX()+1, upstreamBlock.getY()+1, upstreamBlock.getZ()+1));
 				if(!list.isEmpty()){
 					ItemEntity e = list.get(0);
-					if(!e.isAirBorne){
+					if(!e.hasImpulse){
 						ItemStack entityStack = e.getItem();
 						if(canInsertItemInto(entityStack,this,myDir)){
 							ItemStack newItem = entityStack.copy();
@@ -121,17 +129,17 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 							} else {
 								e.setItem(entityStack);
 							}
-							this.markDirty();
+							this.setChanged();
 						}
 					}
 				}
 			} else {
-				target = w.getTileEntity(upstreamBlock);
+				target = w.getBlockEntity(upstreamBlock);
 				if(target != null){
 					if( target instanceof IInventory){
-						ISidedInventory them = InventoryWrapper.wrap(HopperTileEntity.getInventoryAtPosition(getWorld(),upstreamBlock.getX(), upstreamBlock.getY(), upstreamBlock.getZ()));
+						ISidedInventory them = InventoryWrapper.wrap(HopperTileEntity.getContainerAt(getLevel(),upstreamBlock.getX(), upstreamBlock.getY(), upstreamBlock.getZ()));
 						if(transferItem(them,theirDir,this,myDir)){
-							this.markDirty();
+							this.setChanged();
 						}
 					}
 				}
@@ -152,12 +160,13 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 		int[] slots = dest.getSlotsForFace(destFace);
 		for(int i = 0; i < slots.length; i++){
 			int slot = slots[i];
-			if(dest.canInsertItem(slot, item, destFace)){
-				ItemStack destItem = dest.getStackInSlot(slot);
+			if(dest.canPlaceItemThroughFace(slot, item, destFace)){
+				ItemStack destItem = dest.getItem(slot);
 				if(destItem == null || destItem.isEmpty()) {
 					return true;
-				} else {
-					return ItemStack.areItemsEqual(item, destItem);
+				} else if (ItemStack.isSame(item, destItem) && ItemStack.tagMatches(item, destItem)
+						&& destItem.getCount() < Math.min(dest.getMaxStackSize(), destItem.getMaxStackSize())) {
+					return true;
 				}
 			}
 		}
@@ -170,30 +179,35 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 		}
 		int[] srcValidSlots = src.getSlotsForFace(srcFace);
 		for(int i = 0; i < srcValidSlots.length; i++){
-			ItemStack item = src.getStackInSlot(srcValidSlots[i]);
+			ItemStack item = src.getItem(srcValidSlots[i]);
 			if(item == null || item.isEmpty()) continue;
-			if(src.canExtractItem(srcValidSlots[i], item, srcFace)){
+			if(src.canTakeItemThroughFace(srcValidSlots[i], item, srcFace)){
 					int[] destValidSlots = dest.getSlotsForFace(destFace);
 					// First look for stackable items
 					for(int j = 0; j < destValidSlots.length; j++){
-						if(dest.canInsertItem(destValidSlots[j], item, destFace)){
-							ItemStack otherItem = dest.getStackInSlot(destValidSlots[j]);
+						if(dest.canPlaceItemThroughFace(destValidSlots[j], item, destFace)){
+							ItemStack otherItem = dest.getItem(destValidSlots[j]);
 							if(otherItem != null && !otherItem.isEmpty()
-									&& ItemStack.areItemsEqual(item, otherItem)
-									&& otherItem.getCount() < dest.getInventoryStackLimit()
-									&& otherItem.getCount() < otherItem.getItem().getItemStackLimit(otherItem)){
-								src.decrStackSize(srcValidSlots[i], 1);
+									&& ItemStack.isSame(item, otherItem)
+									&& ItemStack.tagMatches(item, otherItem)
+									&& otherItem.getCount() < dest.getMaxStackSize()
+									&& otherItem.getCount() < otherItem.getMaxStackSize()){
+								src.removeItem(srcValidSlots[i], 1);
 								otherItem.grow(1);
+								src.setChanged();
+								dest.setChanged();
 								return true;
 							}
 						}
 					}
 					// then look for empty slots
 					for(int j = 0; j < destValidSlots.length; j++){
-						if(dest.canInsertItem(destValidSlots[j], item, destFace)){
-							ItemStack otherItem = dest.getStackInSlot(destValidSlots[j]);
+						if(dest.canPlaceItemThroughFace(destValidSlots[j], item, destFace)){
+							ItemStack otherItem = dest.getItem(destValidSlots[j]);
 							if(otherItem == null || otherItem.isEmpty()){
-								dest.setInventorySlotContents(destValidSlots[j], src.decrStackSize(srcValidSlots[i], 1));
+								dest.setItem(destValidSlots[j], src.removeItem(srcValidSlots[i], 1));
+								src.setChanged();
+								dest.setChanged();
 								return true;
 							}
 						}
@@ -210,11 +224,11 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 	 * @return an EnumfFacing
 	 */
 	public Direction getFacing(){
-		BlockState state = getWorld().getBlockState(getPos());
-		if(state.has(BlockConveyor.FACING)){
-			return state.get(BlockConveyor.FACING);
+		BlockState state = getLevel().getBlockState(getBlockPos());
+		if(state.hasProperty(BlockConveyor.FACING)){
+			return state.getValue(BlockConveyor.FACING);
 		}else{
-			PowerAdvantage.LOGGER.warn("{}.getFacing(): blockstate at {} does not have BlockConveyor.FACING", this.getClass().getName(), getPos());
+			PowerAdvantage.LOGGER.warn("{}.getFacing(): blockstate at {} does not have BlockConveyor.FACING", this.getClass().getName(), getBlockPos());
 			return Direction.NORTH;
 		}
 	}
@@ -231,8 +245,8 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 	 * @param tagRoot The root of the NBT
 	 */
 	@Override
-	public void read(final CompoundNBT tagRoot) {
-		super.read(tagRoot);
+	public void load(net.minecraft.block.BlockState state, final CompoundNBT tagRoot) {
+		super.load(state, tagRoot);
 		ItemStack[] inventory = this.getInventory();
 		if(inventory != null ){
 			Arrays.fill(inventory, null);
@@ -241,7 +255,7 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 				final CompoundNBT nbttagcompound1 = nbttaglist .getCompound(i);
 				final byte n = nbttagcompound1.getByte("Slot");
 				if (n >= 0 && n < inventory.length) {
-					ItemStack stack = ItemStack.read(nbttagcompound1);
+					ItemStack stack = ItemStack.of(nbttagcompound1);
 					inventory[n] = stack.isEmpty() ? null : stack;
 				}
 			}
@@ -258,8 +272,8 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 	 * @param tagRoot The root of the NBT
 	 */
 	@Override
-	public CompoundNBT write(final CompoundNBT tagRoot) {
-		super .write(tagRoot);
+	public CompoundNBT save(final CompoundNBT tagRoot) {
+		super .save(tagRoot);
 		ItemStack[] inventory = this.getInventory();
 		if(inventory != null ){
 			final ListNBT nbttaglist = new ListNBT();
@@ -267,7 +281,7 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 				if (inventory[i] != null && !inventory[i].isEmpty()) {
 					final CompoundNBT nbttagcompound1 = new CompoundNBT();
 					nbttagcompound1.putByte("Slot", (byte)i);
-					inventory[i] .write(nbttagcompound1);
+					inventory[i] .save(nbttagcompound1);
 					nbttaglist .add(nbttagcompound1);
 				}
 			}
@@ -293,7 +307,7 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 	
 	///// ISidedInventory METHODS /////
 	@Override
-	public void clear() {
+	public void clearContent() {
 		Arrays.fill(inventory, null);
 	}
 
@@ -306,12 +320,12 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 	}
 
 	@Override
-	public void closeInventory(PlayerEntity p) {
+	public void stopOpen(PlayerEntity p) {
 		// do nothing
 	}
 
 	@Override
-	public ItemStack decrStackSize(int slot, int decrement) {
+	public ItemStack removeItem(int slot, int decrement) {
 		if (this.getInventory()[slot] == null || this.getInventory()[slot].isEmpty()) {
 			return ItemStack.EMPTY;
 		}
@@ -336,23 +350,23 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 	}
 
 	@Override
-	public int getInventoryStackLimit() {
+	public int getMaxStackSize() {
 		return 64;
 	}
 
 	@Override
-	public int getSizeInventory() {
+	public int getContainerSize() {
 		return getInventory().length;
 	}
 
 	@Override
-	public ItemStack getStackInSlot(int slot) {
+	public ItemStack getItem(int slot) {
 		ItemStack stack = this.getInventory()[slot];
 		return stack == null ? ItemStack.EMPTY : stack;
 	}
 	
 	@Override
-	public ItemStack removeStackFromSlot(int slot) {
+	public ItemStack removeItemNoUpdate(int slot) {
 		ItemStack i = this.getInventory()[slot];
 		this.getInventory()[slot] = null;
 		return i == null ? ItemStack.EMPTY : i;
@@ -361,21 +375,21 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 
 
 	@Override
-	public boolean isItemValidForSlot(final int slot, final ItemStack item) {
+	public boolean canPlaceItem(final int slot, final ItemStack item) {
 		return slot < getInventory().length && getInventory()[0] == null; 
 	}
 
 	@Override
-	public boolean isUsableByPlayer(final PlayerEntity p_isUseableByPlayer_1_) {
-		return this.world.getTileEntity(this.pos) 
-				== this && p_isUseableByPlayer_1_.getDistanceSq(
-						(double)this.pos.getX() + 0.5, 
-						(double)this.pos.getY() + 0.5, 
-						(double)this.pos.getZ() + 0.5) <= 64.0;
+	public boolean stillValid(final PlayerEntity p_isUseableByPlayer_1_) {
+		return this.level.getBlockEntity(this.worldPosition)
+				== this && p_isUseableByPlayer_1_.distanceToSqr(
+						(double)this.worldPosition.getX() + 0.5,
+						(double)this.worldPosition.getY() + 0.5,
+						(double)this.worldPosition.getZ() + 0.5) <= 64.0;
 	}
 
 	@Override
-	public void openInventory(PlayerEntity arg0) {
+	public void startOpen(PlayerEntity arg0) {
 		// do nothing
 	}
 
@@ -384,16 +398,16 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 	}
 
 	@Override
-	public void setInventorySlotContents(int slot, ItemStack item) {
+	public void setItem(int slot, ItemStack item) {
 		ItemStack existing = this.getInventory()[slot];
 		final boolean flag = item != null && !item.isEmpty() && existing != null && !existing.isEmpty()
-				&& item.isItemEqual(existing) && ItemStack.areItemStackTagsEqual(item, existing);
+				&& item.sameItem(existing) && ItemStack.tagMatches(item, existing);
 		this.getInventory()[slot] = (item == null || item.isEmpty()) ? null : item;
-		if (item != null && item.getCount() > this.getInventoryStackLimit()) {
-			item.setCount(this.getInventoryStackLimit());
+		if (item != null && item.getCount() > this.getMaxStackSize()) {
+			item.setCount(this.getMaxStackSize());
 		}
 		if (slot == 0 && !flag) {
-			this.markDirty();
+			this.setChanged();
 		}
 	}
 
@@ -411,7 +425,7 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 	@Override
 	public ITextComponent getName() {
 		return this.hasCustomName() ? new StringTextComponent(this.customName)
-				: new TranslationTextComponent(this.getUnlocalizedName());
+				: new TranslationTextComponent(this.getDescriptionId());
 	}
 
 	@Override
@@ -423,7 +437,7 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 	 * Gets the unlocalized String passed to the constructor
 	 * @return A String used in name localization by client GUI 
 	 */
-	public String getUnlocalizedName(){
+	public String getDescriptionId(){
 		return unlocalizedName;
 	}
 
@@ -446,7 +460,7 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 	 * @return true if the item is allowed to be pulled, false otherwise
 	 */
 	@Override
-	public boolean canExtractItem(final int slot, final ItemStack targetItem, final Direction side) {
+	public boolean canTakeItemThroughFace(final int slot, final ItemStack targetItem, final Direction side) {
 		return slot == 0;
 	}
 	/**
@@ -458,8 +472,8 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 	 * @return true if the item is allowed to be inserted, false otherwise
 	 */
 	@Override
-	public boolean canInsertItem(final int slot, final ItemStack srcItem, final Direction side) {
-		return slot == 0 && this.isItemValidForSlot(slot, srcItem);
+	public boolean canPlaceItemThroughFace(final int slot, final ItemStack srcItem, final Direction side) {
+		return slot == 0 && this.canPlaceItem(slot, srcItem);
 	}
 
 	/** cache for default implementation of getSlotsForFace(...)*/

@@ -10,10 +10,13 @@ import org.junit.Test;
 import zone.moddev.mc.poweradvantage.math.BlockPos4D;
 
 public class ConduitNetworkManagerTest {
+    @org.junit.BeforeClass public static void bootstrap() {
+        net.minecraft.util.registry.Bootstrap.bootStrap();
+    }
     private final ConduitNetworkManager manager = new ConduitNetworkManager(new ConduitType("test"));
 
     private static BlockPos4D pos(int dimension, int x, int z) {
-        return new BlockPos4D(dimension, new BlockPos(x, 80, z));
+        return new BlockPos4D(BlockPos4D.legacyDimension(dimension), new BlockPos(x, 80, z));
     }
 
     @Test
@@ -21,7 +24,7 @@ public class ConduitNetworkManagerTest {
         BlockPos4D source = pos(0, 13, 8), bridge = pos(0, 20, 8), sink = pos(0, 40, 8);
         manager.addBlockToNetwork(source, bridge);
         manager.addBlockToNetwork(source, sink);
-        manager.invalidateChunk(0, new ChunkPos(1, 0));
+        manager.invalidateChunk(net.minecraft.world.World.OVERWORLD, new ChunkPos(1, 0));
         assertFalse(manager.isValidatedNetwork(source));
         assertFalse(manager.isValidatedNetwork(bridge));
         assertFalse(manager.isValidatedNetwork(sink));
@@ -32,7 +35,7 @@ public class ConduitNetworkManagerTest {
         BlockPos4D left = pos(0, 15, 8), right = pos(0, 32, 8);
         manager.createNewNetwork(left);
         manager.createNewNetwork(right);
-        manager.invalidateChunk(0, new ChunkPos(1, 0));
+        manager.invalidateChunk(net.minecraft.world.World.OVERWORLD, new ChunkPos(1, 0));
         assertFalse(manager.isValidatedNetwork(left));
         assertFalse(manager.isValidatedNetwork(right));
     }
@@ -41,7 +44,7 @@ public class ConduitNetworkManagerTest {
     public void allFourChunkBoundariesAreInvalidated() {
         BlockPos4D[] edges = {pos(0, 15, 20), pos(0, 32, 20), pos(0, 20, 15), pos(0, 20, 32)};
         for (BlockPos4D edge : edges) manager.createNewNetwork(edge);
-        manager.invalidateChunk(0, new ChunkPos(1, 1));
+        manager.invalidateChunk(net.minecraft.world.World.OVERWORLD, new ChunkPos(1, 1));
         for (BlockPos4D edge : edges) assertFalse(manager.isValidatedNetwork(edge));
     }
 
@@ -49,7 +52,7 @@ public class ConduitNetworkManagerTest {
     public void negativeChunkCoordinatesUseTheSameBoundaryRules() {
         BlockPos4D edge = pos(0, -17, -8);
         manager.createNewNetwork(edge);
-        manager.invalidateChunk(0, new ChunkPos(-1, -1));
+        manager.invalidateChunk(net.minecraft.world.World.OVERWORLD, new ChunkPos(-1, -1));
         assertFalse(manager.isValidatedNetwork(edge));
     }
 
@@ -59,7 +62,7 @@ public class ConduitNetworkManagerTest {
         manager.createNewNetwork(nearby);
         manager.createNewNetwork(distant);
         manager.createNewNetwork(otherDimension);
-        manager.invalidateChunk(0, new ChunkPos(1, 0));
+        manager.invalidateChunk(net.minecraft.world.World.OVERWORLD, new ChunkPos(1, 0));
         assertTrue(manager.isValidatedNetwork(nearby));
         assertTrue(manager.isValidatedNetwork(distant));
         assertTrue(manager.isValidatedNetwork(otherDimension));

@@ -12,21 +12,21 @@ import net.minecraft.world.IBlockReader;
 public class InfiniteEnergyBlock extends BlockSimplePowerMachine {
 
 	public InfiniteEnergyBlock(ConduitType energyType) {
-		super(Material.IRON, 0.75f, energyType);
+		super(Material.METAL, 0.75f, energyType);
 	}
 
 	@Override
-	public PoweredEntity createNewTileEntity(IBlockReader world) {
+	public PoweredEntity newBlockEntity(IBlockReader world) {
 		return new InfiniteEnergyTileEntity(this.getTypes()[0]);
 	}
 
 	@Override
-	public boolean hasComparatorInputOverride(BlockState bs) {
+	public boolean hasAnalogOutputSignal(BlockState bs) {
 		return false;
 	}
 
 	@Override
-	public int getComparatorInputOverride(BlockState bs, World world, BlockPos coord) {
+	public int getAnalogOutputSignal(BlockState bs, World world, BlockPos coord) {
 		return 0;
 	}
 

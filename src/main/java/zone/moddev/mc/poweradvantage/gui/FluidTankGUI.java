@@ -35,8 +35,8 @@ public class FluidTankGUI extends SimpleMachineGUI {
 						guiDisplayImage, guiContainer, x, y, z);
 			}
 		}
-		GlStateManager.color4f(1f, 1f, 1f, 1f); // reset tint
-		guiContainer.getMinecraft().getTextureManager().bindTexture(guiDisplayImage);
+		com.mojang.blaze3d.systems.RenderSystem.color4f(1f, 1f, 1f, 1f); // reset tint
+		guiContainer.getMinecraft().getTextureManager().bind(guiDisplayImage);
 		guiContainer.blit(x + 77, y + 6, 176, 0, 22, 66); // x, y, textureOffsetX, textureOffsetY, width, height)
 	}
 
@@ -45,6 +45,7 @@ public class FluidTankGUI extends SimpleMachineGUI {
 			FluidStack fs, float barHeight, int xPos, int yPos,
 			ResourceLocation displayImage, GUIContainer guiContainer, int x, int y, float zLevel
 	) {
+		barHeight = Float.isFinite(barHeight) ? Math.max(0F, Math.min(1F, barHeight)) : 0F;
 		final int w = 16;
 		final int barSlotHeight = 60;
 		final int h = (int) (barSlotHeight * barHeight);
@@ -52,7 +53,7 @@ public class FluidTankGUI extends SimpleMachineGUI {
 		FluidTankGUI.drawFluidFilledRectangle(guiContainer, fs, x + xPos, y + yPos + barSlotHeight - h, w, h, zLevel);
 		//guiContainer.drawModalRectWithCustomSizedTexture(x+xPos, y+yPos+barSlotHeight-h, 0, 0, w, h, 16, h);//h * texPerPixel); // x, y, u, v, width, height, textureWidth, textureHeight
 
-		guiContainer.getMinecraft().getTextureManager().bindTexture(displayImage);
+		guiContainer.getMinecraft().getTextureManager().bind(displayImage);
 		guiContainer.blit(x + xPos - 3, y + yPos - 3, 176, 0, 22, 66); // x, y, textureOffsetX, textureOffsetY, width, height)
 	}
 
@@ -64,33 +65,33 @@ public class FluidTankGUI extends SimpleMachineGUI {
 	) {
 		if (fs == null || fs.getFluid() == null || width <= 0 || height <= 0) return;
 		// The atlas supplies the current animation frame; water's sprite is grayscale.
-		TextureAtlasSprite sprite = guiContainer.getMinecraft().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE)
+		TextureAtlasSprite sprite = guiContainer.getMinecraft().getTextureAtlas(AtlasTexture.LOCATION_BLOCKS)
 				.apply(fs.getFluid().getAttributes().getStillTexture());
-		guiContainer.getMinecraft().getTextureManager().bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
+		guiContainer.getMinecraft().getTextureManager().bind(AtlasTexture.LOCATION_BLOCKS);
 		int color = fs.getFluid().getAttributes().getColor(zone.moddev.mc.poweradvantage.util.ForgeFluidAdapter.toForge(fs));
-		if (fs.getFluid().isEquivalentTo(net.minecraft.fluid.Fluids.WATER)) {
-			color = guiContainer.getMinecraft().world != null && guiContainer.getMinecraft().player != null
-					? BiomeColors.getWaterColor(guiContainer.getMinecraft().world, guiContainer.getMinecraft().player.getPosition()) : 0x3F76E4;
+		if (fs.getFluid().isSame(net.minecraft.fluid.Fluids.WATER)) {
+			color = guiContainer.getMinecraft().level != null && guiContainer.getMinecraft().player != null
+					? BiomeColors.getAverageWaterColor(guiContainer.getMinecraft().level, guiContainer.getMinecraft().player.blockPosition()) : 0x3F76E4;
 		}
 		float red = ((color >>> 16) & 255) / 255F;
 		float green = ((color >>> 8) & 255) / 255F;
 		float blue = (color & 255) / 255F;
 		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder vertexbuffer = tessellator.getBuffer();
+		BufferBuilder vertexbuffer = tessellator.getBuilder();
 		vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
 		for (int dy = 0; dy < height; dy += 16) {
 			int tileHeight = Math.min(16, height - dy);
 			for (int dx = 0; dx < width; dx += 16) {
 				int tileWidth = Math.min(16, width - dx);
-				float u0 = sprite.getMinU(), u1 = sprite.getInterpolatedU(tileWidth);
-				float v0 = sprite.getMinV(), v1 = sprite.getInterpolatedV(tileHeight);
-				vertexbuffer.pos(x + dx, y + dy + tileHeight, zLevel).tex(u0, v1).color(red, green, blue, 1F).endVertex();
-				vertexbuffer.pos(x + dx + tileWidth, y + dy + tileHeight, zLevel).tex(u1, v1).color(red, green, blue, 1F).endVertex();
-				vertexbuffer.pos(x + dx + tileWidth, y + dy, zLevel).tex(u1, v0).color(red, green, blue, 1F).endVertex();
-				vertexbuffer.pos(x + dx, y + dy, zLevel).tex(u0, v0).color(red, green, blue, 1F).endVertex();
+				float u0 = sprite.getU0(), u1 = sprite.getU(tileWidth);
+				float v0 = sprite.getV0(), v1 = sprite.getV(tileHeight);
+				vertexbuffer.vertex(x + dx, y + dy + tileHeight, zLevel).uv(u0, v1).color(red, green, blue, 1F).endVertex();
+				vertexbuffer.vertex(x + dx + tileWidth, y + dy + tileHeight, zLevel).uv(u1, v1).color(red, green, blue, 1F).endVertex();
+				vertexbuffer.vertex(x + dx + tileWidth, y + dy, zLevel).uv(u1, v0).color(red, green, blue, 1F).endVertex();
+				vertexbuffer.vertex(x + dx, y + dy, zLevel).uv(u0, v0).color(red, green, blue, 1F).endVertex();
 			}
 		}
-		tessellator.draw();
+		tessellator.end();
 	}
 
 }

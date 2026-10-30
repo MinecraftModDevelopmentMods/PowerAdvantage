@@ -4,7 +4,7 @@ import cyano.poweradvantage.api.*;
 import zone.moddev.mc.poweradvantage.conduitnetwork.ConduitRegistry;
 import net.minecraft.block.HorizontalBlock;
 import net.minecraft.block.material.Material;
-import net.minecraft.state.IProperty;
+import net.minecraft.state.Property;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.block.BlockState;
@@ -46,7 +46,7 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
 	/**
 	 * Blockstate property indicating which direction the block is facing
 	 */
-    public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
+    public static final DirectionProperty FACING = HorizontalBlock.FACING;
     /**
      * Standard constructor for a machine block. Remember to set the GUI ID so that a GUI can pop-up 
      * when the player interacts with this block.
@@ -61,7 +61,7 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
 	public BlockSimplePowerMachine(Material blockMaterial, float hardness, ConduitType... energyType){
 		super(blockMaterial, hardness);
 		this.type = energyType;
-		this.setDefaultState(this.getStateContainer().getBaseState().with(FACING, Direction.NORTH));
+		this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH));
 	}
 
 	/**
@@ -71,7 +71,7 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
 	protected BlockSimplePowerMachine(Block.Properties properties, ConduitType... energyType) {
 		super(properties);
 		this.type = energyType;
-		this.setDefaultState(this.getStateContainer().getBaseState().with(FACING, Direction.NORTH));
+		this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH));
 	}
 	
 	/**
@@ -81,36 +81,36 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
 	 * <b>TileEntitySimplePowerMachine</b>.
 	 */
 	@Override
-    public abstract PoweredEntity createNewTileEntity(final IBlockReader world);
+    public abstract PoweredEntity newBlockEntity(final IBlockReader world);
 	
 	/**
 	 * Override of default block behavior
 	 */
 	@Override
-	public void onBlockAdded(final BlockState state, final World world, final BlockPos coord,
+	public void onPlace(final BlockState state, final World world, final BlockPos coord,
 			final BlockState oldState, final boolean isMoving) {
-		super.onBlockAdded(state, world, coord, oldState, isMoving);
+		super.onPlace(state, world, coord, oldState, isMoving);
 		this.setDefaultFacing(world, coord, state);
-		ConduitRegistry.getInstance().conduitBlockPlacedEvent(world, world.dimension.getType().getId(), coord, getTypes());
+		ConduitRegistry.getInstance().conduitBlockPlacedEvent(world, coord, getTypes());
 	}
 	/**
 	 * This method is called when the block is removed from the world by an entity.
 	 */
 	@Override
-	public void onReplaced(BlockState state, World w, BlockPos coord, BlockState newState,
+	public void onRemove(BlockState state, World w, BlockPos coord, BlockState newState,
 			boolean isMoving) {
 		if (state.getBlock() != newState.getBlock()) {
-			ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.dimension.getType().getId(), coord, getTypes());
+			ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, coord, getTypes());
 		}
-		super.onReplaced(state, w, coord, newState, isMoving);
+		super.onRemove(state, w, coord, newState, isMoving);
 	}
 	/**
 	 * This method is called when the block is destroyed by an explosion.
 	 */
 	@Override
-	public void onExplosionDestroy(World w, BlockPos coord, Explosion boom){
-		super.onExplosionDestroy(w, coord, boom);
-		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, w.dimension.getType().getId(), coord, getTypes());
+	public void wasExploded(World w, BlockPos coord, Explosion boom){
+		super.wasExploded(w, coord, boom);
+		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, coord, getTypes());
 	}
 	
 	/**
@@ -145,18 +145,18 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
 	 */
     @Override
     public BlockState getStateForPlacement(final BlockItemUseContext context) {
-        return this.getDefaultState().with(FACING, context.getPlacementHorizontalFacing().getOpposite());
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
     
     /**
 	 * Creates the blockstate of this block when it is placed in the world
 	 */
     @Override
-    public void onBlockPlacedBy(final World world, final BlockPos coord, final BlockState bs,
+    public void setPlacedBy(final World world, final BlockPos coord, final BlockState bs,
             final LivingEntity placer, final ItemStack srcItemStack) {
-        world.setBlockState(coord, bs.with((IProperty) FACING, (Comparable)placer.getHorizontalFacing().getOpposite()), 2);
-        if (srcItemStack.hasDisplayName()) {
-        	final TileEntity tileEntity = world.getTileEntity(coord);
+        world.setBlock(coord, bs.setValue((Property) FACING, (Comparable)placer.getDirection().getOpposite()), 2);
+        if (srcItemStack.hasCustomHoverName()) {
+            final TileEntity tileEntity = world.getBlockEntity(coord);
         	if (tileEntity instanceof PoweredEntity){
 				((PoweredEntity)tileEntity).setCustomInventoryName(srcItemStack.getDisplayName().getString());
         	}
@@ -174,27 +174,27 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
      * @param state Block state
      */
     protected void setDefaultFacing(final World w, final BlockPos coord, final BlockState state) {
-        if (w.isRemote) {
+        if (w.isClientSide) {
             return;
         }
         final BlockState block = w.getBlockState(coord.north());
         final BlockState block2 = w.getBlockState(coord.south());
         final BlockState block3 = w.getBlockState(coord.west());
         final BlockState block4 = w.getBlockState(coord.east());
-        Direction enumFacing = (Direction)state .get(FACING);
-        if (enumFacing == Direction.NORTH && block.isNormalCube(w, coord.north()) && !block2.isNormalCube(w, coord.south())) {
+        Direction enumFacing = (Direction)state .getValue(FACING);
+        if (enumFacing == Direction.NORTH && block.isRedstoneConductor(w, coord.north()) && !block2.isRedstoneConductor(w, coord.south())) {
             enumFacing = Direction.SOUTH;
         }
-        else if (enumFacing == Direction.SOUTH && block2.isNormalCube(w, coord.south()) && !block.isNormalCube(w, coord.north())) {
+        else if (enumFacing == Direction.SOUTH && block2.isRedstoneConductor(w, coord.south()) && !block.isRedstoneConductor(w, coord.north())) {
             enumFacing = Direction.NORTH;
         }
-        else if (enumFacing == Direction.WEST && block3.isNormalCube(w, coord.west()) && !block4.isNormalCube(w, coord.east())) {
+        else if (enumFacing == Direction.WEST && block3.isRedstoneConductor(w, coord.west()) && !block4.isRedstoneConductor(w, coord.east())) {
             enumFacing = Direction.EAST;
         }
-        else if (enumFacing == Direction.EAST && block4.isNormalCube(w, coord.east()) && !block3.isNormalCube(w, coord.west())) {
+        else if (enumFacing == Direction.EAST && block4.isRedstoneConductor(w, coord.east()) && !block3.isRedstoneConductor(w, coord.west())) {
             enumFacing = Direction.WEST;
         }
-        w.setBlockState(coord, state.with((IProperty) FACING, (Comparable)enumFacing), 2);
+        w.setBlock(coord, state.setValue((Property) FACING, (Comparable)enumFacing), 2);
     }
     
     /**
@@ -214,7 +214,7 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
     * false otherwise
     */
     @Override
-    public abstract boolean hasComparatorInputOverride(BlockState state);
+    public abstract boolean hasAnalogOutputSignal(BlockState state);
     
     /**
      * This method gets the output for a redstone comparator placed against this 
@@ -234,43 +234,43 @@ public abstract class BlockSimplePowerMachine extends GUIBlock implements ITyped
      * @return a number from 0 to 15
      */
     @Override
-    public  abstract  int getComparatorInputOverride(BlockState state, final World world, final BlockPos coord);
+    public  abstract  int getAnalogOutputSignal(BlockState state, final World world, final BlockPos coord);
     
 
     /**
      * Converts metadata into blockstate
      */
     public BlockState getStateFromMeta(final int metaValue) {
-        Direction enumFacing = Direction.byIndex(metaValue);
+        Direction enumFacing = Direction.from3DDataValue(metaValue);
         if (enumFacing.getAxis() == Direction.Axis.Y) {
             enumFacing = Direction.NORTH;
         }
-        return this.getDefaultState().with( FACING, enumFacing);
+        return this.defaultBlockState().setValue( FACING, enumFacing);
     }
     
     /**
      * Converts blockstate into metadata
      */
     public int getMetaFromState(final BlockState bs) {
-        return ((Direction)bs .get( FACING)).getIndex();
+        return ((Direction)bs .getValue(FACING)).get3DDataValue();
     }
     
     /**
      * Creates a blockstate
      */
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
 		builder.add(FACING);
     }
 
 	@Override
 	public BlockState rotate(BlockState state, Rotation rot) {
-		return state.with(FACING, rot.rotate((Direction)state .get(FACING)));
+		return state.setValue(FACING, rot.rotate((Direction)state .getValue(FACING)));
 	}
 
 	@Override
 	public BlockState mirror(BlockState state, Mirror mirrorIn) {
-		return state.rotate(mirrorIn.toRotation((Direction)state .get(FACING)));
+		return state.rotate(mirrorIn.getRotation((Direction)state .getValue(FACING)));
 	}
 
 	/**

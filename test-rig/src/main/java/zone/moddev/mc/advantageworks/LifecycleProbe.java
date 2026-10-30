@@ -30,7 +30,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import zone.moddev.mc.poweradvantage.conduitnetwork.ConduitRegistry;
 
 /** Observes real tile movement and chunk lifecycles only in marked disposable worlds. */
@@ -170,9 +170,9 @@ final class LifecycleProbe {
         MinecraftForge.EVENT_BUS.addListener(probe::load);
     }
 
-    private void starting(FMLServerStartingEvent event) {
-        event.getCommandDispatcher().register(Commands.literal("advlifecycle")
-                .requires(source -> source.hasPermissionLevel(4))
+    private void starting(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("advlifecycle")
+                .requires(source -> source.hasPermission(4))
                 .then(Commands.argument("operation", StringArgumentType.word())
                         .then(Commands.argument("label", StringArgumentType.word()).executes(context -> {
                             WorksController.getInstance().requireAuthorizedWorld(context.getSource().getServer());
@@ -180,7 +180,7 @@ final class LifecycleProbe {
                             String operation = StringArgumentType.getString(context, "operation");
                             String label = StringArgumentType.getString(context, "label");
                             if (!label.matches("[A-Za-z0-9_-]+")) throw new IllegalArgumentException("Invalid label");
-                            execute(context.getSource().getWorld(), operation, label);
+                            execute(context.getSource().getLevel(), operation, label);
                             System.out.println("ADVLIFECYCLE COMPLETE " + operation + " " + label);
                             return 1;
                         }))));
@@ -198,7 +198,7 @@ final class LifecycleProbe {
             if (selected.isEmpty()) throw new IllegalArgumentException("Unknown chunk group " + group);
             for (long key : selected) {
                 ChunkPos pos = new ChunkPos(key);
-                world.forceChunk(pos.x, pos.z, acquire);
+                world.setChunkForced(pos.x, pos.z, acquire);
                 if (acquire) world.getChunk(pos.x, pos.z);
                 // Removing the forced ticket lets the native ticket manager unload naturally.
                 // The runner still requires actual ChunkEvent.Unload/Load witnesses.
@@ -211,16 +211,16 @@ final class LifecycleProbe {
                 for (Fixture oil : fixtures.values()) {
                     if (oil.bucket == null) continue;
                     BlockPos source = position(oil.source);
-                    if (!world.isAirBlock(source)) throw new IllegalStateException("Oil source is not empty: " + oil.id);
+                    if (!world.isEmptyBlock(source)) throw new IllegalStateException("Oil source is not empty: " + oil.id);
                     net.minecraft.item.Item item = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(
                             new net.minecraft.util.ResourceLocation(oil.bucket));
                     if (!(item instanceof net.minecraft.item.BucketItem)
-                            || !((net.minecraft.item.BucketItem) item).tryPlaceContainedLiquid(null, world, source, null))
+                            || !((net.minecraft.item.BucketItem) item).emptyBucket(null, world, source, null))
                         throw new IllegalStateException("Bucket placement failed: " + oil.id);
                     String expected = oil.bucket.substring(0, oil.bucket.length() - "_bucket".length());
-                    net.minecraft.fluid.IFluidState state = world.getFluidState(source);
+                    net.minecraft.fluid.FluidState state = world.getFluidState(source);
                     if (!state.isSource() || !expected.equals(
-                            net.minecraft.util.registry.Registry.FLUID.getKey(state.getFluid()).toString()))
+                            net.minecraft.util.registry.Registry.FLUID.getKey(state.getType()).toString()))
                         throw new IllegalStateException("Bucket placed the wrong fluid: " + oil.id);
                 }
                 break;
@@ -229,12 +229,12 @@ final class LifecycleProbe {
                 for (Fixture fixture : fixtures.values()) {
                     if (fixture.from == null) continue;
                     int[] current = fixture.route == null ? fixture.from : fixture.route.get(routeSteps.getOrDefault(fixture.id, 0));
-                    TileEntity tile = world.getTileEntity(position(current));
-                    if (!(tile instanceof PoweredEntity) || !fixture.block.equals(world.getBlockState(tile.getPos()).getBlock().getRegistryName().toString()))
+                    TileEntity tile = world.getBlockEntity(position(current));
+                    if (!(tile instanceof PoweredEntity) || !fixture.block.equals(world.getBlockState(tile.getBlockPos()).getBlock().getRegistryName().toString()))
                         throw new IllegalStateException("Missing drill " + fixture.id);
                     float reserve = "low-prime".equals(operation) ? ("steam".equals(fixture.energyType) ? 9 : 249) : fixture.initialEnergy;
                     ((PoweredEntity) tile).setEnergy(reserve, new ConduitType(fixture.energyType));
-                    tile.markDirty();
+                    tile.setChanged();
                 }
                 break;
             case "watch": watching = true; break;
@@ -242,13 +242,13 @@ final class LifecycleProbe {
             case "release":
                 for (long key : chunks()) {
                     ChunkPos pos = new ChunkPos(key);
-                    world.forceChunk(pos.x, pos.z, false);
+                    world.setChunkForced(pos.x, pos.z, false);
                 }
                 break;
             case "load":
                 for (long key : chunks()) {
                     ChunkPos pos = new ChunkPos(key);
-                    world.forceChunk(pos.x, pos.z, true);
+                    world.setChunkForced(pos.x, pos.z, true);
                     world.getChunk(pos.x, pos.z);
                 }
                 break;
@@ -277,11 +277,11 @@ final class LifecycleProbe {
             case "changed-target-read":
                 for (Fixture drill : fixtures.values()) {
                     if (drill.to == null) continue;
-                    TileEntity tile = world.getTileEntity(position(drill.to));
+                    TileEntity tile = world.getBlockEntity(position(drill.to));
                     if (!(tile instanceof PoweredEntity)
                             || !drill.block.equals(world.getBlockState(position(drill.to)).getBlock().getRegistryName().toString()))
                         throw new IllegalStateException("Missing restored drill " + drill.id);
-                    CompoundNBT saved = tile.write(new CompoundNBT());
+                    CompoundNBT saved = tile.save(new CompoundNBT());
                     if (!saved.contains("targetX", 99) || saved.getShort("progress") <= 0)
                         throw new IllegalStateException("Drill must be mid-block " + drill.id);
                     if ("legacy-read".equals(operation)) {
@@ -290,11 +290,11 @@ final class LifecycleProbe {
                     } else {
                         int[] target = {saved.getInt("targetX"), saved.getInt("targetY"), saved.getInt("targetZ")};
                         requireInside(drill, target);
-                        world.setBlockState(position(target), Blocks.BEDROCK.getDefaultState(), 3);
+                        world.setBlock(position(target), Blocks.BEDROCK.defaultBlockState(), 3);
                     }
                     // Round-trip real saved state; never inject quantities, energy or progress.
-                    tile.read(saved);
-                    tile.markDirty();
+                    tile.load(tile.getBlockState(), saved);
+                    tile.setChanged();
                 }
                 break;
             default: throw new IllegalArgumentException("Unknown lifecycle operation " + operation);
@@ -312,20 +312,20 @@ final class LifecycleProbe {
 
     private void unload(ChunkEvent.Unload event) {
         if (event.getWorld() instanceof ServerWorld) {
-            increment(unloads, event.getChunk().getPos().asLong());
+            increment(unloads, event.getChunk().getPos().toLong());
             recordEvent(event, "unload");
         }
     }
 
     private void load(ChunkEvent.Load event) {
         if (event.getWorld() instanceof ServerWorld) {
-            increment(loads, event.getChunk().getPos().asLong());
+            increment(loads, event.getChunk().getPos().toLong());
             recordEvent(event, "load");
         }
     }
 
     private void recordEvent(ChunkEvent event, String operation) {
-        if (!chunks().contains(event.getChunk().getPos().asLong())) return;
+        if (!chunks().contains(event.getChunk().getPos().toLong())) return;
         Map<String, Object> record = new LinkedHashMap<>();
         record.put("operation", operation);
         record.put("pos", Arrays.asList(event.getChunk().getPos().x, event.getChunk().getPos().z));
@@ -350,14 +350,14 @@ final class LifecycleProbe {
         result.put("pos", coordinates);
         BlockPos pos = position(coordinates);
         // No world.getChunk/getTileEntity call is permitted before this non-loading lookup.
-        Chunk chunk = world.getChunkProvider().getChunkWithoutLoading(pos.getX() >> 4, pos.getZ() >> 4);
+        Chunk chunk = world.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
         result.put("loaded", chunk != null);
         if (chunk == null) return result;
         result.put("block", chunk.getBlockState(pos).getBlock().getRegistryName().toString());
         result.put("state", chunk.getBlockState(pos).toString());
-        TileEntity tile = chunk.getTileEntity(pos);
+        TileEntity tile = chunk.getBlockEntity(pos);
         if (tile != null) {
-            result.put("nbt", tile.write(new CompoundNBT()).toString());
+            result.put("nbt", tile.save(new CompoundNBT()).toString());
             result.put("tileIdentity", System.identityHashCode(tile));
             if (tile instanceof PoweredEntity) {
                 PoweredEntity powered = (PoweredEntity) tile;
@@ -396,7 +396,7 @@ final class LifecycleProbe {
                     routeSteps.put(fixture.id, step + 1);
                     // Hold after observing the real move, without touching the drill's state or inventory.
                     int[] hold = fixture.controls == null ? fixture.hold : fixture.controls.get(step + 1);
-                    world.setBlockState(position(hold), Blocks.REDSTONE_BLOCK.getDefaultState(), 3);
+                    world.setBlock(position(hold), Blocks.REDSTONE_BLOCK.defaultBlockState(), 3);
                 }
             }
         }
@@ -415,7 +415,7 @@ final class LifecycleProbe {
             ChunkPos pos = new ChunkPos(key);
             Map<String, Object> entry = new LinkedHashMap<>();
             entry.put("pos", Arrays.asList(pos.x, pos.z));
-            entry.put("loaded", world.getChunkProvider().getChunkWithoutLoading(pos.x, pos.z) != null);
+            entry.put("loaded", world.getChunkSource().getChunkNow(pos.x, pos.z) != null);
             entry.put("unloads", unloads.getOrDefault(key, 0));
             entry.put("loads", loads.getOrDefault(key, 0));
             chunkStates.add(entry);

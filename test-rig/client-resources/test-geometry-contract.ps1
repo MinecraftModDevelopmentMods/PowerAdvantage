@@ -10,13 +10,13 @@ $main = Get-Content -LiteralPath (Join-Path $PSScriptRoot "$relative/ClientResou
 $runner = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'run.ps1') -Raw
 Assert-GeometryContract ($geometry -notmatch '(?m)^import zone\.moddev\.mc\.(?:steamadvantage|electricadvantage)\.') 'Child renderer probe must not add compile dependencies on the expansions.'
 Assert-GeometryContract ($geometry -notmatch 'new (?:DrillBitRenderer|LaserDrillRenderer|LaserTurretRenderer|HydroturbineRenderer)|renderGeometry\(|Unsafe|allocateInstance|new ClientWorld|loadWorld\(') 'Use dispatcher-owned production renderer instances without bypassing construction or loading a world.'
-foreach ($fragment in 'TileEntityRendererDispatcher.instance.getRenderer(tile)', 'minecraft.getRenderManager().renderers.get(type)',
-        'renderer.render(tile, partial, matrices, buffers', 'buffer.begin(type.getDrawMode(), type.getVertexFormat())',
-        'buffer.getNextBuffer()', 'private static final float EPSILON = 0.0001F;',
+foreach ($fragment in 'TileEntityRendererDispatcher.instance.getRenderer(tile)', 'minecraft.getEntityRenderDispatcher().renderers.get(type)',
+        'renderer.render(tile, partial, matrices, buffers', 'buffer.begin(type.mode(), type.format())',
+        'buffer.popNextBuffer()', 'private static final float EPSILON = 0.0001F;',
         'mesh(vertices, 24)', 'mesh(vertices, 16)', 'mesh(vertices, 40)',
         'new float[]{0F, 0.5F}', 'for (Direction facing : Direction.values())',
         'partial-tick rotation did not move vertices', 'Production renderer did not restore its matrix stack',
-        'position.equals(original.getMatrix()) && normal.equals(original.getNormal())',
+        'position.equals(original.pose()) && normal.equals(original.normal())',
         'native_buffers', 'vertices_xyz_uv_normal_alpha', 'bounds_xyz', 'uv_bounds',
         'Float.isFinite(value)', 'blank/degenerate quad', 'Beam cardinal bounds/length changed',
         'Idle turret uses the active optic UVs', 'Active turret uses the idle optic UVs',
@@ -31,12 +31,20 @@ Assert-GeometryContract ($geometryCall -gt $main.IndexOf('RecipeBookGroupingProb
 Assert-GeometryContract ($main.IndexOf('result.addProperty("primary_resource_status", "PASS");') -lt $geometryCall) 'Keep primary resource results separate from the extra renderer scope.'
 Assert-GeometryContract ($runner.Contains('[switch]$ChildRendererGeometry') -and $runner.Contains('-Dadvantageworks.childRendererGeometry=true')) 'Additional renderer geometry must be explicitly selected.'
 Assert-GeometryContract ($runner.Contains('if ($ChildRendererGeometry -and -not $RequireExtensions)')) 'Geometry must require the combined scope.'
-$unchanged = @{
-    OilRenderProbe = '3560449BA7DBB2AD60CDEF4FEB5A7DCB53EF66A0AA9A82EC538F4D1993CD8ECE'
-    RecipeBookGroupingProbe = 'C9E02B30693C7CCFA024290DE4B286E707BE5DD9BC07633704437FEA4E660376'
-    TankVisualProbe = '756DE3330EDF1A9E649A2CE06BEFD7AC4A1C5E39E4443EE69A0AFE1D33A1807F'
-}
-foreach ($name in $unchanged.Keys) {
-    Assert-GeometryContract ((Get-FileHash -LiteralPath (Join-Path $PSScriptRoot "$relative/$name.java")).Hash -eq $unchanged[$name]) "Primary capture/oracle file changed: $name"
+# Native method names change, but the fixed accepted source hashes and complete
+# recipe/tank capture comparisons remain enforced by the primary contract.
+& (Join-Path $PSScriptRoot 'test-probe-contract.ps1')
+$checks++
+$reference = Join-Path $PSScriptRoot "../../../../PA115/PowerAdvantage/test-rig/client-resources/$relative/ChildRendererGeometryProbe.java"
+Assert-GeometryContract ((Get-FileHash -LiteralPath $reference).Hash -eq 'A125FEC9F7322B019887FB240316411DBDF25173501CFA66F8F6816D536E4E03') 'The accepted renderer reference changed.'
+$source = Get-Content -LiteralPath $reference -Raw
+$source = $source.Replace('minecraft.getRenderManager()', 'minecraft.getEntityRenderDispatcher()').
+    Replace('type.getDrawMode()', 'type.mode()').Replace('type.getVertexFormat()', 'type.format()').
+    Replace('DefaultVertexFormats.ENTITY', 'DefaultVertexFormats.NEW_ENTITY').
+    Replace('minecraft.world == null', 'minecraft.level == null').
+    Replace('minecraft.isIntegratedServerRunning()', 'minecraft.hasSingleplayerServer()').
+    Replace('tile.getWorld()', 'tile.getLevel()')
+foreach ($assertion in [regex]::Matches($source, '(?s)\brequire\(.*?\);')) {
+    Assert-GeometryContract ($geometry.Contains($assertion.Value)) "Renderer oracle changed: $($assertion.Value)"
 }
 Write-Output "PASS: $checks static additional-geometry wiring and primary-oracle preservation checks. No renderer, Java or client was run."

@@ -1,17 +1,19 @@
-# Advantage Works 1.15.2 Native Test Rig
+# Advantage Works 1.16.5 Native Test Rig
 
-The native target is Minecraft 1.15.2 / Forge 31.2.57, snapshot mappings
-20200514-1.15.1, MCP 20200515.085601, Java 8 bytecode and harness
-`1.1.0.115021`. Read [the native115 runner and qualification limits](NATIVE115.md)
+The native target is Minecraft 1.16.5 / Forge 36.2.34, official mappings
+1.16.5, MCP 20210115.111550, Java 8 bytecode and harness
+`1.1.0.116051`. Read [the native116 runner and qualification limits](NATIVE116.md)
 before using this checkout. Build success is not runtime or migration acceptance.
 
-Default destination profiles live only in `profiles/native115/`. The original
+Default destination profiles live only in `profiles/native116/`. The original
 profiles, station specification and legacy migration source adapters remain
 unchanged. New profiles explicitly reference the historical PA113 source root;
-the native runner refuses to launch an old profile as a native115 destination.
+the native runner refuses to launch an old profile as a native116 destination.
 The native114 scripts/profiles and [their qualification record](NATIVE114.md)
-remain historical evidence. Missing 115 artifact pins fail before runtime
-creation. No 114 pass is a 115 runtime qualification.
+remain historical evidence, together with the unchanged [native115 record](NATIVE115.md).
+Missing 116 artifact pins fail before runtime creation. No earlier pass is a 116
+runtime qualification. New flat fixtures require the harness-only
+`advantageworkstest:test_flat` world preset; it saves as vanilla `minecraft:flat`.
 
 ## Retained 1.13.2 Protocol Reference
 
@@ -82,6 +84,10 @@ The focused [oil-transfer protocol](../docs/1.13/OIL-TRANSFER.md) adds four isol
 ## Build and development run
 
 Run Gradle with Java 17. The harness and all Minecraft code compile to Java 8 bytecode.
+Compiler outputs and harness jars live in `build/gradle/`. Pinned dependencies,
+disposable saves and reports remain in sibling directories under `build/`.
+The harness `clean` task is restricted to `build/gradle/`; it must never clear the
+shared fixture and evidence root.
 
 ```text
 gradlew.bat -p test-rig clean test assemble

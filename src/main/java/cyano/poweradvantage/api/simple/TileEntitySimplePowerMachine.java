@@ -82,7 +82,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * Gets the unlocalized String passed to the constructor
 	 * @return A String used in name localization by client GUI 
 	 */
-	public String getUnlocalizedName(){
+	public String getDescriptionId(){
 		return unlocalizedName;
 	}
 
@@ -288,8 +288,8 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * @param tagRoot The root of the NBT
 	 */
 	@Override
-	public void read(final CompoundNBT tagRoot) {
-		super.read(tagRoot);
+	public void load(net.minecraft.block.BlockState state, final CompoundNBT tagRoot) {
+		super.load(state, tagRoot);
 		ItemStack[] inventory = this.getInventory();
 		if(inventory != null ){
 			Arrays.fill(inventory, null);
@@ -298,7 +298,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 				final CompoundNBT nbttagcompound1 = nbttaglist .getCompound(i);
 				final byte n = nbttagcompound1.getByte("Slot");
 				if (n >= 0 && n < inventory.length) {
-					ItemStack stack = ItemStack.read(nbttagcompound1);
+					ItemStack stack = ItemStack.of(nbttagcompound1);
 					inventory[n] = stack.isEmpty() ? null : stack;
 				}
 			}
@@ -315,8 +315,8 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * @param tagRoot The root of the NBT
 	 */
 	@Override
-	public CompoundNBT write(final CompoundNBT tagRoot) {
-		super .write(tagRoot);
+	public CompoundNBT save(final CompoundNBT tagRoot) {
+		super .save(tagRoot);
 		ItemStack[] inventory = this.getInventory();
 		if(inventory != null ){
 			final ListNBT nbttaglist = new ListNBT();
@@ -324,7 +324,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 				if (inventory[i] != null && !inventory[i].isEmpty()) {
 					final CompoundNBT nbttagcompound1 = new CompoundNBT();
 					nbttagcompound1.putByte("Slot", (byte)i);
-					inventory[i] .write(nbttagcompound1);
+					inventory[i] .save(nbttagcompound1);
 					nbttaglist .add(nbttagcompound1);
 				}
 			}
@@ -428,7 +428,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	@Override 
 	public SUpdateTileEntityPacket getUpdatePacket(){
 		CompoundNBT nbtTag = createDataFieldUpdateTag();
-		return new SUpdateTileEntityPacket(this.pos, 0, nbtTag);
+		return new SUpdateTileEntityPacket(this.worldPosition, 0, nbtTag);
 	}
 
 	/**
@@ -436,7 +436,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 */
 	@Override
 	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet) {
-		readDataFieldUpdateTag(packet.getNbtCompound());
+		readDataFieldUpdateTag(packet.getTag());
 	}
 	
 ///// ISidedInventory methods /////
@@ -444,7 +444,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * Removes all items from this machine's inventory.
 	 */
 	@Override
-	public void clear() {
+	public void clearContent() {
 		if(this.getInventory() == null) return;
 		for(int i = 0; i < this.getInventory().length; i++){
 			this.getInventory()[i] = null;
@@ -466,7 +466,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * executes when a player right-clicks and opens the inventory GUI
 	 */
 	@Override
-	public void openInventory(PlayerEntity arg0) {
+	public void startOpen(PlayerEntity arg0) {
 		// do nothing
 		
 	}
@@ -475,7 +475,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * executes when a player stops interacting with this machine 
 	 */
 	@Override
-	public void closeInventory(PlayerEntity arg0) {
+	public void stopOpen(PlayerEntity arg0) {
 		// do nothing
 		
 	}
@@ -484,7 +484,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * boilerplate inventory code
 	 */
 	@Override
-	public ItemStack decrStackSize(int slot, int decrement) {
+	public ItemStack removeItem(int slot, int decrement) {
 		if (this.getInventory()[slot] == null || this.getInventory()[slot].isEmpty()) {
 			return ItemStack.EMPTY;
 		}
@@ -540,7 +540,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * boilerplate inventory code
 	 */
 	@Override
-	public int getInventoryStackLimit() {
+	public int getMaxStackSize() {
 		return 64;
 	}
 
@@ -550,7 +550,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * inventory)
 	 */
 	@Override
-	public int getSizeInventory() {
+	public int getContainerSize() {
 		if(this.getInventory() != null){
 			return this.getInventory().length;
 		} else {
@@ -564,7 +564,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * @return Item in a given inventory slot (null means no item)
 	 */
 	@Override
-	public ItemStack getStackInSlot(int slot) {
+	public ItemStack getItem(int slot) {
 		if(this.getInventory() != null){
 			ItemStack stack = this.getInventory()[slot];
 			return stack == null ? ItemStack.EMPTY : stack;
@@ -579,7 +579,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * @return Item in a given inventory slot (null means no item)
 	 */
 	@Override
-	public ItemStack removeStackFromSlot(int slot) {
+	public ItemStack removeItemNoUpdate(int slot) {
 		if(this.getInventory() != null){
 			ItemStack i = this.getInventory()[slot];
 			this.getInventory()[slot] = null;
@@ -601,7 +601,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * otherwise 
 	 */
 	@Override
-	public boolean isItemValidForSlot(final int slot, final ItemStack item) {
+	public boolean canPlaceItem(final int slot, final ItemStack item) {
 		if(this.getInventory() == null) return false;
 		return slot < this.getInventory().length; 
 	}
@@ -610,25 +610,25 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * boilerplate inventory code
 	 */
 	@Override
-	public boolean isUsableByPlayer(final PlayerEntity p_isUseableByPlayer_1_) {
-		return this.world.getTileEntity(this.pos) == this && p_isUseableByPlayer_1_.getDistanceSq((double)this.pos.getX() + 0.5, (double)this.pos.getY() + 0.5, (double)this.pos.getZ() + 0.5) <= 64.0;
+	public boolean stillValid(final PlayerEntity p_isUseableByPlayer_1_) {
+		return this.level.getBlockEntity(this.worldPosition) == this && p_isUseableByPlayer_1_.distanceToSqr((double)this.worldPosition.getX() + 0.5, (double)this.worldPosition.getY() + 0.5, (double)this.worldPosition.getZ() + 0.5) <= 64.0;
 	}
 
 	/**
 	 * boilerplate inventory code
 	 */
 	@Override
-	public void setInventorySlotContents(int slot, ItemStack item) {
+	public void setItem(int slot, ItemStack item) {
 		if(this.getInventory() == null) return;
 		ItemStack existing = this.getInventory()[slot];
 		final boolean flag = item != null && !item.isEmpty() && existing != null && !existing.isEmpty()
-				&& item.isItemEqual(existing) && ItemStack.areItemStackTagsEqual(item, existing);
+				&& item.sameItem(existing) && ItemStack.tagMatches(item, existing);
 		this.getInventory()[slot] = (item == null || item.isEmpty()) ? null : item;
-		if (item != null && item.getCount() > this.getInventoryStackLimit()) {
-			item.setCount(this.getInventoryStackLimit());
+		if (item != null && item.getCount() > this.getMaxStackSize()) {
+			item.setCount(this.getMaxStackSize());
 		}
 		if (slot == 0 && !flag) {
-			this.markDirty();
+			this.setChanged();
 		}
 	}
 	
@@ -675,7 +675,7 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * @return true if the item is allowed to be pulled, false otherwise
 	 */
 	@Override
-	public boolean canExtractItem(final int slot, final ItemStack targetItem, final Direction side) {
+	public boolean canTakeItemThroughFace(final int slot, final ItemStack targetItem, final Direction side) {
 		if(this.getInventory() == null) return false;
 		return slot < this.getInventory().length;
 	}
@@ -689,9 +689,9 @@ public abstract class TileEntitySimplePowerMachine extends PoweredEntity impleme
 	 * @return true if the item is allowed to be inserted, false otherwise
 	 */
 	@Override
-	public boolean canInsertItem(final int slot, final ItemStack srcItem, final Direction side) {
+	public boolean canPlaceItemThroughFace(final int slot, final ItemStack srcItem, final Direction side) {
 		if(this.getInventory() == null) return false;
-		return this.isItemValidForSlot(slot, srcItem);
+		return this.canPlaceItem(slot, srcItem);
 	}
 
 	/** cache for default implementation of getSlotsForFace(...)*/

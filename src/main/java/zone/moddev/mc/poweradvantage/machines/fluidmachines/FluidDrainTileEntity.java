@@ -7,8 +7,10 @@ import cyano.poweradvantage.api.fluid.FluidTankInfo;
 import cyano.poweradvantage.api.fluid.IAdvantageFluidHandler;
 import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.IFluidState;
-import net.minecraft.block.Blocks;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.IBucketPickupHandler;
+import net.minecraft.world.IWorld;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -25,17 +27,17 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
 
     @Override
     public void powerUpdate() {
-        if (getTank().getFluidAmount() > 0) tryPushFluid(getPos().down(), Direction.UP);
+        if (getTank().getFluidAmount() > 0) tryPushFluid(getBlockPos().below(), Direction.UP);
 
         for (Direction side : Direction.values()) {
-            BlockPos adjacent = getPos().offset(side);
+            BlockPos adjacent = getBlockPos().relative(side);
             IAdvantageFluidHandler other = FluidHandlerHelper.getHandler(
-                    getWorld().getTileEntity(adjacent), side.getOpposite());
+                    getLevel().getBlockEntity(adjacent), side.getOpposite());
             if (other == null) continue;
             for (FluidTankInfo info : other.getTankInfo(side.getOpposite())) {
                 FluidStack available = info.fluid;
                 if (available == null || (getTank().getFluid() != null
-                        && !getTank().getFluid().getFluid().isEquivalentTo(available.getFluid()))) continue;
+                        && !getTank().getFluid().getFluid().isSame(available.getFluid()))) continue;
                 FluidStack drained = other.drain(side.getOpposite(), getTank().getCapacity() - getTank().getFluidAmount(), false);
                 if (drained == null) continue;
                 int accepted = getTank().fill(drained, false);
@@ -49,18 +51,24 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
         }
 
         if (getTank().getFluidAmount() == 0) {
-            BlockPos source = scanFluidSpaceForSourceBlock(getWorld(), getPos().up(), 32);
+            BlockPos source = scanFluidSpaceForSourceBlock(getLevel(), getBlockPos().above(), 32);
             if (source != null) {
-                Fluid fluid = getWorld().getFluidState(source).getFluid();
-                getTank().fill(new FluidStack(fluid, FluidTank.BUCKET_VOLUME), true);
-                getWorld().setBlockState(source, Blocks.AIR.getDefaultState());
+                Fluid fluid = pickupSource(getLevel(), source, getLevel().getBlockState(source));
+                if (fluid != net.minecraft.fluid.Fluids.EMPTY)
+                    getTank().fill(new FluidStack(fluid, FluidTank.BUCKET_VOLUME), true);
             }
         }
         super.powerUpdate();
     }
 
+    static Fluid pickupSource(IWorld world, BlockPos position, BlockState state) {
+        if (!(state.getBlock() instanceof IBucketPickupHandler)) return net.minecraft.fluid.Fluids.EMPTY;
+        Fluid picked = ((IBucketPickupHandler)state.getBlock()).takeLiquid(world, position, state);
+        return picked == null ? net.minecraft.fluid.Fluids.EMPTY : picked;
+    }
+
     private void tryPushFluid(BlockPos position, Direction face) {
-        IAdvantageFluidHandler handler = FluidHandlerHelper.getHandler(getWorld().getTileEntity(position), face);
+        IAdvantageFluidHandler handler = FluidHandlerHelper.getHandler(getLevel().getBlockEntity(position), face);
         if (handler == null || getTank().getFluid() == null) return;
         int accepted = handler.fill(face, getTank().getFluid(), true);
         if (accepted > 0) {
@@ -84,27 +92,28 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
         BlockPos position = initial;
         Direction[] directions = { Direction.UP, Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST };
         while (range-- > 0) {
-            IFluidState state = world.getFluidState(position);
-            if (!state.isEmpty() && state.isSource()) return position;
+            FluidState state = world.getFluidState(position);
+            if (!state.isEmpty() && state.isSource()
+                    && world.getBlockState(position).getBlock() instanceof IBucketPickupHandler) return position;
             java.util.List<BlockPos> candidates = new java.util.ArrayList<>();
             for (Direction direction : directions) {
-                BlockPos candidate = position.offset(direction);
-                IFluidState candidateState = world.getFluidState(candidate);
+                BlockPos candidate = position.relative(direction);
+                FluidState candidateState = world.getFluidState(candidate);
                 if (!candidateState.isEmpty() && (state.isEmpty()
-                        || candidateState.getFluid().isEquivalentTo(state.getFluid()))) candidates.add(candidate);
+                        || candidateState.getType().isSame(state.getType()))) candidates.add(candidate);
             }
             if (candidates.isEmpty()) return null;
-            position = candidates.get(candidates.size() == 1 ? 0 : world.rand.nextInt(candidates.size()));
+            position = candidates.get(candidates.size() == 1 ? 0 : world.random.nextInt(candidates.size()));
         }
         return null;
     }
 
     public static boolean isFluidBlock(net.minecraft.block.Block block, Fluid fluid) {
-        return block.getDefaultState().getFluidState().getFluid().isEquivalentTo(fluid);
+        return block.defaultBlockState().getFluidState().getType().isSame(fluid);
     }
 
     public static boolean isFluidSourceBlock(net.minecraft.block.Block block, Fluid fluid, World world, BlockPos pos) {
-        IFluidState state = world.getFluidState(pos);
-        return !state.isEmpty() && state.isSource() && state.getFluid().isEquivalentTo(fluid);
+        FluidState state = world.getFluidState(pos);
+        return !state.isEmpty() && state.isSource() && state.getType().isSame(fluid);
     }
 }

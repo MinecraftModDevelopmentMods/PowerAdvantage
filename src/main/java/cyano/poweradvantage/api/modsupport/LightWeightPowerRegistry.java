@@ -84,7 +84,7 @@ public class LightWeightPowerRegistry {
 	 *                                    and how to add power to that TileEntity
 	 */
 	public static void registerLightWeightPowerAcceptor(Block machineBlock, ILightWeightPowerAcceptor powerAcceptorImplementation) {
-		PowerAdvantage.LOGGER.info("Registered external power acceptor interface for block {}", machineBlock.getTranslationKey());
+		PowerAdvantage.LOGGER.info("Registered external power acceptor interface for block {}", machineBlock.getDescriptionId());
 		getInstance().externalPowerSinks.put(machineBlock, powerAcceptorImplementation);
 	}
 
@@ -111,7 +111,7 @@ public class LightWeightPowerRegistry {
 	 */
 	public float getRequestedPowerAmount(IBlockReader w, BlockPos coord, ConduitType energyType) {
 		Block b = w.getBlockState(coord).getBlock();
-		TileEntity te = w.getTileEntity(coord);
+		TileEntity te = w.getBlockEntity(coord);
 		if (te == null) return 0;
 		if (te instanceof IPowerMachine) {
 			return ((IPowerMachine) te).getPowerRequest(energyType).amount;
@@ -134,7 +134,7 @@ public class LightWeightPowerRegistry {
 	 */
 	public float addPower(IBlockReader w, BlockPos coord, ConduitType energyType, float amount) {
 		Block b = w.getBlockState(coord).getBlock();
-		TileEntity te = w.getTileEntity(coord);
+		TileEntity te = w.getBlockEntity(coord);
 		if (te == null) return 0;
 		if (te instanceof IPowerMachine) {
 			return ((IPowerMachine) te).addEnergy(amount, energyType);

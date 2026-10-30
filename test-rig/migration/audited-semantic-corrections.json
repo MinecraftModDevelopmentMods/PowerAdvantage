@@ -1,0 +1,28 @@
+{
+  "format": 1,
+  "id": "EXTENDED-ABSENCE-001",
+  "scope": "Explicit audited semantic correction, not a claim of historical byte identity. Original historical-input ledgers are unchanged.",
+  "corrections": {
+    "migration/extended_lifecycle.py": {
+      "kind": "semantic-oracle-correction",
+      "historicalSha256": "8A1E84C3E696EFAC711D3D0D847DD532253F57BFEF1A7BC93EF5529605A6280B",
+      "correctedSha256": "EF746EEC9B21E5D9757684A5B1AD6387706EBCD7E2CB15D020234E9B4D57DC82",
+      "unchangedHistoricalAstSha256": "F5B03E76C0509A147048614503AF50DF6970E54C9202D925EBEDFA8E1515BD24",
+      "correctedFunctionAstSha256": {
+        "continuous_absence": "C0D67996E484FA530272E1217CBD1B6F36920914E76E59CF98E71BFFA68AF65C",
+        "partial_result": "69C242C5B111514BB7064C410B3D11E38B53950806231212F4768D715A1E0803"
+      },
+      "reason": "Require at least 40 native ticks of continuous absence through confirmation, with unchanged load/unload counters. The old adjacent-gap check rejected a 189-tick interval ending in a 38-tick gap and could accept hidden reloads.",
+      "evidence": "20 new continuity controls, 13 existing extended controls and 8 independent audit controls per line; separate exact-pin raw re-audits retain original reports and old helper hashes.",
+      "auditReceipt": "raw-audit-116-final.json",
+      "auditReceiptSha256": "A2C4AF17F7FB6AD028DEBFF5E92FA5B0BF84BC138C644C3BA0F14D8E06581134"
+    },
+    "migration/test_native115_geometry.py": {
+      "kind": "historical-guard-reporting-correction",
+      "historicalSha256": "3063D17F4CFBC78A4378115D71568EDA7F276BE0EE62ECD4333AA5F8FEFDC1F1",
+      "correctedSha256": "A611DB71AD5465CC82DC62456EA8BA47EF68695A670DD7E64F112EE0C4EC76BD",
+      "unchangedHistoricalAstSha256": "5DCA0E9CB107837B402B239B79D29B69FC195343EB600EC8F167CD591360C0C1",
+      "reason": "The inherited historical-input test must report the approved semantic correction truthfully. Only that guard method and its ast/hashlib imports change; all other geometry, harvest and route contracts retain their historical AST."
+    }
+  }
+}

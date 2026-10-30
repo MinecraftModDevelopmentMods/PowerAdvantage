@@ -22,31 +22,31 @@ public class BlockConveyor extends GUIBlock {
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
 
     public BlockConveyor(Material material, float hardness) {
-        super(Block.Properties.create(material).hardnessAndResistance(hardness)
-                .sound(SoundType.METAL).notSolid().variableOpacity());
-        setDefaultState(getStateContainer().getBaseState().with(FACING, Direction.NORTH));
+        super(Block.Properties.of(material).strength(hardness)
+                .sound(SoundType.METAL).noOcclusion().dynamicShape());
+        registerDefaultState(getStateDefinition().any().setValue(FACING, Direction.NORTH));
     }
 
-    @Override public TileEntity createNewTileEntity(IBlockReader world) { return new TileEntityConveyor(); }
-    @Override public BlockState rotate(BlockState state, Rotation rotation) { return state.with(FACING, rotation.rotate(state.get(FACING))); }
-    @Override public BlockState mirror(BlockState state, Mirror mirror) { return state.rotate(mirror.toRotation(state.get(FACING))); }
+    @Override public TileEntity newBlockEntity(IBlockReader world) { return new TileEntityConveyor(); }
+    @Override public BlockState rotate(BlockState state, Rotation rotation) { return state.setValue(FACING, rotation.rotate(state.getValue(FACING))); }
+    @Override public BlockState mirror(BlockState state, Mirror mirror) { return state.rotate(mirror.getRotation(state.getValue(FACING))); }
     @Override public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return getDefaultState().with(FACING, context.getFace().getOpposite());
+        return defaultBlockState().setValue(FACING, context.getClickedFace().getOpposite());
     }
-    @Override protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) { builder.add(FACING); }
+    @Override protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) { builder.add(FACING); }
     @Override public boolean isOpaqueCube(BlockState state) { return false; }
     public boolean isFullCube(BlockState state) { return false; }
-    @Override public boolean hasComparatorInputOverride(BlockState state) { return true; }
+    @Override public boolean hasAnalogOutputSignal(BlockState state) { return true; }
 
     @Override
-    public int getComparatorInputOverride(BlockState state, World world, BlockPos pos) {
-        TileEntity tile = world.getTileEntity(pos);
-        return tile instanceof TileEntityConveyor && !((TileEntityConveyor) tile).getStackInSlot(0).isEmpty() ? 7 : 0;
+    public int getAnalogOutputSignal(BlockState state, World world, BlockPos pos) {
+        TileEntity tile = world.getBlockEntity(pos);
+        return tile instanceof TileEntityConveyor && !((TileEntityConveyor) tile).getItem(0).isEmpty() ? 7 : 0;
     }
 
     public BlockState getStateFromMeta(int meta) {
-        Direction facing = Direction.byIndex(meta);
-        return getDefaultState().with(FACING, facing == null ? Direction.NORTH : facing);
+        Direction facing = Direction.from3DDataValue(meta);
+        return defaultBlockState().setValue(FACING, facing == null ? Direction.NORTH : facing);
     }
-    public int getMetaFromState(BlockState state) { return state.get(FACING).getIndex(); }
+    public int getMetaFromState(BlockState state) { return state.getValue(FACING).get3DDataValue(); }
 }

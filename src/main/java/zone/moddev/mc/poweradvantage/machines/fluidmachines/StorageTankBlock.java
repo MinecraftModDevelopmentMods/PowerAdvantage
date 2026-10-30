@@ -30,21 +30,21 @@ import zone.moddev.mc.poweradvantage.init.Fluids;
 public class StorageTankBlock extends BlockSimpleFluidMachine {
     public StorageTankBlock() { super(Material.PISTON, 3F); }
 
-    @Override public PoweredEntity createNewTileEntity(IBlockReader world) { return new StorageTankTileEntity(); }
-    @Override public boolean hasComparatorInputOverride(BlockState state) { return true; }
-    @Override public int getComparatorInputOverride(BlockState state, World world, BlockPos pos) {
-        TileEntity tile = world.getTileEntity(pos);
+    @Override public PoweredEntity newBlockEntity(IBlockReader world) { return new StorageTankTileEntity(); }
+    @Override public boolean hasAnalogOutputSignal(BlockState state) { return true; }
+    @Override public int getAnalogOutputSignal(BlockState state, World world, BlockPos pos) {
+        TileEntity tile = world.getBlockEntity(pos);
         return tile instanceof StorageTankTileEntity ? ((StorageTankTileEntity) tile).getRedstoneOutput() : 0;
     }
     @Override public boolean isPowerSink(ConduitType type) { return true; }
     @Override public boolean isPowerSource(ConduitType type) { return true; }
 
     @Override
-    public void onBlockPlacedBy(World world, BlockPos pos, BlockState state,
+    public void setPlacedBy(World world, BlockPos pos, BlockState state,
             @Nullable LivingEntity placer, ItemStack stack) {
-        super.onBlockPlacedBy(world, pos, state, placer, stack);
+        super.setPlacedBy(world, pos, state, placer, stack);
         CompoundNBT tag = stack.getTag();
-        TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = world.getBlockEntity(pos);
         if (tag != null && tag.contains("FluidID", 8) && tag.contains("Volume", 99)
                 && tile instanceof StorageTankTileEntity) {
             net.minecraft.fluid.Fluid fluid = Fluids.byName(tag.getString("FluidID"));
@@ -67,7 +67,7 @@ public class StorageTankBlock extends BlockSimpleFluidMachine {
     }
 
     @Override
-    public void addInformation(ItemStack stack, @Nullable IBlockReader world,
+    public void appendHoverText(ItemStack stack, @Nullable IBlockReader world,
             List<ITextComponent> tooltip, ITooltipFlag flag) {
         CompoundNBT tag = stack.getTag();
         if (tag == null || !tag.contains("FluidID", 8) || !tag.contains("Volume", 99)) {

@@ -20,8 +20,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class BlockFrame extends Block {
 
 	public BlockFrame(Material material, float hardness, float resistance) {
-		super(Block.Properties.create(material).sound(SoundType.METAL)
-				.hardnessAndResistance(hardness, resistance).notSolid().variableOpacity());
+		super(Block.Properties.of(material).sound(SoundType.METAL)
+				.strength(hardness, resistance).noOcclusion().dynamicShape());
 	}
 
 	public boolean isFullCube(BlockState bs) {

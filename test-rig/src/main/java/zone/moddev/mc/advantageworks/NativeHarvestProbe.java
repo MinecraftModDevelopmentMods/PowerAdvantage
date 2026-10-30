@@ -36,7 +36,7 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.ToolType;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 /** Actual survival harvesting, not loot-JSON presence or a synthetic getDrops call. */
@@ -48,12 +48,12 @@ final class NativeHarvestProbe {
         if (MARKER.isFile()) MinecraftForge.EVENT_BUS.addListener(new NativeHarvestProbe()::starting);
     }
 
-    private void starting(FMLServerStartingEvent event) {
-        event.getCommandDispatcher().register(Commands.literal("advharvest")
-                .requires(source -> source.hasPermissionLevel(4))
+    private void starting(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("advharvest")
+                .requires(source -> source.hasPermission(4))
                 .then(Commands.argument("label", StringArgumentType.word()).executes(context -> {
                     WorksController.getInstance().requireAuthorizedWorld(context.getSource().getServer());
-                    try { run(context.getSource().getWorld(), StringArgumentType.getString(context, "label")); }
+                    try { run(context.getSource().getLevel(), StringArgumentType.getString(context, "label")); }
                     catch (Exception error) { throw new IllegalStateException("Native harvest witness failed", error); }
                     return 1;
                 })));
@@ -81,57 +81,57 @@ final class NativeHarvestProbe {
             ResourceLocation key = new ResourceLocation(blockId);
             require(ForgeRegistries.BLOCKS.containsKey(key), "Missing real block: " + blockId);
             Block block = ForgeRegistries.BLOCKS.getValue(key);
-            player.interactionManager.setGameType(GameType.SURVIVAL);
+            player.gameMode.setGameModeForPlayer(GameType.SURVIVAL);
             for (int trial = 0; trial < trials; trial++) {
                 JsonObject evidence = new JsonObject();
                 evidence.addProperty("trial", trial);
                 evidence.addProperty("worldTime", world.getGameTime());
-                List<ItemEntity> indexed = world.getEntitiesWithinAABB(ItemEntity.class, new AxisAlignedBB(POS).grow(2));
+                List<ItemEntity> indexed = world.getEntitiesOfClass(ItemEntity.class, new AxisAlignedBB(POS).inflate(2));
                 evidence.addProperty("removedBeforeCleanup", indexed.stream().filter(entity -> entity.removed).count());
                 evidence.addProperty("liveBeforeCleanup", indexed.stream().filter(entity -> !entity.removed).count());
                 dropEvidence.add(evidence);
-                harvestDrops(world, new AxisAlignedBB(POS).grow(2)).forEach(ItemEntity::remove);
-                int remaining = harvestDrops(world, new AxisAlignedBB(POS).grow(2)).size();
+                harvestDrops(world, new AxisAlignedBB(POS).inflate(2)).forEach(ItemEntity::remove);
+                int remaining = harvestDrops(world, new AxisAlignedBB(POS).inflate(2)).size();
                 evidence.addProperty("liveAfterCleanup", remaining);
                 require(remaining == 0, "Harvest fixture retained a live item before placement");
-                world.setBlockState(POS, net.minecraft.block.Blocks.AIR.getDefaultState(), 2);
-                BlockState requested = block.getDefaultState();
+                world.setBlock(POS, net.minecraft.block.Blocks.AIR.defaultBlockState(), 2);
+                BlockState requested = block.defaultBlockState();
                 if (connectionMask >= 0) {
                     int bit = 0;
                     for (Direction direction : Direction.values()) {
-                        net.minecraft.state.IProperty<?> property = block.getStateContainer().getProperty(direction.getName());
+                        net.minecraft.state.Property<?> property = block.getStateDefinition().getProperty(direction.getName());
                         require(property instanceof BooleanProperty, "Missing inherited conduit connection state");
                         boolean connected = (connectionMask & (1 << bit++)) != 0;
-                        requested = requested.with((BooleanProperty) property, connected);
-                        world.setBlockState(POS.offset(direction), connected ? block.getDefaultState()
-                                : net.minecraft.block.Blocks.AIR.getDefaultState(), 2);
+                        requested = requested.setValue((BooleanProperty) property, connected);
+                        world.setBlock(POS.relative(direction), connected ? block.defaultBlockState()
+                                : net.minecraft.block.Blocks.AIR.defaultBlockState(), 2);
                     }
                 }
-                require(world.setBlockState(POS, requested, 2), "Cannot place harvest witness");
+                require(world.setBlock(POS, requested, 2), "Cannot place harvest witness");
                 BlockState state = world.getBlockState(POS);
                 require(state.equals(requested), "Native connection state changed before mining");
                 boolean expectedSolid = blockId.endsWith("_ore") || blockId.equals("electricadvantage:electric_conduit");
-                require(state.isSolid() == expectedSolid, "Legacy solid/non-solid property changed");
-                row.addProperty("actualSolid", state.isSolid());
-                boolean fullCollision = !VoxelShapes.compare(state.getCollisionShape(world, POS),
-                        VoxelShapes.fullCube(), IBooleanFunction.NOT_SAME);
+                require(state.canOcclude() == expectedSolid, "Legacy solid/non-solid property changed");
+                row.addProperty("actualSolid", state.canOcclude());
+                boolean fullCollision = !VoxelShapes.joinIsNotEmpty(state.getCollisionShape(world, POS),
+                        VoxelShapes.block(), IBooleanFunction.NOT_SAME);
                 require(fullCollision != blockId.equals("electricadvantage:electric_conduit"),
                         "Legacy wire/frame/scaffold collision geometry changed");
                 row.addProperty("fullCollision", fullCollision);
                 if (level >= 0) require(state.getHarvestTool() == ToolType.PICKAXE
                         && state.getHarvestLevel() == level, "Historical harvest level/tool changed");
                 ItemStack tool = toolItem == null ? ItemStack.EMPTY : new ItemStack(toolItem);
-                if (silk) tool.addEnchantment(Enchantments.SILK_TOUCH, 1);
-                player.setHeldItem(Hand.MAIN_HAND, tool);
+                if (silk) tool.enchant(Enchantments.SILK_TOUCH, 1);
+                player.setItemInHand(Hand.MAIN_HAND, tool);
                 require(state.canHarvestBlock(world, POS, player) == allowed, "Tool failure/success gate changed");
-                require(player.interactionManager.tryHarvestBlock(POS) && world.isAirBlock(POS),
+                require(player.gameMode.destroyBlock(POS) && world.isEmptyBlock(POS),
                         "Native PlayerInteractionManager did not remove the block");
-                List<ItemEntity> drops = harvestDrops(world, new AxisAlignedBB(POS).grow(2));
+                List<ItemEntity> drops = harvestDrops(world, new AxisAlignedBB(POS).inflate(2));
                 JsonArray actualDrops = new JsonArray();
                 for (ItemEntity entity : drops) {
                     JsonObject actual = new JsonObject();
-                    actual.addProperty("entityId", entity.getEntityId());
-                    actual.addProperty("uuid", entity.getUniqueID().toString());
+                    actual.addProperty("entityId", entity.getId());
+                    actual.addProperty("uuid", entity.getUUID().toString());
                     actual.addProperty("item", entity.getItem().getItem().getRegistryName().toString());
                     actual.addProperty("count", entity.getItem().getCount());
                     actual.addProperty("removed", entity.removed);
@@ -170,9 +170,9 @@ final class NativeHarvestProbe {
                 new GameProfile(UUID.fromString("c791aefe-a372-4536-9251-27032c01f115"), "AdvWorksHarvest"),
                 new PlayerInteractionManager(world));
         player.connection = new ServerPlayNetHandler(world.getServer(), new NetworkManager(PacketDirection.SERVERBOUND), player) {
-            @Override public void sendPacket(IPacket<?> packet) {}
+            @Override public void send(IPacket<?> packet) {}
         };
-        player.setPosition(POS.getX() + 0.5, POS.getY() + 1, POS.getZ() + 0.5);
+        player.setPos(POS.getX() + 0.5, POS.getY() + 1, POS.getZ() + 0.5);
         JsonArray rows = new JsonArray();
         String sulfur = "electricadvantage:sulfur_ore", lithium = "electricadvantage:li_ore";
         witness(world, player, rows, "sulfur/hand-fails", sulfur, 0, null, false, false, "", 0, 0, 1);
@@ -202,22 +202,22 @@ final class NativeHarvestProbe {
         try {
             Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation("electricadvantage:photovoltaic_generator"));
             require(block != null && block != net.minecraft.block.Blocks.AIR, "Missing native photovoltaic block");
-            world.setBlockState(POS, block.getDefaultState(), 2);
-            require(world.getBlockState(POS).isSolid(), "Legacy photovoltaic solid=true was lost");
+            world.setBlock(POS, block.defaultBlockState(), 2);
+            require(world.getBlockState(POS).canOcclude(), "Legacy photovoltaic solid=true was lost");
             solar.addProperty("actualSolid", true);
             solar.addProperty("status", "PASS");
         } catch (AssertionError | RuntimeException error) {
             solar.addProperty("status", "FAIL"); solar.addProperty("failure", error.toString());
         }
         rows.add(solar);
-        world.setBlockState(POS, net.minecraft.block.Blocks.AIR.getDefaultState(), 2);
-        for (Direction direction : Direction.values()) world.setBlockState(POS.offset(direction), net.minecraft.block.Blocks.AIR.getDefaultState(), 2);
-        harvestDrops(world, new AxisAlignedBB(POS).grow(2)).forEach(ItemEntity::remove);
+        world.setBlock(POS, net.minecraft.block.Blocks.AIR.defaultBlockState(), 2);
+        for (Direction direction : Direction.values()) world.setBlock(POS.relative(direction), net.minecraft.block.Blocks.AIR.defaultBlockState(), 2);
+        harvestDrops(world, new AxisAlignedBB(POS).inflate(2)).forEach(ItemEntity::remove);
         JsonObject report = new JsonObject();
         report.addProperty("label", label);
-        report.addProperty("minecraft", "1.15.2");
+        report.addProperty("minecraft", "1.16.5");
         report.addProperty("worldTime", world.getGameTime());
-        report.addProperty("fixtureIsolation", "native115-live-drops-v1");
+        report.addProperty("fixtureIsolation", "native116-live-drops-v1");
         report.addProperty("status", java.util.stream.StreamSupport.stream(rows.spliterator(), false)
                 .allMatch(row -> "PASS".equals(row.getAsJsonObject().get("status").getAsString())) ? "PASS" : "FAIL");
         report.add("checks", rows);
@@ -228,6 +228,6 @@ final class NativeHarvestProbe {
 
     static List<ItemEntity> harvestDrops(net.minecraft.world.IEntityReader world, AxisAlignedBB bounds) {
         // remove() only marks an entity; the chunk index can retain it until the next tick.
-        return world.getEntitiesWithinAABB(ItemEntity.class, bounds, entity -> !entity.removed);
+        return world.getEntitiesOfClass(ItemEntity.class, bounds, entity -> !entity.removed);
     }
 }

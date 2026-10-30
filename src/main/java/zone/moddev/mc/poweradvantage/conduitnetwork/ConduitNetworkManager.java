@@ -131,13 +131,13 @@ public class ConduitNetworkManager {
 	 * @param dimension dimension containing the changed chunk
 	 * @param chunk changed chunk position
 	 */
-	public void invalidateChunk(int dimension, ChunkPos chunk) {
+	public void invalidateChunk(net.minecraft.util.RegistryKey<World> dimension, ChunkPos chunk) {
 		lock.writeLock().lock();
 		try {
 			int minX = (chunk.x << 4) - 1;
 			int minZ = (chunk.z << 4) - 1;
 			for (BlockPos4D coord : new ArrayList<>(networkCache.keySet())) {
-				if (coord.dimension == dimension && coord.pos.getX() >= minX
+				if (coord.dimension.equals(dimension) && coord.pos.getX() >= minX
 						&& coord.pos.getX() <= minX + 17 && coord.pos.getZ() >= minZ
 						&& coord.pos.getZ() <= minZ + 17) invalidate(coord);
 			}
@@ -159,7 +159,7 @@ public class ConduitNetworkManager {
 		lock.writeLock().lock();
 		try {
 			invalidate(coord);
-			if (!w.isBlockLoaded(coord.pos)) return;
+			if (!w.hasChunkAt(coord.pos)) return;
 			createNewNetwork(coord);
 			recursiveScan(w, coord, w.getBlockState(coord.pos), type);
 		} finally {
@@ -196,8 +196,8 @@ public class ConduitNetworkManager {
 	protected void recursiveScan(World w, BlockPos4D coord, BlockState src, ConduitType type) {
 		for (int i = 0; i < Direction.values().length; i++) {
 			Direction face = Direction.values()[i];
-			BlockPos4D n = coord.offset(face);
-			if (!w.isBlockLoaded(n.pos) || areInSameNetwork(coord, n)) {
+			BlockPos4D n = coord.relative(face);
+			if (!w.hasChunkAt(n.pos) || areInSameNetwork(coord, n)) {
 				continue;
 			}
 			BlockState blockstate = w.getBlockState(n.pos);

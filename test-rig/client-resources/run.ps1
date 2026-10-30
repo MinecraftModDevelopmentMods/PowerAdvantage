@@ -3,6 +3,7 @@ param([Parameter(Mandatory = $true)][string]$JavaHome,
       [ValidateSet('Gradle', 'Eclipse')][string]$OutputSource = 'Gradle',
       [switch]$RequireExtensions,
       [switch]$ChildRendererGeometry,
+      [switch]$MachineGuiLayouts,
       [string]$RecipeBookFixtures,
       [string]$PowerCandidate,
       [switch]$PreflightOnly,
@@ -29,32 +30,33 @@ function Assert-NativeMetadata([string]$Metadata, [string]$Id) {
     # Match the known single-mod header, not dependency modId/versionRange fields.
     $header = [regex]::Match($Metadata, '(?ms)^\[\[mods\]\]\s*(.*?)(?=^\[|\z)').Groups[1].Value
     if ($header -notmatch ('(?m)^modId\s*=\s*"' + [regex]::Escape($Id) + '"[ \t]*(?:#[^\r\n]*)?\r?$') -or
-        $header -notmatch '(?m)^version\s*=\s*"[^"\r\n]*\.115\d+"[ \t]*(?:#[^\r\n]*)?\r?$' -or
-        $Metadata -notmatch '(?m)^loaderVersion\s*=\s*"\[31,') { throw "Not a native Forge 31 candidate: $Id" }
-    $expected = @{ poweradvantage = '2.4.6.115021'; steamadvantage = '2.2.7.115021'; electricadvantage = '2.2.7.115021' }
+        $header -notmatch '(?m)^version\s*=\s*"[^"\r\n]*\.116051"[ \t]*(?:#[^\r\n]*)?\r?$' -or
+        $Metadata -notmatch '(?m)^loaderVersion\s*=\s*"\[36,') { throw "Not a native Forge 36 candidate: $Id" }
+    $expected = @{ poweradvantage = '2.4.7.116051'; steamadvantage = '2.2.8.116051'; electricadvantage = '2.2.8.116051' }
     if ($expected.ContainsKey($Id) -and $header -notmatch ('(?m)^version\s*=\s*"' + [regex]::Escape($expected[$Id]) + '"[ \t]*(?:#[^\r\n]*)?\r?$')) {
         throw "Unexpected native candidate version for $Id; expected $($expected[$Id])"
     }
 }
 function Assert-NativeLaunch([hashtable]$Environment, [hashtable]$Attributes) {
-    if ($Environment.MC_VERSION -ne '1.15.2' -or $Environment.FORGE_VERSION -ne '31.2.57' -or
-        $Environment.MCP_MAPPINGS -ne 'snapshot_20200514-1.15.1' -or $Environment.MCP_VERSION -ne '20200515.085601' -or
-        $Environment.target -ne 'fmluserdevclient') { throw 'Regenerate the native 1.15.2 / Forge 31.2.57 snapshot 20200514-1.15.1 client launch.' }
-    if ($Attributes['org.eclipse.jdt.launching.PROGRAM_ARGUMENTS'] -notmatch '1\.15\.2-31\.2\.57' -or
-        $Attributes['org.eclipse.jdt.launching.PROGRAM_ARGUMENTS'] -match '1\.(?:13\.2|14\.4)|--(?:server|port|gameDir|world)\b' -or
+    if ($Environment.MC_VERSION -ne '1.16.5' -or $Environment.FORGE_VERSION -ne '36.2.34' -or
+        $Environment.MCP_MAPPINGS -ne 'official_1.16.5' -or $Environment.MCP_VERSION -ne '20210115.111550' -or
+        $Environment.target -ne 'fmluserdevclient') { throw 'Regenerate the native 1.16.5 / Forge 36.2.34 official client launch.' }
+    if ($Attributes['org.eclipse.jdt.launching.PROGRAM_ARGUMENTS'] -notmatch '1\.16\.5-36\.2\.34' -or
+        $Attributes['org.eclipse.jdt.launching.PROGRAM_ARGUMENTS'] -match '1\.(?:13\.2|14\.4|15\.2)|--(?:server|port|gameDir|world)\b' -or
         $Attributes['org.eclipse.jdt.launching.MAIN_TYPE'] -ne 'net.minecraftforge.launcher.Main') {
         throw 'Unexpected native launch arguments; no server connection or existing game directory is allowed.'
     }
 }
 function Assert-NativeArchive([string]$Path) {
-    if ($Path -match '(?:forge|client-extra)-1\.(?:13\.2|14\.4)|[\\/]PA11[34][\\/]') { throw "Legacy runtime archive: $Path" }
+    if ($Path -match '(?:forge|client-extra)-1\.(?:13\.2|14\.4|15\.2)|[\\/]PA11[345][\\/]') { throw "Legacy runtime archive: $Path" }
 }
 function Quote-Argument([string]$Value) {
     '"' + [regex]::Replace([regex]::Replace($Value, '(\\*)"', '$1$1\"'), '(\\+)$', '$1$1') + '"'
 }
 $probe = Join-Path $project 'build/client-resource-probe/advantageclientresources-deobf.jar'
-$runtime = Join-Path $project ('build/client-resource-runs/' + [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss') + '-' + [guid]::NewGuid().ToString('N').Substring(0, 8))
-$inputReport = [ordered]@{ minecraft = '1.15.2'; forge = '31.2.57'; mappings = 'snapshot_20200514-1.15.1'; mcp = '20200515.085601'; qualification = 'UNQUALIFIED'; output_source = $OutputSource; launch_profile = $LaunchProfile; require_extensions = [bool]$RequireExtensions; child_renderer_geometry = [bool]$ChildRendererGeometry }
+$runtime = Join-Path $project ('run-client-resource-runs/' + [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss') + '-' + [guid]::NewGuid().ToString('N').Substring(0, 8))
+$inputReport = [ordered]@{ minecraft = '1.16.5'; forge = '36.2.34'; mappings = 'official_1.16.5'; mcp = '20210115.111550'; qualification = 'UNQUALIFIED'; output_source = $OutputSource; launch_profile = $LaunchProfile; require_extensions = [bool]$RequireExtensions; child_renderer_geometry = [bool]$ChildRendererGeometry }
+$inputReport.machine_gui_layouts = [bool]$MachineGuiLayouts
 $phase = 'launch-preflight'
 New-Item -ItemType Directory -Path $runtime | Out-Null
 try {
@@ -69,8 +71,8 @@ $inputReport.java = Get-Record $java
 $inputReport.launch = Get-Record (Join-Path $project $LaunchProfile)
 $inputReport.probe = Get-Record $probe
 $probeMetadata = Read-JarMetadata $probe
-if ($probeMetadata -notmatch 'loaderVersion="\[31,32\)"' -or $probeMetadata -notmatch 'versionRange="\[1\.15\.2\]"' -or
-    $probeMetadata -notmatch 'versionRange="\[31\.2\.57\]"' -or $probeMetadata -notmatch 'versionRange="\[2\.4\.6\.115021\]"') { throw 'Rebuild the native 1.15 probe; do not substitute a legacy probe.' }
+if ($probeMetadata -notmatch 'loaderVersion="\[36,37\)"' -or $probeMetadata -notmatch 'versionRange="\[1\.16\.5\]"' -or
+    $probeMetadata -notmatch 'versionRange="\[36\.2\.34\]"' -or $probeMetadata -notmatch 'versionRange="\[2\.4\.7\.116051\]"') { throw 'Rebuild the native 1.16 probe; do not substitute a legacy probe.' }
 Copy-Item -LiteralPath (Join-Path $project $LaunchProfile) -Destination (Join-Path $runtime 'launch.xml')
 $environment = @{}
 foreach ($map in $launch.launchConfiguration.mapAttribute) {
@@ -101,7 +103,7 @@ $outputFiles = @(Get-ChildItem -LiteralPath $modOutput -Recurse -File | Sort-Obj
 if (@($outputFiles | Where-Object { $_.path -like '*.class' }).Count -eq 0) { throw 'Selected output has no compiled production classes.' }
 $outputFiles | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $runtime 'production-files.json') -Encoding utf8
 $inputReport.production_files = Get-Record (Join-Path $runtime 'production-files.json')
-if (-not $PowerCandidate) { $PowerCandidate = Join-Path $project 'build/libs-dev/PowerAdvantage-2.4.6.115021-deobf.jar' }
+if (-not $PowerCandidate) { $PowerCandidate = Join-Path $project 'build/libs-dev/PowerAdvantage-2.4.7.116051-deobf.jar' }
 $PowerCandidate = (Resolve-Path -LiteralPath $PowerCandidate).Path
 Assert-NativeMetadata (Read-JarMetadata $PowerCandidate) 'poweradvantage'
 $inputReport.power_candidate = Get-Record $PowerCandidate
@@ -136,13 +138,24 @@ $archives = @(foreach ($entry in $classpathNode.listEntry) {
     if ($classpathEntry.runtimeClasspathEntry.externalArchive) { $classpathEntry.runtimeClasspathEntry.externalArchive }
 })
 $archiveRecords = @()
+$launchArchives = @()
 $runtimeCandidates = @{}
 foreach ($archive in $archives) {
     Assert-NativeArchive $archive
     $record = Get-Record $archive
-    $archiveRecords += $record
     $metadata = if ([IO.Path]::GetExtension($archive) -eq '.jar') { Read-JarMetadata $archive }
     $modHeader = if ($metadata) { [regex]::Match($metadata, '(?ms)^\[\[mods\]\]\s*(.*?)(?=^\[|\z)').Groups[1].Value }
+    if ($modHeader -match '(?m)^modId\s*=\s*"(?:steamadvantage|electricadvantage|basemetals|orespawn)"') {
+        # Never read mutable sibling build outputs while the client is running.
+        $snapshotDirectory = Join-Path $runtime 'runtime-archives'
+        New-Item -ItemType Directory -Path $snapshotDirectory -Force | Out-Null
+        $snapshot = Join-Path $snapshotDirectory ([IO.Path]::GetFileName($archive))
+        Copy-Item -LiteralPath $archive -Destination $snapshot
+        $snapshotRecord = Get-Record $snapshot
+        if ($snapshotRecord.sha256 -ne $record.sha256) { throw "Dependency changed during snapshot: $archive" }
+        $snapshotRecord.origin_path = $record.path
+        $record = $snapshotRecord
+    }
     foreach ($id in 'poweradvantage','steamadvantage','electricadvantage','basemetals','orespawn') {
         if ($modHeader -match ('(?m)^modId\s*=\s*"' + $id + '"[ \t]*(?:#[^\r\n]*)?\r?$')) {
             Assert-NativeMetadata $metadata $id
@@ -150,15 +163,19 @@ foreach ($archive in $archives) {
             $runtimeCandidates[$id] = $record
         }
     }
+    $archiveRecords += $record
+    $launchArchives += $record.path
 }
+$archives = $launchArchives
 $inputReport.archives = $archiveRecords
 $inputReport.runtime_candidates = $runtimeCandidates
-if (-not ($archives -match 'forge-1\.15\.2-31\.2\.57-snapshot-20200514-1\.15\.1\.jar$')) { throw 'Missing actual native mapped Forge runtime.' }
+if (-not ($archives -match 'forge-1\.16\.5-36\.2\.34\.jar$')) { throw 'Missing actual native mapped Forge runtime.' }
 if ($RequireExtensions -and (-not $runtimeCandidates.ContainsKey('steamadvantage') -or -not $runtimeCandidates.ContainsKey('electricadvantage'))) { throw 'Combined launch must explicitly contain both native expansion candidates.' }
 $arguments = @([regex]::Matches($attributes['org.eclipse.jdt.launching.PROGRAM_ARGUMENTS'], '"[^"]*"|\S+') | ForEach-Object { $_.Value.Trim('"') })
 $vmArguments = @([regex]::Matches($attributes['org.eclipse.jdt.launching.VM_ARGUMENTS'], '"[^"]*"|\S+') | ForEach-Object { $_.Value.Trim('"') })
 if ($RequireExtensions) { $vmArguments += '-Dadvantageworks.requireExtensions=true' }
 if ($ChildRendererGeometry) { $vmArguments += '-Dadvantageworks.childRendererGeometry=true' }
+if ($MachineGuiLayouts) { $vmArguments += '-Dadvantageworks.machineGuiLayouts=true' }
 $environment.MOD_CLASSES = "poweradvantage%%$modOutput;poweradvantage%%$modOutput"
 $inputReport.environment = $environment
 $inputReport.program_arguments = $arguments
@@ -192,7 +209,14 @@ $resultPath = Join-Path $runtime 'client-resources.json'
 if (-not (Test-Path -LiteralPath $resultPath)) { throw "Client did not produce a result; inspect $runtime/logs" }
 $result = Get-Content -LiteralPath $resultPath -Raw | ConvertFrom-Json
 if ($result.status -ne 'PASS') { throw "Client resource check failed: $($result.error); inspect $runtime" }
-if ($result.minecraft -ne '1.15.2' -or $result.forge -ne '31.2.57') { throw 'Result is not native 1.15.2 / Forge 31.2.57 evidence.' }
+if ($result.minecraft -ne '1.16.5' -or $result.forge -ne '36.2.34') { throw 'Result is not native 1.16.5 / Forge 36.2.34 evidence.' }
+if ($MachineGuiLayouts -and $result.machine_gui_layout_status -ne 'PASS') { throw 'Machine GUI layouts did not pass; inspect the retained images and JSON.' }
+$expectedGuiTextChecks = if ($RequireExtensions) { 351 } else { 126 }
+if ($MachineGuiLayouts -and ($result.machine_gui_text_spec -ne 2 -or $result.machine_gui_text_status -ne 'PASS' -or
+        $result.machine_gui_text_checks -ne $expectedGuiTextChecks -or
+        $result.machine_gui_negative_controls_rejected -ne ($expectedGuiTextChecks + 4))) {
+    throw 'Required-caption GUI contract v2 did not pass; an older no-label probe is not acceptable.'
+}
 if ($RecipeBookFixtures -and $result.recipe_book_grouping_status -ne 'PASS') { throw 'Native recipe fixtures were supplied but recipe-book grouping did not pass.' }
 if ($ChildRendererGeometry -and ($result.primary_resource_status -ne 'PASS' -or $result.child_renderer_geometry_status -ne 'PASS_WITH_MANUAL_GAPS')) { throw 'Additional child renderer geometry did not pass its worldless scope; inspect the retained report.' }
 if ($ChildRendererGeometry) { $inputReport.child_renderer_geometry_status = $result.child_renderer_geometry_status }
@@ -205,6 +229,7 @@ if ($log -match "Unable to load model:.*${namespaces}:|Exception loading blockst
     throw "Client logged a model or texture error; inspect $runtime/logs/latest.log"
 }
 Write-Output "PASS: $($result.items) items, $($result.block_states) block states, $($result.creative_entries) creative entries. Evidence: $runtime"
+if ($MachineGuiLayouts) { Write-Output "Required-caption GUI contract v2: $($result.machine_gui_text_checks) text cases passed; $($result.machine_gui_negative_controls_rejected) deliberately broken controls rejected. Images retained." }
 if ($ChildRendererGeometry) { Write-Output 'Additional renderer geometry: worldless scope passed; hydroturbine orientation/spin still requires a disposable-world test. This is not pixel/manual acceptance.' }
 $inputReport.qualification = 'NATIVE_CLIENT_RESOURCE_PASS'
 } catch {

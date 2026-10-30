@@ -18,18 +18,18 @@ public class FluidDrainBlock extends BlockSimpleFluidMachine {
 	}
 
 	@Override
-	public PoweredEntity createNewTileEntity(IBlockReader w) {
+	public PoweredEntity newBlockEntity(IBlockReader w) {
 		return new FluidDrainTileEntity();
 	}
 
 	@Override
-	public boolean hasComparatorInputOverride(BlockState state) {
+	public boolean hasAnalogOutputSignal(BlockState state) {
 		return true;
 	}
 
 	@Override
-	public int getComparatorInputOverride(BlockState state, World world, BlockPos coord) {
-		TileEntity te = world.getTileEntity(coord);
+	public int getAnalogOutputSignal(BlockState state, World world, BlockPos coord) {
+		TileEntity te = world.getBlockEntity(coord);
 		if (te != null && te instanceof FluidDrainTileEntity) {
 			return ((FluidDrainTileEntity) te).getRedstoneOutput();
 		}

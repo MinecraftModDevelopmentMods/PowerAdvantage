@@ -41,9 +41,9 @@ public final class FluidNetworkApi {
      */
     public static int offerFluid(World world, BlockPos conduitPosition, FluidStack offered, int maxTransfer,
             byte minimumPriority, @Nullable Object source) {
-        if (world == null || world.isRemote || conduitPosition == null || offered == null
+        if (world == null || world.isClientSide || conduitPosition == null || offered == null
                 || offered.getFluid() == null || offered.amount <= 0 || maxTransfer <= 0
-                || !world.isBlockLoaded(conduitPosition)) {
+                || !world.hasChunkAt(conduitPosition)) {
             return 0;
         }
 

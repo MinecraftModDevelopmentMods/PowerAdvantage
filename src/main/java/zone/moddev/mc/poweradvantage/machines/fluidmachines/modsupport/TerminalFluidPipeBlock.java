@@ -19,7 +19,7 @@ import net.minecraft.world.World;
 public class TerminalFluidPipeBlock extends FluidPipeBlock implements ITileEntityProvider {
 
 	@Override
-	public TileEntity createNewTileEntity(IBlockReader worldIn) {
+	public TileEntity newBlockEntity(IBlockReader worldIn) {
 		return new TerminalFluidPipeTileEntity();
 	}
 
@@ -45,15 +45,15 @@ public class TerminalFluidPipeBlock extends FluidPipeBlock implements ITileEntit
 	/**
 	 * Called by ItemBlocks after a block is set in the world, to allow post-place logic
 	 */
-	public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
-		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+	public void setPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+		super.setPlacedBy(worldIn, pos, state, placer, stack);
 		pipeCheck(worldIn, pos);
 	}
 
 	private void pipeCheck(World w, BlockPos pos) {
-		if (!w.isRemote) {
+		if (!w.isClientSide) {
 			if (numberOfAdjacentFluidHandlers(w, pos) == 0) {
-				w.setBlockState(pos, Blocks.fluid_pipe.getDefaultState());
+				w.setBlock(pos, Blocks.fluid_pipe.defaultBlockState(), 3);
 			}
 		}
 	}
@@ -66,7 +66,6 @@ public class TerminalFluidPipeBlock extends FluidPipeBlock implements ITileEntit
 	 * @param thisBlock  The block that is checking its neighbor
 	 * @param bs         Block state of this block
 	 * @param face       The face on the first block through which the connection would happen
-	 * @param otherBlock Coordinate of neighboring block
 	 * @return Default implementation: true if the neighboring block implements
 	 * ITypedConductor and has the same energy type as this block. Overriding
 	 * the canConnectTo(ConductorType) method will change the results of this
@@ -74,9 +73,9 @@ public class TerminalFluidPipeBlock extends FluidPipeBlock implements ITileEntit
 	 */
 	@Override
 	protected boolean canConnectTo(IBlockReader w, BlockPos thisBlock, BlockState bs, Direction face) {
-		BlockPos otherBlock = thisBlock.offset(face);
+		BlockPos otherBlock = thisBlock.relative(face);
 		return super.canConnectTo(w, thisBlock, bs, face)
-				|| FluidHandlerHelper.hasHandler(w.getTileEntity(otherBlock), face.getOpposite());
+				|| FluidHandlerHelper.hasHandler(w.getBlockEntity(otherBlock), face.getOpposite());
 	}
 
 }

@@ -3,6 +3,7 @@ import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.jar.Manifest
 import java.util.zip.ZipFile
+import java.util.zip.CRC32
 import org.apache.tools.ant.filters.FixCrLfFilter
 
 plugins {
@@ -89,12 +90,13 @@ def normalizeArchiveLineEndings = { details ->
 
 minecraft {
     mappings channel: project.mapping_channel, version: project.mapping_version
+    accessTransformer = 'META-INF/accesstransformer.cfg'
     String configuredRunDirectory = providers.gradleProperty('powerAdvantageRunDirectory')
             .getOrElse('run')
     def forgeRunModClassesDirectory = layout.buildDirectory.dir('forge-run-mod-classes/main')
     def forgeMainOutputPath = forgeRunModClassesDirectory.get().asFile.absolutePath
     def mainModClasses = "${mod_id}%%${forgeMainOutputPath}${File.pathSeparator}${mod_id}%%${forgeMainOutputPath}"
-    def forge31RunTargets = [client: 'fmluserdevclient', server: 'fmluserdevserver', data: 'fmluserdevdata']
+    def forge36RunTargets = [client: 'fmluserdevclient', server: 'fmluserdevserver', data: 'fmluserdevdata']
     runs {
         configureEach {
             mainClass = 'net.minecraftforge.userdev.LaunchTesting'
@@ -102,7 +104,7 @@ minecraft {
             systemProperty 'forge.logging.markers', 'REGISTRIES'
             systemProperty 'forge.logging.console.level', 'info'
             mods { poweradvantage { source sourceSets.main } }
-            environment 'target', forge31RunTargets[name]
+            environment 'target', forge36RunTargets[name]
             environment 'MCP_MAPPINGS', "${mapping_channel}_${mapping_version}"
             environment 'MCP_VERSION', mcp_version
             environment 'FORGE_VERSION', forge_version
@@ -130,7 +132,7 @@ sourceSets.main.resources {
 def forgeRunModClassesDirectory = layout.buildDirectory.dir('forge-run-mod-classes/main')
 def prepareForgeRunModClasses = tasks.register('prepareForgeRunModClasses', Sync) {
     group = 'ide'
-    description = 'Merges classes and processed resources for Forge 1.15 launches.'
+    description = 'Merges classes and processed resources for Forge 1.16 launches.'
     dependsOn tasks.named('classes')
     from sourceSets.main.output
     into forgeRunModClassesDirectory
@@ -165,11 +167,11 @@ repositories {
 // The default paths mirror the local MMD checkout layout without tying the
 // build to a drive letter. CI and other layouts can override either path.
 def baseMetalsDeobfJar = file(providers.gradleProperty('baseMetalsDeobfJar')
-        .getOrElse('../../../BaseMetals/BaseMetals 115/BaseMetals/build/libs-dev/'
-                + 'BaseMetals-3.0.2.115021-deobf.jar'))
+        .getOrElse('../../../BaseMetals/BaseMetals 116/BaseMetals/build/libs-dev/'
+                + 'BaseMetals-3.1.1.116051-deobf.jar'))
 def oreSpawnDeobfJar = file(providers.gradleProperty('oreSpawnDeobfJar')
-        .getOrElse('../../../MinecraftMineralogy/OS115/OreSpawn/build/libs-dev/'
-                + 'OreSpawn-4.1.1.115021-deobf.jar'))
+        .getOrElse('../../../MinecraftMineralogy/OS116/OreSpawn/build/libs-dev/'
+                + 'OreSpawn-4.1.0.116051-deobf.jar'))
 
 dependencies {
     implementation minecraft.dependency(
@@ -314,17 +316,17 @@ tasks.register('verifyReleaseConfiguration') {
     group = 'verification'
     description = 'Validates release identity, target metadata, and optional integration policy.'
     doLast {
-        if (new JsonSlurper().parse(file('src/main/resources/pack.mcmeta')).pack.pack_format != 5) {
-            throw new GradleException('Minecraft 1.15.2 resources must use pack format 5')
+        if (new JsonSlurper().parse(file('src/main/resources/pack.mcmeta')).pack.pack_format != 6) {
+            throw new GradleException('Minecraft 1.16.5 resources must use pack format 6')
         }
-        if (project.mod_version != '2.4.6.115021') {
+        if (project.mod_version != '2.4.7.116051') {
             throw new GradleException("Unexpected PowerAdvantage release version: ${project.mod_version}")
         }
-        if (project.minecraft_version != '1.15.2'
-                || project.forge_version != '31.2.57'
-                || project.mapping_channel != 'snapshot'
-                || project.mapping_version != '20200514-1.15.1'
-                || project.mcp_version != '20200515.085601') {
+        if (project.minecraft_version != '1.16.5'
+                || project.forge_version != '36.2.34'
+                || project.mapping_channel != 'official'
+                || project.mapping_version != '1.16.5'
+                || project.mcp_version != '20210115.111550') {
             throw new GradleException('Unexpected Minecraft, Forge, or mappings target')
         }
         if (project.loader_name != 'forge' || project.loader_code != '1'
@@ -341,19 +343,19 @@ tasks.register('verifyReleaseConfiguration') {
         }
         if (project.cf_requirements != 'base-metals,mmd-orespawn'
                 || project.cf_optionals != 'additional-loot-tables'
-                || project.cf_versions != '1.15.2') {
+                || project.cf_versions != '1.16.5') {
             throw new GradleException('Unexpected CurseForge dependency or game-version metadata')
         }
-        if (project.basemetals_version != '3.0.2.115021'
-                || project.orespawn_version != '4.1.1.115021'
-                || project.basemetals_source_commit != 'ac1781e7cade15045ffe0135077087b4d1722603'
-                || project.orespawn_source_commit != '5613baf876747ed071cb7ad7e2aff4e0ce4f0a03') {
+        if (project.basemetals_version != '3.1.1.116051'
+                || project.orespawn_version != '4.1.0.116051'
+                || project.basemetals_source_commit != '995f6cc4dd2d5eecc628a42e5c43fa5390c24bca'
+                || project.orespawn_source_commit != 'a113e5d767169189f0e35ade1e173a12d550b00e') {
             throw new GradleException('Unexpected Base Metals or OreSpawn dependency identity')
         }
         String mainSource = file(
                 'src/main/java/zone/moddev/mc/poweradvantage/PowerAdvantage.java').getText('UTF-8')
         if (!mainSource.contains('MODID = "poweradvantage"')
-                || !mainSource.contains('VERSION = "2.4.6.115021"')
+                || !mainSource.contains('VERSION = "2.4.7.116051"')
                 || !mainSource.contains('@Mod(PowerAdvantage.MODID)')) {
             throw new GradleException('PowerAdvantage source identity changed')
         }
@@ -386,7 +388,7 @@ tasks.register('verifyReleaseConfiguration') {
         }
         String steelBarsTag = file(
                 'src/main/resources/data/forge/tags/items/bars/steel.json').getText('UTF-8')
-        if (!steelBarsTag.contains('"optional"') || !steelBarsTag.contains('"basemetals:steel_bars"')) {
+        if (!steelBarsTag.contains('"required": false') || !steelBarsTag.contains('"basemetals:steel_bars"')) {
             throw new GradleException('Steel bars must use Forge optional tag entries when Base Metals is absent')
         }
         [
@@ -459,6 +461,38 @@ tasks.register('verifyReleaseDependencies') {
     }
 }
 
+tasks.register('verifyDevelopmentRuntimeArchives') {
+    group = 'verification'
+    description = 'Reads every development runtime jar entry and verifies its CRC before launching Minecraft.'
+    dependsOn tasks.named('verifyReleaseDependencies')
+    doLast {
+        configurations.runtimeClasspath.files.findAll { it.name.endsWith('.jar') }.each { File archive ->
+            new ZipFile(archive).withCloseable { zip ->
+                zip.entries().each { entry ->
+                    if (entry.directory) return
+                    CRC32 crc = new CRC32()
+                    long size = 0
+                    try {
+                        zip.getInputStream(entry).withCloseable { input ->
+                            byte[] buffer = new byte[8192]
+                            int count
+                            while ((count = input.read(buffer)) != -1) {
+                                crc.update(buffer, 0, count)
+                                size += count
+                            }
+                        }
+                    } catch (IOException failure) {
+                        throw new GradleException("Unreadable development runtime entry: ${archive}!/${entry.name}", failure)
+                    }
+                    if (size != entry.size || crc.value != entry.crc) {
+                        throw new GradleException("Corrupt development runtime entry: ${archive}!/${entry.name}")
+                    }
+                }
+            }
+        }
+    }
+}
+
 tasks.register('verifyReleaseArtifacts') {
     group = 'verification'
     description = 'Audits the exact three distributable jars and release-critical contents.'
@@ -508,7 +542,8 @@ tasks.register('verifyReleaseArtifacts') {
         File mainJar = new File(libs, expectedReleaseFiles.get()[0])
         new ZipFile(mainJar).withCloseable { zip ->
             List<String> names = zip.entries().collect { it.name }
-            ['META-INF/mods.toml', 'pack.mcmeta',
+            ['META-INF/mods.toml', 'META-INF/accesstransformer.cfg', 'pack.mcmeta',
+             'coremods/poweradvantage_116_migration.js',
              'zone/moddev/mc/poweradvantage/PowerAdvantage.class',
              'cyano/poweradvantage/api/PoweredEntity.class',
              'cyano/poweradvantage/api/fluid/FluidNetworkApi.class',
@@ -527,6 +562,14 @@ tasks.register('verifyReleaseArtifacts') {
                 if (names.any { it.contains(forbidden) }) {
                     throw new GradleException("Release jar contains forbidden entry matching ${forbidden}")
                 }
+            }
+            List<String> accessRules = zip.getInputStream(zip.getEntry('META-INF/accesstransformer.cfg'))
+                    .getText('UTF-8').readLines().collect { it.trim() }
+                    .findAll { it && !it.startsWith('#') }
+            if (accessRules != [
+                    'public net.minecraft.resources.DataPackRegistries field_240955_e_',
+                    'public net.minecraft.tags.NetworkTagManager field_199720_b']) {
+                throw new GradleException('Packaged native tag-reader access rules were not reobfuscated correctly')
             }
             String modsToml = zip.getInputStream(zip.getEntry('META-INF/mods.toml'))
                     .getText(StandardCharsets.UTF_8.name())
@@ -883,6 +926,7 @@ tasks.register('verifyEclipseProductionClasspath') {
     group = 'verification'
     description = 'Verifies the generated Eclipse project and production launches.'
     dependsOn tasks.named('eclipse')
+    dependsOn tasks.named('verifyDevelopmentRuntimeArchives')
     dependsOn tasks.named('isolateEclipseProductionRuns')
     doLast {
         File preferencesFile = file('.settings/org.eclipse.buildship.core.prefs')
@@ -1108,6 +1152,7 @@ tasks.register('verifyRecipeTagGuards') {
 
 tasks.named('check') {
     dependsOn tasks.named('verifyReleaseConfiguration')
+    dependsOn tasks.named('verifyDevelopmentRuntimeArchives')
     dependsOn tasks.named('verifyModelAssets')
     dependsOn tasks.named('verifyRecipeTagGuards')
 }
@@ -1135,23 +1180,33 @@ tasks.register('clientResourceProbeJar', Jar) {
 // these deobf jars are runtime inputs, never release contents or compile dependencies.
 def advantageExtensionJars = [
         steamadvantage: file(providers.gradleProperty('steamAdvantageDeobfJar').getOrElse(
-                '../SteamAdvantage/SteamAdvantage/build/libs-dev/SteamAdvantage-2.2.7.115021-deobf.jar')),
+                '../SteamAdvantage/SteamAdvantage/build/libs-dev/SteamAdvantage-2.2.8.116051-deobf.jar')),
         electricadvantage: file(providers.gradleProperty('electricAdvantageDeobfJar').getOrElse(
-                '../ElectricAdvantage/ElectricAdvantage/build/libs-dev/ElectricAdvantage-2.2.7.115021-deobf.jar'))
+                '../ElectricAdvantage/ElectricAdvantage/build/libs-dev/ElectricAdvantage-2.2.8.116051-deobf.jar'))
 ]
 
 tasks.register('prepareCombinedEclipseLaunch') {
     group = 'ide'
     description = 'Creates an additional production-only Eclipse client launch with all three Advantage mods.'
     dependsOn tasks.named('verifyEclipseProductionClasspath')
+    dependsOn tasks.named('deobfJar')
     doLast {
-        def profile = new JsonSlurper().parse(file('test-rig/profiles/native115/dev-core.json'))
+        File inputProfile = file(providers.gradleProperty('advantageDevelopmentProfile').getOrElse(
+                'test-rig/profiles/native116/dev-core.json'))
+        def profile = new JsonSlurper().parse(inputProfile)
+        if (profile.powerDeobfSha256) {
+            File powerJar = tasks.named('jar', Jar).get().archiveFile.get().asFile
+            String powerHash = MessageDigest.getInstance('SHA-256').digest(powerJar.bytes).encodeHex().toString()
+            if (!powerHash.equalsIgnoreCase(profile.powerDeobfSha256 as String)) {
+                throw new GradleException("PowerAdvantage does not match the dependency pin in ${inputProfile}: ${powerJar}")
+            }
+        }
         advantageExtensionJars.each { String id, File jar ->
             def pin = profile.mods.find { it.id == id }
             if (!jar.isFile()) throw new GradleException("Build ${id} first, or override its *AdvantageDeobfJar property: ${jar}")
             String hash = MessageDigest.getInstance('SHA-256').digest(jar.bytes).encodeHex().toString()
             if (pin == null || !hash.equalsIgnoreCase(pin.sha256 as String)) {
-                throw new GradleException("${id} does not match the audited dev-core dependency pin: ${jar}")
+                throw new GradleException("${id} does not match the dependency pin in ${inputProfile}: ${jar}")
             }
         }
         def launch = new groovy.xml.XmlParser().parse(file('runClient.launch'))

@@ -18,11 +18,11 @@ public class RotationTool extends net.minecraft.item.Item {
 	}
 
 	@Override
-	public ActionResultType onItemUse(ItemUseContext context) {
+	public ActionResultType useOn(ItemUseContext context) {
 		final PlayerEntity player = context.getPlayer();
-		final World w = context.getWorld();
-		final BlockPos coord = context.getPos();
-		final Direction facing = context.getFace();
+		final World w = context.getLevel();
+		final BlockPos coord = context.getClickedPos();
+		final Direction facing = context.getClickedFace();
 		BlockState bs = w.getBlockState(coord);
 		/*  // comment this line to turn the wrench into a hacker tool
 		try { // hacker info
@@ -40,7 +40,7 @@ public class RotationTool extends net.minecraft.item.Item {
 
 		BlockState rotated = bs.rotate(w, coord, Rotation.COUNTERCLOCKWISE_90);
 		if (rotated != bs) {
-			w.setBlockState(coord, rotated);
+			w.setBlock(coord, rotated, 3);
 			return ActionResultType.SUCCESS;
 		}
 

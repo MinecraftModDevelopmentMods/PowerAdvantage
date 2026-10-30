@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.storage.loot.ConstantRange;
-import net.minecraft.world.storage.loot.LootPool;
-import net.minecraft.world.storage.loot.TableLootEntry;
+import net.minecraft.loot.ConstantRange;
+import net.minecraft.loot.LootPool;
+import net.minecraft.loot.TableLootEntry;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.fml.ModList;
 import zone.moddev.mc.poweradvantage.PowerAdvantage;
@@ -24,7 +24,7 @@ public final class PartsLoot {
                 mod -> ModList.get().isLoaded(mod));
     }
 
-    static void addPools(net.minecraft.world.storage.loot.LootTable table, ResourceLocation name,
+    static void addPools(net.minecraft.loot.LootTable table, ResourceLocation name,
             boolean enabled, java.util.function.Predicate<String> loaded) {
         if (!"minecraft".equals(name.getNamespace()) || !CHESTS.contains(name.getPath())
                 || !enabled) return;
@@ -33,8 +33,8 @@ public final class PartsLoot {
                     || (mod.equals("poweradvantage") && name.getPath().equals("chests/end_city_treasure"))) continue;
             String poolName = mod + ":legacy_parts";
             if (table.getPool(poolName) != null) continue;
-            table.addPool(LootPool.builder().name(poolName).rolls(ConstantRange.of(1))
-                    .addEntry(TableLootEntry.builder(new ResourceLocation(mod, "chests/advantage_parts"))).build());
+            table.addPool(LootPool.lootPool().name(poolName) .setRolls(ConstantRange.exactly(1))
+                     .add(TableLootEntry.lootTableReference(new ResourceLocation(mod, "chests/advantage_parts"))).build());
         }
     }
 

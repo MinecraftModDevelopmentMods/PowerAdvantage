@@ -19,7 +19,7 @@ public class BlockRFConverter extends BlockSimplePowerMachine {
     }
 
     @Override
-    public TileEntityRFConverter createNewTileEntity(IBlockReader world) {
+    public TileEntityRFConverter newBlockEntity(IBlockReader world) {
         try {
             return tileEntityClass.newInstance();
         } catch (ReflectiveOperationException exception) {
@@ -29,6 +29,6 @@ public class BlockRFConverter extends BlockSimplePowerMachine {
 
     @Override public boolean isPowerSink(ConduitType powerType) { return true; }
     @Override public boolean isPowerSource(ConduitType powerType) { return true; }
-    @Override public boolean hasComparatorInputOverride(BlockState state) { return false; }
-    @Override public int getComparatorInputOverride(BlockState state, World world, BlockPos pos) { return 0; }
+    @Override public boolean hasAnalogOutputSignal(BlockState state) { return false; }
+    @Override public int getAnalogOutputSignal(BlockState state, World world, BlockPos pos) { return 0; }
 }

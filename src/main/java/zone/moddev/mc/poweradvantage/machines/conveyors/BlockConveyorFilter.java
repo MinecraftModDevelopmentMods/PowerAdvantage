@@ -20,19 +20,19 @@ import zone.moddev.mc.poweradvantage.PowerAdvantage;
 
 /** Horizontal conveyor filter block retaining its legacy metadata codec. */
 public class BlockConveyorFilter extends GUIBlock {
-    public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
+    public static final DirectionProperty FACING = HorizontalBlock.FACING;
     private final Class<? extends TileEntityConveyor> tileEntityClass;
 
     public BlockConveyorFilter(Material material, float hardness,
             Class<? extends TileEntityConveyor> tileEntityClass) {
-        super(Block.Properties.create(material).hardnessAndResistance(hardness)
-                .sound(SoundType.METAL).notSolid().variableOpacity());
+        super(Block.Properties.of(material).strength(hardness)
+                .sound(SoundType.METAL).noOcclusion().dynamicShape());
         this.tileEntityClass = tileEntityClass;
-        setDefaultState(getStateContainer().getBaseState().with(FACING, Direction.NORTH));
+        registerDefaultState(getStateDefinition().any().setValue(FACING, Direction.NORTH));
     }
 
     @Override
-    public TileEntity createNewTileEntity(IBlockReader world) {
+    public TileEntity newBlockEntity(IBlockReader world) {
         try {
             return tileEntityClass.newInstance();
         } catch (ReflectiveOperationException exception) {
@@ -41,28 +41,28 @@ public class BlockConveyorFilter extends GUIBlock {
         }
     }
 
-    @Override public BlockState rotate(BlockState state, Rotation rotation) { return state.with(FACING, rotation.rotate(state.get(FACING))); }
-    @Override public BlockState mirror(BlockState state, Mirror mirror) { return state.rotate(mirror.toRotation(state.get(FACING))); }
+    @Override public BlockState rotate(BlockState state, Rotation rotation) { return state.setValue(FACING, rotation.rotate(state.getValue(FACING))); }
+    @Override public BlockState mirror(BlockState state, Mirror mirror) { return state.rotate(mirror.getRotation(state.getValue(FACING))); }
     @Override public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return getDefaultState().with(FACING, context.getPlacementHorizontalFacing());
+        return defaultBlockState().setValue(FACING, context.getHorizontalDirection());
     }
-    @Override protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) { builder.add(FACING); }
+    @Override protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) { builder.add(FACING); }
     @Override public boolean isOpaqueCube(BlockState state) { return false; }
     public boolean isFullCube(BlockState state) { return false; }
-    @Override public boolean hasComparatorInputOverride(BlockState state) { return true; }
+    @Override public boolean hasAnalogOutputSignal(BlockState state) { return true; }
 
     @Override
-    public int getComparatorInputOverride(BlockState state, World world, BlockPos pos) {
-        TileEntity tile = world.getTileEntity(pos);
+    public int getAnalogOutputSignal(BlockState state, World world, BlockPos pos) {
+        TileEntity tile = world.getBlockEntity(pos);
         if (!(tile instanceof TileEntityConveyorFilter)) return 0;
         TileEntityConveyorFilter filter = (TileEntityConveyorFilter) tile;
-        if (filter.getStackInSlot(0).isEmpty()) return 0;
-        return filter.matchesFilter(filter.getStackInSlot(0)) ? 15 : 7;
+        if (filter.getItem(0).isEmpty()) return 0;
+        return filter.matchesFilter(filter.getItem(0)) ? 15 : 7;
     }
 
     public BlockState getStateFromMeta(int meta) {
-        Direction facing = Direction.byIndex(meta);
-        return getDefaultState().with(FACING, facing.getAxis().isHorizontal() ? facing : Direction.NORTH);
+        Direction facing = Direction.from3DDataValue(meta);
+        return defaultBlockState().setValue(FACING, facing.getAxis().isHorizontal() ? facing : Direction.NORTH);
     }
-    public int getMetaFromState(BlockState state) { return state.get(FACING).getIndex(); }
+    public int getMetaFromState(BlockState state) { return state.getValue(FACING).get3DDataValue(); }
 }

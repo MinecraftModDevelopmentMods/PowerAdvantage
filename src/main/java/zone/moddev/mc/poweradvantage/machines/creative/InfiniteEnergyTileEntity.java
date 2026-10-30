@@ -89,15 +89,15 @@ public class InfiniteEnergyTileEntity extends TileEntitySimplePowerMachine {
 	}
 
 	@Override
-	public CompoundNBT write(final CompoundNBT tagRoot) {
-		super .write(tagRoot);
+	public CompoundNBT save(final CompoundNBT tagRoot) {
+		super .save(tagRoot);
 		tagRoot.putString("InfType", this.type[0].toString());
 		return tagRoot;
 	}
 
 	@Override
-	public void read(final CompoundNBT tagRoot) {
-		super.read(tagRoot);
+	public void load(net.minecraft.block.BlockState state, final CompoundNBT tagRoot) {
+		super.load(state, tagRoot);
 		if (tagRoot.contains("InfType", 8)) {
 			this.type[0] = new ConduitType(tagRoot.getString("InfType"));
 		}

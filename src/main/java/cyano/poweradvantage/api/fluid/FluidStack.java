@@ -32,7 +32,7 @@ public final class FluidStack {
     public FluidStack copy() { return new FluidStack(this, amount); }
 
     public boolean isFluidEqual(@Nullable FluidStack other) {
-        return other != null && fluid.isEquivalentTo(other.fluid)
+        return other != null && fluid.isSame(other.fluid)
                 && (tag == null ? other.tag == null : tag.equals(other.tag));
     }
 

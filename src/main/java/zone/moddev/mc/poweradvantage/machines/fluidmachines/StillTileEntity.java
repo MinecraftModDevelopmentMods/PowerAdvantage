@@ -59,7 +59,7 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 					distill();
 				}
 				if (burnTime <= 0) {
-					getWorld().setBlockState(getPos(), getWorld().getBlockState(getPos()).with(StillBlock.ACTIVE, false));
+					getLevel().setBlock(getBlockPos(), getLevel().getBlockState(getBlockPos()).setValue(StillBlock.ACTIVE, false), 3);
 				}
 			} else {
 				short fuel = getFuelBurnTime(inventory[0]);
@@ -67,7 +67,7 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 					burnTime = fuel;
 					totalBurnTime = fuel;
 					decrementFuel();
-					getWorld().setBlockState(getPos(), getWorld().getBlockState(getPos()).with(StillBlock.ACTIVE, true));
+					getLevel().setBlock(getBlockPos(), getLevel().getBlockState(getBlockPos()).setValue(StillBlock.ACTIVE, true), 3);
 				}
 			}
 		}
@@ -106,7 +106,7 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 		if (updateFlag) {
 			this.sync();
 		}
-		redstone = getWorld().isBlockPowered(getPos());
+		redstone = getLevel().hasNeighborSignal(getBlockPos());
 	}
 
 	private boolean canDistill() {
@@ -247,8 +247,8 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	public CompoundNBT write(final CompoundNBT tagRoot) {
-		super .write(tagRoot);
+	public CompoundNBT save(final CompoundNBT tagRoot) {
+		super .save(tagRoot);
 		CompoundNBT tankTag2 = new CompoundNBT();
 		inputTank.writeToNBT(tankTag2);
 		tagRoot.put("InputTank", tankTag2);
@@ -263,8 +263,8 @@ public class StillTileEntity extends TileEntitySimpleFluidMachine {
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	public void read(final CompoundNBT tagRoot) {
-		super.read(tagRoot);
+	public void load(net.minecraft.block.BlockState state, final CompoundNBT tagRoot) {
+		super.load(state, tagRoot);
 		if (tagRoot.contains("InputTank", 10)) {
 			CompoundNBT tankTag2 = tagRoot .getCompound("InputTank");
 			inputTank.readFromNBT(tankTag2);

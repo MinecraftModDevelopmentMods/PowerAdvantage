@@ -9,7 +9,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.fluid.IFluidState;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
@@ -37,8 +37,8 @@ final class TankVisualProbe {
     private TankVisualProbe() {}
 
     static void verify(Minecraft minecraft, JsonObject result) {
-        boolean metalFloor = floorVisible(Blocks.metal_storage_tank.getDefaultState());
-        boolean portableFloor = floorVisible(Blocks.storage_tank.getDefaultState());
+        boolean metalFloor = floorVisible(Blocks.metal_storage_tank.defaultBlockState());
+        boolean portableFloor = floorVisible(Blocks.storage_tank.defaultBlockState());
         result.addProperty("metal_tank_floor_visible", metalFloor);
         result.addProperty("portable_tank_floor_visible", portableFloor);
 
@@ -68,28 +68,28 @@ final class TankVisualProbe {
 
     private static boolean floorVisible(final BlockState tank) {
         IBlockReader world = new IBlockReader() {
-            @Override public TileEntity getTileEntity(BlockPos pos) { return null; }
+            @Override public TileEntity getBlockEntity(BlockPos pos) { return null; }
             @Override public BlockState getBlockState(BlockPos pos) {
-                return pos.equals(BlockPos.ZERO.up()) ? tank : net.minecraft.block.Blocks.GRASS_BLOCK.getDefaultState();
+                return pos.equals(BlockPos.ZERO.above()) ? tank : net.minecraft.block.Blocks.GRASS_BLOCK.defaultBlockState();
             }
-            @Override public IFluidState getFluidState(BlockPos pos) { return getBlockState(pos).getFluidState(); }
+            @Override public FluidState getFluidState(BlockPos pos) { return getBlockState(pos).getFluidState(); }
         };
-        return Block.shouldSideBeRendered(net.minecraft.block.Blocks.GRASS_BLOCK.getDefaultState(), world, BlockPos.ZERO, Direction.UP);
+        return Block.shouldRenderFace(net.minecraft.block.Blocks.GRASS_BLOCK.defaultBlockState(), world, BlockPos.ZERO, Direction.UP);
     }
 
     private static int renderWater(Minecraft minecraft, MetalTankTileEntity tile) {
         FilteredFluidTankGUI definition = new FilteredFluidTankGUI(new ResourceLocation("poweradvantage", "textures/gui/container/fluid_metal_tank_gui.png"));
         final int width = 128, height = 96;
         PlayerInventory inventory = new PlayerInventory(null);
-        SimpleMachineGUI.Container container = definition.createContainer(1, inventory, tile);
+        SimpleMachineGUI.Container container = definition.createMenu(1, inventory, tile);
         require(container.getType() == MachineGUIRegistry.TYPE && MachineGUIRegistry.TYPE != null,
                 "Tank GUI is not backed by the registered native container type");
         SimpleMachineGUI.GUIContainer screen = container.createScreen(inventory, new net.minecraft.util.text.StringTextComponent("Tank probe"));
         screen.init(minecraft, width, height);
         require(screen.getMinecraft() == minecraft, "Native tank screen was not initialized");
         tile.getTank().setFluid(new cyano.poweradvantage.api.fluid.FluidStack(net.minecraft.fluid.Fluids.WATER, 10000));
-        Framebuffer framebuffer = new Framebuffer(width, height, true, Minecraft.IS_RUNNING_ON_MAC);
-        framebuffer.bindFramebuffer(true);
+        Framebuffer framebuffer = new Framebuffer(width, height, true, Minecraft.ON_OSX);
+        framebuffer.bindWrite(true);
         RenderSystem.matrixMode(GL_PROJECTION);
         RenderSystem.pushMatrix();
         RenderSystem.loadIdentity();
@@ -105,7 +105,7 @@ final class TankVisualProbe {
         RenderSystem.color4f(1F, 1F, 1F, 1F);
         try {
             RenderSystem.clearColor(0F, 0F, 0F, 1F);
-            RenderSystem.clear(GL_COLOR_BUFFER_BIT, Minecraft.IS_RUNNING_ON_MAC);
+            RenderSystem.clear(GL_COLOR_BUFFER_BIT, Minecraft.ON_OSX);
             definition.drawGUIDecorations(tile, screen, 0, 0, 0F);
             ByteBuffer pixels = ByteBuffer.allocateDirect(width * height * 4);
             RenderSystem.readPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
@@ -126,8 +126,8 @@ final class TankVisualProbe {
             RenderSystem.matrixMode(GL_PROJECTION);
             RenderSystem.popMatrix();
             RenderSystem.matrixMode(GL_MODELVIEW);
-            framebuffer.deleteFramebuffer();
-            minecraft.getFramebuffer().bindFramebuffer(true);
+            framebuffer.destroyBuffers();
+            minecraft.getMainRenderTarget().bindWrite(true);
             RenderSystem.enableDepthTest();
         }
     }

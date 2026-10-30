@@ -40,8 +40,8 @@ public final class RecipeConditions {
             switch (id.getPath()) {
                 case "recipe_mode": return PowerAdvantage.recipeMode == RecipeMode.valueOf(value.toUpperCase(Locale.ROOT));
                 case "not_recipe_mode": return PowerAdvantage.recipeMode != RecipeMode.valueOf(value.toUpperCase(Locale.ROOT));
-                case "tag_empty": return ItemTags.getCollection().getOrCreate(new ResourceLocation(value)).getAllElements().isEmpty();
-                case "tag_not_empty": return !ItemTags.getCollection().getOrCreate(new ResourceLocation(value)).getAllElements().isEmpty();
+                case "tag_empty": return net.minecraft.tags.TagCollectionManager.getInstance().getItems().getTagOrEmpty(new ResourceLocation(value)).getValues().isEmpty();
+                case "tag_not_empty": return !net.minecraft.tags.TagCollectionManager.getInstance().getItems().getTagOrEmpty(new ResourceLocation(value)).getValues().isEmpty();
                 default: throw new IllegalStateException("Unknown Advantage condition " + id);
             }
         }
@@ -57,7 +57,7 @@ public final class RecipeConditions {
         }
 
         @Override public ResourceLocation getID() { return id; }
-        @Override public Condition read(JsonObject json) { return new Condition(id, JSONUtils.getString(json, key)); }
+        @Override public Condition read(JsonObject json) { return new Condition(id, JSONUtils.getAsString(json, key)); }
         @Override public void write(JsonObject json, Condition condition) { json.addProperty(key, condition.value); }
     }
 }

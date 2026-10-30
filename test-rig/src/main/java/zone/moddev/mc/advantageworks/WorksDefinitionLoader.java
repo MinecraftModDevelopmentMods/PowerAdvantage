@@ -34,6 +34,10 @@ final class WorksDefinitionLoader {
         return load(RESOURCE, "1.15.2");
     }
 
+    static WorksDefinition loadNative116() {
+        return load("/assets/advantageworkstest/works/works-1.16.5.json", "1.16.5");
+    }
+
     static WorksDefinition load(String resource, String minecraft) {
         JsonObject target = readResource(resource);
         if (target.get("format").getAsInt() != 1 || !minecraft.equals(target.get("minecraft").getAsString())
@@ -111,6 +115,9 @@ final class WorksDefinitionLoader {
     }
 
     private static void validatePlacements(WorksDefinition.Station station) {
+        if (station.assertions == null || station.assertions.isEmpty()) {
+            throw new IllegalArgumentException("No measurements declared for " + station.id);
+        }
         for (WorksDefinition.Placement placement : station.placements) {
             validatePosition(station, placement.pos, "placement");
             requireResource(placement.block, station.id + " placement block");
@@ -128,6 +135,17 @@ final class WorksDefinitionLoader {
             if (!ASSERTION_TYPES.contains(assertion.type)) {
                 throw new IllegalArgumentException("Unsupported assertion type " + assertion.type
                         + " in " + station.id + "/" + assertion.id);
+            }
+            if (!Arrays.asList("equals", "min", "max", "greater", "less").contains(assertion.operator)
+                    || (assertion.value != null && !Double.isFinite(assertion.value))) {
+                throw new IllegalArgumentException("Invalid comparison for " + station.id + "/" + assertion.id);
+            }
+            if (!Arrays.asList("registryBlock", "registryItem", "modLoaded", "fluidAmount").contains(assertion.type)
+                    && assertion.pos == null) {
+                throw new IllegalArgumentException("Missing measurement position for " + station.id + "/" + assertion.id);
+            }
+            if ("inventoryCount".equals(assertion.type) && (assertion.count == null || assertion.count < 0)) {
+                throw new IllegalArgumentException("Missing/invalid inventory count for " + station.id + "/" + assertion.id);
             }
             if (assertion.pos != null) validatePosition(station, assertion.pos, "assertion");
             if ("fluidAmount".equals(assertion.type)) {
@@ -158,6 +176,7 @@ final class WorksDefinitionLoader {
                     requireResource(assertion.item, station.id + "/" + assertion.id + " item");
                 }
             }
+            if ("registryItem".equals(assertion.type)) requireResource(assertion.item, "registry item");
             if ("modLoaded".equals(assertion.type)) requireId(assertion.item, "mod ID");
             if ("inventoryNbtNumber".equals(assertion.type)) {
                 if (assertion.slot == null) throw new IllegalArgumentException("Missing inventory slot for "

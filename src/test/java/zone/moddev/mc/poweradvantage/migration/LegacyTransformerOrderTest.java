@@ -40,13 +40,38 @@ public class LegacyTransformerOrderTest {
             if (target[1].equals("legacy_chunk_status")) {
                 assertEquals(1, calls(node, "poweradvantage", "finalizeLegacyChunk"));
                 assertEquals(1, calls(node, "basemetals", "finalizeLegacyChunk"));
+                assertEquals(1, calls(node, "poweradvantage", "copyChunkForMigration"));
+                assertEquals(1, calls(node, "poweradvantage", "prepareLegacyEntities"));
+                assertEntityPreparationOrder(node);
+            }
+        }
+    }
+
+    private static void assertEntityPreparationOrder(ClassNode node) {
+        for (MethodNode method : node.methods) {
+            int preparations = 0;
+            boolean entitiesPrepared = false;
+            for (AbstractInsnNode instruction : method.instructions.toArray()) {
+                if (!(instruction instanceof MethodInsnNode)) continue;
+                MethodInsnNode call = (MethodInsnNode) instruction;
+                if (call.name.equals("prepareLegacyChunk")) {
+                    assertFalse("All mod entry hooks must precede entity DFU", entitiesPrepared);
+                    preparations++;
+                }
+                if (call.name.equals("prepareLegacyEntities")) {
+                    assertEquals("Both mod item migrations must precede entity DFU", 2, preparations);
+                    entitiesPrepared = true;
+                }
+                if (call.owner.equals(node.name) && call.desc.equals("(Lnet/minecraft/nbt/CompoundNBT;)I")) {
+                    assertTrue("Entity staging must precede native version handling", entitiesPrepared);
+                }
             }
         }
     }
 
     private static void transform(ClassNode node, String target, boolean base) throws Exception {
         String mod = base ? "basemetals" : "poweradvantage";
-        String path = base ? "/coremods/basemetals_115_compatibility.js" : "/coremods/poweradvantage_115_migration.js";
+        String path = base ? "/coremods/basemetals_116_compatibility.js" : "/coremods/poweradvantage_116_migration.js";
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
         assertNotNull("Transformer tests require the Java 8 test toolchain", engine);
         try (InputStreamReader reader = new InputStreamReader(getResource(path), StandardCharsets.UTF_8)) { engine.eval(reader); }

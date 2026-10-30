@@ -17,7 +17,7 @@ public class ForgeFluidAdapterTest {
     private static Fluid WATER;
 
     @BeforeClass public static void bootstrapNativeRegistries() {
-        net.minecraft.util.registry.Bootstrap.register();
+        net.minecraft.util.registry.Bootstrap.bootStrap();
         WATER = net.minecraft.fluid.Fluids.WATER;
     }
 

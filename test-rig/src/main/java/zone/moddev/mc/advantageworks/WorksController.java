@@ -20,7 +20,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.state.IProperty;
+import net.minecraft.state.Property;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.util.Direction;
@@ -32,9 +32,9 @@ import net.minecraft.util.text.Style;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
@@ -78,7 +78,7 @@ final class WorksController {
 
     synchronized void loadDefinition() {
         if (definition != null) return;
-        definition = WorksDefinitionLoader.load();
+        definition = WorksDefinitionLoader.loadNative116();
         for (WorksDefinition.Station station : definition.stations) {
             stations.put(station.id.toUpperCase(Locale.ROOT), station);
             statuses.put(station.id, "NOT_BUILT");
@@ -87,7 +87,7 @@ final class WorksController {
 
     void requireAuthorizedWorld(MinecraftServer server) throws CommandException {
         File marker = new File("advantage-works.allow");
-        if (!marker.isFile() || !server.getFolderName().startsWith("AdvantageWorks")) {
+        if (!WorksWorldGuard.authorized(server.getWorldPath(net.minecraft.world.storage.FolderName.ROOT), marker.isFile())) {
             throw commandError("Refusing to alter an unmarked world. Expected AdvantageWorks level and advantage-works.allow.");
         }
     }
@@ -110,7 +110,7 @@ final class WorksController {
             statuses.put(station.id, "READY");
             built++;
         }
-        world.setSpawnPoint(new BlockPos(0, 4, 0));
+        world.setDefaultSpawnPos(new BlockPos(0, 4, 0), 0.0F);
         return "Advantage Works built " + built + " station(s); skipped " + skipped + " for missing mods.";
     }
 
@@ -170,7 +170,7 @@ final class WorksController {
         int maxChunkZ = (station.origin[2] + station.boundsMax[2]) >> 4;
         for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
             for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
-                world.forceChunk(chunkX, chunkZ, forced);
+                world.setChunkForced(chunkX, chunkZ, forced);
             }
         }
     }
@@ -185,6 +185,7 @@ final class WorksController {
         }
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("summary", summary);
+        payload.put("evidenceScope", "declared_assertions_only; manual procedures are not automated passes");
         payload.put("stationStatuses", new LinkedHashMap<>(statuses));
         resultWriter.write("all", "summary", payload);
         return "Advantage Works check: " + summary;
@@ -212,7 +213,7 @@ final class WorksController {
         }
         if (worldgenJob.current() != null) throw commandError("A worldgen sample is already running");
         ServerWorld world = overworld(server);
-        BlockPos spawn = world.getSpawnPoint();
+        BlockPos spawn = world.getSharedSpawnPos();
         worldgenJob.start(new WorldgenSamplingJob(new NativeWorldgenAccess(world),
                 spawn.getX(), spawn.getY(), spawn.getZ(), world.getSeaLevel(), radius));
         return "Queued worldgen sample with radius " + radius + " for bounded server-tick sampling";
@@ -254,7 +255,7 @@ final class WorksController {
         NativeWorldgenAccess(ServerWorld world) { this.world = world; }
 
         @Override public boolean matchesBiome(String expected, int x, int y, int z) {
-            return matchesExpectedBiome(expected, world.getBiome(cursor.setPos(x, y, z)));
+            return matchesExpectedBiome(world, expected, world.getBiome(cursor.set(x, y, z)));
         }
 
         @Override public void populateChunk(int chunkX, int chunkZ) { world.getChunk(chunkX, chunkZ); }
@@ -263,23 +264,25 @@ final class WorksController {
             Chunk chunk = world.getChunk(chunkX, chunkZ);
             Biome center = world.getBiome(new BlockPos((chunkX << 4) + 8, world.getSeaLevel(), (chunkZ << 4) + 8));
             return new WorldgenSamplingJob.SampleChunk() {
-                @Override public boolean centerMatches(String expected) { return matchesExpectedBiome(expected, center); }
+                @Override public boolean centerMatches(String expected) { return matchesExpectedBiome(world, expected, center); }
                 @Override public String blockName(int x, int y, int z) {
                     ResourceLocation id = ForgeRegistries.BLOCKS.getKey(
-                            chunk.getBlockState(cursor.setPos(x, y, z)).getBlock());
+                            chunk.getBlockState(cursor.set(x, y, z)).getBlock());
                     return id == null ? null : id.toString();
                 }
             };
         }
     }
 
-    private static boolean matchesExpectedBiome(String expected, Biome biome) {
+    private static boolean matchesExpectedBiome(ServerWorld world, String expected, Biome biome) {
+        net.minecraft.util.RegistryKey<Biome> key = world.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY)
+                .getResourceKey(biome).orElseThrow(() -> new IllegalStateException("Unregistered native biome"));
         if ("DESERT".equals(expected)) {
-            return BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType("SANDY"))
-                    && !BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType("BEACH"))
-                    && !BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType("MESA"));
+            return BiomeDictionary.hasType(key, BiomeDictionary.Type.getType("SANDY"))
+                    && !BiomeDictionary.hasType(key, BiomeDictionary.Type.getType("BEACH"))
+                    && !BiomeDictionary.hasType(key, BiomeDictionary.Type.getType("MESA"));
         }
-        return BiomeDictionary.hasType(biome, BiomeDictionary.Type.getType(expected));
+        return BiomeDictionary.hasType(key, BiomeDictionary.Type.getType(expected));
     }
 
     List<String> stationIdsWithAll() {
@@ -301,9 +304,6 @@ final class WorksController {
             return "SKIP";
         }
         List<Map<String, Object>> assertionResults = new ArrayList<>();
-        boolean failed = false;
-        boolean expectedFailure = false;
-        boolean unexpectedPass = false;
         for (WorksDefinition.Assertion assertion : station.assertions) {
             if (!requirementsPresent(assertion.requiredMods) || !optionalTargetPresent(assertion)) {
                 Map<String, Object> result = new LinkedHashMap<>();
@@ -316,28 +316,16 @@ final class WorksController {
             }
             boolean passed;
             String detail;
+            Exception evaluationError = null;
             try {
                 passed = evaluateAssertion(world, station, assertion);
                 detail = passed ? "matched" : "did not match";
             } catch (Exception ex) {
                 passed = false;
+                evaluationError = ex;
                 detail = ex.getClass().getSimpleName() + ": " + ex.getMessage();
             }
-            String assertionStatus;
-            if (assertion.expectedFailure != null && !assertion.expectedFailure.isEmpty()) {
-                if (passed) {
-                    assertionStatus = "UNEXPECTED_PASS";
-                    unexpectedPass = true;
-                } else {
-                    assertionStatus = "EXPECTED_FAIL";
-                    expectedFailure = true;
-                }
-            } else if (passed) {
-                assertionStatus = "PASS";
-            } else {
-                assertionStatus = "FAIL";
-                failed = true;
-            }
+            String assertionStatus = AssertionChecks.verdict(passed, assertion.expectedFailure, evaluationError);
             Map<String, Object> result = new LinkedHashMap<>();
             result.put("id", assertion.id);
             result.put("type", assertion.type);
@@ -347,12 +335,7 @@ final class WorksController {
             assertionResults.add(result);
         }
 
-        String status;
-        if (failed) status = "FAIL";
-        else if (unexpectedPass) status = "UNEXPECTED_PASS";
-        else if (expectedFailure) status = "EXPECTED_FAIL";
-        else if (!station.manualChecks.isEmpty()) status = "MANUAL_REQUIRED";
-        else status = "PASS";
+        String status = AssertionChecks.aggregate(assertionResults, !station.manualChecks.isEmpty());
         statuses.put(station.id, status);
         setStatusBlock(world, station, statusColor(status));
         writeStationResult(world, station, status, assertionResults);
@@ -365,6 +348,8 @@ final class WorksController {
         payload.put("name", station.name);
         payload.put("district", station.district);
         payload.put("status", status);
+        payload.put("evidenceScope", "declared_assertions_only; manual procedures are not automated passes");
+        if ("SKIP".equals(status)) payload.put("skipReason", "required integration or all measurements unavailable");
         payload.put("worldTime", world.getGameTime());
         payload.put("assertions", assertions);
         payload.put("manualChecks", station.manualChecks);
@@ -378,6 +363,7 @@ final class WorksController {
         for (WorksDefinition.Placement placement : station.placements) positions.add(absolute(station, placement.pos));
         for (WorksDefinition.Assertion assertion : station.assertions) {
             if (assertion.pos != null) positions.add(absolute(station, assertion.pos));
+            for (int[] position : assertion.positions) positions.add(absolute(station, position));
         }
         for (BlockPos pos : positions) {
             Map<String, Object> block = new LinkedHashMap<>();
@@ -386,8 +372,8 @@ final class WorksController {
             block.put("pos", Arrays.asList(pos.getX(), pos.getY(), pos.getZ()));
             block.put("block", name == null ? "unknown" : name.toString());
             block.put("state", state.toString());
-            TileEntity tile = world.getTileEntity(pos);
-            if (tile != null) block.put("nbt", tile.write(new CompoundNBT()).toString());
+            TileEntity tile = world.getBlockEntity(pos);
+            if (tile != null) block.put("nbt", tile.save(new CompoundNBT()).toString());
             snapshot.add(block);
         }
         return snapshot;
@@ -395,6 +381,10 @@ final class WorksController {
 
     private boolean evaluateAssertion(ServerWorld world, WorksDefinition.Station station,
                                       WorksDefinition.Assertion assertion) {
+        if (assertion.block != null && block(assertion.block) == Blocks.AIR
+                && !"minecraft:air".equals(assertion.block)) {
+            throw new IllegalArgumentException("Unregistered assertion block " + assertion.block);
+        }
         if (BayDrillAssertions.applies(station, assertion)) {
             return BayDrillAssertions.matches(station, assertion,
                     relative -> world.getBlockState(absolute(station, relative)).getBlock() == block(assertion.block),
@@ -412,7 +402,7 @@ final class WorksController {
             return block(assertion.block) != Blocks.AIR;
         }
         if ("registryItem".equals(assertion.type)) {
-            return item(assertion.item) != null;
+            return assertion.item != null && item(assertion.item) != null;
         }
         if ("modLoaded".equals(assertion.type)) {
             return ModList.get().isLoaded(assertion.item);
@@ -420,13 +410,9 @@ final class WorksController {
         if ("fluidAmount".equals(assertion.type)) {
             long total = 0;
             for (int[] position : assertion.positions) {
-                TileEntity source = world.getTileEntity(absolute(station, position));
+                TileEntity source = world.getBlockEntity(absolute(station, position));
                 if (source == null) return false;
-                CompoundNBT tank = source.write(new CompoundNBT()).getCompound(assertion.nbtPath);
-                if (tank.contains("Empty", 1)) continue;
-                int amount = tank.getInt("Amount");
-                if (amount < 0) return false;
-                if (assertion.fluid == null || assertion.fluid.equals(tank.getString("FluidName"))) total += amount;
+                total += AssertionChecks.fluidAmount(source.save(new CompoundNBT()), assertion.nbtPath, assertion.fluid);
             }
             return compare(total, assertion.operator, assertion.value);
         }
@@ -439,7 +425,7 @@ final class WorksController {
         if ("blockProperty".equals(assertion.type)) {
             BlockState state = world.getBlockState(pos);
             if (state.getBlock() != block(assertion.block)) return false;
-            for (Map.Entry<IProperty<?>, Comparable<?>> entry : state.getValues().entrySet()) {
+            for (Map.Entry<Property<?>, Comparable<?>> entry : state.getValues().entrySet()) {
                 if (entry.getKey().getName().equals(assertion.property)) {
                     return assertion.expectedText.equals(String.valueOf(entry.getValue()));
                 }
@@ -449,11 +435,11 @@ final class WorksController {
         if ("comparatorOutput".equals(assertion.type)) {
             BlockState state = world.getBlockState(pos);
             Block source = state.getBlock();
-            return source.hasComparatorInputOverride(state)
-                    && compare(source.getComparatorInputOverride(state, world, pos),
+            return source.hasAnalogOutputSignal(state)
+                    && compare(source.getAnalogOutputSignal(state, world, pos),
                     assertion.operator, assertion.value);
         }
-        TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = world.getBlockEntity(pos);
         if ("tileExists".equals(assertion.type)) return tile != null;
         if ("inventoryEmpty".equals(assertion.type)) {
             if (!(tile instanceof IInventory)) return false;
@@ -466,26 +452,26 @@ final class WorksController {
         if ("inventoryNbtNumber".equals(assertion.type)) {
             if (!(tile instanceof IInventory) || assertion.slot == null) return false;
             IInventory inventory = (IInventory) tile;
-            if (assertion.slot < 0 || assertion.slot >= inventory.getSizeInventory()) return false;
-            ItemStack stack = inventory.getStackInSlot(assertion.slot);
+            if (assertion.slot < 0 || assertion.slot >= inventory.getContainerSize()) return false;
+            ItemStack stack = inventory.getItem(assertion.slot);
             if (stack.isEmpty() || !stack.hasTag()) return false;
             Number number = numberAt(stack.getTag(), assertion.nbtPath);
             return number != null && compare(number.doubleValue(), assertion.operator, assertion.value);
         }
         if ("nbtNumber".equals(assertion.type)) {
             if (tile == null) return false;
-            CompoundNBT nbt = tile.write(new CompoundNBT());
+            CompoundNBT nbt = tile.save(new CompoundNBT());
             Number number = numberAt(nbt, assertion.nbtPath);
             return number != null && compare(number.doubleValue(), assertion.operator, assertion.value);
         }
         if ("nbtString".equals(assertion.type)) {
             if (tile == null) return false;
-            String text = stringAt(tile.write(new CompoundNBT()), assertion.nbtPath);
+            String text = stringAt(tile.save(new CompoundNBT()), assertion.nbtPath);
             return assertion.expectedText != null && assertion.expectedText.equals(text);
         }
         if ("energy".equals(assertion.type)) {
             if (tile == null) return false;
-            int[] energy = tile.write(new CompoundNBT()).getIntArray("Energy");
+            int[] energy = tile.save(new CompoundNBT()).getIntArray("Energy");
             int index = assertion.energyIndex == null ? 0 : assertion.energyIndex;
             return index >= 0 && index < energy.length
                     && compare(Float.intBitsToFloat(energy[index]), assertion.operator, assertion.value);
@@ -495,9 +481,10 @@ final class WorksController {
 
     private static int inventoryCount(IInventory inventory, String itemName) {
         Item expected = itemName == null ? null : item(itemName);
+        if (itemName != null && expected == null) throw new IllegalArgumentException("Unregistered assertion item " + itemName);
         int count = 0;
-        for (int slot = 0; slot < inventory.getSizeInventory(); slot++) {
-            ItemStack stack = inventory.getStackInSlot(slot);
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            ItemStack stack = inventory.getItem(slot);
             if (!stack.isEmpty() && (expected == null || stack.getItem() == expected)) count += stack.getCount();
         }
         return count;
@@ -529,16 +516,7 @@ final class WorksController {
     }
 
     private static boolean compare(double actual, String operator, Number expected) {
-        if (expected == null) return false;
-        double value = expected.doubleValue();
-        switch (operator == null ? "equals" : operator) {
-            case "equals": return Math.abs(actual - value) < 0.0001;
-            case "min": return actual >= value;
-            case "max": return actual <= value;
-            case "greater": return actual > value;
-            case "less": return actual < value;
-            default: throw new IllegalArgumentException("Unsupported comparison " + operator);
-        }
+        return AssertionChecks.compare(actual, operator, expected);
     }
 
     private void resetStation(ServerWorld world, WorksDefinition.Station station) {
@@ -553,16 +531,16 @@ final class WorksController {
         BlockPos min = absolute(station, station.boundsMin);
         BlockPos max = absolute(station, station.boundsMax);
         removeTaggedEntities(world, station);
-        for (BlockPos pos : BlockPos.getAllInBoxMutable(min, max)) {
-            world.setBlockState(pos, Blocks.AIR.getDefaultState(), 2);
+        for (BlockPos pos : BlockPos.betweenClosed(min, max)) {
+            world.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
         }
     }
 
     private void removeTaggedEntities(ServerWorld world, WorksDefinition.Station station) {
         BlockPos min = absolute(station, station.boundsMin);
         BlockPos max = absolute(station, station.boundsMax);
-        for (Entity entity : world.getEntitiesWithinAABB(Entity.class,
-                new AxisAlignedBB(min, max.add(1, 1, 1)))) {
+        for (Entity entity : world.getEntitiesOfClass(Entity.class,
+                new AxisAlignedBB(min, max.offset(1, 1, 1)))) {
             if (station.id.equals(entity.getPersistentData().getString("AdvantageWorksStation"))) {
                 entity.remove();
             }
@@ -577,8 +555,8 @@ final class WorksController {
             for (int z = station.boundsMin[2]; z <= maxZ; z++) {
                 boolean edge = x == station.boundsMin[0] || x == maxX
                         || z == station.boundsMin[2] || z == maxZ;
-                BlockState state = edge ? wool(color).getDefaultState() : Blocks.STONE_BRICKS.getDefaultState();
-                world.setBlockState(absolute(station, new int[]{x, 0, z}), state, 2);
+                BlockState state = edge ? wool(color).defaultBlockState() : Blocks.STONE_BRICKS.defaultBlockState();
+                world.setBlock(absolute(station, new int[]{x, 0, z}), state, 2);
             }
         }
         if (station.enclosed) encloseStation(world, station);
@@ -603,33 +581,33 @@ final class WorksController {
         for (int y = 1; y <= 4; y++) {
             for (int x = minX; x <= maxX; x++) {
                 if (!(x == gateX && y <= 2)) {
-                    world.setBlockState(absolute(station, new int[]{x, y, minZ}),
-                            Blocks.GLASS.getDefaultState(), 2);
+                    world.setBlock(absolute(station, new int[]{x, y, minZ}),
+                            Blocks.GLASS.defaultBlockState(), 2);
                 }
-                world.setBlockState(absolute(station, new int[]{x, y, maxZ}),
-                        Blocks.GLASS.getDefaultState(), 2);
+                world.setBlock(absolute(station, new int[]{x, y, maxZ}),
+                        Blocks.GLASS.defaultBlockState(), 2);
             }
             for (int z = minZ + 1; z < maxZ; z++) {
-                world.setBlockState(absolute(station, new int[]{minX, y, z}),
-                        Blocks.GLASS.getDefaultState(), 2);
-                world.setBlockState(absolute(station, new int[]{maxX, y, z}),
-                        Blocks.GLASS.getDefaultState(), 2);
+                world.setBlock(absolute(station, new int[]{minX, y, z}),
+                        Blocks.GLASS.defaultBlockState(), 2);
+                world.setBlock(absolute(station, new int[]{maxX, y, z}),
+                        Blocks.GLASS.defaultBlockState(), 2);
             }
         }
-        world.setBlockState(absolute(station, new int[]{gateX, 1, minZ}),
-                Blocks.OAK_FENCE_GATE.getDefaultState().with(FenceGateBlock.HORIZONTAL_FACING, Direction.NORTH), 2);
+        world.setBlock(absolute(station, new int[]{gateX, 1, minZ}),
+                Blocks.OAK_FENCE_GATE.defaultBlockState().setValue(FenceGateBlock.FACING, Direction.NORTH), 2);
     }
 
     private void buildConcourse(ServerWorld world) {
         for (int x = -15; x <= 15; x++) {
             for (int z = -15; z <= 15; z++) {
-                world.setBlockState(new BlockPos(x, 3, z), Blocks.STONE_BRICKS.getDefaultState(), 2);
+                world.setBlock(new BlockPos(x, 3, z), Blocks.STONE_BRICKS.defaultBlockState(), 2);
             }
         }
         for (int i = -140; i <= 160; i++) {
             for (int width = -2; width <= 2; width++) {
-                world.setBlockState(new BlockPos(i, 3, width), Blocks.STONE_BRICKS.getDefaultState(), 2);
-                world.setBlockState(new BlockPos(width, 3, i), Blocks.STONE_BRICKS.getDefaultState(), 2);
+                world.setBlock(new BlockPos(i, 3, width), Blocks.STONE_BRICKS.defaultBlockState(), 2);
+                world.setBlock(new BlockPos(width, 3, i), Blocks.STONE_BRICKS.defaultBlockState(), 2);
             }
         }
         placeSign(world, new BlockPos(-3, 4, 0), "POWER WORKS", "WEST", "", "");
@@ -649,14 +627,14 @@ final class WorksController {
                     applyPlacement(world, station, action);
                     break;
                 case "setAir":
-                    world.setBlockState(pos, Blocks.AIR.getDefaultState(), 2);
+                    world.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
                     break;
                 case "clearInventory":
-                    TileEntity clearTile = world.getTileEntity(pos);
-                    if (clearTile instanceof IInventory) ((IInventory) clearTile).clear();
+                    TileEntity clearTile = world.getBlockEntity(pos);
+                    if (clearTile instanceof IInventory) ((IInventory) clearTile).clearContent();
                     break;
                 case "setInventory":
-                    TileEntity tile = world.getTileEntity(pos);
+                    TileEntity tile = world.getBlockEntity(pos);
                     if (!(tile instanceof IInventory)) throw new IllegalStateException("No inventory at " + pos);
                     Item stackItem = item(action.item);
                     if (stackItem == null) throw new IllegalStateException("Unknown item " + action.item);
@@ -674,31 +652,31 @@ final class WorksController {
                         if (enchantment == null) {
                             throw new IllegalStateException("Unknown enchantment " + action.enchantment);
                         }
-                        stack.addEnchantment(enchantment, action.level);
+                        stack.enchant(enchantment, action.level);
                     }
-                    ((IInventory) tile).setInventorySlotContents(action.slot, stack);
-                    tile.markDirty();
+                    ((IInventory) tile).setItem(action.slot, stack);
+                    tile.setChanged();
                     break;
                 case "fillInventory":
-                    TileEntity fillTile = world.getTileEntity(pos);
+                    TileEntity fillTile = world.getBlockEntity(pos);
                     if (!(fillTile instanceof IInventory)) throw new IllegalStateException("No inventory at " + pos);
                     Item fillItem = item(action.item);
                     if (fillItem == null) throw new IllegalStateException("Unknown item " + action.item);
                     IInventory inventory = (IInventory) fillTile;
                     ItemStack fillTemplate = itemStack(fillItem, 1, action.damage);
                     int fillCount = Math.min(action.count,
-                            Math.min(fillTemplate.getMaxStackSize(), inventory.getInventoryStackLimit()));
-                    for (int slot = 0; slot < inventory.getSizeInventory(); slot++) {
-                        inventory.setInventorySlotContents(slot,
+                            Math.min(fillTemplate.getMaxStackSize(), inventory.getMaxStackSize()));
+                    for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+                        inventory.setItem(slot,
                                 itemStack(fillItem, fillCount, action.damage));
                     }
-                    fillTile.markDirty();
+                    fillTile.setChanged();
                     break;
                 case "mergeNbt":
                     mergeTileNbt(world, pos, action.nbt);
                     break;
                 case "setFluid":
-                    TileEntity fluidTile = world.getTileEntity(pos);
+                    TileEntity fluidTile = world.getBlockEntity(pos);
                     Fluid fluid = fluid(action.fluid);
                     if (fluid == null) throw new IllegalStateException("Unknown fluid " + action.fluid);
                     int requested = (int) Math.min(Integer.MAX_VALUE, action.value);
@@ -714,7 +692,7 @@ final class WorksController {
                         throw new IllegalStateException("Fluid handler at " + pos + " accepted " + filled
                                 + " of " + requested + " mB " + action.fluid);
                     }
-                    fluidTile.markDirty();
+                    fluidTile.setChanged();
                     break;
                 case "offerFluid":
                     Fluid offeredFluid = fluid(action.fluid);
@@ -735,30 +713,30 @@ final class WorksController {
                     ItemEntity entityItem = new ItemEntity(world, pos.getX() + 0.5, pos.getY() + 0.1,
                             pos.getZ() + 0.5, itemStack(dropped, action.count, action.damage));
                     tagEntity(entityItem, station.id);
-                    world.addEntity(entityItem);
+                    world.addFreshEntity(entityItem);
                     break;
                 case "spawnEntity":
                     EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(action.entity));
                     Entity entity = entityType == null ? null : entityType.create(world);
                     if (entity == null) throw new IllegalStateException("Unknown entity " + action.entity);
-                    entity.setPosition(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+                    entity.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
                     tagEntity(entity, station.id);
-                    world.addEntity(entity);
+                    world.addFreshEntity(entity);
                     break;
                 case "time":
                     world.setDayTime(action.value);
                     break;
                 case "weatherClear":
-                    world.getWorldInfo().setRaining(false);
-                    world.getWorldInfo().setThundering(false);
+                    world.getLevelData().setRaining(false);
+                    ((net.minecraft.world.storage.IServerWorldInfo) world.getLevelData()).setThundering(false);
                     break;
                 case "weatherRain":
-                    world.getWorldInfo().setRaining(true);
-                    world.getWorldInfo().setThundering(false);
+                    world.getLevelData().setRaining(true);
+                    ((net.minecraft.world.storage.IServerWorldInfo) world.getLevelData()).setThundering(false);
                     break;
                 case "weatherThunder":
-                    world.getWorldInfo().setRaining(true);
-                    world.getWorldInfo().setThundering(true);
+                    world.getLevelData().setRaining(true);
+                    ((net.minecraft.world.storage.IServerWorldInfo) world.getLevelData()).setThundering(true);
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported action type " + type);
@@ -775,22 +753,22 @@ final class WorksController {
             throw new IllegalStateException("Unknown block " + placement.block + " for " + station.id);
         }
         BlockPos pos = absolute(station, placement.pos);
-        world.setBlockState(pos, legacyState(placement.block, target, placement.meta), 2);
+        world.setBlock(pos, legacyState(placement.block, target, placement.meta), 2);
         if (placement.nbt != null) mergeTileNbt(world, pos, placement.nbt);
     }
 
     private void mergeTileNbt(ServerWorld world, BlockPos pos, JsonObject supplied) {
-        TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = world.getBlockEntity(pos);
         if (tile == null) throw new IllegalStateException("No tile entity at " + pos);
         try {
-            CompoundNBT base = tile.write(new CompoundNBT());
+            CompoundNBT base = tile.save(new CompoundNBT());
             CompoundNBT additions = JsonNbtConverter.toCompound(supplied);
             base.merge(additions);
             base.putInt("x", pos.getX());
             base.putInt("y", pos.getY());
             base.putInt("z", pos.getZ());
-            tile.read(base);
-            tile.markDirty();
+            tile.load(tile.getBlockState(), base);
+            tile.setChanged();
         } catch (Exception ex) {
             throw new IllegalStateException("Cannot merge tile NBT at " + pos, ex);
         }
@@ -849,30 +827,30 @@ final class WorksController {
     }
 
     private static void setStatusBlock(ServerWorld world, WorksDefinition.Station station, int meta) {
-        world.setBlockState(absolute(station, new int[]{11, 1, 1}), wool(meta).getDefaultState(), 2);
+        world.setBlock(absolute(station, new int[]{11, 1, 1}), wool(meta).defaultBlockState(), 2);
     }
 
     private static void placeCommandSign(ServerWorld world, BlockPos pos, String label, String command) {
-        world.setBlockState(pos, Blocks.OAK_SIGN.getDefaultState().with(StandingSignBlock.ROTATION, 8), 2);
-        TileEntity tile = world.getTileEntity(pos);
+        world.setBlock(pos, Blocks.OAK_SIGN.defaultBlockState().setValue(StandingSignBlock.ROTATION, 8), 2);
+        TileEntity tile = world.getBlockEntity(pos);
         if (!(tile instanceof SignTileEntity)) return;
         SignTileEntity sign = (SignTileEntity) tile;
         StringTextComponent clickable = new StringTextComponent(label);
-        clickable.setStyle(new Style().setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command)));
-        sign.signText[0] = clickable;
-        sign.signText[1] = new StringTextComponent("right-click");
-        sign.markDirty();
+        clickable.setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command)));
+        sign.setMessage(0, clickable);
+        sign.setMessage(1, new StringTextComponent("right-click"));
+        sign.setChanged();
     }
 
     private static void placeSign(ServerWorld world, BlockPos pos, String... lines) {
-        world.setBlockState(pos, Blocks.OAK_SIGN.getDefaultState().with(StandingSignBlock.ROTATION, 8), 2);
-        TileEntity tile = world.getTileEntity(pos);
+        world.setBlock(pos, Blocks.OAK_SIGN.defaultBlockState().setValue(StandingSignBlock.ROTATION, 8), 2);
+        TileEntity tile = world.getBlockEntity(pos);
         if (!(tile instanceof SignTileEntity)) return;
         SignTileEntity sign = (SignTileEntity) tile;
-        for (int i = 0; i < sign.signText.length; i++) {
-            sign.signText[i] = new StringTextComponent(i < lines.length ? trimSign(lines[i]) : "");
+        for (int i = 0; i < 4; i++) {
+            sign.setMessage(i, new StringTextComponent(i < lines.length ? trimSign(lines[i]) : ""));
         }
-        sign.markDirty();
+        sign.setChanged();
     }
 
     private static String trimSign(String text) {
@@ -890,7 +868,7 @@ final class WorksController {
     }
 
     private static ServerWorld overworld(MinecraftServer server) throws CommandException {
-        ServerWorld world = server.getWorld(DimensionType.OVERWORLD);
+        ServerWorld world = server.getLevel(World.OVERWORLD);
         if (world == null) throw commandError("Overworld is not loaded");
         return world;
     }
@@ -907,7 +885,8 @@ final class WorksController {
         if (name == null) return null;
         String resolved = "minecraft:sapling".equals(name) ? "minecraft:oak_sapling"
                 : "minecraft:planks".equals(name) ? "minecraft:oak_planks" : name;
-        return ForgeRegistries.ITEMS.getValue(new ResourceLocation(resolved));
+        ResourceLocation key = new ResourceLocation(resolved);
+        return ForgeRegistries.ITEMS.containsKey(key) ? ForgeRegistries.ITEMS.getValue(key) : null;
     }
 
     private static CommandException commandError(String message) {
@@ -920,14 +899,14 @@ final class WorksController {
             return LegacyMigrationApi.decodeBlockState(new ResourceLocation(name), block, metadata);
         }
         if (block instanceof FlowingFluidBlock) {
-            return block.getDefaultState().with(FlowingFluidBlock.LEVEL, Integer.valueOf(metadata & 15));
+            return block.defaultBlockState().setValue(FlowingFluidBlock.LEVEL, Integer.valueOf(metadata & 15));
         }
-        return block.getDefaultState();
+        return block.defaultBlockState();
     }
 
     private static ItemStack itemStack(Item item, int count, int damage) {
         ItemStack stack = new ItemStack(item, count);
-        if (damage != 0) stack.setDamage(damage);
+        if (damage != 0) stack.setDamageValue(damage);
         return stack;
     }
 
@@ -935,15 +914,15 @@ final class WorksController {
         if (name == null || name.trim().isEmpty()) return null;
         ResourceLocation id = name.indexOf(':') >= 0 ? new ResourceLocation(name)
                 : new ResourceLocation("poweradvantage", name);
-        Fluid value = Registry.FLUID.getValue(id).orElse(null);
+        Fluid value = Registry.FLUID.getOptional(id).orElse(null);
         if (value == null) {
             String migratedName = LegacyMigrationApi.fluidTarget(name);
             if (!name.equals(migratedName)) {
-                value = Registry.FLUID.getValue(new ResourceLocation(migratedName)).orElse(null);
+                value = Registry.FLUID.getOptional(new ResourceLocation(migratedName)).orElse(null);
             }
         }
         if (value == null && name.indexOf(':') < 0) {
-            value = Registry.FLUID.getValue(new ResourceLocation("minecraft", name)).orElse(null);
+            value = Registry.FLUID.getOptional(new ResourceLocation("minecraft", name)).orElse(null);
         }
         return value;
     }

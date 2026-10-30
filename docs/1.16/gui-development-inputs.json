@@ -1,0 +1,18 @@
+{
+  "purpose": "Local GUI and machine correction candidate. Packaged qualification uses the separately archived operating manifest.",
+  "minecraftVersion": "1.16.5",
+  "sourceStatus": "Uncommitted corrections on the local 1.16.5 port branches",
+  "powerDeobfSha256": "483F0E3ECFE8AE79BB5CFD7B96B89259D71E13BC3F658D639C7AF93D9CF8158A",
+  "mods": [
+    {
+      "id": "steamadvantage",
+      "version": "2.2.8.116051",
+      "sha256": "DFE3C4589B7494DCF7C8BE30C684C2A7A63C4D0992284833DAD199667C722666"
+    },
+    {
+      "id": "electricadvantage",
+      "version": "2.2.8.116051",
+      "sha256": "C9F8BFFFC735316704180EED31FC6DBEF1C3682633C32048A733B6A80E82B3D9"
+    }
+  ]
+}

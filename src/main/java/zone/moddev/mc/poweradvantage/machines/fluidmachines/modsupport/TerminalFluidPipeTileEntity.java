@@ -27,7 +27,7 @@ public class TerminalFluidPipeTileEntity extends PoweredEntity {
     @Override public void tickUpdate(boolean server) {
         if (!server) return;
         for (int index = 0; index < faces.length; index++) {
-            TileEntity tile = getWorld().getTileEntity(getPos().offset(faces[index]));
+            TileEntity tile = getLevel().getBlockEntity(getBlockPos().relative(faces[index]));
             neighbors[index] = FluidHandlerHelper.getHandler(tile, faces[index].getOpposite());
         }
     }
@@ -67,7 +67,7 @@ public class TerminalFluidPipeTileEntity extends PoweredEntity {
     protected int transmitFluidToConsumers(FluidStack available, byte minimumPriority) {
         ConduitType type = Fluids.fluidToConduitType(available.getFluid());
         List<PowerRequest> requests = ConduitRegistry.getInstance()
-                .getRequestsForPower(getWorld(), getPos(), Fluids.fluidConduit_general, type);
+                .getRequestsForPower(getLevel(), getBlockPos(), Fluids.fluidConduit_general, type);
         float remaining = available.amount;
         for (PowerRequest request : requests) {
             if (request.entity == this || request.amount <= 0) continue;

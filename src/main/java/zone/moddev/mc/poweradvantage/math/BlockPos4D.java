@@ -2,8 +2,13 @@ package zone.moddev.mc.poweradvantage.math;
 
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.IntArrayNBT;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 /**
  * This class is used to store 4D integer coordinates
@@ -14,7 +19,7 @@ public class BlockPos4D {
 	/**
 	 * 4th dimension coordinate
 	 */
-	public final int dimension;
+	public final RegistryKey<World> dimension;
 	/**
 	 * X,Y,Z coordinate
 	 */
@@ -25,7 +30,7 @@ public class BlockPos4D {
 	 *
 	 * @return The dimension of the coordinate (e.g. 0 for overworld, -1 for nether, 1 for the end)
 	 */
-	public int getDim() {
+	public RegistryKey<World> getDim() {
 		return dimension;
 	}
 
@@ -66,7 +71,7 @@ public class BlockPos4D {
 	 * @param y Y-coordinate of D,X,Y,Z coordinate tuple
 	 * @param z Z-coordinate of D,X,Y,Z coordinate tuple
 	 */
-	public BlockPos4D(int d, int x, int y, int z) {
+	public BlockPos4D(RegistryKey<World> d, int x, int y, int z) {
 		this(d, new BlockPos(x, y, z));
 	}
 
@@ -76,10 +81,10 @@ public class BlockPos4D {
 	 * @param dimension Dimension of the block
 	 * @param bp        location of the block
 	 */
-	public BlockPos4D(int dimension, BlockPos bp) {
-		this.dimension = dimension;
-		this.pos = bp;
-		hashCache = (((dimension * 31 + pos.getZ()) * 31 + pos.getX()) * 31 + pos.getY());
+	public BlockPos4D(RegistryKey<World> dimension, BlockPos bp) {
+		this.dimension = java.util.Objects.requireNonNull(dimension, "dimension");
+		this.pos = bp.immutable();
+		hashCache = (((dimension.hashCode() * 31 + pos.getZ()) * 31 + pos.getX()) * 31 + pos.getY());
 	}
 
 	/**
@@ -96,9 +101,9 @@ public class BlockPos4D {
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) return true;
-		if (other.hashCode() == this.hashCode() && other instanceof BlockPos4D) {
+		if (other instanceof BlockPos4D && other.hashCode() == this.hashCode()) {
 			BlockPos4D o = (BlockPos4D) other;
-			return this.dimension == o.dimension && this.pos.equals(o.pos);
+			return this.dimension.equals(o.dimension) && this.pos.equals(o.pos);
 		}
 		return false;
 	}
@@ -110,11 +115,11 @@ public class BlockPos4D {
 	 * @param distance  The direction to move the coordinate
 	 * @return A new BlockPos4D representing the new position
 	 */
-	public BlockPos4D offset(final Direction direction, final int distance) {
+	public BlockPos4D relative(final Direction direction, final int distance) {
 		return new BlockPos4D(this.dimension,
-				this.getX() + direction.getXOffset() * distance,
-				this.getY() + direction.getYOffset() * distance,
-				this.getZ() + direction.getZOffset() * distance);
+				this.getX() + direction.getStepX() * distance,
+				this.getY() + direction.getStepY() * distance,
+				this.getZ() + direction.getStepZ() * distance);
 	}
 
 	/**
@@ -123,8 +128,8 @@ public class BlockPos4D {
 	 * @param direction The direction to move the coordinate
 	 * @return A new BlockPos4D representing the new position
 	 */
-	public BlockPos4D offset(final Direction direction) {
-		return offset(direction, 1);
+	public BlockPos4D relative(final Direction direction) {
+		return relative(direction, 1);
 	}
 
 
@@ -259,30 +264,46 @@ public class BlockPos4D {
 	 *                     1 for the end)
 	 * @return A new BlockPos4D representing the new position
 	 */
-	public BlockPos4D toDimension(int newDimension) {
+	public BlockPos4D toDimension(RegistryKey<World> newDimension) {
 		return new BlockPos4D(newDimension, this.pos);
 	}
 
 	public BlockPos4D[] getNeighbors() {
 		BlockPos4D[] n = new BlockPos4D[Direction.values().length];
 		for (int i = 0; i < n.length; i++) {
-			n[i] = this.offset(Direction.values()[i]);
+			n[i] = this.relative(Direction.values()[i]);
 		}
 		return n;
 	}
 
 	public INBT toNBT() {
-		int[] data = new int[4];
-		data[0] = dimension;
-		data[1] = pos.getX();
-		data[2] = pos.getY();
-		data[3] = pos.getZ();
-		return new IntArrayNBT(data);
+		CompoundNBT data = new CompoundNBT();
+		data.putString("Dimension", dimension.location().toString());
+		data.putIntArray("Pos", new int[] {pos.getX(), pos.getY(), pos.getZ()});
+		return data;
 	}
 
 	public static BlockPos4D fromNBT(INBT tag) {
-		int[] data = ((IntArrayNBT) tag).getIntArray();
-		return new BlockPos4D(data[0], data[1], data[2], data[3]);
+		if (tag instanceof IntArrayNBT) {
+			int[] data = ((IntArrayNBT) tag).getAsIntArray();
+			if (data.length != 4) throw new IllegalArgumentException("Invalid legacy position");
+			return new BlockPos4D(legacyDimension(data[0]), data[1], data[2], data[3]);
+		}
+		CompoundNBT data = (CompoundNBT) tag;
+		int[] pos = data.getIntArray("Pos");
+		if (pos.length != 3) throw new IllegalArgumentException("Invalid position");
+		return new BlockPos4D(RegistryKey.create(Registry.DIMENSION_REGISTRY,
+				new ResourceLocation(data.getString("Dimension"))), pos[0], pos[1], pos[2]);
+	}
+
+	/** Only the three vanilla numeric IDs have an unambiguous legacy meaning. */
+	public static RegistryKey<World> legacyDimension(int dimension) {
+		switch (dimension) {
+			case 0: return World.OVERWORLD;
+			case -1: return World.NETHER;
+			case 1: return World.END;
+			default: throw new IllegalArgumentException("No registry key for legacy dimension " + dimension);
+		}
 	}
 
 	@Override
