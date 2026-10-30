@@ -19,7 +19,8 @@ The source-controlled [Advantage Works test rig](test-rig/README.md) turns those
 ## Building Minecraft 1.10.2
 
 The rig profiles use Steam and Electric Advantage `2.2.5.110021`, which retain unfinished
-drill work after a restart. This profile update does not change Power Advantage gameplay or its version.
+drill work after a restart. The machine repairs and their verification scope are
+described in the test coverage notes above; this work does not bump the version.
 
 The `master-1.10.2` build uses ForgeGradle 7.0.34 and Gradle 9.6.1. Run Gradle with Java 17; Gradle resolves the Java 8 toolchain used for compilation.
 
