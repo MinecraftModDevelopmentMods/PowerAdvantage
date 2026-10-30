@@ -43,6 +43,12 @@ public final class ClientResourceProbe {
         finished = true;
         JsonObject result = new JsonObject();
         try {
+            result.addProperty("minecraft", net.minecraftforge.versions.mcp.MCPVersion.getMCVersion());
+            result.addProperty("forge", net.minecraftforge.versions.forge.ForgeVersion.getVersion());
+            require("1.13.2".equals(result.get("minecraft").getAsString())
+                    && "25.0.223".equals(result.get("forge").getAsString()), "Wrong native client target");
+            require(minecraft.world == null && minecraft.player == null && !minecraft.isIntegratedServerRunning(),
+                    "Resource probe must not open a world or connect to a server");
             com.google.gson.JsonArray mods = new com.google.gson.JsonArray();
             JsonObject versions = new JsonObject();
             for (String id : new String[]{"poweradvantage", "steamadvantage", "electricadvantage"}) {
@@ -58,6 +64,10 @@ public final class ClientResourceProbe {
             result.add("mod_versions", versions);
             require(versions.has("poweradvantage") && zone.moddev.mc.poweradvantage.PowerAdvantage.VERSION
                     .equals(versions.get("poweradvantage").getAsString()), "Power metadata does not match the compiled version");
+            require("2.4.4.113021".equals(versions.get("poweradvantage").getAsString()), "Wrong native Power candidate");
+            for (String id : new String[]{"steamadvantage", "electricadvantage"}) {
+                if (versions.has(id)) require("2.2.5.113021".equals(versions.get(id).getAsString()), "Wrong native expansion candidate: " + id);
+            }
             require(minecraft.getModelManager().getMissingModel() != null, "Timed out before model baking");
             int items = 0;
             int states = 0;
@@ -89,6 +99,7 @@ public final class ClientResourceProbe {
             require(I18n.format("block.poweradvantage.still").equals(I18n.format("tile.poweradvantage.still.name")),
                     "Legacy GUI translation differs from modern block name");
             TankVisualProbe.verify(minecraft, result);
+            MachineGuiLayoutProbe.verify(minecraft, result);
             OilRenderProbe.verify(minecraft, result);
             RecipeBookGroupingProbe.verify(minecraft, result);
             result.addProperty("status", "PASS");
@@ -97,7 +108,7 @@ public final class ClientResourceProbe {
             result.addProperty("creative_entries", contents.size());
             result.addProperty("screen", minecraft.currentScreen == null ? "none" : minecraft.currentScreen.getClass().getName());
             LogManager.getLogger(MODID).info("ADVANTAGE_CLIENT_RESOURCES PASS items={} block_states={} creative_entries={}", items, states, contents.size());
-        } catch (RuntimeException | AssertionError failure) {
+        } catch (RuntimeException | LinkageError | AssertionError failure) {
             result.addProperty("status", "FAIL");
             result.addProperty("error", failure.toString());
             LogManager.getLogger(MODID).error("ADVANTAGE_CLIENT_RESOURCES FAIL", failure);

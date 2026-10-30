@@ -1,5 +1,6 @@
 package zone.moddev.mc.poweradvantage.registry;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -11,7 +12,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.FMLPlayMessages;
@@ -139,13 +140,26 @@ public class MachineGUIRegistry {
 				return "poweradvantage:machine";
 			}
 
-			@Override public ITextComponent getName() { return new TextComponentString("Power Advantage"); }
-			@Override public boolean hasCustomName() { return false; }
-			@Override public ITextComponent getCustomName() { return null; }
+			@Override public ITextComponent getName() { return menuTitle(tile, world.getBlockState(pos).getBlock()); }
+			@Override public boolean hasCustomName() {
+				return tile instanceof net.minecraft.util.INameable && ((net.minecraft.util.INameable) tile).hasCustomName();
+			}
+			@Override public ITextComponent getCustomName() {
+				return tile instanceof net.minecraft.util.INameable ? ((net.minecraft.util.INameable) tile).getCustomName() : null;
+			}
 		}, buffer -> {
 			buffer.writeBlockPos(pos);
 			buffer.writeVarInt(guiId);
 		});
+	}
+
+	/** Shares equipment/custom names between the native window and legacy screen. */
+	public static ITextComponent menuTitle(TileEntity tile, Block block) {
+		if (tile instanceof net.minecraft.util.INameable) {
+			ITextComponent customName = ((net.minecraft.util.INameable) tile).getCustomName();
+			if (customName != null) return customName;
+		}
+		return new TextComponentTranslation(block.getTranslationKey());
 	}
 
 	@OnlyIn(Dist.CLIENT)

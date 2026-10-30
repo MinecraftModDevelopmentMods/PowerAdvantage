@@ -1,5 +1,47 @@
 # Native Client Resource Check
 
+## GUI Coverage Backport
+
+The new `-MachineGuiLayouts` option tests all 39 machine screens through the
+native 1.13 renderer. The independent caption-v2 specification requires 351
+empty/half/full viewport cases and 355 rejected broken-label controls, alongside
+native item hover, slot alignment, dedicated label rows and long custom names.
+The expected captions are not copied from production label output.
+
+The tests first rejected all 39 old screens in a native red capture. Minimal
+caption, slot, tooltip and bounded-display repairs are now staged for a fresh
+green build and native client run. Static checks and earlier-version results
+do not qualify 1.13 screen rendering.
+
+Build and run only through the coordinated parent build/runtime lease:
+
+```powershell
+./gradlew.bat clientResourceProbeJar
+./test-rig/client-resources/run.ps1 -JavaHome '<Java 8 home>' -LaunchProfile runClientAllAdvantage.launch -RequireExtensions -MachineGuiLayouts -TimeoutSeconds 600
+```
+
+The fixture uses 1.13's real GuiContainer, InventoryPlayer, fontRenderer and
+setWorldAndResolution APIs. Its long-name case names the real tank through
+setCustomInventoryName and restores that name afterward. It never injects
+expected glyphs into production rendering. Old oil, tank and recipe probes
+retain their native 1.13 source and thresholds.
+
+The following checks open no world and start no Java process:
+
+```powershell
+./test-rig/client-resources/test-launcher.ps1 -StaticOnly
+./test-rig/client-resources/test-gui-contract.ps1
+./test-rig/client-resources/test-probe-contract.ps1
+./test-rig/client-resources/test-gui-contract-negative-controls.ps1
+./test-rig/client-resources/test-probe-contract-negative-controls.ps1
+```
+
+The runner requires exact native target/candidate identities, snapshots mutable
+development dependencies, and retains failed images and partial native reports
+separately from launcher failures. The normal Eclipse launch remains unchanged.
+
+## Existing Resource Checks
+
 This build-only Forge 1.13.2 probe checks PowerAdvantage, or all three Advantage mods in the combined profile, after Minecraft bakes its models and stitches its textures. It registers no gameplay content, opens no world, and shuts down its own disposable client when finished. It is not included in release jars or ordinary Eclipse launches.
 
 For native recipe-book grouping, first complete the packaged `recipe_unlocks.py`
@@ -29,7 +71,9 @@ Run Gradle with Java 17, then supply a Java 8 runtime to the launcher:
 ./test-rig/client-resources/run.ps1 -JavaHome '<Java 8 home>'
 ```
 
-Each run gets a new directory under `build/client-resource-runs/`. The runner snapshots production classes/resources, uses the audited launch dependencies, and loads only the probe as an additional mod. It retains logs and `client-resources.json`; missing reports, failed assertions, and model/texture errors fail the run. Existing saves, configuration, and prior reports are untouched.
+Each run gets a new directory under `run-client-resource-runs/`. The runner snapshots production classes/resources, uses the audited launch dependencies, and loads only the probe as an additional mod. It retains logs and `client-resources.json`; missing reports, failed assertions, and model/texture errors fail the run. Existing saves, configuration, and prior reports are untouched.
+
+New GUI captures are kept outside Gradle's `build/` directory so `clean` cannot remove them. This does not recreate any historical captures already lost from the former build-based location.
 
 The default `-OutputSource Gradle` merges Gradle's classes and processed resources. To test the actual Eclipse output instead, pass `-OutputSource Eclipse`; this copies `bin/main` verbatim and does not overlay Gradle resources. `client-input.json` records the selected output, launch and metadata hash. Missing/unexpanded metadata fails the preflight before Minecraft opens, and the native result records the versions Forge actually discovers. The [Eclipse metadata regression](../../docs/1.13/ECLIPSE-METADATA.md) explains why this is a separate acceptance gate.
 

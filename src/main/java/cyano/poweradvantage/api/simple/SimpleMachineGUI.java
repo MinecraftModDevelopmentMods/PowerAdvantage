@@ -4,6 +4,7 @@ package cyano.poweradvantage.api.simple;
 import zone.moddev.mc.poweradvantage.PowerAdvantage;
 import zone.moddev.mc.poweradvantage.math.Integer2D;
 import zone.moddev.mc.poweradvantage.registry.ITileEntityGUI;
+import zone.moddev.mc.poweradvantage.registry.MachineGUIRegistry;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -14,7 +15,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.text.ITextComponent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +33,10 @@ import java.util.function.Function;
  *
  */
 public class SimpleMachineGUI implements ITileEntityGUI {
+	private static final int MACHINE_TOP = 12;
+	private static final int MACHINE_HEIGHT = 128;
+	private static final int PLAYER_PANEL_TOP = 150;
+	private static final int PLAYER_SLOTS_TOP = PLAYER_PANEL_TOP + 8;
 
 	/**
 	 * This is the texture resource for drawing the player's inventory.
@@ -38,7 +44,7 @@ public class SimpleMachineGUI implements ITileEntityGUI {
 	public final static ResourceLocation playerInventoryBox  = new ResourceLocation(PowerAdvantage.MODID+":"+"textures/gui/container/player_inventory.png");
 	/** Texture resource for the machine's GUI */ 
 	protected final ResourceLocation guiDisplayImage;
-	/** Dimensions of the GUI texture image */ 
+	/** Dimensions of the assembled screen, including its label rows. */
 	protected final int guiWidth, guiHeight;
 	/** List of pixel coordinates for the upper-left corner of each inventory 
 	 * slot that should appear on the screen */
@@ -63,7 +69,7 @@ public class SimpleMachineGUI implements ITileEntityGUI {
 	public SimpleMachineGUI(ResourceLocation guiImage, Integer2D... inventorySlotCoordinates){
 		this.guiDisplayImage = guiImage;
 		this.guiWidth = 176;
-		this.guiHeight = 222;
+		this.guiHeight = 240;
 		if(inventorySlotCoordinates == null){
 			this.inventorySlotCoordinates = new Integer2D[0];
 		} else {
@@ -149,14 +155,14 @@ guiContainer.drawTexturedModalRect(x+79, y+35, 0, 0, arrowLength, 17); // x, y, 
 			int index = 0;
 			for(Integer2D pt : inventorySlotCoordinates){
 				if(specialSlots.containsKey(index)){
-					SlotContext params = new SlotContext(playerItems,entity,index, pt.X, pt.Y);
+					SlotContext params = new SlotContext(playerItems,entity,index, pt.X, pt.Y + MACHINE_TOP);
 					this.addSlot(specialSlots.get(index).apply(params));
 				} else {
-					this.addSlot(new Slot(entity, index, pt.X, pt.Y));
+					this.addSlot(new Slot(entity, index, pt.X, pt.Y + MACHINE_TOP));
 				}
 				index++;
 			}
-			bindPlayerInventory(playerItems, 140);
+			bindPlayerInventory(playerItems, PLAYER_SLOTS_TOP);
 		}
 		
 		@Override
@@ -221,25 +227,62 @@ guiContainer.drawTexturedModalRect(x+79, y+35, 0, 0, arrowLength, 17); // x, y, 
 	@OnlyIn(Dist.CLIENT)
 	public class GUIContainer extends net.minecraft.client.gui.inventory.GuiContainer{
 		private final Object entity;
+		private final InventoryPlayer playerInventory;
+		private final ITextComponent machineTitle;
 		public GUIContainer(InventoryPlayer playerItems, IInventory entity) {
 			super(new Container(playerItems,entity));
 //System.out.println("Size: "+this.xSize+"x"+this.ySize+" at coordinate ("+this.guiLeft+","+this.guiTop+")");
 			this.xSize = guiWidth;
 			this.ySize = guiHeight;
 			this.entity = entity;
+			this.playerInventory = playerItems;
+			if (entity instanceof TileEntity && ((TileEntity) entity).hasWorld()) {
+				TileEntity tile = (TileEntity) entity;
+				this.machineTitle = MachineGUIRegistry.menuTitle(tile, tile.getWorld().getBlockState(tile.getPos()).getBlock());
+			} else {
+				this.machineTitle = entity.getDisplayName();
+			}
 		}
+
+		@Override
+		public void render(int mouseX, int mouseY, float partialTicks) {
+			this.drawDefaultBackground();
+			super.render(mouseX, mouseY, partialTicks);
+			this.renderHoveredToolTip(mouseX, mouseY);
+			if (fontRenderer.getStringWidth(machineTitle.getString()) > width - 8
+					&& mouseY >= guiTop + 1 && mouseY < guiTop + MACHINE_TOP) {
+				this.drawHoveringText(machineTitle.getString(), mouseX, mouseY);
+			}
+		}
+
+		@Override
+		protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+			String machineName = fitLabel(machineTitle.getString(), width - 8);
+			fontRenderer.drawStringWithShadow(machineName, (xSize - fontRenderer.getStringWidth(machineName)) / 2, 1, 0xFFFFFF);
+			fontRenderer.drawStringWithShadow(fitLabel(playerInventory.getDisplayName().getString(), xSize - 16),
+					8, MACHINE_TOP + MACHINE_HEIGHT, 0xFFFFFF);
+		}
+
+		private String fitLabel(String text, int availableWidth) {
+			return fontRenderer.getStringWidth(text) <= availableWidth ? text
+					: fontRenderer.trimStringToWidth(text, Math.max(0, availableWidth - fontRenderer.getStringWidth("..."))) + "...";
+		}
+
 		@Override
 		protected void drawGuiContainerBackgroundLayer(float f, int i, int j) {
-			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+			GlStateManager.enableBlend();
+			GlStateManager.blendFuncSeparate(770, 771, 1, 0);
+			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			this.mc.getTextureManager().bindTexture(playerInventoryBox);
 			int x = (width - xSize) / 2;
 			int y = (height - ySize) / 2;
 			final int playerInventoryWidth = 176;
-			final int playerInventoryHeight = 222;
-			this.drawTexturedModalRect(x, y, 0, 0, playerInventoryWidth, playerInventoryHeight); // x, y, textureOffsetX, textureOffsetY, width, height)
+			final int playerInventoryHeight = 90;
+			this.drawTexturedModalRect(x, y + PLAYER_PANEL_TOP, 0, 132, playerInventoryWidth, playerInventoryHeight);
 			this.mc.getTextureManager().bindTexture(guiDisplayImage);
-			this.drawTexturedModalRect(x, y, 0, 0, guiWidth, guiHeight); // x, y, textureOffsetX, textureOffsetY, width, height)
-			drawGUIDecorations(entity, this, x, y, this.zLevel);
+			this.drawTexturedModalRect(x, y + MACHINE_TOP, 0, 0, guiWidth, MACHINE_HEIGHT);
+			drawGUIDecorations(entity, this, x, y + MACHINE_TOP, this.zLevel);
+			GlStateManager.disableBlend();
 		}
 		/**
 		 * Gets the z-coordinate of this GUI element

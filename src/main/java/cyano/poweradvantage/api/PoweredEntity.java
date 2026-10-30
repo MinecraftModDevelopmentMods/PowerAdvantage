@@ -178,6 +178,11 @@ public abstract class PoweredEntity extends TileEntity implements ITickable, IPo
 		if (this.isServer() && ((this.getWorld().getGameTime() + this.getTickOffset()) % powerUpdateInterval == 0)) {
 			this.powerUpdate();
 		}
+		if (this.isServer()) {
+			// 1.13 skips clean chunks even on save-all; timers and energy change without inventory edits.
+			// Mark the chunk directly, without comparator notifications or network packets every tick.
+			this.getWorld().markChunkDirty(this.getPos(), this);
+		}
 	}
 
 	private void refreshConduitNetworkAfterLoad() {

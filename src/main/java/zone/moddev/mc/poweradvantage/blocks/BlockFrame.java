@@ -37,6 +37,11 @@ public class BlockFrame extends Block {
 	}
 
 	@Override
+	public boolean isSolid(IBlockState state) {
+		return false;
+	}
+
+	@Override
 	public boolean canSilkHarvest(IBlockState state, IWorldReader world, BlockPos pos, EntityPlayer player) {
 		return true;
 	}
