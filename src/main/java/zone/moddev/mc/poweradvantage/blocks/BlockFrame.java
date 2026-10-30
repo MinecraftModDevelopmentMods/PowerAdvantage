@@ -31,7 +31,8 @@ public class BlockFrame extends Block {
 		return BlockRenderLayer.CUTOUT;
 	}
 
-	public boolean isFullCube(BlockState bs) {
+	@Override
+	public boolean isSolid(BlockState bs) {
 		return false;
 	}
 
@@ -39,9 +40,5 @@ public class BlockFrame extends Block {
 		return true;
 	}
 
-
-	public boolean isOpaqueCube(BlockState bs) {
-		return false;
-	}
 
 }

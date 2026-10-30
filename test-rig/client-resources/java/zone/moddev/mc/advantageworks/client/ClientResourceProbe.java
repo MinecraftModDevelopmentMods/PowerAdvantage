@@ -64,6 +64,10 @@ public final class ClientResourceProbe {
             result.add("mod_versions", versions);
             require(versions.has("poweradvantage") && zone.moddev.mc.poweradvantage.PowerAdvantage.VERSION
                     .equals(versions.get("poweradvantage").getAsString()), "Power metadata does not match the compiled version");
+            require("2.4.5.114041".equals(versions.get("poweradvantage").getAsString()), "Wrong native Power candidate");
+            for (String id : new String[]{"steamadvantage", "electricadvantage"}) {
+                if (versions.has(id)) require("2.2.6.114041".equals(versions.get(id).getAsString()), "Wrong native expansion candidate: " + id);
+            }
             require(minecraft.getModelManager().getMissingModel() != null, "Timed out before model baking");
             require(minecraft.getLoadingGui() == null, "Timed out before native resource loading completed");
             int items = 0;
@@ -96,6 +100,7 @@ public final class ClientResourceProbe {
             require(I18n.format("block.poweradvantage.still").equals(I18n.format("tile.poweradvantage.still.name")),
                     "Legacy GUI translation differs from modern block name");
             TankVisualProbe.verify(minecraft, result);
+            MachineGuiLayoutProbe.verify(minecraft, result);
             OilRenderProbe.verify(minecraft, result);
             RecipeBookGroupingProbe.verify(minecraft, result);
             result.addProperty("status", "PASS");

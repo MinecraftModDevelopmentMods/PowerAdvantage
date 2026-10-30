@@ -1141,14 +1141,24 @@ tasks.register('prepareCombinedEclipseLaunch') {
     group = 'ide'
     description = 'Creates an additional production-only Eclipse client launch with all three Advantage mods.'
     dependsOn tasks.named('verifyEclipseProductionClasspath')
+    dependsOn tasks.named('deobfJar')
     doLast {
-        def profile = new JsonSlurper().parse(file('test-rig/profiles/native114/dev-core.json'))
+        File inputProfile = file(providers.gradleProperty('advantageDevelopmentProfile').getOrElse(
+                'test-rig/profiles/native114/dev-core.json'))
+        def profile = new JsonSlurper().parse(inputProfile)
+        if (profile.powerDeobfSha256) {
+            File powerJar = tasks.named('jar', Jar).get().archiveFile.get().asFile
+            String powerHash = MessageDigest.getInstance('SHA-256').digest(powerJar.bytes).encodeHex().toString()
+            if (!powerHash.equalsIgnoreCase(profile.powerDeobfSha256 as String)) {
+                throw new GradleException("PowerAdvantage does not match the dependency pin in ${inputProfile}: ${powerJar}")
+            }
+        }
         advantageExtensionJars.each { String id, File jar ->
             def pin = profile.mods.find { it.id == id }
             if (!jar.isFile()) throw new GradleException("Build ${id} first, or override its *AdvantageDeobfJar property: ${jar}")
             String hash = MessageDigest.getInstance('SHA-256').digest(jar.bytes).encodeHex().toString()
             if (pin == null || !hash.equalsIgnoreCase(pin.sha256 as String)) {
-                throw new GradleException("${id} does not match the audited dev-core dependency pin: ${jar}")
+                throw new GradleException("${id} does not match the dependency pin in ${inputProfile}: ${jar}")
             }
         }
         def launch = new groovy.xml.XmlParser().parse(file('runClient.launch'))

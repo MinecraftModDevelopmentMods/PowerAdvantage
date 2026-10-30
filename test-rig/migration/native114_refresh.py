@@ -13,6 +13,7 @@ from unittest.mock import patch
 
 import native114
 import native114_connected
+from native114_resource_audit import compare_snapshot_resources
 from matrix import digest, write_json
 from native114_lifecycle import read_json
 
@@ -37,7 +38,10 @@ def run(args):
     output.mkdir(parents=True, exist_ok=False)
     report = dict(status="RUNNING", scope=args.kind, previous=str(args.previous.resolve()),
                   previousSha256=digest(args.previous), targetManifest=str(args.target_manifest.resolve()),
-                  targetManifestSha256=digest(args.target_manifest), routes=[])
+                  targetManifestSha256=digest(args.target_manifest), observationTicks=2048, routes=[])
+    helpers = [Path(__file__), Path(native114.__file__), Path(native114_connected.__file__),
+               Path(__file__).with_name("semantic_machine_audit.py"), Path(__file__).with_name("native114_resource_audit.py")]
+    report["protocolSha256"] = {str(path): digest(path) for path in helpers}
     rows = previous["routes"] if args.kind == "frozen" else previous["sources"]
     for index, row in enumerate(rows):
         outcome = dict(index=index, status="RUNNING")
@@ -68,6 +72,10 @@ def run(args):
                     return launcher
                 with patch.object(native114, "stage", native_stage):
                     code = native114.run(settings)
+                resources = {phase: compare_snapshot_resources(source / selected,
+                             settings.output / ("migration-" + phase + ".json")) for phase in ("converted", "restarted")}
+                write_json(settings.output / "exact-resource-comparison.json", resources)
+                if any(value["status"] != "PASS" for value in resources.values()): code = 1
                 outcome.update(source=str(source), sourceSnapshot=selected, runtime=str(settings.output),
                                comparison=read_json(settings.output / "state-comparison.json"))
             else:
@@ -83,7 +91,7 @@ def run(args):
                                      source_key=provenance["sourceKey"], source_hashes=hashes,
                                      source_checkpoint=provenance["sourceCheckpoint"], target_manifest=args.target_manifest,
                                      java8=args.java8, output=output / f"route-{index:02}",
-                                     ticks=512, port=args.port)
+                                     ticks=2048, port=args.port)
                 code = native114_connected.run(settings)
                 outcome.update(source=str(source), runtime=str(settings.output),
                                result=str(settings.output / "native114-connected-results.json"))
@@ -94,6 +102,9 @@ def run(args):
         print(f"{args.kind}/{index + 1}/{len(rows)}: {outcome['status']}", flush=True)
     report["status"] = "PASS" if len(rows) == (13 if args.kind == "frozen" else 5) and all(
         row["status"] == "PASS" for row in report["routes"]) else "FAIL"
+    report["protocolUnchanged"] = {str(path): digest(path) for path in helpers} == report["protocolSha256"]
+    if (not report["protocolUnchanged"] or digest(args.target_manifest) != report["targetManifestSha256"]
+            or digest(args.previous) != report["previousSha256"]): report["status"] = "FAIL"
     write_json(output / "native114-refresh-results.json", report)
     return int(report["status"] != "PASS")
 

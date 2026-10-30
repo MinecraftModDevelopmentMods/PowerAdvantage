@@ -156,8 +156,9 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 				ItemStack destItem = dest.getStackInSlot(slot);
 				if(destItem == null || destItem.isEmpty()) {
 					return true;
-				} else {
-					return ItemStack.areItemsEqual(item, destItem);
+				} else if (ItemStack.areItemsEqual(item, destItem) && ItemStack.areItemStackTagsEqual(item, destItem)
+						&& destItem.getCount() < Math.min(dest.getInventoryStackLimit(), destItem.getMaxStackSize())) {
+					return true;
 				}
 			}
 		}
@@ -180,10 +181,13 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 							ItemStack otherItem = dest.getStackInSlot(destValidSlots[j]);
 							if(otherItem != null && !otherItem.isEmpty()
 									&& ItemStack.areItemsEqual(item, otherItem)
+									&& ItemStack.areItemStackTagsEqual(item, otherItem)
 									&& otherItem.getCount() < dest.getInventoryStackLimit()
 									&& otherItem.getCount() < otherItem.getItem().getItemStackLimit(otherItem)){
 								src.decrStackSize(srcValidSlots[i], 1);
 								otherItem.grow(1);
+								src.markDirty();
+								dest.markDirty();
 								return true;
 							}
 						}
@@ -194,6 +198,8 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 							ItemStack otherItem = dest.getStackInSlot(destValidSlots[j]);
 							if(otherItem == null || otherItem.isEmpty()){
 								dest.setInventorySlotContents(destValidSlots[j], src.decrStackSize(srcValidSlots[i], 1));
+								src.markDirty();
+								dest.markDirty();
 								return true;
 							}
 						}
