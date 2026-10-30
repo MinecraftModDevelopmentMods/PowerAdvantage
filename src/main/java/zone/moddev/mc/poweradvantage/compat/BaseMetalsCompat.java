@@ -4,6 +4,7 @@ import zone.moddev.mc.poweradvantage.PowerAdvantage;
 import zone.moddev.mc.poweradvantage.registry.FuelRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.FMLLog;
@@ -15,10 +16,13 @@ import org.apache.logging.log4j.Level;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public final class BaseMetalsCompat {
 
 	private static final String MODID = "basemetals";
+	private static final ResourceLocation STEEL_BLOCK = new ResourceLocation(MODID, "steel_block");
 	private static final String[] CRUSHER_REGISTRY_CLASSES = {
 			"cyano.basemetals.registry.CrusherRecipeRegistry",
 			"com.mcmoddev.lib.registry.CrusherRecipeRegistry"
@@ -30,6 +34,31 @@ public final class BaseMetalsCompat {
 
 	public static boolean isLoaded() {
 		return Loader.isModLoaded(MODID);
+	}
+
+	public static void registerOreDictionaryFallbacks() {
+		registerOreDictionaryFallbacks(OreDictionary::getOres, OreDictionary::registerOre,
+				id -> GameData.getItemRegistry().getObject(id));
+	}
+
+	static void registerOreDictionaryFallbacks(Function<String, List<ItemStack>> ores,
+			BiConsumer<String, ItemStack> register, Function<ResourceLocation, Item> items) {
+		if (ores.apply("dustCarbon").isEmpty()) {
+			for (String source : new String[]{"dustCoal", "dustCharcoal"}) {
+				for (ItemStack stack : ores.apply(source)) {
+					if (stack != null && stack.stackSize > 0 && stack.getItem() != null) {
+						register.accept("dustCarbon", stack.copy());
+					}
+				}
+			}
+		}
+		if (ores.apply("blockSteel").isEmpty()) {
+			Item item = items.apply(STEEL_BLOCK);
+			if (item instanceof ItemBlock && STEEL_BLOCK.equals(item.getRegistryName())
+					&& STEEL_BLOCK.equals(((ItemBlock)item).getBlock().getRegistryName())) {
+				register.accept("blockSteel", new ItemStack(item, 1));
+			}
+		}
 	}
 
 	public static void setStrongHammers(boolean enabled) {

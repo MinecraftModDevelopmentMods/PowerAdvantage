@@ -2,6 +2,8 @@
 
 Power Advantage provides shared power, fluid, and item transport systems for its Minecraft 1.10.2 expansion mods.
 
+The [test coverage backport notes](TEST-COVERAGE-BACKPORT.md#final-recorded-candidate) record the final machine, restart, control, partial-network, GUI, endurance, connected-world and reproducibility results alongside exact candidate hashes. The bounded legacy checks pass; the recipe progression graph is still partial. Earlier failures, modern follow-up findings and manual-testing limits are kept in the notes. This is not an all-machines or all-worlds guarantee.
+
 The maintained implementation namespace is `zone.moddev.mc.poweradvantage`. The legacy
 `cyano.poweradvantage.api` package remains the supported add-on API.
 

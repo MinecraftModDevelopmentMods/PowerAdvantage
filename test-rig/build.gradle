@@ -6,6 +6,8 @@ plugins {
     id 'net.minecraftforge.gradle' version '7.0.34'
 }
 
+layout.buildDirectory = layout.projectDirectory.dir('build/gradle')
+
 group = 'zone.moddev.mc.advantageworks'
 version = project.harness_version
 base.archivesName = 'AdvantageWorksTestHarness'

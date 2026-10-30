@@ -122,7 +122,7 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 
 	
 	protected static boolean canInsertItemInto(ItemStack item, ISidedInventory dest, EnumFacing destFace){
-		if(item == null || item.getItem() == null || isLocked(dest)){
+		if(item == null || item.stackSize <= 0 || item.getItem() == null || isLocked(dest)){
 			return false;
 		}
 		int[] slots = dest.getSlotsForFace(destFace);
@@ -132,8 +132,9 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 				ItemStack destItem = dest.getStackInSlot(slot);
 				if(destItem == null) {
 					return true;
-				} else {
-					return ItemStack.areItemsEqual(item, destItem);
+				} else if (ItemStack.areItemsEqual(item, destItem) && ItemStack.areItemStackTagsEqual(item, destItem)
+						&& destItem.stackSize < Math.min(dest.getInventoryStackLimit(), destItem.getMaxStackSize())) {
+					return true;
 				}
 			}
 		}
@@ -147,18 +148,21 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 		int[] srcValidSlots = src.getSlotsForFace(srcFace);
 		for(int i = 0; i < srcValidSlots.length; i++){
 			ItemStack item = src.getStackInSlot(srcValidSlots[i]);
-			if(item == null) continue;
+			if(item == null || item.stackSize <= 0) continue;
 			if(src.canExtractItem(srcValidSlots[i], item, srcFace)){
 					int[] destValidSlots = dest.getSlotsForFace(destFace);
 					// First look for stackable items
 					for(int j = 0; j < destValidSlots.length; j++){
 						if(dest.canInsertItem(destValidSlots[j], item, destFace)){
 							ItemStack otherItem = dest.getStackInSlot(destValidSlots[j]);
-							if( ItemStack.areItemsEqual(item, otherItem)
+							if(otherItem != null && ItemStack.areItemsEqual(item, otherItem)
+									&& ItemStack.areItemStackTagsEqual(item, otherItem)
 									&& otherItem.stackSize < dest.getInventoryStackLimit()
 									&& otherItem.stackSize < otherItem.getItem().getItemStackLimit(otherItem)){
 								src.decrStackSize(srcValidSlots[i], 1);
 								otherItem.stackSize++;
+								src.markDirty();
+								dest.markDirty();
 								return true;
 							}
 						}
@@ -169,6 +173,8 @@ public class TileEntityConveyor extends TileEntity implements ITickable, ISidedI
 							ItemStack otherItem = dest.getStackInSlot(destValidSlots[j]);
 							if(otherItem == null){
 								dest.setInventorySlotContents(destValidSlots[j], src.decrStackSize(srcValidSlots[i], 1));
+								src.markDirty();
+								dest.markDirty();
 								return true;
 							}
 						}
