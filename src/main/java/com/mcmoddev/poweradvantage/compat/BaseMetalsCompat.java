@@ -5,9 +5,14 @@ import com.mcmoddev.poweradvantage.registry.FuelRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreDictionary;
 import org.apache.logging.log4j.Level;
@@ -15,7 +20,10 @@ import org.apache.logging.log4j.Level;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
+@Mod.EventBusSubscriber(modid = PowerAdvantage.MODID)
 public final class BaseMetalsCompat {
 
 	private static final String MODID = "basemetals";
@@ -30,6 +38,26 @@ public final class BaseMetalsCompat {
 
 	public static boolean isLoaded() {
 		return Loader.isModLoaded(MODID);
+	}
+
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public static void registerRecipeAliases(RegistryEvent.Register<IRecipe> event) {
+		// Item registration has finished; populate aliases before recipe factories inspect them.
+		registerCarbonDustFallback();
+	}
+
+	public static void registerCarbonDustFallback() {
+		registerCarbonDustFallback(OreDictionary::getOres, OreDictionary::registerOre);
+	}
+
+	static void registerCarbonDustFallback(Function<String, List<ItemStack>> ores,
+			BiConsumer<String, ItemStack> register) {
+		if (!ores.apply("dustCarbon").isEmpty()) return;
+		for (String source : new String[]{"dustCoal", "dustCharcoal"}) {
+			for (ItemStack stack : ores.apply(source)) {
+				if (stack != null && !stack.isEmpty()) register.accept("dustCarbon", stack.copy());
+			}
+		}
 	}
 
 	public static void setStrongHammers(boolean enabled) {

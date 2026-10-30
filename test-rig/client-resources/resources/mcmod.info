@@ -1,0 +1,11 @@
+[
+  {
+    "modid": "advantageclientresources",
+    "name": "Advantage GUI Capture",
+    "description": "Disposable native GUI test adapter; not part of Power Advantage.",
+    "version": "1.0.0.112021",
+    "mcversion": "1.12.2",
+    "authorList": ["Advantage Works"],
+    "dependencies": ["poweradvantage", "steamadvantage", "electricadvantage"]
+  }
+]

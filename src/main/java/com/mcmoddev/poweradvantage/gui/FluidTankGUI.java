@@ -45,6 +45,7 @@ public class FluidTankGUI extends SimpleMachineGUI {
 			FluidStack fs, float barHeight, int xPos, int yPos,
 			ResourceLocation displayImage, GUIContainer guiContainer, int x, int y, float zLevel
 	) {
+		barHeight = Float.isFinite(barHeight) ? Math.max(0F, Math.min(1F, barHeight)) : 0F;
 		final int w = 16;
 		final int barSlotHeight = 60;
 		final int h = (int) (barSlotHeight * barHeight);

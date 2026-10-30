@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+    id 'net.minecraftforge.renamer' version '1.1.5'
+    id 'net.minecraftforge.gradle' version '7.0.34'
+}
+
+layout.buildDirectory = layout.projectDirectory.dir('build/gradle')
+group = 'zone.moddev.mc.advantageworks'
+version = project.harness_version
+base.archivesName = 'AdvantageWorksTestHarness'
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+tasks.withType(JavaCompile).configureEach {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+    options.encoding = 'UTF-8'
+}
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+minecraft {
+    mappings channel: project.mapping_channel, version: project.mapping_version
+}
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
+}
+dependencies {
+    implementation minecraft.dependency("net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}")
+    compileOnly files(project.findProperty('powerAdvantageDeobfJar')
+            ?: '../build/libs-dev/PowerAdvantage-2.4.1.112021-deobf.jar')
+    testImplementation 'junit:junit:4.13.2'
+}
+tasks.named('jar', Jar) {
+    archiveClassifier = 'deobf'
+    destinationDirectory = layout.buildDirectory.dir('libs-dev')
+}
+def releaseJar = renamer.classes(tasks.named('jar', Jar)) {
+    map.from minecraft.dependency.toSrgFile
+    archiveClassifier = null
+}
+tasks.named('assemble') { dependsOn releaseJar }

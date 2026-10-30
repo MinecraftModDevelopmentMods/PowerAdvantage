@@ -14,6 +14,21 @@ plugins {
     id 'net.minecraftforge.gradle' version '7.0.34'
 }
 
+sourceSets {
+    guiProbe {
+        java.srcDir 'test-rig/client-resources/java'
+        resources.srcDir 'test-rig/client-resources/resources'
+        compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+    }
+}
+
+tasks.register('clientResourceProbeJar', Jar) {
+    dependsOn tasks.named('guiProbeClasses')
+    from sourceSets.guiProbe.output
+    archiveFileName = 'advantageclientresources-deobf.jar'
+    destinationDirectory = layout.buildDirectory.dir('client-resource-probe')
+}
+
 group = project.mod_group
 version = project.mod_version
 base.archivesName = 'PowerAdvantage'
@@ -172,6 +187,7 @@ def rebornCoreCoordinate = usingStagedRebornCore
         : "RebornCore:RebornCore-1.12.2:${project.reborncore_version}:universal"
 
 dependencies {
+    testImplementation 'junit:junit:4.13.2'
     implementation minecraft.dependency(
             "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}")
     // Mavenizer's legacy metadata omits this compile-time Minecraft library.

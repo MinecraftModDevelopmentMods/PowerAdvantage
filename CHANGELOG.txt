@@ -1,3 +1,15 @@
+Unreleased test-coverage repairs for 1.12.2
+
+- Restore the missing carbon-dust recipe name from registered coal and charcoal powders, without replacing existing entries or changing recipe amounts.
+- Enable Forge's universal bucket during mod construction so oil buckets work without another mod enabling them first.
+- Stop steam, electricity and fluids from loading chunks or crossing an unloaded pipe section. Reconnect the network when that section loads again.
+- Keep refused energy available to the rest of the network instead of charging it to the source.
+- Check all conveyor destination slots, respect stack limits and preserve different item NBT.
+- Route overflow through the same insertion checks and save both inventories after transfers.
+- Stop the smeltable filter from accepting items whose furnace result is an empty stack.
+- Save changing timers and energy even when a machine has not sent a GUI update.
+- Add measured natural-tick jobs, negative controls and exact full-process restart comparisons.
+
 Power Advantage 2.4.1.112021
 
 - Restore conduit networks and machine GUI state after a world reload.

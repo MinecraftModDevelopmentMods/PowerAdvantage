@@ -1,0 +1,11 @@
+[
+  {
+    "modid": "advantageworkstest",
+    "name": "Advantage Works Test Harness",
+    "description": "Disposable, explicitly authorized machine regression fixtures. Not a gameplay mod.",
+    "version": "1.1.0.112021",
+    "mcversion": "1.12.2",
+    "authorList": ["MMD"],
+    "dependencies": ["poweradvantage"]
+  }
+]

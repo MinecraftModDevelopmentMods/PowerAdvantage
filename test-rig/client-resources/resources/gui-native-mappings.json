@@ -1,0 +1,122 @@
+[
+  [
+    "import net.minecraftforge.registries.ForgeRegistries;",
+    "import net.minecraftforge.fml.common.registry.ForgeRegistries;"
+  ],
+  [
+    "import cyano.poweradvantage.api.fluid.FluidStack;",
+    "import net.minecraftforge.fluids.FluidStack;"
+  ],
+  [
+    "import cyano.poweradvantage.api.fluid.FluidTank;",
+    "import net.minecraftforge.fluids.FluidTank;"
+  ],
+  [
+    "import zone.moddev.mc.poweradvantage.registry.MachineGUIRegistry;",
+    "import com.mcmoddev.poweradvantage.registry.MachineGUIRegistry;"
+  ],
+  [
+    "net.minecraft.resources.IResource",
+    "net.minecraft.client.resources.IResource"
+  ],
+  [
+    "block.createTileEntity(block.getDefaultState(), null)",
+    "block.createTileEntity(null, block.getDefaultState())"
+  ],
+  [
+    "net.minecraft.state.IProperty<?>",
+    "net.minecraft.block.properties.IProperty<?>"
+  ],
+  [
+    "block.getDefaultState().getProperties()",
+    "block.getDefaultState().getPropertyKeys()"
+  ],
+  [
+    "net.minecraft.state.BooleanProperty",
+    "net.minecraft.block.properties.PropertyBool"
+  ],
+  [
+    "block.getDefaultState().with(",
+    "block.getDefaultState().withProperty("
+  ],
+  [
+    ".getString()",
+    ".getUnformattedText()"
+  ],
+  [
+    "screen.render(",
+    "screen.drawScreen("
+  ],
+  [
+    "public void render(int x, int y, float ticks)",
+    "public void drawScreen(int x, int y, float ticks)"
+  ],
+  [
+    "super.render(x, y, ticks)",
+    "super.drawScreen(x, y, ticks)"
+  ],
+  [
+    "GlStateManager.translatef(",
+    "GlStateManager.translate("
+  ],
+  [
+    "GlStateManager.enableAlphaTest()",
+    "GlStateManager.enableAlpha()"
+  ],
+  [
+    "GlStateManager.enableDepthTest()",
+    "GlStateManager.enableDepth()"
+  ],
+  [
+    "GlStateManager.color4f(",
+    "GlStateManager.color("
+  ],
+  [
+    "net.minecraft.init.Fluids.WATER",
+    "net.minecraftforge.fluids.FluidRegistry.WATER"
+  ],
+  [
+    "zone.moddev.mc.poweradvantage.init.Blocks",
+    "com.mcmoddev.poweradvantage.init.Blocks"
+  ],
+  [
+    "zone.moddev.mc.electricadvantage.gui.GUIHelper",
+    "com.mcmoddev.electricadvantage.gui.GUIHelper"
+  ],
+  [
+    "zone.moddev.mc.steamadvantage.gui.GUIHelper",
+    "com.mcmoddev.steamadvantage.gui.GUIHelper"
+  ],
+  [
+    "net.minecraftforge.fml.ModList.get().isLoaded(",
+    "net.minecraftforge.fml.common.Loader.isModLoaded("
+  ],
+  [
+    "net.minecraft.world.dimension.DimensionType.OVERWORLD",
+    "0"
+  ],
+  [
+    "net.minecraft.util.INameable",
+    "net.minecraft.world.IWorldNameable"
+  ],
+  [
+    "new TextComponentTranslation(block.getTranslationKey())",
+    "new TextComponentTranslation(block.getTranslationKey() + \".name\")"
+  ],
+  [
+    "net.minecraft.util.text.ITextComponent previousName = named.getCustomName();",
+    "String previousName = named.hasCustomName() ? named.getName() : null;"
+  ],
+  [
+    "named.setCustomInventoryName(previousName == null ? null : previousName.getUnformattedText());",
+    "named.setCustomInventoryName(previousName);"
+  ],
+  [
+    "Slot hovered() { return hoveredSlot; }",
+    "Slot hovered() throws Exception {\n            Field field = net.minecraft.client.gui.inventory.GuiContainer.class.getDeclaredField(\"hoveredSlot\");\n            field.setAccessible(true);\n            return (Slot) field.get(this);\n        }"
+  ],
+  [
+    "Match the uncorrected 1.15 menu provider for the retained red run.",
+    "Use the legacy inventory name when no caption resolver exists."
+  ]
+]
