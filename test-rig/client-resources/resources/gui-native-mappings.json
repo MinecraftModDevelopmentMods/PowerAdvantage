@@ -1,0 +1,42 @@
+[
+  [
+    "com.mcmoddev.",
+    "zone.moddev.mc."
+  ],
+  [
+    "getTranslationKey()",
+    "getUnlocalizedName()"
+  ],
+  [
+    "fontRenderer",
+    "fontRendererObj"
+  ],
+  [
+    "net.minecraft.item.ItemStack.EMPTY",
+    "null"
+  ],
+  [
+    "                            require(screen.tooltipCalls > 0, \"Native item tooltip rendering was not dispatched\");\n",
+    ""
+  ],
+  [
+    "        private int tooltipCalls;\n",
+    ""
+  ],
+  [
+    "draws.clear(); tooltipCalls = 0; itemTooltipCalls = 0; titleTooltip = null;",
+    "draws.clear(); itemTooltipCalls = 0; titleTooltip = null;"
+  ],
+  [
+    "        @Override protected void renderHoveredToolTip(int x, int y) {\n            tooltipCalls++;\n            super.renderHoveredToolTip(x, y);\n        }\n",
+    ""
+  ],
+  [
+    "        @Override public void drawHoveringText(String text, int x, int y) {\n            titleTooltip = text;\n            super.drawHoveringText(text, x, y);\n        }",
+    "        @Override protected void drawHoveringText(java.util.List<String> text, int x, int y,\n                net.minecraft.client.gui.FontRenderer renderer) {\n            if (text.size() == 1) titleTooltip = text.get(0);\n            super.drawHoveringText(text, x, y, renderer);\n        }"
+  ],
+  [
+    "        Slot hovered() throws Exception {\n            Field field = net.minecraft.client.gui.inventory.GuiContainer.class.getDeclaredField(\"hoveredSlot\");\n            field.setAccessible(true);\n            return (Slot) field.get(this);\n        }",
+    "        Slot hovered() { return getSlotUnderMouse(); }"
+  ]
+]

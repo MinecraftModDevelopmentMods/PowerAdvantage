@@ -1,9 +1,13 @@
 package zone.moddev.mc.poweradvantage.registry;
 
 import com.mcmoddev.poweradvantage.registry.ITileEntityGUI;
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import net.minecraftforge.fml.relauncher.Side;
@@ -82,6 +86,13 @@ public class MachineGUIRegistry  implements IGuiHandler {
 	 */
 	public void removeGUI(int guiID) {
 		guiTable.remove(guiID);
+	}
+
+	public static ITextComponent menuTitle(TileEntity tile, Block block) {
+		if (tile instanceof IInventory && ((IInventory) tile).hasCustomName()) {
+			return ((IInventory) tile).getDisplayName();
+		}
+		return new TextComponentTranslation(block.getUnlocalizedName() + ".name");
 	}
 
 	/**

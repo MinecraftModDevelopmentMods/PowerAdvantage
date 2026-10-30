@@ -12,7 +12,7 @@ import net.minecraftforge.fluids.FluidStack;
 public class StorageTankTileEntity  extends TileEntitySimpleFluidMachine {
 
 	public StorageTankTileEntity() {
-		super(FluidContainerRegistry.BUCKET_VOLUME * 4, StorageTankTileEntity.class.getName());
+		super(FluidContainerRegistry.BUCKET_VOLUME * 4, "tile.poweradvantage.fluid_storage_tank.name");
 	}
 
 	/**

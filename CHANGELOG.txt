@@ -1,3 +1,9 @@
+Unreleased
+
+- Restore missing carbon-dust and steel-block recipe names when equivalent registered materials are available. Keep existing Ore Dictionary entries and recipe amounts unchanged.
+- Enable Forge's universal bucket during mod construction so oil buckets work without another mod enabling them first.
+- Stop steam, electricity and fluids from loading chunks or crossing an unloaded pipe section. Reconnect the network when that section loads again.
+
 Test rig updates (no Power Advantage version change)
 
 - Use the repaired Steam and Electric drill builds in the 1.10 test profiles.

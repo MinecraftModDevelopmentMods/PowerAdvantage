@@ -14,6 +14,24 @@ plugins {
     id 'net.minecraftforge.gradle' version '7.0.34'
 }
 
+// The native GUI adapter is a test mod, not a production or published source set.
+sourceSets {
+    guiProbe {
+        java.srcDir 'test-rig/client-resources/java'
+        resources.srcDir 'test-rig/client-resources/resources'
+        compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+    }
+}
+
+tasks.register('clientResourceProbeJar', Jar) {
+    group = 'verification'
+    description = 'Builds the isolated native GUI capture mod, outside release artifacts.'
+    dependsOn tasks.named('guiProbeClasses')
+    from sourceSets.guiProbe.output
+    archiveFileName = 'advantageclientresources-deobf.jar'
+    destinationDirectory = layout.buildDirectory.dir('client-resource-probe')
+}
+
 group = project.mod_group
 version = project.mod_version
 base.archivesName = 'PowerAdvantage'
@@ -828,4 +846,116 @@ tasks.register('verifyEclipseProductionClasspath') {
 
 tasks.named('check') {
     dependsOn tasks.named('verifyReleaseConfiguration')
+}
+
+tasks.register('prepareGuiProbeLaunch') {
+    group = 'verification'
+    description = 'Writes a separate native GUI capture launch with an explicit runtime-only classpath.'
+    dependsOn tasks.named('genEclipseRuns')
+    inputs.file(layout.projectDirectory.file('runClient.launch'))
+    inputs.files(configurations.runtimeClasspath)
+    def bootstrapOverride = providers.gradleProperty('guiProbeBootstrapJar')
+    if (bootstrapOverride.isPresent()) {
+        inputs.file(bootstrapOverride.map { file(it) })
+    }
+    outputs.file(layout.buildDirectory.file('client-resource-probe/runClientGuiProbe.launch'))
+    doLast {
+        File template = file('runClient.launch')
+        def launch = new groovy.xml.XmlParser(false, false).parse(template)
+        def stringAttribute = { String key ->
+            def attributes = launch.stringAttribute.findAll { it.attribute('key') == key }
+            if (attributes.size() != 1) {
+                throw new GradleException("GUI launch needs exactly one ${key} attribute")
+            }
+            attributes.first()
+        }
+        if (stringAttribute('org.eclipse.jdt.launching.MAIN_TYPE').attribute('value')
+                != 'net.minecraftforge.launcher.Main') {
+            throw new GradleException('GUI capture requires the native ForgeGradle Slime Launcher')
+        }
+
+        def environment = launch.mapAttribute.find {
+            it.attribute('key') == 'org.eclipse.debug.core.environmentVariables'
+        }
+        if (environment == null) {
+            throw new GradleException('GUI launch is missing its native Forge environment')
+        }
+        [MC_VERSION: project.minecraft_version,
+         FORGE_VERSION: project.forge_version,
+         MCP_MAPPINGS: "${project.mapping_channel}_${project.mapping_version}"].each { key, value ->
+            def entry = environment.mapEntry.find { it.attribute('key') == key }
+            if (entry == null || entry.attribute('value') != value.toString()) {
+                throw new GradleException("GUI launch has an unexpected ${key}")
+            }
+        }
+
+        def program = stringAttribute('org.eclipse.jdt.launching.PROGRAM_ARGUMENTS')
+        String arguments = program.attribute('value')
+        if (!arguments.contains('--main net.minecraftforge.legacydev.MainClient ')
+                || arguments.find(/--(?:server|port|gameDir|world)\b/) != null) {
+            throw new GradleException('GUI capture requires a client launch without a world or server target')
+        }
+        ['--cache', '--metadata', '--to-srg', '--to-obf'].each { String option ->
+            int start = arguments.indexOf(option + ' ')
+            int end = start < 0 ? -1 : arguments.indexOf(' --', start + option.length() + 1)
+            if (start < 0 || end < 0) {
+                throw new GradleException("GUI launch is missing a complete ${option} argument")
+            }
+            start += option.length() + 1
+            String value = arguments.substring(start, end)
+            if (value.find(/\s/) != null && !value.startsWith('"')) {
+                arguments = arguments.substring(0, start) + '"' + value + '"' + arguments.substring(end)
+            }
+        }
+        program.attributes().put('value', arguments)
+
+        def classpathLists = launch.listAttribute.findAll {
+            it.attribute('key') == 'org.eclipse.jdt.launching.CLASSPATH'
+        }
+        if (classpathLists.size() != 1) {
+            throw new GradleException('GUI launch needs exactly one generated classpath')
+        }
+        // Never use Buildship/project outputs here: the runner supplies hash-bound
+        // Advantage and probe jars in its disposable mods directory.
+        Set<File> runtime = new LinkedHashSet<>(configurations.runtimeClasspath.files.collect {
+            it.canonicalFile
+        })
+        classpathLists.first().listEntry.each { entry ->
+            def parsed = new groovy.xml.XmlParser(false, false).parseText(entry.attribute('value'))
+            String archive = parsed.attribute('externalArchive')
+            if (archive != null) runtime.add(file(archive).canonicalFile)
+        }
+        // Older cached 1.10 Mavenizer metadata may omit legacydev. An explicit
+        // test-launch override avoids changing any production dependency/pin.
+        if (bootstrapOverride.isPresent()) {
+            runtime.add(file(bootstrapOverride.get()).canonicalFile)
+        }
+        String mappedForge = "forge-${project.minecraft_version}-${project.forge_version}-" \
+                + "${project.mapping_channel}-${project.mapping_version}.jar"
+        if (!runtime.any { it.name == mappedForge }
+                || !runtime.any { it.name.startsWith('legacydev-') && it.name.endsWith('.jar') }) {
+            throw new GradleException('GUI launch is missing its native mapped Forge/legacydev runtime. '
+                    + 'For old metadata, pass -PguiProbeBootstrapJar=<existing-legacydev-fatjar>.')
+        }
+        if (runtime.any { !it.isFile() || it.path.replace('\\', '/').find(/\/(?:bin|classes)\/test(?:\/|$)/) != null }) {
+            throw new GradleException('GUI runtime must contain existing dependency archives, not test output')
+        }
+        launch.remove(classpathLists.first())
+        def classpath = launch.appendNode('listAttribute', [key: 'org.eclipse.jdt.launching.CLASSPATH'])
+        runtime.each { File archive ->
+            StringWriter entry = new StringWriter()
+            new groovy.xml.MarkupBuilder(entry).runtimeClasspathEntry(
+                    externalArchive: archive.canonicalPath, type: '2', path: '5')
+            classpath.appendNode('listEntry', [value: entry.toString()])
+        }
+        ['org.eclipse.jdt.launching.DEFAULT_CLASSPATH': 'false',
+         'org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE': 'true'].each { key, value ->
+            launch.booleanAttribute.findAll { it.attribute('key') == key }.each { launch.remove(it) }
+            launch.appendNode('booleanAttribute', [key: key, value: value])
+        }
+        File output = layout.buildDirectory.file('client-resource-probe/runClientGuiProbe.launch').get().asFile
+        output.parentFile.mkdirs()
+        output.setText(groovy.xml.XmlUtil.serialize(launch).replace('\r\n', '\n'), 'UTF-8')
+        logger.lifecycle("Native GUI capture launch: ${output}")
+    }
 }

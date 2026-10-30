@@ -14,7 +14,11 @@ import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.ChunkEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -45,6 +49,7 @@ public class ConduitRegistry {
 			try {
 				if (instance == null) {
 					instance = new ConduitRegistry();
+					MinecraftForge.EVENT_BUS.register(instance);
 				}
 			} finally {
 				initLock.unlock();
@@ -87,6 +92,7 @@ public class ConduitRegistry {
 	 * priority.
 	 */
 	public List<PowerRequest> getRequestsForPower(World w, BlockPos coord, ConduitType conduitType, ConduitType energyType) {
+		if (!w.isBlockLoaded(coord)) return Collections.emptyList();
 		int dimension = w.provider.getDimension();
 		clearIfWorldChanged(w, dimension);
 		ConduitNetworkManager manager = getConduitNetworkManager(conduitType);
@@ -107,6 +113,7 @@ public class ConduitRegistry {
 	private List<PowerRequest> collectRequests(World w, List<BlockPos4D> net, ConduitType conduitType, ConduitType energyType) {
 		List<PowerRequest> requests = new ArrayList<>();
 		for (BlockPos4D pos : net) {
+			if (!w.isBlockLoaded(pos.pos)) continue;
 			Block b = w.getBlockState(pos.pos).getBlock();
 			if (b instanceof ITileEntityProvider) {
 				TileEntity e = w.getTileEntity(pos.pos);
@@ -184,27 +191,29 @@ public class ConduitRegistry {
 			World world, BlockPos srcPos, Object providerInstance
 	) {
 		List<PowerRequest> requests = ConduitRegistry.getInstance().getRequestsForPower(world, srcPos, networkType, powerType);
+		return distributePower(availableEnergy, powerType, minimumPriority, world, providerInstance, requests);
+	}
+
+	static float distributePower(float availableEnergy, ConduitType powerType, byte minimumPriority,
+			World world, Object providerInstance, List<PowerRequest> requests) {
+		if (!Float.isFinite(availableEnergy) || availableEnergy <= 0) return 0;
 		float e = availableEnergy;
 		for (PowerRequest req : requests) {
-			if (req.amount <= 0) continue;
+			if (!Float.isFinite(req.amount) || req.amount <= 0) continue;
 			if (req.entity == providerInstance) continue;
 			if (req.priority < minimumPriority) continue;
 
+			float offered = Math.min(e, req.amount);
+			float accepted;
 			if (req instanceof ExternalPowerRequest) {
-				e -= LightWeightPowerRegistry.getInstance().addPower(world, ((ExternalPowerRequest) req).pos,
-						powerType, Math.min(e, req.amount));
-				if (e <= 0) break;
-				continue;
-			}
-
-			if (req.entity == null) continue;
-			if (req.amount < e) {
-				e -= req.entity.addEnergy(req.amount, powerType);
+				accepted = LightWeightPowerRegistry.getInstance().addPower(world, ((ExternalPowerRequest) req).pos,
+						powerType, offered);
 			} else {
-				req.entity.addEnergy(e, powerType);
-				e = 0;
-				break;
+				if (req.entity == null) continue;
+				accepted = req.entity.addEnergy(offered, powerType);
 			}
+			if (Float.isFinite(accepted)) e -= Math.max(0, Math.min(offered, accepted));
+			if (e <= 0) break;
 		}
 		return availableEnergy - e;
 	}
@@ -294,6 +303,29 @@ public class ConduitRegistry {
 	public void conduitBlockRemovedEvent(World w, int dimension, BlockPos location, ConduitType... types) {
 		for (int i = 0; i < types.length; i++) {
 			conduitBlockRemovedEvent(w, dimension, location, types[i]);
+		}
+	}
+
+	/** Clears networks crossing a changed chunk, including adjacent pipe-only boundaries. */
+	@SubscribeEvent
+	public void onChunkLoad(ChunkEvent.Load event) {
+		invalidateChunk(event);
+	}
+
+	/** Clears networks before an unloaded section can be used for another transfer. */
+	@SubscribeEvent
+	public void onChunkUnload(ChunkEvent.Unload event) {
+		invalidateChunk(event);
+	}
+
+	private void invalidateChunk(ChunkEvent event) {
+		World world = event.getWorld();
+		if (world.isRemote) return;
+		int dimension = world.provider.getDimension();
+		clearIfWorldChanged(world, dimension);
+		for (ConduitNetworkManager manager : networkManagers.values()) {
+			manager.invalidateChunk(dimension, new ChunkPos(
+					event.getChunk().xPosition, event.getChunk().zPosition));
 		}
 	}
 

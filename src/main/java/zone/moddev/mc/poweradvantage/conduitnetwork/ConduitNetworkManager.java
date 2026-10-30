@@ -13,6 +13,7 @@ import zone.moddev.mc.poweradvantage.math.BlockPos4D;
 import zone.moddev.mc.poweradvantage.util.PowerHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 /**
@@ -124,18 +125,40 @@ public class ConduitNetworkManager {
 	}
 
 	/**
-	 * Invalidates the cached network at a block location and then rescans the world to make a new
-	 * cached network
+	 * Invalidates networks crossing a changed chunk or touching its boundary.
+	 * Boundary networks must be rescanned when a pipe-only chunk returns.
 	 *
-	 * @param coord The block position that needs revalidating
-	 * @param w     The world instance for the same dimension as the coord
-	 * @param type  The energy type that is triggering the revalidation (should be the same type as
-	 *              this manager)
+	 * @param dimension dimension containing the changed chunk
+	 * @param chunk changed chunk position
+	 */
+	public void invalidateChunk(int dimension, ChunkPos chunk) {
+		lock.writeLock().lock();
+		try {
+			int minX = (chunk.chunkXPos << 4) - 1;
+			int minZ = (chunk.chunkZPos << 4) - 1;
+			for (BlockPos4D coord : new ArrayList<>(networkCache.keySet())) {
+				if (coord.dimension == dimension && coord.pos.getX() >= minX
+						&& coord.pos.getX() <= minX + 17 && coord.pos.getZ() >= minZ
+						&& coord.pos.getZ() <= minZ + 17) invalidate(coord);
+			}
+		} finally {
+			lock.writeLock().unlock();
+		}
+	}
+
+	/**
+	 * Rebuilds a network using only blocks already loaded in this world.
+	 *
+	 * @param coord origin of the network
+	 * @param w world containing the network
+	 * @param type conduit type being scanned
 	 */
 	public void revalidate(BlockPos4D coord, World w, ConduitType type) {
 		lock.writeLock().lock();
 		try {
 			invalidate(coord);
+			if (!w.isBlockLoaded(coord.pos)) return;
+			createNewNetwork(coord);
 			recursiveScan(w, coord, w.getBlockState(coord.pos), type);
 		} finally {
 			lock.writeLock().unlock();
@@ -172,7 +195,7 @@ public class ConduitNetworkManager {
 		for (int i = 0; i < EnumFacing.values().length; i++) {
 			EnumFacing face = EnumFacing.values()[i];
 			BlockPos4D n = coord.offset(face);
-			if (areInSameNetwork(coord, n)) {
+			if (!w.isBlockLoaded(n.pos) || areInSameNetwork(coord, n)) {
 				continue;
 			}
 			IBlockState blockstate = w.getBlockState(n.pos);
