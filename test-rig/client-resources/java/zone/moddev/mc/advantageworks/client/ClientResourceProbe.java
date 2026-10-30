@@ -49,6 +49,7 @@ public final class ClientResourceProbe {
                     && "36.2.34".equals(result.get("forge").getAsString()), "Wrong native client target");
             require(minecraft.level == null && minecraft.player == null && !minecraft.hasSingleplayerServer(),
                     "Resource probe must not open a world or connect to a server");
+            verifyNetworkBootstrap(result);
             com.google.gson.JsonArray mods = new com.google.gson.JsonArray();
             JsonObject versions = new JsonObject();
             for (String id : new String[]{"poweradvantage", "steamadvantage", "electricadvantage"}) {
@@ -100,6 +101,7 @@ public final class ClientResourceProbe {
             require(I18n.get("block.poweradvantage.still").equals(I18n.get("tile.poweradvantage.still.name")),
                     "Legacy GUI translation differs from modern block name");
             TankVisualProbe.verify(minecraft, result);
+            MachineGuiLayoutProbe.verify(minecraft, result);
             OilRenderProbe.verify(minecraft, result);
             RecipeBookGroupingProbe.verify(minecraft, result);
             result.addProperty("primary_resource_status", "PASS");
@@ -124,6 +126,18 @@ public final class ClientResourceProbe {
     private static boolean included(String namespace) {
         return "poweradvantage".equals(namespace) || (Boolean.getBoolean("advantageworks.requireExtensions")
                 && ("steamadvantage".equals(namespace) || "electricadvantage".equals(namespace)));
+    }
+
+    private static void verifyNetworkBootstrap(JsonObject result) {
+        try {
+            Class.forName("net.minecraft.network.play.client.CMoveVehiclePacket");
+            Class<?> protocol = Class.forName("net.minecraft.network.ProtocolType");
+            require(protocol.isEnum() && protocol.getEnumConstants().length > 0,
+                    "Vanilla network protocols did not initialise");
+            result.addProperty("network_bootstrap_status", "PASS");
+        } catch (ClassNotFoundException failure) {
+            throw new IllegalStateException("Vanilla packet class is unavailable", failure);
+        }
     }
 
     private static void verifyModel(IBakedModel model, IBakedModel missing, BlockState state, String id, boolean requireQuads) {

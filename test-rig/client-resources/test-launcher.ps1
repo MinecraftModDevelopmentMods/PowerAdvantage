@@ -1,4 +1,4 @@
-param([switch]$StaticOnly)
+param([switch]$StaticOnly, [switch]$CrossVersionEvidenceRoots, [string]$WorkspaceRoot)
 $ErrorActionPreference = 'Stop'
 $tokens = $null
 $errors = $null
@@ -17,6 +17,63 @@ function Assert-Throws([scriptblock]$Action) {
     if (-not $threw) { throw 'Expected invalid native metadata to be rejected.' }
     $script:checks++
 }
+function Assert-GuiEvidenceRoot([Management.Automation.Language.ScriptBlockAst]$RunnerAst) {
+    $assignments = @($RunnerAst.FindAll({ param($node) $node -is [Management.Automation.Language.AssignmentStatementAst] }, $true))
+    $projects = @($assignments | Where-Object { $_.Left.Extent.Text -eq '$project' })
+    $runtimes = @($assignments | Where-Object { $_.Left.Extent.Text -eq '$runtime' })
+    if ($projects.Count -ne 1 -or $runtimes.Count -ne 1) { throw 'GUI evidence needs one unambiguous project/runtime assignment.' }
+    $projectExpression = [regex]::Replace($projects[0].Right.Extent.Text, '\s+', '')
+    if ($projectExpression -cne "(Resolve-Path(Join-Path`$PSScriptRoot'../..')).Path") {
+        throw 'GUI evidence must be based at the runner project root, not a build directory.'
+    }
+    $runtimeExpression = [regex]::Replace($runtimes[0].Right.Extent.Text, '\s+', '')
+    if (-not $runtimeExpression.StartsWith("Join-Path`$project('run-client-resource-runs/'+", [StringComparison]::Ordinal)) {
+        throw 'GUI captures must use project/run-client-resource-runs, outside Gradle clean output.'
+    }
+    $variables = @($runtimes[0].Right.FindAll({ param($node) $node -is [Management.Automation.Language.VariableExpressionAst] }, $true))
+    if (@($variables | Where-Object { $_.VariablePath.UserPath -ne 'project' }).Count) {
+        throw 'GUI evidence suffix must not introduce a different root variable.'
+    }
+    $literals = @($runtimes[0].Right.FindAll({ param($node) $node -is [Management.Automation.Language.StringConstantExpressionAst] }, $true))
+    foreach ($literal in $literals) {
+        if ($literal.Value -ceq 'run-client-resource-runs/') { continue }
+        if ($literal.Value -match '[\\/:]|\.\.') { throw 'GUI evidence suffix contains a path or traversal component.' }
+    }
+}
+
+function Test-GuiEvidenceRootContract([string]$RunnerSource) {
+    $rootTokens = $null; $rootErrors = $null
+    $runnerAst = [Management.Automation.Language.Parser]::ParseInput($RunnerSource, [ref]$rootTokens, [ref]$rootErrors)
+    if ($rootErrors.Count) { throw 'GUI evidence source must parse before its path is audited.' }
+    Assert-GuiEvidenceRoot $runnerAst
+    $script:checks++
+    foreach ($replacement in "'build/client-resource-runs/'", "'run-client-resource-runs/../build/'", "'C:/build/client-resource-runs/'") {
+        $broken = $RunnerSource.Replace("'run-client-resource-runs/'", $replacement)
+        if ($broken -ceq $RunnerSource) { throw 'Evidence-root negative control did not mutate the source.' }
+        $brokenAst = [Management.Automation.Language.Parser]::ParseInput($broken, [ref]$rootTokens, [ref]$rootErrors)
+        if ($rootErrors.Count) { throw 'Evidence-root negative control must remain valid PowerShell.' }
+        Assert-Throws { Assert-GuiEvidenceRoot $brokenAst }
+    }
+    $broken = $RunnerSource.Replace("'../..'", "'../../build'")
+    if ($broken -ceq $RunnerSource) { throw 'Project-root negative control did not mutate the source.' }
+    $brokenAst = [Management.Automation.Language.Parser]::ParseInput($broken, [ref]$rootTokens, [ref]$rootErrors)
+    if ($rootErrors.Count) { throw 'Project-root negative control must remain valid PowerShell.' }
+    Assert-Throws { Assert-GuiEvidenceRoot $brokenAst }
+}
+
+Test-GuiEvidenceRootContract (Get-Content -LiteralPath $script -Raw)
+
+if ($CrossVersionEvidenceRoots) {
+    $workspace = if ($WorkspaceRoot) { (Resolve-Path -LiteralPath $WorkspaceRoot).Path }
+        else { (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../../../..')).Path }
+    foreach ($line in 'PA110','PA112','PA113','PA114','PA115','PA116') {
+        $runner = Join-Path $workspace ($line + '/PowerAdvantage/test-rig/client-resources/run.ps1')
+        if (-not (Test-Path -LiteralPath $runner -PathType Leaf)) { throw "Cross-version GUI contract requires all six runners; missing $runner" }
+        Test-GuiEvidenceRootContract (Get-Content -LiteralPath $runner -Raw)
+    }
+    Write-Output 'PASS: all six GUI evidence roots are outside build; old-build, traversal, absolute-build and changed-project controls rejected.'
+}
+
 $native = @'
 modLoader="javafml"
 loaderVersion="[36,)" # native Forge

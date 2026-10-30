@@ -185,6 +185,7 @@ final class WorksController {
         }
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("summary", summary);
+        payload.put("evidenceScope", "declared_assertions_only; manual procedures are not automated passes");
         payload.put("stationStatuses", new LinkedHashMap<>(statuses));
         resultWriter.write("all", "summary", payload);
         return "Advantage Works check: " + summary;
@@ -303,9 +304,6 @@ final class WorksController {
             return "SKIP";
         }
         List<Map<String, Object>> assertionResults = new ArrayList<>();
-        boolean failed = false;
-        boolean expectedFailure = false;
-        boolean unexpectedPass = false;
         for (WorksDefinition.Assertion assertion : station.assertions) {
             if (!requirementsPresent(assertion.requiredMods) || !optionalTargetPresent(assertion)) {
                 Map<String, Object> result = new LinkedHashMap<>();
@@ -318,28 +316,16 @@ final class WorksController {
             }
             boolean passed;
             String detail;
+            Exception evaluationError = null;
             try {
                 passed = evaluateAssertion(world, station, assertion);
                 detail = passed ? "matched" : "did not match";
             } catch (Exception ex) {
                 passed = false;
+                evaluationError = ex;
                 detail = ex.getClass().getSimpleName() + ": " + ex.getMessage();
             }
-            String assertionStatus;
-            if (assertion.expectedFailure != null && !assertion.expectedFailure.isEmpty()) {
-                if (passed) {
-                    assertionStatus = "UNEXPECTED_PASS";
-                    unexpectedPass = true;
-                } else {
-                    assertionStatus = "EXPECTED_FAIL";
-                    expectedFailure = true;
-                }
-            } else if (passed) {
-                assertionStatus = "PASS";
-            } else {
-                assertionStatus = "FAIL";
-                failed = true;
-            }
+            String assertionStatus = AssertionChecks.verdict(passed, assertion.expectedFailure, evaluationError);
             Map<String, Object> result = new LinkedHashMap<>();
             result.put("id", assertion.id);
             result.put("type", assertion.type);
@@ -349,12 +335,7 @@ final class WorksController {
             assertionResults.add(result);
         }
 
-        String status;
-        if (failed) status = "FAIL";
-        else if (unexpectedPass) status = "UNEXPECTED_PASS";
-        else if (expectedFailure) status = "EXPECTED_FAIL";
-        else if (!station.manualChecks.isEmpty()) status = "MANUAL_REQUIRED";
-        else status = "PASS";
+        String status = AssertionChecks.aggregate(assertionResults, !station.manualChecks.isEmpty());
         statuses.put(station.id, status);
         setStatusBlock(world, station, statusColor(status));
         writeStationResult(world, station, status, assertionResults);
@@ -367,6 +348,8 @@ final class WorksController {
         payload.put("name", station.name);
         payload.put("district", station.district);
         payload.put("status", status);
+        payload.put("evidenceScope", "declared_assertions_only; manual procedures are not automated passes");
+        if ("SKIP".equals(status)) payload.put("skipReason", "required integration or all measurements unavailable");
         payload.put("worldTime", world.getGameTime());
         payload.put("assertions", assertions);
         payload.put("manualChecks", station.manualChecks);
@@ -380,6 +363,7 @@ final class WorksController {
         for (WorksDefinition.Placement placement : station.placements) positions.add(absolute(station, placement.pos));
         for (WorksDefinition.Assertion assertion : station.assertions) {
             if (assertion.pos != null) positions.add(absolute(station, assertion.pos));
+            for (int[] position : assertion.positions) positions.add(absolute(station, position));
         }
         for (BlockPos pos : positions) {
             Map<String, Object> block = new LinkedHashMap<>();
@@ -397,6 +381,10 @@ final class WorksController {
 
     private boolean evaluateAssertion(ServerWorld world, WorksDefinition.Station station,
                                       WorksDefinition.Assertion assertion) {
+        if (assertion.block != null && block(assertion.block) == Blocks.AIR
+                && !"minecraft:air".equals(assertion.block)) {
+            throw new IllegalArgumentException("Unregistered assertion block " + assertion.block);
+        }
         if (BayDrillAssertions.applies(station, assertion)) {
             return BayDrillAssertions.matches(station, assertion,
                     relative -> world.getBlockState(absolute(station, relative)).getBlock() == block(assertion.block),
@@ -414,7 +402,7 @@ final class WorksController {
             return block(assertion.block) != Blocks.AIR;
         }
         if ("registryItem".equals(assertion.type)) {
-            return item(assertion.item) != null;
+            return assertion.item != null && item(assertion.item) != null;
         }
         if ("modLoaded".equals(assertion.type)) {
             return ModList.get().isLoaded(assertion.item);
@@ -424,11 +412,7 @@ final class WorksController {
             for (int[] position : assertion.positions) {
                 TileEntity source = world.getBlockEntity(absolute(station, position));
                 if (source == null) return false;
-                CompoundNBT tank = source.save(new CompoundNBT()).getCompound(assertion.nbtPath);
-                if (tank.contains("Empty", 1)) continue;
-                int amount = tank.getInt("Amount");
-                if (amount < 0) return false;
-                if (assertion.fluid == null || assertion.fluid.equals(tank.getString("FluidName"))) total += amount;
+                total += AssertionChecks.fluidAmount(source.save(new CompoundNBT()), assertion.nbtPath, assertion.fluid);
             }
             return compare(total, assertion.operator, assertion.value);
         }
@@ -497,6 +481,7 @@ final class WorksController {
 
     private static int inventoryCount(IInventory inventory, String itemName) {
         Item expected = itemName == null ? null : item(itemName);
+        if (itemName != null && expected == null) throw new IllegalArgumentException("Unregistered assertion item " + itemName);
         int count = 0;
         for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
             ItemStack stack = inventory.getItem(slot);
@@ -531,16 +516,7 @@ final class WorksController {
     }
 
     private static boolean compare(double actual, String operator, Number expected) {
-        if (expected == null) return false;
-        double value = expected.doubleValue();
-        switch (operator == null ? "equals" : operator) {
-            case "equals": return Math.abs(actual - value) < 0.0001;
-            case "min": return actual >= value;
-            case "max": return actual <= value;
-            case "greater": return actual > value;
-            case "less": return actual < value;
-            default: throw new IllegalArgumentException("Unsupported comparison " + operator);
-        }
+        return AssertionChecks.compare(actual, operator, expected);
     }
 
     private void resetStation(ServerWorld world, WorksDefinition.Station station) {
@@ -909,7 +885,8 @@ final class WorksController {
         if (name == null) return null;
         String resolved = "minecraft:sapling".equals(name) ? "minecraft:oak_sapling"
                 : "minecraft:planks".equals(name) ? "minecraft:oak_planks" : name;
-        return ForgeRegistries.ITEMS.getValue(new ResourceLocation(resolved));
+        ResourceLocation key = new ResourceLocation(resolved);
+        return ForgeRegistries.ITEMS.containsKey(key) ? ForgeRegistries.ITEMS.getValue(key) : null;
     }
 
     private static CommandException commandError(String message) {

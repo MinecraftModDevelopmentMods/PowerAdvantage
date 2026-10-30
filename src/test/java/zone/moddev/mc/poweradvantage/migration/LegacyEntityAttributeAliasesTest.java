@@ -33,7 +33,6 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import sun.misc.Unsafe;
 
 public class LegacyEntityAttributeAliasesTest {
     private static final UUID MODIFIER = new UUID(17L, 19L);
@@ -229,8 +228,11 @@ public class LegacyEntityAttributeAliasesTest {
 
     @Test public void actualNativeWolfRetainsCustomizedBaseTwoAndNonemptyModifier() throws Exception {
         registerForgeAttributes();
-        Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe"); unsafeField.setAccessible(true);
-        ServerWorld world = (ServerWorld) ((Unsafe) unsafeField.get(null)).allocateInstance(ServerWorld.class);
+        // Keep constructor-free test setup without linking restricted JDK types.
+        Class<?> allocator = Class.forName("sun.misc.Unsafe");
+        Field unsafeField = allocator.getDeclaredField("theUnsafe"); unsafeField.setAccessible(true);
+        ServerWorld world = (ServerWorld) allocator.getMethod("allocateInstance", Class.class)
+                .invoke(unsafeField.get(null), ServerWorld.class);
         set(World.class, world, "dimension", World.NETHER);
         set(World.class, world, "profiler", (Supplier<IProfiler>) () -> EmptyProfiler.INSTANCE);
         CompoundNBT source = entity("minecraft:wolf", true);

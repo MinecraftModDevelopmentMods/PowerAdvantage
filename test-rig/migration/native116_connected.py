@@ -159,6 +159,8 @@ def continued_output(first, last):
 
 
 def run(args):
+    from semantic_machine_audit import connected_interval
+    from native116_resource_audit import compare_snapshot_resources
     if not 1 <= args.port <= 65535 or not 1 <= args.ticks <= 4000:
         raise ValueError("Port/tick interval outside native command bounds")
     output = output_path(args.output)
@@ -190,6 +192,7 @@ def run(args):
                   targetManifest=str(args.target_manifest.resolve()), targetManifestSha256=digest(args.target_manifest),
                   targetProfile=target_pins, port=args.port, ticks=args.ticks,
                   runnerSha256=digest(Path(__file__)), oracleSha256=digest(Path(connected.__file__)),
+                  semanticOracleSha256=digest(Path(__file__).with_name("semantic_machine_audit.py")),
                   historicalCampaign=historical, results={})
     write_json(report_path, report)
     try:
@@ -204,8 +207,10 @@ def run(args):
                     raise AssertionError("Initial preservation requires a frozen zero-step snapshot")
                 result = compare(previous, runtime / f"migration-{loaded_label}.json", native_normalized)
                 report["results"][label + "_preservation"] = result
+                resources = compare_snapshot_resources(previous, runtime / f"migration-{loaded_label}.json")
+                report["results"][label + "_exact_resources"] = resources
                 write_json(report_path, report)
-                if result["status"] != "PASS":
+                if result["status"] != "PASS" or resources["status"] != "PASS":
                     raise AssertionError(label + " native116 preservation failed")
 
             def boot(current, settings, selected_launcher, selected_label):
@@ -217,6 +222,9 @@ def run(args):
             with patch.object(connected, "boot", boot):
                 verdict = connected.resume(runtime, args, launcher, label)
             report["results"][label + "_operation"] = verdict
+            report["results"][label + "_completed_work"] = connected_interval(
+                connected.read(runtime, label + "-loaded"), connected.read(runtime, label + "-worked"),
+                definition, args.ticks)
             require_document(connected.read(runtime, label + "-worked"), definition, destination=True)
             require_native_boot(runtime / f"console-{label}.log")
             report["results"][label + "_native_boot"] = dict(status="PASS", launcher=launcher)

@@ -15,11 +15,31 @@ from native116_endurance import (FRESH_FIXTURE_SEED, NativeEnduranceRig, audit,
 
 class NativeEnduranceTests(unittest.TestCase):
     def test_batch_and_conservation_oracles_are_inherited(self):
-        self.assertIs(NativeEnduranceRig.batch, endurance.Rig.batch)
+        self.assertIsNot(NativeEnduranceRig.batch, endurance.Rig.batch)
         self.assertIs(NativeEnduranceRig.invariants, endurance.Rig.invariants)
         self.assertIs(NativeEnduranceRig.inventory, endurance.Rig.inventory)
         self.assertIs(NativeEnduranceRig.seed, endurance.Rig.seed)
         self.assertIs(NativeEnduranceRig.structure, endurance.Rig.structure)
+
+    def test_independent_failure_is_retained_and_cannot_reach_a_passing_ledger(self):
+        with tempfile.TemporaryDirectory() as directory:
+            rig = NativeEnduranceRig("test", Path(directory), None, None, {})
+            rig.documents = {station: {} for station in ("S-04", "E-03", "W-04", "W-03")}
+            with patch("semantic_machine_audit.endurance_batch", return_value={"status": "FAIL", "failures": ["lost filter"]}), \
+                    patch.object(endurance.Rig, "batch") as historical:
+                with self.assertRaisesRegex(AssertionError, "Independent batch"):
+                    rig.batch("cycle-001")
+                historical.assert_not_called()
+            self.assertEqual("FAIL", __import__("json").loads((Path(directory) / "semantic-batch-cycle-001.json").read_text())["status"])
+
+    def test_independent_pass_keeps_the_historical_material_checks(self):
+        with tempfile.TemporaryDirectory() as directory:
+            rig = NativeEnduranceRig("test", Path(directory), None, None, {})
+            rig.documents = {station: {} for station in ("S-04", "E-03", "W-04", "W-03")}
+            with patch("semantic_machine_audit.endurance_batch", return_value={"status": "PASS", "failures": []}), \
+                    patch.object(endurance.Rig, "batch", return_value={"retained": True}) as historical:
+                self.assertEqual({"retained": True}, rig.batch("cycle-001"))
+                historical.assert_called_once_with("cycle-001")
 
     def test_restart_selects_first_tick_without_output_or_inventory_inspection(self):
         with tempfile.TemporaryDirectory() as directory:

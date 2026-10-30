@@ -8,7 +8,9 @@ import cyano.poweradvantage.api.fluid.IAdvantageFluidHandler;
 import cyano.poweradvantage.api.simple.TileEntitySimpleFluidMachine;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.block.Blocks;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.IBucketPickupHandler;
+import net.minecraft.world.IWorld;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -51,12 +53,18 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
         if (getTank().getFluidAmount() == 0) {
             BlockPos source = scanFluidSpaceForSourceBlock(getLevel(), getBlockPos().above(), 32);
             if (source != null) {
-                Fluid fluid = getLevel().getFluidState(source).getType();
-                getTank().fill(new FluidStack(fluid, FluidTank.BUCKET_VOLUME), true);
-                getLevel().setBlock(source, Blocks.AIR.defaultBlockState(), 3);
+                Fluid fluid = pickupSource(getLevel(), source, getLevel().getBlockState(source));
+                if (fluid != net.minecraft.fluid.Fluids.EMPTY)
+                    getTank().fill(new FluidStack(fluid, FluidTank.BUCKET_VOLUME), true);
             }
         }
         super.powerUpdate();
+    }
+
+    static Fluid pickupSource(IWorld world, BlockPos position, BlockState state) {
+        if (!(state.getBlock() instanceof IBucketPickupHandler)) return net.minecraft.fluid.Fluids.EMPTY;
+        Fluid picked = ((IBucketPickupHandler)state.getBlock()).takeLiquid(world, position, state);
+        return picked == null ? net.minecraft.fluid.Fluids.EMPTY : picked;
     }
 
     private void tryPushFluid(BlockPos position, Direction face) {
@@ -85,7 +93,8 @@ public class FluidDrainTileEntity extends TileEntitySimpleFluidMachine {
         Direction[] directions = { Direction.UP, Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST };
         while (range-- > 0) {
             FluidState state = world.getFluidState(position);
-            if (!state.isEmpty() && state.isSource()) return position;
+            if (!state.isEmpty() && state.isSource()
+                    && world.getBlockState(position).getBlock() instanceof IBucketPickupHandler) return position;
             java.util.List<BlockPos> candidates = new java.util.ArrayList<>();
             for (Direction direction : directions) {
                 BlockPos candidate = position.relative(direction);

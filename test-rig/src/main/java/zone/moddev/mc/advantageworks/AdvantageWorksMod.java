@@ -22,6 +22,8 @@ public final class AdvantageWorksMod {
         ProgressionProbe.register();
         NativeInteropProbe.register();
         NativeHarvestProbe.register();
+        MachineOperationalProbe.register();
+        RedstoneReloadProbe.register();
         WorksController.getInstance().loadDefinition();
         MinecraftForge.EVENT_BUS.addListener(this::serverStarting);
     }

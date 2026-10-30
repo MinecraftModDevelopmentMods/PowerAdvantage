@@ -164,8 +164,9 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 				ItemStack destItem = dest.getItem(slot);
 				if(destItem == null || destItem.isEmpty()) {
 					return true;
-				} else {
-					return ItemStack.isSame(item, destItem);
+				} else if (ItemStack.isSame(item, destItem) && ItemStack.tagMatches(item, destItem)
+						&& destItem.getCount() < Math.min(dest.getMaxStackSize(), destItem.getMaxStackSize())) {
+					return true;
 				}
 			}
 		}
@@ -188,10 +189,13 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 							ItemStack otherItem = dest.getItem(destValidSlots[j]);
 							if(otherItem != null && !otherItem.isEmpty()
 									&& ItemStack.isSame(item, otherItem)
+									&& ItemStack.tagMatches(item, otherItem)
 									&& otherItem.getCount() < dest.getMaxStackSize()
 									&& otherItem.getCount() < otherItem.getMaxStackSize()){
 								src.removeItem(srcValidSlots[i], 1);
 								otherItem.grow(1);
+								src.setChanged();
+								dest.setChanged();
 								return true;
 							}
 						}
@@ -202,6 +206,8 @@ public class TileEntityConveyor extends TileEntity implements ITickableTileEntit
 							ItemStack otherItem = dest.getItem(destValidSlots[j]);
 							if(otherItem == null || otherItem.isEmpty()){
 								dest.setItem(destValidSlots[j], src.removeItem(srcValidSlots[i], 1));
+								src.setChanged();
+								dest.setChanged();
 								return true;
 							}
 						}

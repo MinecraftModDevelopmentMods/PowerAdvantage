@@ -60,6 +60,7 @@ The static checks do not require artifacts, Gradle, Java or a graphical client:
 
 ```powershell
 ./test-rig/client-resources/test-launcher.ps1 -StaticOnly
+./test-rig/client-resources/test-launcher.ps1 -StaticOnly -CrossVersionEvidenceRoots
 ./test-rig/client-resources/test-probe-contract.ps1
 ./test-rig/client-resources/test-geometry-contract.ps1
 ./test-rig/client-resources/test-probe-contract-negative-controls.ps1
@@ -79,7 +80,9 @@ the disposable launcher. Do not launch the actual client until authorized:
 ./test-rig/client-resources/run.ps1 -JavaHome '<Java 8 home>' -LaunchProfile runClientAllAdvantage.launch -RequireExtensions -RecipeBookFixtures '<new native116 fixture directory>/unlock'
 ```
 
-Each run gets a new directory under `build/client-resource-runs/`. The runner snapshots production classes/resources, uses the audited native launch dependencies, and loads only the probe as an additional mod. Helpers launch hidden, with separate stdout/stderr logs and a bounded timeout. It retains logs, images and `client-resources.json`; missing reports, failed assertions, and model/texture errors fail the run. A runner failure gets a separate `runner-failure.json`, without replacing partial native results. Existing saves, configuration, and prior reports are untouched. `-PreflightOnly` creates an input snapshot without starting Java or claiming a graphical pass.
+Each run gets a new directory under `run-client-resource-runs/`. The runner snapshots production classes/resources, uses the audited native launch dependencies, and loads only the probe as an additional mod. Helpers launch hidden, with separate stdout/stderr logs and a bounded timeout. It retains logs, images and `client-resources.json`; missing reports, failed assertions, and model/texture errors fail the run. A runner failure gets a separate `runner-failure.json`, without replacing partial native results. Existing saves, configuration, and prior reports are untouched. `-PreflightOnly` creates an input snapshot without starting Java or claiming a graphical pass.
+
+New GUI captures are kept outside Gradle's `build/` directory so `clean` cannot remove them. This does not recreate any historical captures already lost from the former build-based location.
 
 The default `-OutputSource Gradle` merges Gradle's classes and processed resources. To test the actual Eclipse output instead, pass `-OutputSource Eclipse`; this copies `bin/main` verbatim and does not overlay Gradle resources. `production-files.json` hashes every selected class/resource. `client-input.json` records that manifest's hash, the Java binary, probe, launch, production metadata, every dependency archive, expansion candidate hashes and optional fixture hashes. The current Power deobf candidate is recorded separately, defaulting to `build/libs-dev/PowerAdvantage-2.4.6.115021-deobf.jar`; `-PowerCandidate` selects an explicit native candidate. That jar hash is provenance, not a claim that Eclipse/Gradle output equals the jar. Missing/unexpanded metadata or a legacy target fails preflight. The native result records actual discovered mod versions and the exact game/Forge target. Refresh candidate hashes after any production rebuild before final evidence is taken. The [historical Eclipse metadata regression](../../docs/1.13/ECLIPSE-METADATA.md) explains the original failure, not native 1.15 acceptance.
 

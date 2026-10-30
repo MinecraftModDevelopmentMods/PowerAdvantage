@@ -48,12 +48,13 @@ public class FluidDischargeTileEntity extends TileEntitySimpleFluidMachine {
     }
 
     private static BlockPos findPlacement(World world, BlockPos initial, Fluid fluid, int range) {
-        if (world.isEmptyBlock(initial)) return initial;
         BlockPos position = initial;
         Direction[] directions = { Direction.DOWN, Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST };
         while (range-- > 0) {
+            if (world.isEmptyBlock(position)) return position;
             FluidState state = world.getFluidState(position);
-            if (state.isEmpty()) return position;
+            if (state.isEmpty() || !state.getType().isSame(fluid)) return null;
+            if (!state.isSource()) return position;
             java.util.List<BlockPos> candidates = new java.util.ArrayList<>();
             for (Direction direction : directions) {
                 BlockPos candidate = position.relative(direction);

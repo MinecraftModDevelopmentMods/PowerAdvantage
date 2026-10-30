@@ -2,7 +2,6 @@ package zone.moddev.mc.poweradvantage.machines.conveyors;
 
 import zone.moddev.mc.poweradvantage.util.InventoryWrapper;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -26,23 +25,7 @@ public class TileEntityOverflowFilter extends TileEntityConveyorFilter {
 	private boolean canInsert(ItemStack item, Direction f) {
 		TileEntity target = getLevel().getBlockEntity(getBlockPos().relative(f));
 		if (target instanceof IInventory) {
-			Direction side = f.getOpposite();
-			ISidedInventory dt = InventoryWrapper.wrap((IInventory) target);
-			int[] slots = dt.getSlotsForFace(side);
-			for (int i = 0; i < slots.length; i++) {
-				int slot = slots[i];
-				if (dt.canPlaceItemThroughFace(slot, item, side)) {
-					ItemStack targetSlot = dt.getItem(slot);
-					if ((targetSlot == null) ||
-							(ItemStack.isSame(item, targetSlot)
-									&& !targetSlot.isDamageableItem()
-									&& targetSlot.getCount() < targetSlot.getMaxStackSize()
-									&& targetSlot.getCount() < dt.getMaxStackSize())) {
-						return true;
-					}
-				}
-			}
-			return false;
+			return canInsertItemInto(item, InventoryWrapper.wrap((IInventory) target), f.getOpposite());
 		} else {
 			return false;
 		}

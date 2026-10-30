@@ -13,6 +13,7 @@ import shutil
 import struct
 import time
 import traceback
+from broad_campaign_status import campaign_document, campaign_status
 
 import nbtlib
 from matrix import digest, plain, stage, write_json
@@ -306,14 +307,22 @@ def main():
     source_hash = digest(output / "runner-source.py")
     names = ("packaged-current", "packaged-decoupled") if args.profile == "both" else (args.profile,)
     results = {}
+    def write_result(finished=False):
+        write_json(output / "native116-broad-results.json", campaign_document(
+            names, results, dict(
+                targetManifest=str(args.target_manifest.resolve()), targetManifestSha256=digest(args.target_manifest),
+                runnerSha256=source_hash, stationDefinitionSha256=digest(stations_path)),
+            finished=finished))
+    write_result()
     for index, name in enumerate(names):
-        results[name] = run_profile(args, profile, output, name, args.port + index, stations)
-        write_json(output / "native116-broad-results.json", dict(
-            status="PASS" if all(r["status"] == "PASS" for r in results.values()) else "FAIL",
-            targetManifest=str(args.target_manifest.resolve()), targetManifestSha256=digest(args.target_manifest),
-            runnerSha256=source_hash, stationDefinitionSha256=digest(stations_path), profiles=results))
+        try:
+            results[name] = run_profile(args, profile, output, name, args.port + index, stations)
+        except Exception:
+            results[name] = dict(status="FAIL", profile=name, phases={}, error=traceback.format_exc())
+        write_result()
         print(name, results[name]["status"], flush=True)
-    return int(any(r["status"] != "PASS" for r in results.values()))
+    write_result(finished=True)
+    return int(campaign_status(names, results, finished=True) != "PASS")
 
 
 if __name__ == "__main__":

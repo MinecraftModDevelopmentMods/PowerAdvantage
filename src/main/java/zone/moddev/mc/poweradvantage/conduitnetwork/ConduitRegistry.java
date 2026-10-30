@@ -183,27 +183,29 @@ public class ConduitRegistry {
 			World world, BlockPos srcPos, Object providerInstance
 	) {
 		List<PowerRequest> requests = ConduitRegistry.getInstance().getRequestsForPower(world, srcPos, networkType, powerType);
+		return distributePower(availableEnergy, powerType, minimumPriority, world, providerInstance, requests);
+	}
+
+	static float distributePower(float availableEnergy, ConduitType powerType, byte minimumPriority,
+			World world, Object providerInstance, List<PowerRequest> requests) {
+		if (!Float.isFinite(availableEnergy) || availableEnergy <= 0) return 0;
 		float e = availableEnergy;
 		for (PowerRequest req : requests) {
-			if (req.amount <= 0) continue;
+			if (!Float.isFinite(req.amount) || req.amount <= 0) continue;
 			if (req.entity == providerInstance) continue;
 			if (req.priority < minimumPriority) continue;
 
+			float offered = Math.min(e, req.amount);
+			float accepted;
 			if (req instanceof ExternalPowerRequest) {
-				e -= LightWeightPowerRegistry.getInstance().addPower(world, ((ExternalPowerRequest) req).pos,
-						powerType, Math.min(e, req.amount));
-				if (e <= 0) break;
-				continue;
-			}
-
-			if (req.entity == null) continue;
-			if (req.amount < e) {
-				e -= req.entity.addEnergy(req.amount, powerType);
+				accepted = LightWeightPowerRegistry.getInstance().addPower(world, ((ExternalPowerRequest) req).pos,
+						powerType, offered);
 			} else {
-				req.entity.addEnergy(e, powerType);
-				e = 0;
-				break;
+				if (req.entity == null) continue;
+				accepted = req.entity.addEnergy(offered, powerType);
 			}
+			if (Float.isFinite(accepted)) e -= Math.max(0, Math.min(offered, accepted));
+			if (e <= 0) break;
 		}
 		return availableEnergy - e;
 	}

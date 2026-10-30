@@ -1,6 +1,8 @@
 """Engine geometry and independent historical-oracle preservation contracts."""
 
+import ast
 import copy
+import hashlib
 import json
 from pathlib import Path
 import unittest
@@ -101,13 +103,55 @@ class HarvestTests(unittest.TestCase):
 
 
 class PortContracts(unittest.TestCase):
-    def test_historical_adapters_profiles_and_semantic_oracles_are_byte_identical(self):
+    def test_historical_inputs_remain_exact_except_audited_semantic_corrections(self):
         ledger = json.loads((RIG / "migration/native115-historical-inputs.json").read_text())
         self.assertEqual(ledger["sourceCommit"], ACCEPTED_POWER114)
         self.assertGreater(len(ledger["hashes"]), 100)
+        approval = json.loads((RIG / "migration/audited-semantic-corrections.json").read_text())
+        self.assertEqual(approval["id"], "EXTENDED-ABSENCE-001")
+        records = approval["corrections"]
+        self.assertIn("migration/extended_lifecycle.py", records)
+        self.assertLessEqual(set(records), {"migration/extended_lifecycle.py", "migration/test_native115_geometry.py"})
+
+        def verify(data, expected, record):
+            self.assertEqual(record["historicalSha256"], expected)
+            self.assertEqual(hashlib.sha256(data).hexdigest().upper(), record["correctedSha256"])
+            tree = ast.parse(data.decode("utf-8-sig"))
+            if record["kind"] == "semantic-oracle-correction":
+                names = {"partial_result", "continuous_absence"}
+                functions = {n.name: hashlib.sha256(ast.dump(n).encode()).hexdigest().upper()
+                             for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in names}
+                self.assertEqual(functions, record["correctedFunctionAstSha256"])
+                tree.body = [n for n in tree.body if not (isinstance(n, ast.FunctionDef) and n.name in names)]
+            else:
+                self.assertEqual(record["kind"], "historical-guard-reporting-correction")
+                for node in tree.body:
+                    if isinstance(node, ast.ClassDef) and node.name == "PortContracts":
+                        node.body = [n for n in node.body if not (isinstance(n, ast.FunctionDef) and n.name in (
+                            "test_historical_adapters_profiles_and_semantic_oracles_are_byte_identical",
+                            "test_historical_inputs_remain_exact_except_audited_semantic_corrections"))]
+                tree.body = [n for n in tree.body if not (isinstance(n, ast.Import)
+                             and all(a.name in ("ast", "hashlib") for a in n.names))]
+            self.assertEqual(hashlib.sha256(ast.dump(tree).encode()).hexdigest().upper(),
+                             record["unchangedHistoricalAstSha256"])
+
         for relative, checksum in ledger["hashes"].items():
             with self.subTest(path=relative):
-                self.assertEqual(digest(RIG / relative), checksum)
+                if relative in records:
+                    verify((RIG / relative).read_bytes(), checksum, records[relative])
+                else:
+                    self.assertEqual(digest(RIG / relative), checksum)
+
+        # Updating only a byte hash must not bless a lower threshold or unrelated oracle edit.
+        source = (RIG / "migration/extended_lifecycle.py").read_bytes()
+        for old, new in ((b">= 40", b">= 39"),
+                         (b"four consecutive moves were not witnessed", b"three consecutive moves were not witnessed")):
+            changed = source.replace(old, new, 1)
+            self.assertNotEqual(changed, source)
+            record = copy.deepcopy(records["migration/extended_lifecycle.py"])
+            record["correctedSha256"] = hashlib.sha256(changed).hexdigest().upper()
+            with self.subTest(unapproved_change=new), self.assertRaises(AssertionError):
+                verify(changed, ledger["hashes"]["migration/extended_lifecycle.py"], record)
 
     def test_all_thirteen_old_routes_and_comprehensive_native114_source_are_required(self):
         self.assertEqual(len(REQUIRED["frozen"]), 14)

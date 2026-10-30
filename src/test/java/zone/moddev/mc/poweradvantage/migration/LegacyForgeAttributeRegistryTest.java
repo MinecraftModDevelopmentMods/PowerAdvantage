@@ -28,7 +28,6 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import sun.misc.Unsafe;
 
 public class LegacyForgeAttributeRegistryTest {
     private static final String[][] ALIASES = {
@@ -61,8 +60,10 @@ public class LegacyForgeAttributeRegistryTest {
 
     @Test public void nativeLivingEntitiesLoadCustomizedValuesAndModifiersForAllThreeAttributes() throws Exception {
         double[] values = {2D, 12.5D, 0.15D};
-        Field unsafe = Unsafe.class.getDeclaredField("theUnsafe"); unsafe.setAccessible(true);
-        ServerWorld world = (ServerWorld) ((Unsafe) unsafe.get(null)).allocateInstance(ServerWorld.class);
+        Class<?> allocator = Class.forName("sun.misc.Unsafe");
+        Field unsafe = allocator.getDeclaredField("theUnsafe"); unsafe.setAccessible(true);
+        ServerWorld world = (ServerWorld) allocator.getMethod("allocateInstance", Class.class)
+                .invoke(unsafe.get(null), ServerWorld.class);
         set(World.class, world, "dimension", World.NETHER);
         set(World.class, world, "profiler", (Supplier<IProfiler>) () -> EmptyProfiler.INSTANCE);
         for (int index = 0; index < 3; index++) {

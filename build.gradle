@@ -3,6 +3,7 @@ import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.jar.Manifest
 import java.util.zip.ZipFile
+import java.util.zip.CRC32
 import org.apache.tools.ant.filters.FixCrLfFilter
 
 plugins {
@@ -460,6 +461,38 @@ tasks.register('verifyReleaseDependencies') {
     }
 }
 
+tasks.register('verifyDevelopmentRuntimeArchives') {
+    group = 'verification'
+    description = 'Reads every development runtime jar entry and verifies its CRC before launching Minecraft.'
+    dependsOn tasks.named('verifyReleaseDependencies')
+    doLast {
+        configurations.runtimeClasspath.files.findAll { it.name.endsWith('.jar') }.each { File archive ->
+            new ZipFile(archive).withCloseable { zip ->
+                zip.entries().each { entry ->
+                    if (entry.directory) return
+                    CRC32 crc = new CRC32()
+                    long size = 0
+                    try {
+                        zip.getInputStream(entry).withCloseable { input ->
+                            byte[] buffer = new byte[8192]
+                            int count
+                            while ((count = input.read(buffer)) != -1) {
+                                crc.update(buffer, 0, count)
+                                size += count
+                            }
+                        }
+                    } catch (IOException failure) {
+                        throw new GradleException("Unreadable development runtime entry: ${archive}!/${entry.name}", failure)
+                    }
+                    if (size != entry.size || crc.value != entry.crc) {
+                        throw new GradleException("Corrupt development runtime entry: ${archive}!/${entry.name}")
+                    }
+                }
+            }
+        }
+    }
+}
+
 tasks.register('verifyReleaseArtifacts') {
     group = 'verification'
     description = 'Audits the exact three distributable jars and release-critical contents.'
@@ -893,6 +926,7 @@ tasks.register('verifyEclipseProductionClasspath') {
     group = 'verification'
     description = 'Verifies the generated Eclipse project and production launches.'
     dependsOn tasks.named('eclipse')
+    dependsOn tasks.named('verifyDevelopmentRuntimeArchives')
     dependsOn tasks.named('isolateEclipseProductionRuns')
     doLast {
         File preferencesFile = file('.settings/org.eclipse.buildship.core.prefs')
@@ -1118,6 +1152,7 @@ tasks.register('verifyRecipeTagGuards') {
 
 tasks.named('check') {
     dependsOn tasks.named('verifyReleaseConfiguration')
+    dependsOn tasks.named('verifyDevelopmentRuntimeArchives')
     dependsOn tasks.named('verifyModelAssets')
     dependsOn tasks.named('verifyRecipeTagGuards')
 }
@@ -1154,14 +1189,24 @@ tasks.register('prepareCombinedEclipseLaunch') {
     group = 'ide'
     description = 'Creates an additional production-only Eclipse client launch with all three Advantage mods.'
     dependsOn tasks.named('verifyEclipseProductionClasspath')
+    dependsOn tasks.named('deobfJar')
     doLast {
-        def profile = new JsonSlurper().parse(file('test-rig/profiles/native116/dev-core.json'))
+        File inputProfile = file(providers.gradleProperty('advantageDevelopmentProfile').getOrElse(
+                'test-rig/profiles/native116/dev-core.json'))
+        def profile = new JsonSlurper().parse(inputProfile)
+        if (profile.powerDeobfSha256) {
+            File powerJar = tasks.named('jar', Jar).get().archiveFile.get().asFile
+            String powerHash = MessageDigest.getInstance('SHA-256').digest(powerJar.bytes).encodeHex().toString()
+            if (!powerHash.equalsIgnoreCase(profile.powerDeobfSha256 as String)) {
+                throw new GradleException("PowerAdvantage does not match the dependency pin in ${inputProfile}: ${powerJar}")
+            }
+        }
         advantageExtensionJars.each { String id, File jar ->
             def pin = profile.mods.find { it.id == id }
             if (!jar.isFile()) throw new GradleException("Build ${id} first, or override its *AdvantageDeobfJar property: ${jar}")
             String hash = MessageDigest.getInstance('SHA-256').digest(jar.bytes).encodeHex().toString()
             if (pin == null || !hash.equalsIgnoreCase(pin.sha256 as String)) {
-                throw new GradleException("${id} does not match the audited dev-core dependency pin: ${jar}")
+                throw new GradleException("${id} does not match the dependency pin in ${inputProfile}: ${jar}")
             }
         }
         def launch = new groovy.xml.XmlParser().parse(file('runClient.launch'))

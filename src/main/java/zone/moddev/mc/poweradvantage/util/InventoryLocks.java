@@ -8,12 +8,14 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 /** Keeps automation from bypassing vanilla container locks. */
 public final class InventoryLocks {
-    // Forge 1.14 has no lock getter. Resolve its SRG field once, not once per transfer.
-    private static final Field CODE = ObfuscationReflectionHelper.findField(LockableTileEntity.class, "field_174901_a");
-    private static final Field FIRST = ObfuscationReflectionHelper.findField(
-            net.minecraft.inventory.DoubleSidedInventory.class, "field_70477_b");
-    private static final Field SECOND = ObfuscationReflectionHelper.findField(
-            net.minecraft.inventory.DoubleSidedInventory.class, "field_70478_c");
+    // Ordinary inventories need no vanilla field access or Forge name remapper.
+    private static final class Fields {
+        static final Field CODE = ObfuscationReflectionHelper.findField(LockableTileEntity.class, "field_174901_a");
+        static final Field FIRST = ObfuscationReflectionHelper.findField(
+                net.minecraft.inventory.DoubleSidedInventory.class, "field_70477_b");
+        static final Field SECOND = ObfuscationReflectionHelper.findField(
+                net.minecraft.inventory.DoubleSidedInventory.class, "field_70478_c");
+    }
 
     private InventoryLocks() {}
 
@@ -21,9 +23,9 @@ public final class InventoryLocks {
         if (inventory instanceof InventoryWrapper) return ((InventoryWrapper) inventory).isLocked();
         try {
             if (inventory instanceof net.minecraft.inventory.DoubleSidedInventory)
-                return isLocked(FIRST.get(inventory)) || isLocked(SECOND.get(inventory));
+                return isLocked(Fields.FIRST.get(inventory)) || isLocked(Fields.SECOND.get(inventory));
             return inventory instanceof LockableTileEntity
-                    && !((LockCode) CODE.get(inventory)) .unlocksWith(ItemStack.EMPTY);
+                    && !((LockCode) Fields.CODE.get(inventory)) .unlocksWith(ItemStack.EMPTY);
         } catch (IllegalAccessException failure) {
             throw new IllegalStateException("Cannot inspect vanilla inventory lock", failure);
         }

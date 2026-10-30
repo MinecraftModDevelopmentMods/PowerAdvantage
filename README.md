@@ -7,6 +7,15 @@ work. The accepted [1.15 test record](docs/1.15/CURRENT-QUALIFICATION.md) is ret
 as historical evidence, not a pass for this version. Manual 1.16 acceptance is
 still required.
 
+The [test-suite review](docs/1.16/TEST-SUITE-AUDIT.md) separates operating checks
+from saved-state and presence checks. It records the remaining machine coverage
+gaps; a green build does not qualify every machine setup.
+
+The follow-up [machine operating checks](docs/1.16/OPERATING-TESTS.md) use finite
+inputs, real server ticks, blocked and starved controls, and full-process
+restarts. They check useful output and retained resources, not just animation
+or a rising progress counter.
+
 Power Advantage provides shared power, fluids, item transport and compatibility APIs for Steam Advantage and Electric Advantage.
 
 **Back up the entire world before upgrading. Test only disposable copies.**
@@ -74,8 +83,25 @@ run `gradlew.bat prepareCombinedEclipseLaunch`, refresh Eclipse, then launch
 The ordinary `runClient.launch` remains Power-only. Both use the `run` directory;
 preparing a launch does not copy, open or qualify a save.
 
+The local GUI corrections have separate input hashes, keeping the earlier machine
+test profiles unchanged. To prepare that combined preview, run
+`gradlew.bat prepareCombinedEclipseLaunch -PadvantageDevelopmentProfile=docs/1.16/gui-development-inputs.json`.
+See the [GUI checks](docs/1.16/GUI-CHECKS.md) for coverage and the repeatable command.
+
+`check` and Eclipse preparation also run `verifyDevelopmentRuntimeArchives`,
+which reads every development runtime jar entry and checks its size and CRC.
+This catches damaged cached dependencies before the next test launch.
+
 Client-resource and recipe-book checks must use the exact 1.16 candidate. Manual
 visual and interaction acceptance remains separate.
+
+The migration test fixtures do not import restricted JDK internals. A plain ECJ
+batch compile does not apply Eclipse's JRE access rules automatically. After
+`eclipseClasspath` and `test`, run `tools/verification/Verify-EclipseCompilation.ps1`
+with `-Compiler <ecj.jar>`, `-Java17Home <jdk17>`, `-Java8Home <jdk8>` and
+`-Evidence <new-directory>` to compile fresh main/test classes with restricted
+references treated as errors, then run the tests on Java 8. Keep Eclipse's
+access-restriction checks enabled.
 
 ## Compatibility
 

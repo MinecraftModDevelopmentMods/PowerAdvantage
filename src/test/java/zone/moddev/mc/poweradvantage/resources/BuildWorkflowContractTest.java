@@ -4,12 +4,28 @@ import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
 public class BuildWorkflowContractTest {
+    @Test public void testFixturesDoNotImportRestrictedUnsafeTypes() throws Exception {
+        Pattern restrictedImport = Pattern.compile("(?m)^\\s*import\\s+(?:static\\s+)?sun\\.misc\\.Unsafe\\b");
+        assertTrue(restrictedImport.matcher("import sun.misc.Unsafe;").find());
+        assertTrue(restrictedImport.matcher("import static sun.misc.Unsafe.INVALID_FIELD_OFFSET;").find());
+        assertFalse(restrictedImport.matcher("Class.forName(\"sun.misc.Unsafe\")").find());
+        try (Stream<Path> sources = Files.walk(Paths.get("src/test/java"))) {
+            for (Path path : (Iterable<Path>) sources.filter(p -> p.toString().endsWith(".java"))::iterator) {
+                String source = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+                assertFalse(path.toString(), restrictedImport.matcher(source).find());
+            }
+        }
+    }
+
     @Test public void pinnedDependencyCheckoutPolicyPrecedesCheckout() throws Exception {
         for (String name : new String[] {"ci.yml", "codeql-analysis.yml"}) {
             String workflow = new String(Files.readAllBytes(Paths.get(".github/workflows", name)),

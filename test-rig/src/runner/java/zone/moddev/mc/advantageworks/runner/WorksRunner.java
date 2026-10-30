@@ -128,6 +128,7 @@ public final class WorksRunner {
                     send(first, "advworks checkpoint " + station + " before-restart");
                     send(first, "advworks stop " + station);
                 }
+                archiveStationResults(results, "first-run", lifecycleStations);
                 checkStations(first, lifecycleStations, selectedLifecycle);
             }
             long firstShutdownDeadline = 0L;
@@ -142,6 +143,7 @@ public final class WorksRunner {
             else requireExit(first, profile.shutdownTimeoutSeconds);
             auditPreparedServer(profile, runtime, "first-run-after");
             requireNoCommandFailures(latestLog, "first-run");
+            if (profile.buildWorks) requireAcceptableStations(results, lifecycleStations);
             copyIfPresent(latestLog, new File(results, "first-run.log"));
             File firstWorldgen = new File(results, "worldgen-first-run.json");
             if (profile.worldgenSampleRadius > 0) {
@@ -163,6 +165,7 @@ public final class WorksRunner {
                 for (String station : lifecycleStations) {
                     send(second, "advworks checkpoint " + station + " after-restart");
                 }
+                archiveStationResults(results, "restart-run", lifecycleStations);
                 checkStations(second, lifecycleStations, selectedLifecycle);
             }
             long secondShutdownDeadline = 0L;
@@ -192,11 +195,10 @@ public final class WorksRunner {
             if (profile.buildWorks) {
                 if (!selectedLifecycle) {
                     requireAcceptableSummary(new File(results, "all-summary.json"));
-                } else {
-                    requireAcceptableStations(results, lifecycleStations);
                 }
+                requireAcceptableStations(results, lifecycleStations);
             }
-            System.out.println("Automated Advantage Works run complete: " + results);
+            System.out.println("Automated assertion checks complete; manual procedures remain unverified: " + results);
             return;
         }
 
@@ -1284,12 +1286,32 @@ public final class WorksRunner {
         try (InputStreamReader reader = new InputStreamReader(
                 new FileInputStream(summary), StandardCharsets.UTF_8)) {
             JsonObject root = GSON.fromJson(reader, JsonObject.class);
+            if (root == null || !root.has("summary") || !root.get("summary").isJsonObject()
+                    || !root.has("stationStatuses") || !root.get("stationStatuses").isJsonObject()) {
+                throw new IllegalStateException("Missing station summary or identities: " + summary);
+            }
             JsonObject counts = root.getAsJsonObject("summary");
-            int failed = counts != null && counts.has("FAIL") ? counts.get("FAIL").getAsInt() : 0;
-            int unexpected = counts != null && counts.has("UNEXPECTED_PASS")
-                    ? counts.get("UNEXPECTED_PASS").getAsInt() : 0;
-            if (failed > 0 || unexpected > 0) {
-                throw new IllegalStateException("Final Advantage Works result is not acceptable: " + counts);
+            JsonObject stations = root.getAsJsonObject("stationStatuses");
+            Map<String, Integer> observed = new LinkedHashMap<>();
+            int completed = 0;
+            if (stations.entrySet().size() != DEFAULT_LIFECYCLE_STATIONS.size()) {
+                throw new IllegalStateException("Incomplete station summary: " + stations);
+            }
+            for (String station : DEFAULT_LIFECYCLE_STATIONS) {
+                if (!stations.has(station)) throw new IllegalStateException("Missing station " + station);
+                String status = stations.get(station).getAsString();
+                requireKnownStatus(status);
+                observed.put(status, observed.getOrDefault(status, 0) + 1);
+                if (!"SKIP".equals(status)) completed++;
+            }
+            if (completed == 0 || counts.entrySet().size() != observed.size()) {
+                throw new IllegalStateException("No completed station checks or inconsistent counts: " + counts);
+            }
+            for (Map.Entry<String, Integer> count : observed.entrySet()) {
+                if (!counts.has(count.getKey()) || !counts.get(count.getKey()).getAsJsonPrimitive().isNumber()
+                        || counts.get(count.getKey()).getAsDouble() != count.getValue()) {
+                    throw new IllegalStateException("Station counts disagree with identities: " + counts);
+                }
             }
         }
     }
@@ -1303,18 +1325,66 @@ public final class WorksRunner {
     }
 
     private static void requireAcceptableStations(File results, List<String> stations) throws Exception {
+        if (stations.isEmpty()) throw new IllegalStateException("No stations requested");
+        int completed = 0;
         for (String station : stations) {
             File result = new File(results, station + "-latest.json");
             if (!result.isFile()) throw new IllegalStateException("Missing final station result " + result);
             try (InputStreamReader reader = new InputStreamReader(
                     new FileInputStream(result), StandardCharsets.UTF_8)) {
                 JsonObject root = GSON.fromJson(reader, JsonObject.class);
-                String status = root.has("status") ? root.get("status").getAsString() : "";
-                if ("FAIL".equals(status) || "UNEXPECTED_PASS".equals(status)) {
-                    throw new IllegalStateException("Final Advantage Works station result is not acceptable: "
-                            + station + "=" + status);
+                String status = root != null && root.has("status") ? root.get("status").getAsString() : "";
+                requireKnownStatus(status);
+                if (!root.has("station") || !station.equals(root.get("station").getAsString())) {
+                    throw new IllegalStateException("Wrong station result: " + result);
                 }
+                if ("SKIP".equals(status)) {
+                    if (!root.has("skipReason") || root.get("skipReason").getAsString().trim().isEmpty()) {
+                        throw new IllegalStateException("Skipped station needs an explicit reason: " + result);
+                    }
+                    continue;
+                }
+                if (!root.has("assertions") || !root.get("assertions").isJsonArray()) {
+                    throw new IllegalStateException("Missing assertions: " + result);
+                }
+                Set<String> ids = new LinkedHashSet<>();
+                int passed = 0;
+                for (JsonElement element : root.getAsJsonArray("assertions")) {
+                    JsonObject assertion = element.getAsJsonObject();
+                    if (!assertion.has("id") || assertion.get("id").getAsString().isEmpty()
+                            || !ids.add(assertion.get("id").getAsString()) || !assertion.has("status")) {
+                        throw new IllegalStateException("Missing or duplicate assertion identity: " + result);
+                    }
+                    String value = assertion.get("status").getAsString();
+                    if ("PASS".equals(value)) passed++;
+                    else if (!"SKIP".equals(value)) throw new IllegalStateException("Unacceptable assertion " + assertion);
+                }
+                if (passed == 0) throw new IllegalStateException("No passing measurements: " + result);
+                boolean manual = root.has("manualChecks") && root.getAsJsonArray("manualChecks").size() > 0;
+                if (manual != "MANUAL_REQUIRED".equals(status)) {
+                    throw new IllegalStateException("Manual checks/status disagree: " + result);
+                }
+                completed++;
             }
+        }
+        if (completed == 0) throw new IllegalStateException("All requested stations skipped");
+    }
+
+    private static void requireKnownStatus(String status) {
+        if (!"PASS".equals(status) && !"MANUAL_REQUIRED".equals(status) && !"SKIP".equals(status)) {
+            throw new IllegalStateException("Unacceptable or incomplete station status: " + status);
+        }
+    }
+
+    static void archiveStationResults(File results, String phase, List<String> stations) throws Exception {
+        File previous = new File(results, "previous-" + phase);
+        if (!previous.mkdir()) throw new IllegalStateException("Cannot create result custody directory: " + previous);
+        List<String> names = new ArrayList<>();
+        names.add("all-summary.json");
+        for (String station : stations) names.add(station + "-latest.json");
+        for (String name : names) {
+            File stale = new File(results, name);
+            if (stale.isFile()) Files.move(stale.toPath(), new File(previous, name).toPath());
         }
     }
 

@@ -10,6 +10,7 @@ from argparse import Namespace
 from pathlib import Path
 from unittest.mock import patch
 import traceback
+import shutil
 
 from matrix import WORLD, digest, fingerprint, write_json
 import native116
@@ -245,7 +246,23 @@ def generate114(args):
     return 0
 
 
+def observation_ticks(args):
+    ticks = getattr(args, "ticks", 512)
+    if not isinstance(ticks, int) or isinstance(ticks, bool) or not 1 <= ticks <= 4000:
+        raise ValueError("Use one fixed connected interval between 1 and 4000 ticks")
+    return ticks
+
+
+def select_shard(rows, index=0, count=1):
+    if not isinstance(index, int) or not isinstance(count, int) or not 1 <= count <= 15 or not 0 <= index < count:
+        raise ValueError("Invalid campaign shard")
+    selected = rows[index::count]
+    if not selected: raise ValueError("Empty campaign shard")
+    return selected
+
+
 def run(args):
+    ticks = observation_ticks(args)
     document = read_json(args.routes)
     require_routes(document)
     output = native116.output_path(args.output)
@@ -254,7 +271,8 @@ def run(args):
     seed, _, jars = native116.pinned_profile(args.target_manifest.resolve(), "target116")
     for protected in (seed, *jars):
         native116.require_disjoint(output, protected)
-    rows = [row for row in document["routes"] if row["kind"] == args.kind]
+    shard_index, shard_count = getattr(args, "shard_index", 0), getattr(args, "shard_count", 1)
+    rows = select_shard([row for row in document["routes"] if row["kind"] == args.kind], shard_index, shard_count)
     for row in rows:
         require_source114_receipt(row)
         require_source115_receipt(row)
@@ -262,8 +280,15 @@ def run(args):
             native116.require_disjoint(output, Path(protected))
     report = dict(status="RUNNING", kind=args.kind, routesManifest=str(args.routes.resolve()),
                   routesManifestSha256=digest(args.routes), targetManifest=str(args.target_manifest.resolve()),
-                  targetManifestSha256=digest(args.target_manifest), routes=[])
+                  targetManifestSha256=digest(args.target_manifest), observationTicks=ticks,
+                  shard=dict(index=shard_index, count=shard_count), selectedRouteIds=[row["id"] for row in rows], routes=[])
     output.mkdir(parents=True, exist_ok=False)
+    helpers = [Path(__file__), Path(native116.__file__), Path(native116_connected.__file__),
+               Path(__file__).with_name("native116_resource_audit.py"), Path(__file__).with_name("native116_legacy_snbt.py"),
+               Path(__file__).with_name("semantic_machine_audit.py")]
+    report["protocolSha256"] = {str(path): digest(path) for path in helpers}
+    (output / "protocol-sources").mkdir()
+    for path in helpers: shutil.copy2(path, output / "protocol-sources" / path.name)
     for index, row in enumerate(rows):
         outcome = dict(id=row["id"], status="RUNNING")
         report["routes"].append(outcome)
@@ -276,7 +301,7 @@ def run(args):
             settings = Namespace(source=source, source_manifest=manifest, source_key=row["sourceKey"],
                                  source_hashes=hashes, source_snapshot=row["sourceSnapshot"], source_checkpoint=row["sourceSnapshot"],
                                  source_fixture_key=row.get("sourceFixtureKey"), target_manifest=args.target_manifest,
-                                 java8=args.java8, output=output / f"route-{index:02}", ticks=512, port=args.port)
+                                 java8=args.java8, output=output / f"route-{index:02}", ticks=ticks, port=args.port)
             if args.kind == "connected":
                 code = native116_connected.run(settings)
             else:
@@ -290,14 +315,54 @@ def run(args):
                     return launcher
                 with patch.object(native116, "stage", stage_at_port):
                     code = native116.run(settings)
+                from native116_resource_audit import compare_snapshot_resources
+                budgets = {phase: compare_snapshot_resources(source / row["sourceSnapshot"],
+                            settings.output / ("migration-" + phase + ".json")) for phase in ("converted", "restarted")}
+                write_json(settings.output / "exact-resource-comparison.json", budgets)
+                if any(result["status"] != "PASS" for result in budgets.values()): code = 1
             outcome.update(status="PASS" if code == 0 else "FAIL", runtime=str(settings.output))
         except Exception as error:
             outcome.update(status="FAIL", failure=str(error), traceback=traceback.format_exc())
         write_json(output / "native116-campaign-results.json", report)
-    report["status"] = "PASS" if len(report["routes"]) == len(REQUIRED[args.kind]) and all(
+    report["status"] = ("PASS_SHARD" if shard_count > 1 else "PASS") if len(report["routes"]) == len(rows) and all(
         row["status"] == "PASS" for row in report["routes"]) else "FAIL"
+    report["protocolUnchanged"] = {str(path): digest(path) for path in helpers} == report["protocolSha256"]
+    if (not report["protocolUnchanged"] or digest(args.target_manifest) != report["targetManifestSha256"]
+            or digest(args.routes) != report["routesManifestSha256"]): report["status"] = "FAIL"
     write_json(output / "native116-campaign-results.json", report)
-    return int(report["status"] != "PASS")
+    return int(report["status"] not in ("PASS", "PASS_SHARD"))
+
+
+def aggregate_shards(documents):
+    if not documents: raise ValueError("No campaign shards")
+    first = documents[0]
+    count = first["shard"]["count"]
+    if len(documents) != count or {row["shard"]["index"] for row in documents} != set(range(count)):
+        raise AssertionError("Missing or duplicate campaign shard")
+    for row in documents:
+        for key in ("kind", "routesManifestSha256", "targetManifestSha256", "observationTicks"):
+            if row[key] != first[key]: raise AssertionError("Mixed campaign inputs: " + key)
+        if row["shard"]["count"] != count or row["status"] not in ("PASS", "PASS_SHARD") or row.get("protocolUnchanged") is not True:
+            raise AssertionError("Failed campaign shard")
+        if len(row["routes"]) != len(row["selectedRouteIds"]) or {r["id"] for r in row["routes"]} != set(row["selectedRouteIds"]):
+            raise AssertionError("Incomplete shard routes")
+    routes = [route for row in documents for route in row["routes"]]
+    if len(routes) != len(REQUIRED[first["kind"]]) or {row["id"] for row in routes} != set(REQUIRED[first["kind"]]):
+        raise AssertionError("Missing or duplicate full-matrix routes")
+    if any(row["status"] != "PASS" for row in routes): raise AssertionError("Failed route")
+    return dict(status="PASS", kind=first["kind"], observationTicks=first["observationTicks"], routes=routes,
+                targetManifestSha256=first["targetManifestSha256"], routesManifestSha256=first["routesManifestSha256"])
+
+
+def aggregate(args):
+    output = native116.output_path(args.output)
+    if output.exists(): raise FileExistsError(output)
+    documents = [read_json(path) for path in args.reports]
+    result = aggregate_shards(documents)
+    result["shardReports"] = {str(path.resolve()): digest(path) for path in args.reports}
+    output.parent.mkdir(parents=True, exist_ok=True)
+    write_json(output, result)
+    return 0
 
 
 def attach115(args):
@@ -451,9 +516,15 @@ def main(argv=None):
     launch.add_argument("--java8", type=Path, required=True)
     launch.add_argument("--output", type=Path, required=True)
     launch.add_argument("--port", type=int, default=25595)
+    launch.add_argument("--ticks", type=int, default=512, help="Fixed interval for every connected route; never retry until a drill passes")
+    launch.add_argument("--shard-index", type=int, default=0)
+    launch.add_argument("--shard-count", type=int, default=1)
+    combine = commands.add_parser("aggregate", help="Require every disjoint shard before accepting a full campaign")
+    combine.add_argument("--reports", nargs="+", type=Path, required=True)
+    combine.add_argument("--output", type=Path, required=True)
     arguments = parser.parse_args(argv)
     return {"prepare": prepare, "generate114": generate114, "generate115": generate115,
-            "attach115": attach115, "run": run}[arguments.command](arguments)
+            "attach115": attach115, "run": run, "aggregate": aggregate}[arguments.command](arguments)
 
 
 if __name__ == "__main__":

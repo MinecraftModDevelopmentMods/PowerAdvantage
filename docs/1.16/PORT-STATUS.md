@@ -1,5 +1,9 @@
 # Advantage 1.16.5 Port
 
+The current GUI and machine corrections are recorded in
+[the qualification record](CURRENT-QUALIFICATION.md). It identifies the current
+local jars separately from the earlier frozen port builds described here.
+
 This branch starts from the merged, accepted 1.15.2 sources. Earlier tests remain
 in their original records and do not qualify the 1.16 build.
 

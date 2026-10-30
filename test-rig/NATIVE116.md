@@ -1,18 +1,34 @@
 # Native 1.16.5 Harness
 
+The [finite operating suite](../docs/1.16/OPERATING-TESTS.md) adds natural-tick
+machine jobs and strict full-process persistence checks. For physical partial
+unloading, use `native116_holder_networks.py`: its 32-chunk layouts account for
+Forge's generation dependency halo. The shorter inherited layouts remain
+diagnostics and cannot qualify actual holder unloading in this version.
+
+The [29 October assertion review](../docs/1.16/TEST-SUITE-AUDIT.md) qualifies the
+scope of the results here. New runs require independent semantic checks;
+counter-only drilling is incomplete proof, not completed work. Harness changes
+are local and do not replace the frozen K runtime evidence.
+
 See the [current test record](../docs/1.16/CURRENT-QUALIFICATION.md) for exact
 tested jars, completed checks and remaining work. Compilation and deterministic
 tests alone are not server, gameplay or manual acceptance. Earlier-version
 passes do not qualify this version. Publication follows manual acceptance.
+
+The checked-in `profiles/native116` manifests retain the frozen K candidates.
+They are not automatically promoted when local source changes. Use the explicit
+immutable manifest listed in the current record for the operating follow-up;
+the new Python runners require that input rather than silently choosing a jar.
 
 ## Build Input
 
 - Minecraft 1.16.5, Forge 36.2.34, official 1.16.5 mappings, MCP 20210115.111550.
 - ForgeGradle 7.0.34, Gradle 9.6.1, Java 8 bytecode.
 - Java 17 runs Gradle; pinned Java 8u502 compiles the harness; Java 25 runs Mavenizer.
-- Power 2.4.7.116051 source: `3f1100e6f75b1fb949cc883be7288aa30789876d`.
-- Deobf SHA-256: `1A3E5B9EE45CF932CE963146D016E5270BD587A5D5AA2B9283886FF89EF14FD4`.
-- Release SHA-256: `EB226ADC200BFB96278F1449CDB7C6941F289DB43330C8206369048378E931EB`.
+- Power 2.4.7.116051 compile source: `bcb75bfa91c14751ebf1e31865e1ec0ffa82c0b7`.
+- Deobf SHA-256: `2FB923944A456B4F26AB2F9212C646469CE3F49BFD4DAE894C15559B48908386`.
+- Frozen K release SHA-256: `5BE5C05D9F78BAF730553B71D07D76BA923EA0A54ABCA53F4149386B27019E71`.
 
 The portable compile default is `../build/libs-dev/PowerAdvantage-2.4.7.116051-deobf.jar`.
 `-PpowerAdvantageDeobfJar` overrides its location, not its exact hash check.
