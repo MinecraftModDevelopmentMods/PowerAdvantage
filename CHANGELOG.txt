@@ -1,3 +1,14 @@
+Unreleased test-coverage repairs for 1.13.2
+
+- Keep steel frames non-opaque on dedicated servers as well as clients.
+
+- Keep machine timers, stored power and progress in the next world save, even when no inventory changes.
+- Charge energy sources only for power that another machine actually accepts.
+- Preserve item NBT and check every destination slot when moving conveyor items.
+- Drain waterlogged blocks without destroying their host, and do not discharge fluid through solid blocks.
+- Restore machine names, readable inventory layouts and bounded fluid gauges.
+- Add measured operating jobs, negative controls and exact saved-state restart checks. Keep visual acceptance separate from automated checks.
+
 Power Advantage 2.4.4.113021
 
 - Exclude empty directories so development jars match between existing workspaces and fresh CI checkouts.

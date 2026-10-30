@@ -6,6 +6,9 @@ plugins {
     id 'net.minecraftforge.gradle' version '7.0.34'
 }
 
+// Keep compiler cleanup separate from disposable worlds and retained evidence.
+layout.buildDirectory = layout.projectDirectory.dir('build/gradle')
+
 group = 'zone.moddev.mc.advantageworks'
 version = project.harness_version
 base.archivesName = 'AdvantageWorksTestHarness'
@@ -56,6 +59,7 @@ dependencies {
             "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}")
     compileOnly 'org.lwjgl.lwjgl:lwjgl_util:2.9.4-nightly-20150209'
     runnerImplementation 'com.google.code.gson:gson:2.8.0'
+    testImplementation sourceSets.runner.output
     testImplementation 'junit:junit:4.13.2'
     compileOnly files(project.findProperty('powerAdvantageDeobfJar')
             ?: '../build/libs-dev/PowerAdvantage-2.4.4.113021-deobf.jar')

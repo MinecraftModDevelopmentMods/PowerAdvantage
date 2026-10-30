@@ -1,5 +1,10 @@
 # Current Candidate Qualification and Remaining Tests
 
+> The [stronger local regression candidate](TEST-COVERAGE-BACKPORT.md) has its
+> own jar hashes, measured results and limits. The archived results below apply
+> to the previous jars, not the modified sources. Do not combine their coverage
+> into a claim that every scenario has been rerun on the new candidate.
+
 ## Scope
 
 This is the 23 October 2026 rerun against the current, unpublished 1.13.2 jars.

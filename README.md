@@ -50,6 +50,9 @@ The [client resource probe](test-rig/client-resources/README.md) checks native b
 
 ## Compatibility
 
+The [stronger regression-test backport](docs/1.13/TEST-COVERAGE-BACKPORT.md)
+records the local repairs, tested jar hashes and remaining manual checks.
+
 The implementation namespace is `zone.moddev.mc.poweradvantage`. The historical `cyano.poweradvantage.api` surface, including `FluidNetworkApi`, remains available to dependent mods. Registry names, fluids, tile IDs, NBT keys, OreSpawn provider IDs, and configuration meaning remain stable.
 
 PowerAdvantage owns the shared pre-flattening migration hook used by all three Advantage mods. See [the 1.13 migration guide](docs/1.13/MIGRATION.md) before opening an irreplaceable 1.10 or 1.12 world. The [Advantage Works rig](test-rig/README.md) provides repeatable machine, restart, world-generation, and migration checks.
@@ -73,3 +76,31 @@ normal chunk loading reconnects them without replacing pipes. The same protocol
 records acquisition-stack diagnostics and pipe-only bridge regressions.
 
 The historical 1.10 handbook remains on the [1.10.2 branch](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.10.2/docs/1.10/README.md).
+
+## Generator Follow-Up
+
+The [generator follow-up](docs/1.13/TEST-COVERAGE-BACKPORT.md#generator-follow-up) records the older `pa113-candidate-g` inputs.
+Its 126 operating jobs and 126 cold checks, 39 GUI windows, 351 caption cases,
+355 rejected broken controls, eight frozen routes, five connected routes and
+paired 30-minute runs passed. This is a pre-final Steam-control checkpoint,
+not qualification of the newer SteamAdvantage jars or harness. Those still need
+the final sweep. Manual play-testing and release review remain separate.
+
+## Final T Candidate
+
+The [final-t checkpoint](docs/1.13/TEST-COVERAGE-BACKPORT.md#final-t-candidate)
+records profile `pa113-candidate-i` and its exact jar hashes. All 132 operating
+jobs and 132 cold-restart comparisons pass, including an independent audit of
+six Steam controls and their nine tile-hold records. GUI checks pass for 39
+windows, 351 caption cases and 355 rejected broken controls.
+Frozen migration passed on 8 routes and connected-source operation passed on
+all five declared routes.
+Fresh and migrated-copy 30-minute runs pass. Power and Electric retain their
+exact-hash release and reproducibility proof; final-t Steam passes its full suite
+and two independent export builds. All 18 mod/version release and reproducibility
+gates pass across the six maintained Minecraft lines. Both requested broad
+profiles and their independent audit pass; the reporter-only unit/replay
+qualification preserves the original native proof. Survival harvest checks pass
+before and after restart. The report's extra network/drill scopes are now
+qualified; manual acceptance remains separate. Earlier checkpoints keep their original scope;
+nothing has been published by this local test work.

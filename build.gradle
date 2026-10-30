@@ -1144,7 +1144,9 @@ tasks.register('prepareCombinedEclipseLaunch') {
     description = 'Creates an additional production-only Eclipse client launch with all three Advantage mods.'
     dependsOn tasks.named('verifyEclipseProductionClasspath')
     doLast {
-        def profile = new JsonSlurper().parse(file('test-rig/profiles/dev-core.json'))
+        File inputProfile = file(providers.gradleProperty('advantageDevelopmentProfile').getOrElse(
+                'test-rig/profiles/dev-core.json'))
+        def profile = new JsonSlurper().parse(inputProfile)
         advantageExtensionJars.each { String id, File jar ->
             def pin = profile.mods.find { it.id == id }
             if (!jar.isFile()) throw new GradleException("Build ${id} first, or override its *AdvantageDeobfJar property: ${jar}")
