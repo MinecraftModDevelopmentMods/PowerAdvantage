@@ -180,7 +180,9 @@ class NativeConnectedTest(unittest.TestCase):
         jar = self.root / "target.jar"
         jar.write_bytes(b"unit-test-target-not-executed")
         runtime = self.root / "target"
-        pins = {"launcher_sha256": digest(seed / LAUNCHER), "jars": [{"path": str(jar), "sha256": digest(jar)}]}
+        from native115_code import code_files
+        pins = {"launcher_sha256": digest(seed / LAUNCHER), "jars": [{"path": str(jar), "sha256": digest(jar)}],
+                "serverCode": {"files": code_files(seed)}}
         self.assertEqual(native.prepare_target(runtime, (seed, LAUNCHER, [jar]), self.definition, 25576, args.source, pins), LAUNCHER)
         self.assertEqual(fingerprint(runtime / WORLD), fingerprint(args.source / WORLD))
         self.assertFalse((runtime / "connected-build.allow").exists())
@@ -201,12 +203,13 @@ class NativeConnectedTest(unittest.TestCase):
         (seed / LAUNCHER).write_bytes(b"unit-test-launcher-never-executed")
         jars = []
         for identity in ("poweradvantage", "steamadvantage", "electricadvantage", "advantageworkstest", "orespawn"):
-            jar = seed / (identity + ".jar")
+            jar = self.root / (identity + ".jar")
             with zipfile.ZipFile(jar, "w") as archive:
                 archive.writestr("META-INF/mods.toml", f'[[mods]]\nmodId="{identity}"\nversion="1.0.0.115021"\n')
             jars.append(dict(path=str(jar), id=identity, version="1.0.0.115021", sha256=digest(jar)))
+        from native115_code import code_files
         write_json(args.target_manifest, {"target115": dict(seed=str(seed), launcher=LAUNCHER,
-                   launcher_sha256=digest(seed / LAUNCHER), jars=jars)})
+                   launcher_sha256=digest(seed / LAUNCHER), jars=jars, serverCode={"files": code_files(seed)})})
 
     def test_runtime_failure_is_retained_and_source_is_still_rechecked(self):
         args = self.source()
@@ -239,7 +242,9 @@ class NativeConnectedTest(unittest.TestCase):
         (seed / LAUNCHER).write_bytes(b"launcher-not-executed")
         jar = self.root / "candidate.jar"
         jar.write_bytes(b"pinned")
-        pins = {"launcher_sha256": digest(seed / LAUNCHER), "jars": [{"path": str(jar), "sha256": digest(jar)}]}
+        from native115_code import code_files
+        pins = {"launcher_sha256": digest(seed / LAUNCHER), "jars": [{"path": str(jar), "sha256": digest(jar)}],
+                "serverCode": {"files": code_files(seed)}}
         jar.write_bytes(b"evolving-after-preflight")
         with self.assertRaises(AssertionError):
             native.prepare_target(self.root / "target", (seed, LAUNCHER, [jar]), self.definition, 25576, args.source, pins)

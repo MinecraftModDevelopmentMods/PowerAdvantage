@@ -1,5 +1,42 @@
 # Native Client Resource Check
 
+## Stronger GUI Backport
+
+The new `-MachineGuiLayouts` option draws every registered machine screen
+through the native 1.15 container renderer. It checks literal English equipment
+names and `Inventory`, separate caption rows, slot alignment, a real item hover,
+and empty/half/full readings at three viewports. The combined profile requires
+39 screens, 351 caption cases and 355 deliberately broken-label rejections.
+The expected captions come from the separately reviewed
+`resources/gui-label-expectations.json`, not from production label output.
+
+The new probe first rejected the existing 1.15 production screens in a native
+client run. The caption/slot/tooltip and finite-display corrections are now
+staged for green compilation and a fresh native client run. Static checks are
+not native graphical acceptance. No previous 1.15 or 1.16 result qualifies the
+corrected caption contract.
+Build and run only through the coordinated validation lease:
+
+```powershell
+./gradlew.bat clientResourceProbeJar
+./test-rig/client-resources/run.ps1 -JavaHome '<Java 8 home>' -LaunchProfile runClientAllAdvantage.launch -RequireExtensions -MachineGuiLayouts -TimeoutSeconds 600
+```
+
+The following checks start no Java process and open no world:
+
+```powershell
+./test-rig/client-resources/test-gui-contract.ps1
+./test-rig/client-resources/test-gui-contract-negative-controls.ps1
+./test-rig/client-resources/test-probe-contract-negative-controls.ps1
+```
+
+The GUI contract script pins the stronger 1.16 oracle and permits only the
+documented 1.15 API spellings. Both the missing-label design and older
+bounds-only reports are rejected. The client runner snapshots mutable
+development dependencies before starting, and retains failed images/results.
+
+## Earlier Resource Qualification
+
 This build-only Minecraft 1.15.2 / Forge 31.2.57 probe checks PowerAdvantage, or all three Advantage mods in the combined profile, after Minecraft bakes its models and stitches its textures. It targets the actual mapped snapshot `20200514-1.15.1` jar with MCP `20200515.085601`. It registers no gameplay content, opens no world, and shuts down its own disposable client when finished. It is not included in release jars or ordinary Eclipse launches.
 
 Compilation and the full combined native graphical run passed on 2026-10-26,
@@ -75,7 +112,9 @@ the disposable launcher. Do not launch the actual client until authorized:
 ./test-rig/client-resources/run.ps1 -JavaHome '<Java 8 home>' -LaunchProfile runClientAllAdvantage.launch -RequireExtensions -RecipeBookFixtures '<new native115 fixture directory>/unlock'
 ```
 
-Each run gets a new directory under `build/client-resource-runs/`. The runner snapshots production classes/resources, uses the audited native launch dependencies, and loads only the probe as an additional mod. Helpers launch hidden, with separate stdout/stderr logs and a bounded timeout. It retains logs, images and `client-resources.json`; missing reports, failed assertions, and model/texture errors fail the run. A runner failure gets a separate `runner-failure.json`, without replacing partial native results. Existing saves, configuration, and prior reports are untouched. `-PreflightOnly` creates an input snapshot without starting Java or claiming a graphical pass.
+Each run gets a new directory under `run-client-resource-runs/`. The runner snapshots production classes/resources, uses the audited native launch dependencies, and loads only the probe as an additional mod. Helpers launch hidden, with separate stdout/stderr logs and a bounded timeout. It retains logs, images and `client-resources.json`; missing reports, failed assertions, and model/texture errors fail the run. A runner failure gets a separate `runner-failure.json`, without replacing partial native results. Existing saves, configuration, and prior reports are untouched. `-PreflightOnly` creates an input snapshot without starting Java or claiming a graphical pass.
+
+New GUI captures are kept outside Gradle's `build/` directory so `clean` cannot remove them. This does not recreate any historical captures already lost from the former build-based location.
 
 The default `-OutputSource Gradle` merges Gradle's classes and processed resources. To test the actual Eclipse output instead, pass `-OutputSource Eclipse`; this copies `bin/main` verbatim and does not overlay Gradle resources. `production-files.json` hashes every selected class/resource. `client-input.json` records that manifest's hash, the Java binary, probe, launch, production metadata, every dependency archive, expansion candidate hashes and optional fixture hashes. The current Power deobf candidate is recorded separately, defaulting to `build/libs-dev/PowerAdvantage-2.4.6.115021-deobf.jar`; `-PowerCandidate` selects an explicit native candidate. That jar hash is provenance, not a claim that Eclipse/Gradle output equals the jar. Missing/unexpanded metadata or a legacy target fails preflight. The native result records actual discovered mod versions and the exact game/Forge target. Refresh candidate hashes after any production rebuild before final evidence is taken. The [historical Eclipse metadata regression](../../docs/1.13/ECLIPSE-METADATA.md) explains the original failure, not native 1.15 acceptance.
 

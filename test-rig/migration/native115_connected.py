@@ -8,6 +8,7 @@ import argparse
 import json
 from pathlib import Path
 import re
+import shutil
 import socket
 from unittest.mock import patch
 
@@ -15,6 +16,7 @@ import connected
 from matrix import WORLD, compare, digest, fingerprint, write_json
 from native115 import (LAUNCHER, native_normalized, output_path, pinned_profile,
                        require_clean_log, require_disjoint)
+from native115_code import CodeCustody, INVENTORY, verify_code
 
 
 def read_json(path):
@@ -103,7 +105,11 @@ def verify_source(args):
 def prepare_target(runtime, profile, definition, port, source, pins):
     if profile[1] != LAUNCHER:
         raise ValueError("Only the genuine native115 launcher is permitted")
+    expected_code = pins.get("serverCode")
+    verify_code(profile[0], expected_code)
     launcher = connected.prepare(runtime, profile, definition, port, source)
+    verify_code(runtime, expected_code)
+    write_json(runtime / INVENTORY, expected_code)
     # Existing chunks are copied unchanged. Only the new server's launch settings
     # replace the legacy semicolon flat-generator syntax with native defaults.
     properties = runtime / "server.properties"
@@ -121,7 +127,7 @@ def prepare_target(runtime, profile, definition, port, source, pins):
     return launcher
 
 
-class NativeConnectedServer(connected.ConnectedServer):
+class NativeConnectedServer(CodeCustody, connected.ConnectedServer):
     def __init__(self, runtime, java, launcher, label, on_loaded):
         if launcher != LAUNCHER:
             raise AssertionError("Refusing a non-native115 process")
@@ -156,6 +162,8 @@ def continued_output(first, last):
 
 
 def run(args):
+    from semantic_machine_audit import connected_interval
+    from native115_resource_audit import compare_snapshot_resources
     if not 1 <= args.port <= 65535 or not 1 <= args.ticks <= 4000:
         raise ValueError("Port/tick interval outside native command bounds")
     output = output_path(args.output)
@@ -187,6 +195,7 @@ def run(args):
                   targetManifest=str(args.target_manifest.resolve()), targetManifestSha256=digest(args.target_manifest),
                   targetProfile=target_pins, port=args.port, ticks=args.ticks,
                   runnerSha256=digest(Path(__file__)), oracleSha256=digest(Path(connected.__file__)),
+                  semanticOracleSha256=digest(Path(__file__).with_name("semantic_machine_audit.py")),
                   historicalCampaign=historical, results={})
     write_json(report_path, report)
     try:
@@ -201,8 +210,10 @@ def run(args):
                     raise AssertionError("Initial preservation requires a frozen zero-step snapshot")
                 result = compare(previous, runtime / f"migration-{loaded_label}.json", native_normalized)
                 report["results"][label + "_preservation"] = result
+                resources = compare_snapshot_resources(previous, runtime / f"migration-{loaded_label}.json")
+                report["results"][label + "_exact_resources"] = resources
                 write_json(report_path, report)
-                if result["status"] != "PASS":
+                if result["status"] != "PASS" or resources["status"] != "PASS":
                     raise AssertionError(label + " native115 preservation failed")
 
             def boot(current, settings, selected_launcher, selected_label):
@@ -214,6 +225,9 @@ def run(args):
             with patch.object(connected, "boot", boot):
                 verdict = connected.resume(runtime, args, launcher, label)
             report["results"][label + "_operation"] = verdict
+            report["results"][label + "_completed_work"] = connected_interval(
+                connected.read(runtime, label + "-loaded"), connected.read(runtime, label + "-worked"),
+                definition, args.ticks)
             require_document(connected.read(runtime, label + "-worked"), definition, destination=True)
             require_native_boot(runtime / f"console-{label}.log")
             report["results"][label + "_native_boot"] = dict(status="PASS", launcher=launcher)

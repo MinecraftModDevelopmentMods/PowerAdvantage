@@ -3,6 +3,7 @@ param([Parameter(Mandatory = $true)][string]$JavaHome,
       [ValidateSet('Gradle', 'Eclipse')][string]$OutputSource = 'Gradle',
       [switch]$RequireExtensions,
       [switch]$ChildRendererGeometry,
+      [switch]$MachineGuiLayouts,
       [string]$RecipeBookFixtures,
       [string]$PowerCandidate,
       [switch]$PreflightOnly,
@@ -53,8 +54,9 @@ function Quote-Argument([string]$Value) {
     '"' + [regex]::Replace([regex]::Replace($Value, '(\\*)"', '$1$1\"'), '(\\+)$', '$1$1') + '"'
 }
 $probe = Join-Path $project 'build/client-resource-probe/advantageclientresources-deobf.jar'
-$runtime = Join-Path $project ('build/client-resource-runs/' + [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss') + '-' + [guid]::NewGuid().ToString('N').Substring(0, 8))
+$runtime = Join-Path $project ('run-client-resource-runs/' + [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss') + '-' + [guid]::NewGuid().ToString('N').Substring(0, 8))
 $inputReport = [ordered]@{ minecraft = '1.15.2'; forge = '31.2.57'; mappings = 'snapshot_20200514-1.15.1'; mcp = '20200515.085601'; qualification = 'UNQUALIFIED'; output_source = $OutputSource; launch_profile = $LaunchProfile; require_extensions = [bool]$RequireExtensions; child_renderer_geometry = [bool]$ChildRendererGeometry }
+$inputReport.machine_gui_layouts = [bool]$MachineGuiLayouts
 $phase = 'launch-preflight'
 New-Item -ItemType Directory -Path $runtime | Out-Null
 try {
@@ -136,13 +138,24 @@ $archives = @(foreach ($entry in $classpathNode.listEntry) {
     if ($classpathEntry.runtimeClasspathEntry.externalArchive) { $classpathEntry.runtimeClasspathEntry.externalArchive }
 })
 $archiveRecords = @()
+$launchArchives = @()
 $runtimeCandidates = @{}
 foreach ($archive in $archives) {
     Assert-NativeArchive $archive
     $record = Get-Record $archive
-    $archiveRecords += $record
     $metadata = if ([IO.Path]::GetExtension($archive) -eq '.jar') { Read-JarMetadata $archive }
     $modHeader = if ($metadata) { [regex]::Match($metadata, '(?ms)^\[\[mods\]\]\s*(.*?)(?=^\[|\z)').Groups[1].Value }
+    if ($modHeader -match '(?m)^modId\s*=\s*"(?:steamadvantage|electricadvantage|basemetals|orespawn)"') {
+        # Never read mutable sibling build outputs while the client is running.
+        $snapshotDirectory = Join-Path $runtime 'runtime-archives'
+        New-Item -ItemType Directory -Path $snapshotDirectory -Force | Out-Null
+        $snapshot = Join-Path $snapshotDirectory ([IO.Path]::GetFileName($archive))
+        Copy-Item -LiteralPath $archive -Destination $snapshot
+        $snapshotRecord = Get-Record $snapshot
+        if ($snapshotRecord.sha256 -ne $record.sha256) { throw "Dependency changed during snapshot: $archive" }
+        $snapshotRecord.origin_path = $record.path
+        $record = $snapshotRecord
+    }
     foreach ($id in 'poweradvantage','steamadvantage','electricadvantage','basemetals','orespawn') {
         if ($modHeader -match ('(?m)^modId\s*=\s*"' + $id + '"[ \t]*(?:#[^\r\n]*)?\r?$')) {
             Assert-NativeMetadata $metadata $id
@@ -150,7 +163,10 @@ foreach ($archive in $archives) {
             $runtimeCandidates[$id] = $record
         }
     }
+    $archiveRecords += $record
+    $launchArchives += $record.path
 }
+$archives = $launchArchives
 $inputReport.archives = $archiveRecords
 $inputReport.runtime_candidates = $runtimeCandidates
 if (-not ($archives -match 'forge-1\.15\.2-31\.2\.57-snapshot-20200514-1\.15\.1\.jar$')) { throw 'Missing actual native mapped Forge runtime.' }
@@ -159,6 +175,7 @@ $arguments = @([regex]::Matches($attributes['org.eclipse.jdt.launching.PROGRAM_A
 $vmArguments = @([regex]::Matches($attributes['org.eclipse.jdt.launching.VM_ARGUMENTS'], '"[^"]*"|\S+') | ForEach-Object { $_.Value.Trim('"') })
 if ($RequireExtensions) { $vmArguments += '-Dadvantageworks.requireExtensions=true' }
 if ($ChildRendererGeometry) { $vmArguments += '-Dadvantageworks.childRendererGeometry=true' }
+if ($MachineGuiLayouts) { $vmArguments += '-Dadvantageworks.machineGuiLayouts=true' }
 $environment.MOD_CLASSES = "poweradvantage%%$modOutput;poweradvantage%%$modOutput"
 $inputReport.environment = $environment
 $inputReport.program_arguments = $arguments
@@ -193,6 +210,13 @@ if (-not (Test-Path -LiteralPath $resultPath)) { throw "Client did not produce a
 $result = Get-Content -LiteralPath $resultPath -Raw | ConvertFrom-Json
 if ($result.status -ne 'PASS') { throw "Client resource check failed: $($result.error); inspect $runtime" }
 if ($result.minecraft -ne '1.15.2' -or $result.forge -ne '31.2.57') { throw 'Result is not native 1.15.2 / Forge 31.2.57 evidence.' }
+if ($MachineGuiLayouts -and $result.machine_gui_layout_status -ne 'PASS') { throw 'Machine GUI layouts did not pass; inspect the retained images and JSON.' }
+$expectedGuiTextChecks = if ($RequireExtensions) { 351 } else { 126 }
+if ($MachineGuiLayouts -and ($result.machine_gui_text_spec -ne 2 -or $result.machine_gui_text_status -ne 'PASS' -or
+        $result.machine_gui_text_checks -ne $expectedGuiTextChecks -or
+        $result.machine_gui_negative_controls_rejected -ne ($expectedGuiTextChecks + 4))) {
+    throw 'Required-caption GUI contract v2 did not pass; an older no-label probe is not acceptable.'
+}
 if ($RecipeBookFixtures -and $result.recipe_book_grouping_status -ne 'PASS') { throw 'Native recipe fixtures were supplied but recipe-book grouping did not pass.' }
 if ($ChildRendererGeometry -and ($result.primary_resource_status -ne 'PASS' -or $result.child_renderer_geometry_status -ne 'PASS_WITH_MANUAL_GAPS')) { throw 'Additional child renderer geometry did not pass its worldless scope; inspect the retained report.' }
 if ($ChildRendererGeometry) { $inputReport.child_renderer_geometry_status = $result.child_renderer_geometry_status }
@@ -205,6 +229,7 @@ if ($log -match "Unable to load model:.*${namespaces}:|Exception loading blockst
     throw "Client logged a model or texture error; inspect $runtime/logs/latest.log"
 }
 Write-Output "PASS: $($result.items) items, $($result.block_states) block states, $($result.creative_entries) creative entries. Evidence: $runtime"
+if ($MachineGuiLayouts) { Write-Output "Required-caption GUI contract v2: $($result.machine_gui_text_checks) text cases passed; $($result.machine_gui_negative_controls_rejected) deliberately broken controls rejected. Images retained." }
 if ($ChildRendererGeometry) { Write-Output 'Additional renderer geometry: worldless scope passed; hydroturbine orientation/spin still requires a disposable-world test. This is not pixel/manual acceptance.' }
 $inputReport.qualification = 'NATIVE_CLIENT_RESOURCE_PASS'
 } catch {
